@@ -1,4 +1,4 @@
-# Build / QA Report — Alavi Form Engine 1.0.25
+# Build / QA Report — Alavi Form Engine 1.0.26
 
 Prepared for PHP 8.3+ / WordPress 6.4+.
 
@@ -179,3 +179,11 @@ Browser print / Save as PDF is always available from a submission. Direct server
 - Picker width/height use `offsetWidth` / `offsetHeight`, avoiding scale-animation distortion on the first frame.
 - Scroll is retained only as a reposition event, not as a prerequisite for opening.
 - README.md and readme.txt updated for 1.0.25.
+
+
+## 1.0.26 Jalali standard behavior rollback
+
+- Removed all AFE frontend manual JalaliDatePicker opening/positioning code introduced after the stable baseline.
+- Frontend now uses only `data-jdp` and the standard `jalaliDatepicker.startWatch()` initialization used by AFE before 1.0.23.
+- Removed custom frontend `jdp-container`/`jdp-overlay` positioning CSS.
+- README.md and readme.txt updated for 1.0.26.

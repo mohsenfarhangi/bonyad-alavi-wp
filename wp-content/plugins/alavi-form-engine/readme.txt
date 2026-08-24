@@ -3,7 +3,7 @@ Contributors: bonyadalavi
 Tags: forms, form-engine, submissions, workflow, elementor
 Requires at least: 6.4
 Requires PHP: 8.3
-Stable tag: 1.0.25
+Stable tag: 1.0.26
 License: GPLv3 or later
 
 Code-first extensible form engine for WordPress.
@@ -25,6 +25,11 @@ The package includes the "ثبت نام گروه‌های مردمی و جهاد
 5. Use [alavi_form id="jihadi-group-registration"].
 
 == Changelog ==
+
+= 1.0.26 =
+* Reverted all custom frontend JalaliDatePicker opening and positioning logic to the library's standard watcher behavior.
+* Removed manual show(), requestAnimationFrame positioning retries, scroll/resize reposition listeners and custom body-level JalaliDatePicker positioning CSS.
+* Frontend Jalali fields now rely on data-jdp plus jalaliDatepicker.startWatch() with only the minimal AFE selector/date options, matching the stable pre-1.0.23 behavior.
 
 = 1.0.25 =
 * Fixed JalaliDatePicker requiring a small page scroll before becoming visible on frontend forms.

@@ -19,7 +19,7 @@
 
 `[alavi_form id="jihadi-group-registration"]`
 
-## ویژگی‌های نسخه 1.0.25
+## ویژگی‌های نسخه 1.0.26
 
 - Fluent DSL برای Form / Step / Field / Repeater
 - HTML Block بین فیلدها
@@ -204,3 +204,13 @@ Form::make('my-form')->hideBrandMark();
 - برای محاسبه ابعاد تقویم از `offsetWidth/offsetHeight` استفاده می‌شود تا animation اولیه `scale()` باعث محاسبه اشتباه مختصات نشود.
 - Scroll همچنان فقط برای reposition کردن تقویم باز استفاده می‌شود و دیگر trigger لازم برای ظاهرشدن آن نیست.
 - `README.md`، `readme.txt` و `BUILD-REPORT.md` هم‌زمان با نسخه 1.0.25 به‌روزرسانی شدند.
+
+
+## تغییرات 1.0.26 — بازگشت تقویم جلالی به رفتار استاندارد
+
+- تمام منطق سفارشی بازکردن و جایگذاری `JalaliDatePicker` در فرم حذف شد.
+- فراخوانی دستی `jalaliDatepicker.show()` حذف شد.
+- محاسبه دستی `top/left`، retry با `requestAnimationFrame` و listenerهای اختصاصی `scroll/resize` حذف شدند.
+- CSS اختصاصی برای `jdp-container` و `jdp-overlay` که در تغییرات جایگذاری اضافه شده بود حذف شد.
+- فیلد جلالی اکنون مانند نسخه‌های پایدار اولیه فقط با `data-jdp` و `jalaliDatepicker.startWatch()` کار می‌کند و بازشدن/جایگذاری را کاملاً به خود کتابخانه می‌سپارد.
+- `README.md` و `readme.txt` هم‌زمان با نسخه 1.0.26 به‌روزرسانی شدند.

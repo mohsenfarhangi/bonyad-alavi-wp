@@ -1154,13 +1154,6 @@ textarea.afe-control { resize:vertical; min-height:118px; line-height:1.9; }
   border-color: var(--afe-danger);
 }
 
-/* JalaliDatePicker is mounted directly under body, outside .afe-shell, so give
-   it a defensive stacking level independent of Elementor/theme overlays. */
-body > jdp-container,
-body > jdp-overlay {
-  z-index: 2147480000 !important;
-}
-
 .afe-shell.afe-isolation-strong .afe-form .afe-input-affix {
   display:flex !important;
   width:100% !important;
