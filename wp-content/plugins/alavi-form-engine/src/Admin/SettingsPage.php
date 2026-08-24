@@ -54,7 +54,7 @@ final class SettingsPage
         }
         echo '</tbody></table></div></div>';
 
-        echo '<div class="afe-admin-card"><div class="afe-admin-card-title"><div><h2>دسترسی اختصاصی هر فرم</h2><p>این سطح دوم دسترسی مشخص می‌کند هر نقش روی کدام فرم چه عملیاتی انجام دهد. دسترسی سراسری متناظر نیز باید فعال باشد.</p></div></div>';
+        echo '<div class="afe-admin-card"><div class="afe-admin-card-title"><div><h2>دسترسی اختصاصی هر فرم</h2><p>این بخش مشخص می‌کند هر نقش روی کدام فرم چه عملیاتی انجام دهد. Capability سراسری لازم برای ورود به صفحه مدیریت به‌صورت خودکار همگام می‌شود و دسترسی کاربر همچنان فقط به فرم‌های انتخاب‌شده محدود می‌ماند.</p></div></div>';
         foreach($this->registry->all() as $slug=>$formObj){
             $title=(string)($formObj->toArray()['title']??$slug);
             echo '<details class="afe-form-access-card" open><summary><strong>'.esc_html($title).'</strong><code>'.esc_html($slug).'</code></summary><div class="afe-table-scroll"><table class="widefat striped afe-form-access-table"><thead><tr><th>نقش</th>';
@@ -118,8 +118,8 @@ final class SettingsPage
             }
         }
         Capabilities::install();
-        Capabilities::syncAccess();
         $this->formAccess->sync($this->registry);
+        Capabilities::syncAccess();
         wp_safe_redirect(admin_url('admin.php?page=alavi-form-engine-settings&updated=1')); exit;
     }
 }

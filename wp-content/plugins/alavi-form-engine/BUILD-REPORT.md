@@ -138,3 +138,10 @@ Browser print / Save as PDF is always available from a submission. Direct server
 - Permanent deletion requires a trashed row and purges values, notes, file relations, dedicated mirror row and submission audit rows before final global audit.
 - Lock-after-submit front-end redirects to persisted locked view; public renderer no longer bypasses lock based on admin capabilities.
 - Custom CAPTCHA exposes AJAX refresh and auto-refreshes after captcha validation errors.
+
+
+## 1.0.22 admin menu gateway capabilities
+
+- Fixed WordPress admin menu visibility when a role has only per-form AFE permissions.
+- Added automatic gateway-capability synchronization with ownership tracking so AFE only removes gateway caps it added itself.
+- Reordered settings save synchronization so `afe_access_admin` is recalculated after gateway caps are updated.

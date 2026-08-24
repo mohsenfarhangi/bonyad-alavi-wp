@@ -3,7 +3,7 @@ Contributors: bonyadalavi
 Tags: forms, form-engine, submissions, workflow, elementor
 Requires at least: 6.4
 Requires PHP: 8.3
-Stable tag: 1.0.21
+Stable tag: 1.0.22
 License: GPLv3 or later
 
 Code-first extensible form engine for WordPress.
@@ -22,6 +22,11 @@ The package includes the "ثبت نام گروه‌های مردمی و جهاد
 4. Use [alavi_form id="jihadi-group-registration"].
 
 == Changelog ==
+
+= 1.0.22 =
+* Fixed admin menu visibility for roles that only have per-form submission/report capabilities.
+* Per-form permissions now automatically synchronize the static WordPress gateway capabilities required by admin menus without granting access to other forms.
+
 
 = 1.0.21 =
 * Added submission Trash, Restore and Permanent Delete with capability + per-form access checks.

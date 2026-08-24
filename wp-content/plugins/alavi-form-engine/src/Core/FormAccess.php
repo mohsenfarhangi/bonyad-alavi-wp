@@ -96,6 +96,67 @@ final class FormAccess
 
         update_option('afe_initialized_form_caps',$initialized,false);
         if($firstMigration) update_option('afe_form_access_migrated',1,false);
+
+        // Per-form permissions are the authoritative scope. WordPress menu pages,
+        // however, still require a static capability string. Keep the matching
+        // global capabilities in sync as gateway capabilities so granting access
+        // to one form is enough to expose the relevant admin page without
+        // widening access to any other form.
+        $this->syncGatewayCapabilities($registry);
+    }
+
+    public function syncGatewayCapabilities(FormRegistry $registry): void
+    {
+        $auto=(array)get_option('afe_auto_form_gateway_caps',[]);
+        $gatewayCaps=[
+            Capabilities::VIEW_SUBMISSIONS,
+            Capabilities::EDIT_SUBMISSIONS,
+            Capabilities::EXPORT,
+            Capabilities::VIEW_REPORTS,
+            Capabilities::MANAGE_FORMS,
+        ];
+
+        foreach(wp_roles()->roles as $roleKey=>$roleData){
+            if($roleKey==='administrator') continue;
+            $role=get_role($roleKey);
+            if(!$role) continue;
+
+            $needed=[];
+            foreach($registry->all() as $slug=>$form){
+                if($role->has_cap(self::capability($slug,self::VIEW))) $needed[Capabilities::VIEW_SUBMISSIONS]=true;
+                if($role->has_cap(self::capability($slug,self::EDIT))){
+                    $needed[Capabilities::VIEW_SUBMISSIONS]=true;
+                    $needed[Capabilities::EDIT_SUBMISSIONS]=true;
+                }
+                if($role->has_cap(self::capability($slug,self::MANAGE))) $needed[Capabilities::VIEW_SUBMISSIONS]=true;
+                if($role->has_cap(self::capability($slug,self::EXPORT))){
+                    $needed[Capabilities::VIEW_SUBMISSIONS]=true;
+                    $needed[Capabilities::EXPORT]=true;
+                }
+                if($role->has_cap(self::capability($slug,self::REPORTS))) $needed[Capabilities::VIEW_REPORTS]=true;
+                if($role->has_cap(self::capability($slug,self::CONFIGURE))) $needed[Capabilities::MANAGE_FORMS]=true;
+            }
+
+            $roleAuto=is_array($auto[$roleKey]??null)?$auto[$roleKey]:[];
+            foreach($gatewayCaps as $cap){
+                if(!empty($needed[$cap])){
+                    if(!$role->has_cap($cap)){
+                        $role->add_cap($cap);
+                        $roleAuto[$cap]=1;
+                    }
+                } elseif(!empty($roleAuto[$cap])) {
+                    // Remove only capabilities that AFE itself added. A manually
+                    // granted global capability must never be revoked here.
+                    $role->remove_cap($cap);
+                    unset($roleAuto[$cap]);
+                }
+            }
+
+            if($roleAuto) $auto[$roleKey]=$roleAuto;
+            else unset($auto[$roleKey]);
+        }
+
+        update_option('afe_auto_form_gateway_caps',$auto,false);
     }
 
     public function globalCapability(string $level): string
