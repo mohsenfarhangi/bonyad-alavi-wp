@@ -1,4 +1,4 @@
-# Build / QA Report — Alavi Form Engine 1.0.24
+# Build / QA Report — Alavi Form Engine 1.0.25
 
 Prepared for PHP 8.3+ / WordPress 6.4+.
 
@@ -170,3 +170,12 @@ Browser print / Save as PDF is always available from a submission. Direct server
 - 69 PHP files linted successfully.
 - Admin and frontend JavaScript syntax checks passed.
 - All bundled regression tests passed, including brand-mark defaults/API, uploads, form access, locale dates, Jihadi form schema and style isolation.
+
+## 1.0.25 Jalali first-open positioning
+
+- Frontend JalaliDatePicker opening is now explicitly controlled with `jalaliDatepicker.show(input)`.
+- The library `autoShow` option is disabled for AFE frontend fields to remove the focus-listener ordering race.
+- Positioning retries for up to 30 animation frames until the picker exists and has layout dimensions.
+- Picker width/height use `offsetWidth` / `offsetHeight`, avoiding scale-animation distortion on the first frame.
+- Scroll is retained only as a reposition event, not as a prerequisite for opening.
+- README.md and readme.txt updated for 1.0.25.

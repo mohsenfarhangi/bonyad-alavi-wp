@@ -1724,43 +1724,90 @@
   }
 
   let activeJalaliInput = null;
+  let jalaliPositionRaf = 0;
+
+  function jalaliPickerIsVisible() {
+    const picker = document.querySelector('jdp-container');
+    return !!(picker && getComputedStyle(picker).display !== 'none' && picker.offsetWidth > 0 && picker.offsetHeight > 0);
+  }
 
   function positionJalaliPicker(input) {
-    if (!(input instanceof HTMLInputElement) || window.innerWidth <= 481) return;
+    if (!(input instanceof HTMLInputElement) || window.innerWidth <= 481) return false;
     const picker = document.querySelector('jdp-container');
-    if (!picker || getComputedStyle(picker).display === 'none') return;
+    if (!picker || getComputedStyle(picker).display === 'none' || picker.offsetWidth <= 0 || picker.offsetHeight <= 0) return false;
+
     const inputRect = input.getBoundingClientRect();
-    const pickerRect = picker.getBoundingClientRect();
+    // offsetWidth/offsetHeight are intentionally used instead of
+    // getBoundingClientRect(): JalaliDatePicker opens with a scale animation
+    // and the transformed rectangle changes during the first frames.
+    const pickerWidth = picker.offsetWidth;
+    const pickerHeight = picker.offsetHeight;
     const gap = 6;
     const edge = 12;
     const scrollX = window.scrollX || document.documentElement.scrollLeft || 0;
     const scrollY = window.scrollY || document.documentElement.scrollTop || 0;
+
     let top = inputRect.bottom + scrollY + gap;
-    if (inputRect.bottom + gap + pickerRect.height > window.innerHeight - edge && inputRect.top - gap - pickerRect.height >= edge) {
-      top = inputRect.top + scrollY - pickerRect.height - gap;
+    if (inputRect.bottom + gap + pickerHeight > window.innerHeight - edge && inputRect.top - gap - pickerHeight >= edge) {
+      top = inputRect.top + scrollY - pickerHeight - gap;
     }
-    let left = inputRect.right + scrollX - pickerRect.width;
-    left = Math.max(scrollX + edge, Math.min(left, scrollX + window.innerWidth - pickerRect.width - edge));
+
+    let left = inputRect.right + scrollX - pickerWidth;
+    left = Math.max(scrollX + edge, Math.min(left, scrollX + window.innerWidth - pickerWidth - edge));
+
     picker.style.top = `${Math.round(top)}px`;
     picker.style.left = `${Math.round(left)}px`;
     picker.style.right = 'auto';
+    return true;
   }
 
   function scheduleJalaliPosition(input) {
     activeJalaliInput = input;
-    requestAnimationFrame(() => requestAnimationFrame(() => positionJalaliPicker(input)));
-    setTimeout(() => positionJalaliPicker(input), 60);
+    if (jalaliPositionRaf) cancelAnimationFrame(jalaliPositionRaf);
+
+    let attempts = 0;
+    const positionWhenReady = () => {
+      if (activeJalaliInput !== input || !input.isConnected) return;
+      attempts += 1;
+      if (positionJalaliPicker(input)) {
+        jalaliPositionRaf = 0;
+        return;
+      }
+      // The library may create/show <jdp-container> after the focus/click
+      // handler. Retry for several frames instead of waiting for a scroll.
+      if (attempts < 30) jalaliPositionRaf = requestAnimationFrame(positionWhenReady);
+      else jalaliPositionRaf = 0;
+    };
+
+    jalaliPositionRaf = requestAnimationFrame(positionWhenReady);
+  }
+
+  function openJalaliPicker(input) {
+    if (!(input instanceof HTMLInputElement) || !window.jalaliDatepicker) return;
+    activeJalaliInput = input;
+
+    // AFE owns opening explicitly. This removes the event-order race between
+    // JalaliDatePicker's autoShow listener and AFE's positioning listener that
+    // previously made the picker appear only after the first page scroll.
+    try {
+      window.jalaliDatepicker.show(input);
+    } catch (error) {
+      console.error('[AFE] Failed to open JalaliDatePicker', error);
+    }
+    scheduleJalaliPosition(input);
   }
 
   document.addEventListener('focusin', event => {
     const input = event.target.closest?.('input[data-afe-calendar="jalali"]');
-    if (input) scheduleJalaliPosition(input);
+    if (input) openJalaliPicker(input);
   });
   document.addEventListener('click', event => {
     const input = event.target.closest?.('input[data-afe-calendar="jalali"]');
-    if (input) scheduleJalaliPosition(input);
+    if (!input) return;
+    if (!jalaliPickerIsVisible()) openJalaliPicker(input);
+    else scheduleJalaliPosition(input);
   });
-  window.addEventListener('resize', () => activeJalaliInput && positionJalaliPicker(activeJalaliInput));
+  window.addEventListener('resize', () => activeJalaliInput && scheduleJalaliPosition(activeJalaliInput));
   window.addEventListener('scroll', () => activeJalaliInput && positionJalaliPicker(activeJalaliInput), {passive:true});
 
   document.addEventListener('DOMContentLoaded', () => {
@@ -1775,6 +1822,7 @@
         zIndex: 2147480000,
         persianDigits: false,
         autoReadOnlyInput: false,
+        autoShow: false,
         date: true,
         time: false
       });

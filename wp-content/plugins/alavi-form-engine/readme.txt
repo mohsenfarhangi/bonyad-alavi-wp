@@ -3,7 +3,7 @@ Contributors: bonyadalavi
 Tags: forms, form-engine, submissions, workflow, elementor
 Requires at least: 6.4
 Requires PHP: 8.3
-Stable tag: 1.0.24
+Stable tag: 1.0.25
 License: GPLv3 or later
 
 Code-first extensible form engine for WordPress.
@@ -25,6 +25,14 @@ The package includes the "ثبت نام گروه‌های مردمی و جهاد
 5. Use [alavi_form id="jihadi-group-registration"].
 
 == Changelog ==
+
+= 1.0.25 =
+* Fixed JalaliDatePicker requiring a small page scroll before becoming visible on frontend forms.
+* Frontend Jalali fields now open explicitly through the official jalaliDatepicker.show(input) API on focus/click.
+* Disabled the library autoShow path for AFE frontend fields to remove the open/position listener race condition.
+* Added frame-based positioning retries so delayed picker rendering is positioned immediately without waiting for scroll.
+* Picker dimensions now use layout size instead of the animated transformed rectangle for stable first-open placement.
+* Updated README.md, readme.txt and BUILD-REPORT.md for the release.
 
 = 1.0.24 =
 * Added per-form afe-brand-mark settings with three modes: default AFE mark, custom Media Library image, or hidden.

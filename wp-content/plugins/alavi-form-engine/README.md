@@ -19,7 +19,7 @@
 
 `[alavi_form id="jihadi-group-registration"]`
 
-## ویژگی‌های نسخه 1.0.24
+## ویژگی‌های نسخه 1.0.25
 
 - Fluent DSL برای Form / Step / Field / Repeater
 - HTML Block بین فیلدها
@@ -194,3 +194,13 @@ Form::make('my-form')->hideBrandMark();
 
 - `README.md`، `readme.txt` و `BUILD-REPORT.md` هم‌زمان با نسخه به‌روزرسانی شدند.
 
+
+## تغییرات 1.0.25 — بازشدن فوری تقویم جلالی
+
+- مشکل نمایش JalaliDatePicker فقط بعد از یک Scroll کوچک در فرم برطرف شد.
+- AFE دیگر برای بازشدن تقویم به ترتیب اجرای listener داخلی `autoShow` کتابخانه وابسته نیست و با API رسمی `jalaliDatepicker.show(input)` تقویم را همان لحظه روی `focus/click` باز می‌کند.
+- `autoShow` داخلی کتابخانه برای فیلدهای فرم AFE غیرفعال شد تا race condition بین بازشدن کتابخانه و محاسبه موقعیت AFE ایجاد نشود.
+- موقعیت تقویم تا ۳۰ frame کوتاه بررسی می‌شود تا اگر `<jdp-container>` کمی دیرتر ساخته/نمایش داده شد، بدون نیاز به Scroll در اولین فرصت کنار همان فیلد قرار بگیرد.
+- برای محاسبه ابعاد تقویم از `offsetWidth/offsetHeight` استفاده می‌شود تا animation اولیه `scale()` باعث محاسبه اشتباه مختصات نشود.
+- Scroll همچنان فقط برای reposition کردن تقویم باز استفاده می‌شود و دیگر trigger لازم برای ظاهرشدن آن نیست.
+- `README.md`، `readme.txt` و `BUILD-REPORT.md` هم‌زمان با نسخه 1.0.25 به‌روزرسانی شدند.
