@@ -26,6 +26,9 @@ final class Form
     public function previewTemplate(string $html): self { $this->settings['preview_template'] = $html; return $this; }
     public function lockAfterSubmit(bool $enabled = true): self { $this->settings['lock_after_submit'] = $enabled; return $this; }
     public function showEditRequestButton(bool $show = true): self { $this->settings['show_edit_request_button'] = $show; return $this; }
+    public function brandMark(string $mode = 'default'): self { $this->settings['brand_mark_mode'] = in_array($mode, ['default','image','none'], true) ? $mode : 'default'; return $this; }
+    public function brandMarkImage(string $url, string $alt = ''): self { $this->settings['brand_mark_mode'] = 'image'; $this->settings['brand_mark_image_url'] = $url; $this->settings['brand_mark_alt'] = $alt; return $this; }
+    public function hideBrandMark(bool $hide = true): self { $this->settings['brand_mark_mode'] = $hide ? 'none' : 'default'; return $this; }
     public function workflow(array $workflow): self { $this->workflow = $workflow; return $this; }
     public function actions(array $actions): self { $this->actions = $actions; return $this; }
     public function storage(string $storage): self { $this->storage = $storage; return $this; }
@@ -53,6 +56,10 @@ final class Form
                 'lock_after_submit' => false,
                 'show_edit_request_button' => false,
                 'lock_warning' => 'پس از ثبت نهایی، امکان ویرایش اطلاعات وجود نخواهد داشت مگر اینکه درخواست ویرایش شما توسط مدیر تأیید شود.',
+                'brand_mark_mode' => 'default',
+                'brand_mark_image_id' => 0,
+                'brand_mark_image_url' => '',
+                'brand_mark_alt' => '',
                 'captcha' => 'custom',
                 'rate_limit' => 10,
             ], $this->settings),

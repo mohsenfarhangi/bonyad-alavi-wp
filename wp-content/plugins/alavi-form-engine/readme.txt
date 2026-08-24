@@ -3,7 +3,7 @@ Contributors: bonyadalavi
 Tags: forms, form-engine, submissions, workflow, elementor
 Requires at least: 6.4
 Requires PHP: 8.3
-Stable tag: 1.0.23
+Stable tag: 1.0.24
 License: GPLv3 or later
 
 Code-first extensible form engine for WordPress.
@@ -25,6 +25,15 @@ The package includes the "ثبت نام گروه‌های مردمی و جهاد
 5. Use [alavi_form id="jihadi-group-registration"].
 
 == Changelog ==
+
+= 1.0.24 =
+* Added per-form afe-brand-mark settings with three modes: default AFE mark, custom Media Library image, or hidden.
+* Added WordPress Media Library picker UI for choosing a custom brand image per form.
+* Added optional brand image alt text and responsive contain-fit rendering for custom marks.
+* Added {{brand_mark}} token for custom form templates so per-form brand-mark settings also work with custom layouts.
+* Locked preview headers now respect the same per-form brand-mark configuration.
+* Added Form fluent APIs: brandMark(), brandMarkImage() and hideBrandMark().
+* Updated README.md, readme.txt and build documentation for the release.
 
 = 1.0.23 =
 * Removed runtime CDN dependency for JalaliDatePicker and switched AFE frontend/admin date assets to local plugin files.

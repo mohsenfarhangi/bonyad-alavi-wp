@@ -299,3 +299,21 @@ Permission levels:
 - `configure` — form definition overrides/admin configuration.
 
 Dynamic capabilities are synchronized after all `afe_register_forms` callbacks have run. On the first migration, existing forms inherit legacy role access to avoid a breaking permission change. Forms registered later default to Administrator-only and must be granted explicitly from **فرم‌های علوی → تنظیمات و دسترسی**.
+
+## Per-form brand mark
+
+The standard AFE header can use the built-in mark, a custom image, or no mark. Admin overrides are available on the Forms screen and take precedence over code defaults.
+
+```php
+Form::make('example')
+    ->brandMark('default');
+
+Form::make('example-image')
+    ->brandMarkImage('https://example.test/wp-content/uploads/form-mark.png', 'Form mark');
+
+Form::make('example-clean')
+    ->hideBrandMark();
+```
+
+Custom form templates can place the resolved markup with `{{brand_mark}}`.
+

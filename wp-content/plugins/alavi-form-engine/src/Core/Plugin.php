@@ -178,6 +178,7 @@ final class Plugin
 
         add_action('admin_enqueue_scripts', static function(string $hook): void {
             if (!str_contains($hook,'alavi-form-engine')) return;
+            if (str_contains($hook,'alavi-form-engine-forms')) wp_enqueue_media();
             $dates=new LocaleDateService();
             $deps=[];
             if($dates->isJalali()){

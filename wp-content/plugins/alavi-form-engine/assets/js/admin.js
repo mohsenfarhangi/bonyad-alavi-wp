@@ -281,6 +281,72 @@
     });
   };
 
+  const initBrandMarkSettings = () => {
+    document.querySelectorAll('[data-afe-brand-settings]').forEach(root => {
+      if (root.dataset.afeBrandReady === '1') return;
+      root.dataset.afeBrandReady = '1';
+
+      const mode = qs(root, '[data-afe-brand-mode]');
+      const media = qs(root, '[data-afe-brand-media]');
+      const select = qs(root, '[data-afe-brand-select]');
+      const remove = qs(root, '[data-afe-brand-remove]');
+      const idInput = qs(root, '[data-afe-brand-image-id]');
+      const urlInput = qs(root, '[data-afe-brand-image-url]');
+      const preview = qs(root, '[data-afe-brand-preview]');
+
+      const syncMode = () => {
+        if (media) media.hidden = mode?.value !== 'image';
+      };
+
+      const syncPreview = url => {
+        if (!preview) return;
+        preview.replaceChildren();
+        if (url) {
+          const image = document.createElement('img');
+          image.src = url;
+          image.alt = '';
+          preview.appendChild(image);
+          if (remove) remove.hidden = false;
+        } else {
+          const empty = document.createElement('span');
+          empty.textContent = 'هنوز تصویری انتخاب نشده است.';
+          preview.appendChild(empty);
+          if (remove) remove.hidden = true;
+        }
+      };
+
+      mode?.addEventListener('change', syncMode);
+      select?.addEventListener('click', () => {
+        if (!window.wp?.media) {
+          window.alert('کتابخانه رسانه وردپرس در دسترس نیست. صفحه را تازه‌سازی کنید.');
+          return;
+        }
+        const frame = window.wp.media({
+          title: 'انتخاب نشان فرم',
+          button: { text: 'استفاده از این تصویر' },
+          library: { type: 'image' },
+          multiple: false
+        });
+        frame.on('select', () => {
+          const attachment = frame.state().get('selection').first()?.toJSON?.();
+          if (!attachment) return;
+          const url = attachment.sizes?.medium?.url || attachment.sizes?.thumbnail?.url || attachment.url || '';
+          if (idInput) idInput.value = String(attachment.id || 0);
+          if (urlInput) urlInput.value = url;
+          syncPreview(url);
+        });
+        frame.open();
+      });
+      remove?.addEventListener('click', () => {
+        if (idInput) idInput.value = '0';
+        if (urlInput) urlInput.value = '';
+        syncPreview('');
+      });
+
+      syncMode();
+    });
+  };
+
   const initAdminDatePickers = () => {
     if (!window.afeAdmin?.isJalali || !window.jalaliDatepicker) return;
     try {
@@ -320,6 +386,7 @@
 
     document.querySelectorAll('[data-afe-geo-chunk-uploader]').forEach(root => new GeoChunkUploader(root));
     initAdminRepeaters(document);
+    initBrandMarkSettings();
     initAdminDatePickers();
   });
 })();

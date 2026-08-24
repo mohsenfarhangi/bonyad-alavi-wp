@@ -104,6 +104,7 @@ final class Renderer
         $steps = implode('', $stepHtml);
         $slogan = trim((string)($form['settings']['header_slogan'] ?? ''));
         $sloganHtml = $slogan !== '' ? '<div class="afe-form-slogan">'.esc_html($slogan).'</div>' : '';
+        $brandMarkHtml = $this->renderBrandMark($form);
         $template = $row ? trim((string)$row->template_html) : '';
         if ($template !== '') {
             $content = strtr(wp_kses_post($template), [
@@ -111,9 +112,10 @@ final class Renderer
                 '{{title}}'=>esc_html($form['title']),
                 '{{description}}'=>esc_html($form['description']),
                 '{{slogan}}'=>$sloganHtml,
+                '{{brand_mark}}'=>$brandMarkHtml,
             ]);
         } else {
-            $content = '<header class="afe-form-header"><div class="afe-brand-mark" aria-hidden="true"><span></span><span></span></div>'
+            $content = '<header class="afe-form-header">'.$brandMarkHtml
                 . '<div><h1>'.esc_html($form['title']).'</h1><p>'.esc_html($form['description']).'</p>'.$sloganHtml.'</div></header>'
                 . $this->progress($form, $total) . $steps;
         }
@@ -190,7 +192,30 @@ final class Renderer
         $row=(array)$editing['row'];
         $content=$this->previewRenderer->render($form,(array)($row['data']??[]),(int)$row['id'],false);
         $notice=(!empty($_GET['afe_submitted'])?'<div class="afe-notice afe-notice-success"><strong>اطلاعات با موفقیت ثبت شد.</strong><span>فرم اکنون قفل شده است.</span></div>':'').'<div class="afe-notice afe-notice-warning"><strong>این فرم پس از ثبت نهایی قفل شده است.</strong><span>اطلاعات زیر فقط قابل مشاهده است.</span></div>';
-        return '<div class="'.esc_attr($shellClass).'" data-afe-isolation="'.esc_attr($this->styleIsolation->modeForForm($form)).'" dir="rtl">'.$notice.$this->editRequestPanel($form,$editing).'<div class="afe-locked-preview"><header class="afe-form-header"><div><h1>'.esc_html((string)$form['title']).'</h1><p>کد رهگیری: <strong dir="ltr">'.esc_html((string)$row['tracking_code']).'</strong></p></div></header>'.$content.'</div></div>';
+        return '<div class="'.esc_attr($shellClass).'" data-afe-isolation="'.esc_attr($this->styleIsolation->modeForForm($form)).'" dir="rtl">'.$notice.$this->editRequestPanel($form,$editing).'<div class="afe-locked-preview"><header class="afe-form-header">'.$this->renderBrandMark($form).'<div><h1>'.esc_html((string)$form['title']).'</h1><p>کد رهگیری: <strong dir="ltr">'.esc_html((string)$row['tracking_code']).'</strong></p></div></header>'.$content.'</div></div>';
+    }
+
+    private function renderBrandMark(array $form): string
+    {
+        $settings = (array)($form['settings'] ?? []);
+        $mode = sanitize_key((string)($settings['brand_mark_mode'] ?? 'default'));
+        if ($mode === 'none') return '';
+
+        if ($mode === 'image') {
+            $url = '';
+            $attachmentId = absint($settings['brand_mark_image_id'] ?? 0);
+            if ($attachmentId > 0) {
+                $attachmentUrl = wp_get_attachment_image_url($attachmentId, 'medium');
+                if (is_string($attachmentUrl)) $url = $attachmentUrl;
+            }
+            if ($url === '') $url = esc_url_raw((string)($settings['brand_mark_image_url'] ?? ''));
+            if ($url !== '') {
+                $alt = sanitize_text_field((string)($settings['brand_mark_alt'] ?? ''));
+                return '<div class="afe-brand-mark afe-brand-mark--image"><img src="'.esc_url($url).'" alt="'.esc_attr($alt).'" loading="eager" decoding="async"></div>';
+            }
+        }
+
+        return '<div class="afe-brand-mark afe-brand-mark--default" aria-hidden="true"><span></span><span></span></div>';
     }
 
     private function editRequestPanel(array $form, array $editing): string

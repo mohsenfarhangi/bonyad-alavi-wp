@@ -71,6 +71,24 @@ final class FormsPage
         }
         echo '</div></div>';
 
+        $brandMode=sanitize_key((string)($storedSettings['brand_mark_mode']??$form['settings']['brand_mark_mode']??'default'));
+        if(!in_array($brandMode,['default','image','none'],true)) $brandMode='default';
+        $brandImageId=absint($storedSettings['brand_mark_image_id']??$form['settings']['brand_mark_image_id']??0);
+        $brandImageUrl=esc_url_raw((string)($storedSettings['brand_mark_image_url']??$form['settings']['brand_mark_image_url']??''));
+        if($brandImageId>0){
+            $resolvedBrandUrl=wp_get_attachment_image_url($brandImageId,'medium');
+            if(is_string($resolvedBrandUrl) && $resolvedBrandUrl!=='') $brandImageUrl=$resolvedBrandUrl;
+        }
+        $brandAlt=(string)($storedSettings['brand_mark_alt']??$form['settings']['brand_mark_alt']??'');
+        echo '<div class="afe-admin-card" data-afe-brand-settings><div class="afe-admin-card-title"><div><h2>نشان فرم</h2><p>برای هر فرم می‌توانید نشان پیش‌فرض AFE، یک تصویر از کتابخانه رسانه یا عدم نمایش نشان را انتخاب کنید.</p></div></div><div class="afe-admin-grid">';
+        echo '<label>نوع نشان<select name="brand_mark_mode" data-afe-brand-mode><option value="default" '.selected($brandMode,'default',false).'>نشان پیش‌فرض AFE</option><option value="image" '.selected($brandMode,'image',false).'>تصویر سفارشی</option><option value="none" '.selected($brandMode,'none',false).'>عدم نمایش</option></select></label>';
+        echo '<div class="afe-span-2 afe-brand-media" data-afe-brand-media'.($brandMode==='image'?'':' hidden').'>';
+        echo '<label class="afe-brand-alt">متن جایگزین تصویر<input name="brand_mark_alt" value="'.esc_attr($brandAlt).'" placeholder="مثلاً نشان خانه نوآوری جهاد"></label>';
+        echo '<input type="hidden" name="brand_mark_image_id" value="'.esc_attr((string)$brandImageId).'" data-afe-brand-image-id>';
+        echo '<input type="hidden" name="brand_mark_image_url" value="'.esc_attr($brandImageUrl).'" data-afe-brand-image-url>';
+        echo '<div class="afe-brand-picker"><div class="afe-brand-picker__preview" data-afe-brand-preview>'.($brandImageUrl!==''?'<img src="'.esc_url($brandImageUrl).'" alt="">':'<span>هنوز تصویری انتخاب نشده است.</span>').'</div><div class="afe-brand-picker__actions"><button type="button" class="button button-secondary" data-afe-brand-select>انتخاب تصویر از رسانه</button><button type="button" class="button" data-afe-brand-remove'.($brandImageUrl!==''?'':' hidden').'>حذف تصویر انتخابی</button><p class="description">برای نتیجه بهتر از تصویر مربع یا نزدیک به مربع استفاده کنید. تصویر در اندازه نشان فرم و با <code>object-fit: contain</code> نمایش داده می‌شود.</p></div></div>';
+        echo '</div></div></div>';
+
         $previewEnabled=!empty($storedSettings['preview_enabled']??$form['settings']['preview_enabled']);
         $lockAfter=!empty($storedSettings['lock_after_submit']??$form['settings']['lock_after_submit']);
         $showRequest=!empty($storedSettings['show_edit_request_button']??$form['settings']['show_edit_request_button']);
@@ -144,7 +162,7 @@ final class FormsPage
         $css=$row?(string)$row->custom_css:'';
         $js=$row?(string)$row->custom_js:'';
         $workflow=(array)($storedSettings['workflow']??$form['workflow']);
-        echo '<div class="afe-admin-card"><h2>کد قالب فرم</h2><p>توکن‌های سطح فرم: <code>{{title}}</code>، <code>{{description}}</code> و <code>{{steps}}</code>. اگر خالی باشد قالب استاندارد افزونه استفاده می‌شود.</p>';
+        echo '<div class="afe-admin-card"><h2>کد قالب فرم</h2><p>توکن‌های سطح فرم: <code>{{title}}</code>، <code>{{description}}</code>، <code>{{brand_mark}}</code> و <code>{{steps}}</code>. اگر خالی باشد قالب استاندارد افزونه استفاده می‌شود.</p>';
         echo '<textarea class="afe-code" name="template_html" rows="10" spellcheck="false">'.esc_textarea($template).'</textarea></div>';
         echo '<div class="afe-admin-card"><h2>CSS اختصاصی</h2><textarea class="afe-code" name="custom_css" rows="10" spellcheck="false">'.esc_textarea($css).'</textarea></div>';
         echo '<div class="afe-admin-card"><h2>JavaScript اختصاصی</h2><div class="afe-warning">این کد در Front-end اجرا می‌شود و فقط کاربران دارای دسترسی تنظیمات باید آن را ویرایش کنند. PHP خام از پنل اجرا نمی‌شود.</div><textarea class="afe-code" name="custom_js" rows="10" spellcheck="false">'.esc_textarea($js).'</textarea></div>';
@@ -216,6 +234,10 @@ final class FormsPage
             'lock_after_submit'=>!empty($_POST['lock_after_submit']),
             'show_edit_request_button'=>!empty($_POST['show_edit_request_button']),
             'lock_warning'=>sanitize_textarea_field(wp_unslash($_POST['lock_warning']??'')),
+            'brand_mark_mode'=>in_array(sanitize_key((string)($_POST['brand_mark_mode']??'default')),['default','image','none'],true)?sanitize_key((string)$_POST['brand_mark_mode']):'default',
+            'brand_mark_image_id'=>absint($_POST['brand_mark_image_id']??0),
+            'brand_mark_image_url'=>esc_url_raw(wp_unslash($_POST['brand_mark_image_url']??'')),
+            'brand_mark_alt'=>sanitize_text_field(wp_unslash($_POST['brand_mark_alt']??'')),
             'workflow'=>$workflowClean,
         ];
         $styleIsolation=sanitize_key((string)($_POST['style_isolation']??'inherit'));

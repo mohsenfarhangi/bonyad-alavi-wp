@@ -1,4 +1,4 @@
-# Build / QA Report — Alavi Form Engine 1.0.14
+# Build / QA Report — Alavi Form Engine 1.0.24
 
 Prepared for PHP 8.3+ / WordPress 6.4+.
 
@@ -145,3 +145,28 @@ Browser print / Save as PDF is always available from a submission. Direct server
 - Fixed WordPress admin menu visibility when a role has only per-form AFE permissions.
 - Added automatic gateway-capability synchronization with ownership tracking so AFE only removes gateway caps it added itself.
 - Reordered settings save synchronization so `afe_access_admin` is recalculated after gateway caps are updated.
+
+## 1.0.23 local assets / Jihadi form updates
+
+- Browser runtime script/style registrations use only local plugin URLs.
+- JalaliDatePicker dist files are intentionally not bundled; runtime expects them under `assets/vendor/jalalidatepicker/`.
+- Desktop Jalali picker positioning is recalculated from the active input and refreshed on scroll/resize.
+- Jihadi form regression coverage includes 09-prefixed 11-digit group mobile, optional 24-digit IBAN UI, 10-digit National IDs, renamed central council and repeater-based coverage areas.
+- Legacy target-area fields are mapped to the first coverage-area repeater row for backward compatibility.
+
+## 1.0.24 per-form brand mark
+
+- Added per-form resolved settings for `brand_mark_mode`, attachment ID/URL and alt text.
+- Admin Forms screen uses the native WordPress Media Library picker for custom brand images.
+- Renderer uses one brand-mark resolver for normal and locked-preview headers.
+- Custom form templates can render the same resolved mark through `{{brand_mark}}`.
+- `none` mode emits no brand-mark DOM; missing custom images safely fall back to the default AFE mark.
+- Added regression test for Form fluent/default brand-mark settings.
+- README.md and WordPress readme.txt updated for 1.0.24.
+
+
+### 1.0.24 QA
+
+- 69 PHP files linted successfully.
+- Admin and frontend JavaScript syntax checks passed.
+- All bundled regression tests passed, including brand-mark defaults/API, uploads, form access, locale dates, Jihadi form schema and style isolation.

@@ -19,7 +19,7 @@
 
 `[alavi_form id="jihadi-group-registration"]`
 
-## ویژگی‌های نسخه 1.0.23
+## ویژگی‌های نسخه 1.0.24
 
 - Fluent DSL برای Form / Step / Field / Repeater
 - HTML Block بین فیلدها
@@ -39,6 +39,7 @@
 - REST API اختیاری، شامل ثبت امن با Capability اختصاصی
 - Elementor Widget و Dynamic Tag
 - گزارش وضعیت‌ها و داده‌های ایندکس‌شده
+- نشان هدر مستقل برای هر فرم با حالت پیش‌فرض، تصویر سفارشی یا عدم نمایش
 
 ## PDF و Excel
 
@@ -172,4 +173,24 @@ wp-content/plugins/alavi-form-engine/assets/vendor/jalalidatepicker/jalalidatepi
 ```
 
 AFE هیچ‌کدام از این دو فایل را از CDN در Runtime درخواست نمی‌کند.
+
+## تغییرات 1.0.24 — نشان اختصاصی هر فرم
+
+- برای `afe-brand-mark` تنظیم مستقل به‌ازای هر فرم اضافه شد.
+- سه حالت در مدیریت فرم در دسترس است: «نشان پیش‌فرض AFE»، «تصویر سفارشی» و «عدم نمایش».
+- در حالت تصویر سفارشی، تصویر مستقیماً از Media Library وردپرس انتخاب می‌شود و شناسه/URL آن در تنظیمات همان فرم ذخیره می‌شود.
+- متن جایگزین (`alt`) برای تصویر نشان قابل تنظیم است و تصویر با `object-fit: contain` داخل فضای نشان نمایش داده می‌شود.
+- حالت «عدم نمایش» هیچ عنصر یا فضای خالی برای `afe-brand-mark` تولید نمی‌کند.
+- اگر تصویر سفارشی حذف یا نامعتبر شود، Renderer به نشان پیش‌فرض AFE برمی‌گردد تا Header شکسته نشود.
+- Header نمای قفل‌شده Submission نیز همان تنظیم نشان فرم را رعایت می‌کند.
+- توکن `{{brand_mark}}` به قالب HTML سفارشی سطح فرم اضافه شد؛ بنابراین قالب‌های سفارشی نیز می‌توانند نشان resolved همان فرم را در محل دلخواه قرار دهند.
+- API توسعه‌دهنده اضافه شد:
+
+```php
+Form::make('my-form')->brandMark('default');
+Form::make('my-form')->brandMarkImage('https://example.test/logo.png', 'نشان فرم');
+Form::make('my-form')->hideBrandMark();
+```
+
+- `README.md`، `readme.txt` و `BUILD-REPORT.md` هم‌زمان با نسخه به‌روزرسانی شدند.
 

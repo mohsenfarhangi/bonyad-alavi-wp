@@ -30,3 +30,13 @@
 .afe-danger-button{border:0;background:transparent;padding:0;cursor:pointer;text-decoration:none}
 .afe-danger-card{border-color:#f0c7c7}
 .afe-danger-card .afe-inline-action{margin-inline-end:10px}
+
+/* 1.0.24 — per-form brand mark picker */
+.afe-brand-media[hidden]{display:none!important}
+.afe-brand-picker{display:flex;align-items:center;gap:16px;padding:14px;border:1px solid #dfe5e2;border-radius:12px;background:#f8faf9}
+.afe-brand-picker__preview{display:flex;align-items:center;justify-content:center;flex:0 0 92px;width:92px;height:92px;border:1px dashed #b8c4bf;border-radius:18px;background:#fff;overflow:hidden;color:#7b8581;font-size:11px;text-align:center;padding:8px;box-sizing:border-box}
+.afe-brand-picker__preview img{display:block;width:100%;height:100%;object-fit:contain}
+.afe-brand-picker__actions{display:flex;align-items:flex-start;gap:8px;flex-wrap:wrap;min-width:0}
+.afe-brand-picker__actions .description{flex-basis:100%;margin:2px 0 0;max-width:620px}
+@media(max-width:600px){.afe-brand-picker{align-items:stretch;flex-direction:column}.afe-brand-picker__preview{width:84px;height:84px;flex-basis:84px}}
+.afe-brand-media{display:grid;gap:10px}.afe-brand-alt{display:flex;flex-direction:column;gap:5px;max-width:520px}.afe-brand-alt input{width:100%;max-width:none}
