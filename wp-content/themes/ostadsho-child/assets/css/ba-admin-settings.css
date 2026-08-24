@@ -1,0 +1,199 @@
+.ba-settings-wrap {
+    max-width: 1180px;
+}
+
+.ba-settings-title {
+    margin-bottom: 18px;
+}
+
+.ba-settings-tabs {
+    margin-bottom: 0;
+}
+
+.ba-settings-card {
+    margin-top: 0;
+    padding: 24px 28px;
+    background: #fff;
+    border: 1px solid #dcdcde;
+    border-top: 0;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, .04);
+}
+
+.ba-settings-card .form-table {
+    margin-top: 0;
+}
+
+.ba-settings-card .form-table th {
+    width: 300px;
+    padding-top: 22px;
+}
+
+.ba-settings-description {
+    margin: 0 0 14px;
+    color: #50575e;
+}
+
+.ba-number-input {
+    width: 100%;
+    max-width: 420px;
+    direction: ltr;
+    text-align: left;
+}
+
+.ba-media-picker__actions {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 14px;
+}
+
+.ba-media-picker__preview {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    min-height: 1px;
+    margin: 0 0 10px;
+}
+
+.ba-media-picker__item {
+    position: relative;
+    width: 112px;
+    height: 112px;
+    margin: 0;
+    overflow: hidden;
+    background: #f0f0f1;
+    border: 1px solid #c3c4c7;
+    border-radius: 6px;
+    cursor: default;
+}
+
+.ba-media-picker__item img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.ba-media-picker__remove {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    display: grid;
+    place-items: center;
+    width: 24px;
+    height: 24px;
+    padding: 0;
+    color: #fff;
+    font-size: 20px;
+    line-height: 1;
+    background: rgba(0, 0, 0, .72);
+    border: 0;
+    border-radius: 50%;
+    cursor: pointer;
+}
+
+.ba-media-picker__drag {
+    position: absolute;
+    left: 6px;
+    bottom: 6px;
+    width: 28px;
+    height: 28px;
+    color: #fff;
+    line-height: 28px;
+    text-align: center;
+    background: rgba(0, 0, 0, .72);
+    border-radius: 4px;
+    cursor: move;
+}
+
+.ba-media-picker__empty {
+    margin: 8px 0 12px;
+    padding: 12px 14px;
+    max-width: 620px;
+    color: #646970;
+    background: #f6f7f7;
+    border: 1px dashed #c3c4c7;
+    border-radius: 4px;
+}
+
+@media (max-width: 782px) {
+    .ba-settings-card {
+        padding: 18px 16px;
+    }
+
+    .ba-settings-card .form-table th {
+        width: auto;
+        padding-bottom: 6px;
+    }
+}
+
+/* Access management tab */
+.ba-access-manager__note {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    max-width: 900px;
+    margin: 16px 0 22px;
+    padding: 12px 14px;
+    background: #f6f7f7;
+    border-right: 4px solid #2271b1;
+}
+
+.ba-access-manager__note .dashicons {
+    margin-top: 1px;
+    color: #2271b1;
+}
+
+.ba-access-manager__note p {
+    margin: 0;
+}
+
+.ba-access-table-wrap {
+    max-width: 100%;
+    overflow-x: auto;
+    border: 1px solid #c3c4c7;
+}
+
+.ba-access-table {
+    min-width: 760px;
+    border: 0;
+    box-shadow: none;
+}
+
+.ba-access-table th,
+.ba-access-table td {
+    vertical-align: middle;
+}
+
+.ba-access-table thead th:not(.ba-access-table__role),
+.ba-access-table__checkbox {
+    min-width: 180px;
+    text-align: center;
+}
+
+.ba-access-table__role {
+    min-width: 190px;
+}
+
+.ba-access-table__role strong,
+.ba-access-table__tab-title {
+    display: block;
+    margin-bottom: 5px;
+}
+
+.ba-access-table code {
+    display: inline-block;
+    direction: ltr;
+    font-size: 11px;
+    white-space: nowrap;
+}
+
+.ba-access-table__checkbox input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+    margin: 0;
+}
+
+.ba-access-table__checkbox input[type="checkbox"]:disabled {
+    opacity: .7;
+}

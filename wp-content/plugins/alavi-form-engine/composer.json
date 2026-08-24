@@ -1,0 +1,21 @@
+{
+  "name": "bonyad-alavi/alavi-form-engine",
+  "description": "Extensible code-first WordPress form engine",
+  "type": "wordpress-plugin",
+  "license": "GPL-3.0-or-later",
+  "require": {
+    "php": ">=8.3"
+  },
+  "autoload": {
+    "psr-4": {
+      "BonyadAlavi\\FormEngine\\": "src/"
+    }
+  },
+  "config": {
+    "optimize-autoloader": true,
+    "sort-packages": true
+  },
+  "suggest": {
+    "dompdf/dompdf": "Optional direct server-side PDF generation. Without it, the admin PDF action opens a print-optimized page that can be saved as PDF."
+  }
+}

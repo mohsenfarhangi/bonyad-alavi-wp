@@ -1,0 +1,953 @@
+/* =========================================
+   Variables + Form Container
+   ========================================= */
+
+.wpforms-container {
+    --ba-green: #079447;
+    --ba-green-dark: #056b35;
+    --ba-green-soft: #eef8f2;
+    --ba-gold: #f1b63b;
+    --ba-ink: #173329;
+    --ba-text: #3f5148;
+    --ba-muted: #74837b;
+    --ba-line: #dce9e1;
+    --ba-line-strong: #c8ddd0;
+    --ba-danger: #c53d46;
+
+    position: relative;
+    max-width: 920px !important;
+    margin: 40px auto !important;
+    padding: clamp(22px, 3vw, 38px) !important;
+
+    direction: rtl;
+
+    background: #fff !important;
+    border: 1px solid var(--ba-line) !important;
+    border-radius: 22px !important;
+
+    box-shadow:
+            0 18px 55px rgba(23, 51, 41, 0.08) !important;
+
+    overflow: hidden;
+}
+
+.wpforms-container::before {
+    content: "";
+    position: absolute;
+    inset: 0 0 auto;
+    height: 4px;
+
+    background: linear-gradient(
+            90deg,
+            var(--ba-green),
+            var(--ba-gold)
+    );
+}
+
+
+/* =========================================
+   Field Spacing
+   ========================================= */
+
+.wpforms-container .wpforms-field {
+    padding: 0 !important;
+    margin: 0 0 22px !important;
+}
+
+
+/* =========================================
+   Two-column Fields
+   ========================================= */
+
+.wpforms-container .wpforms-layout-row,
+.wpforms-container .wpforms-field-name .wpforms-field-row {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px !important;
+
+    width: 100% !important;
+    margin: 0 !important;
+}
+
+.wpforms-container .wpforms-layout-column,
+.wpforms-container .wpforms-field-row-block {
+    width: auto !important;
+    max-width: none !important;
+
+    margin: 0 !important;
+    padding: 0 !important;
+
+    float: none !important;
+}
+
+.wpforms-container .wpforms-layout-column > .wpforms-field {
+    margin-bottom: 0 !important;
+}
+
+
+/* =========================================
+   Labels
+   ========================================= */
+
+.wpforms-container .wpforms-field-label,
+.wpforms-container legend.wpforms-field-label {
+    display: block;
+
+    margin: 0 0 9px !important;
+
+    color: var(--ba-ink) !important;
+
+    font-size: 14px !important;
+    line-height: 1.75 !important;
+    font-weight: 700 !important;
+
+    text-shadow: none !important;
+}
+
+.wpforms-container .wpforms-required-label {
+    margin-inline-start: 3px;
+    color: var(--ba-danger) !important;
+}
+
+
+/* =========================================
+   Sub-labels
+   ========================================= */
+
+.wpforms-container .wpforms-field-sublabel {
+    display: block;
+
+    margin-top: 7px !important;
+
+    color: var(--ba-muted) !important;
+
+    font-size: 12px !important;
+    line-height: 1.6 !important;
+}
+
+
+/* =========================================
+   Inputs / Textarea / Native Select
+   ========================================= */
+
+.wpforms-container input[type="text"],
+.wpforms-container input[type="number"],
+.wpforms-container input[type="email"],
+.wpforms-container input[type="tel"],
+.wpforms-container input[type="url"],
+.wpforms-container input[type="password"],
+.wpforms-container textarea,
+.wpforms-container select {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-height: 50px !important;
+
+    padding: 11px 14px !important;
+
+    box-sizing: border-box !important;
+
+    color: var(--ba-ink) !important;
+    background: #fff !important;
+
+    border: 1px solid var(--ba-line-strong) !important;
+    border-radius: 11px !important;
+
+    outline: none !important;
+
+    box-shadow:
+            0 1px 2px rgba(23, 51, 41, 0.03) !important;
+
+    font-size: 14px !important;
+    line-height: 1.7 !important;
+
+    transition:
+            border-color .18s ease,
+            box-shadow .18s ease,
+            background-color .18s ease !important;
+}
+
+.wpforms-container textarea {
+    min-height: 120px !important;
+    resize: vertical;
+}
+
+.wpforms-container input:hover,
+.wpforms-container textarea:hover,
+.wpforms-container select:hover {
+    border-color: #b8d3c3 !important;
+}
+
+.wpforms-container input:focus,
+.wpforms-container textarea:focus,
+.wpforms-container select:focus {
+    background: #fff !important;
+
+    border-color: var(--ba-green) !important;
+
+    box-shadow:
+            0 0 0 3px rgba(7, 148, 71, 0.11) !important;
+}
+
+
+/* =========================================
+   Select2
+   همان استایل قبلی، عمومی‌شده
+   ========================================= */
+
+.wpforms-container .select2-container {
+    display: none !important;
+
+    width: 100% !important;
+    max-width: 100% !important;
+}
+
+.wpforms-container
+.select2-container
+.select2-selection--single {
+    display: flex !important;
+    align-items: center;
+
+    width: 100% !important;
+    height: 50px !important;
+    min-height: 50px !important;
+
+    background: #fff !important;
+
+    border:
+            1px solid var(--ba-line-strong) !important;
+
+    border-radius: 11px !important;
+}
+
+.wpforms-container
+.select2-container--focus
+.select2-selection--single,
+.wpforms-container
+.select2-container--open
+.select2-selection--single {
+    border-color: var(--ba-green) !important;
+
+    box-shadow:
+            0 0 0 3px rgba(7, 148, 71, 0.11) !important;
+}
+
+.wpforms-container .select2-selection__rendered {
+    width: 100%;
+
+    padding:
+            0 14px 0 38px !important;
+
+    color: var(--ba-ink) !important;
+
+    font-size: 14px !important;
+    line-height: 48px !important;
+
+    text-align: right;
+}
+
+.wpforms-container .select2-selection__arrow {
+    inset: 0 auto 0 10px !important;
+
+    width: 28px !important;
+    height: 50px !important;
+}
+
+
+/* =========================================
+   Choices.js Select
+   دقیقاً بر اساس استایل قبلی
+   ========================================= */
+
+.wpforms-container .choices {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+
+    direction: rtl;
+    font-size: 14px;
+}
+
+/* خود فیلد بسته */
+.wpforms-container .choices__inner {
+    display: flex;
+    align-items: center;
+
+    width: 100% !important;
+    min-height: 50px !important;
+
+    padding: 0 14px !important;
+
+    background: #fff !important;
+
+    border: 1px solid #c8ddd0 !important;
+    border-radius: 11px !important;
+
+    box-sizing: border-box;
+
+    color: #173329;
+
+    transition:
+            border-color .18s ease,
+            box-shadow .18s ease,
+            background-color .18s ease;
+}
+
+/* هاور */
+.wpforms-container .choices:hover .choices__inner {
+    border-color: #b8d3c3 !important;
+}
+
+/* حالت باز / فوکوس */
+.wpforms-container .choices.is-focused .choices__inner,
+.wpforms-container .choices.is-open .choices__inner {
+    border-color: #079447 !important;
+
+    box-shadow:
+            0 0 0 3px rgba(7, 148, 71, .11) !important;
+}
+
+/* مقدار انتخاب‌شده */
+.wpforms-container .choices__list--single {
+    width: 100%;
+    padding: 0 0 0 28px !important;
+}
+
+.wpforms-container .choices__list--single .choices__item {
+    color: #173329;
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 48px;
+    text-align: right;
+}
+
+/* Placeholder */
+.wpforms-container .choices__placeholder {
+    color: #74837b !important;
+    opacity: 1 !important;
+}
+
+/* فلش */
+.wpforms-container .choices[data-type*="select-one"]::after {
+    content: "";
+
+    position: absolute;
+
+    left: 16px !important;
+    right: auto !important;
+    top: 50% !important;
+
+    width: 7px;
+    height: 7px;
+
+    margin: -5px 0 0 !important;
+
+    border: 0 !important;
+    border-left: 2px solid #74837b !important;
+    border-bottom: 2px solid #74837b !important;
+
+    transform: rotate(-45deg);
+
+    transition: transform .2s ease;
+}
+
+/* فلش در حالت باز */
+.wpforms-container .choices[data-type*="select-one"].is-open::after {
+    margin-top: -1px !important;
+    transform: rotate(135deg);
+}
+
+/* حذف دکمه remove عجیب داخل select تک‌انتخابی */
+.wpforms-container .choices__list--single .choices__button {
+    display: none !important;
+}
+
+
+/* Dropdown */
+.wpforms-container .choices__list--dropdown {
+    z-index: 9999 !important;
+
+    margin-top: 7px !important;
+
+    background: #fff !important;
+
+    border: 1px solid #dce9e1 !important;
+    border-radius: 12px !important;
+
+    box-shadow:
+            0 14px 35px rgba(23, 51, 41, .12) !important;
+
+    overflow: hidden !important;
+}
+
+.wpforms-container .choices__list--dropdown.is-active {
+    display: block;
+}
+
+/* فیلد جستجو */
+.wpforms-container .choices__list--dropdown .choices__input {
+    width: calc(100% - 24px) !important;
+    min-height: 44px !important;
+
+    margin: 12px !important;
+    padding: 9px 12px !important;
+
+    background: #f8fbf9 !important;
+
+    border: 1px solid #dce9e1 !important;
+    border-radius: 9px !important;
+
+    box-sizing: border-box;
+
+    color: #173329 !important;
+
+    font-size: 13px !important;
+    line-height: 1.7 !important;
+
+    direction: rtl;
+    text-align: right;
+
+    outline: none !important;
+
+    box-shadow: none !important;
+}
+
+.wpforms-container .choices__list--dropdown .choices__input:focus {
+    background: #fff !important;
+
+    border-color: #079447 !important;
+
+    box-shadow:
+            0 0 0 3px rgba(7, 148, 71, .09) !important;
+}
+
+/* لیست گزینه‌ها */
+.wpforms-container .choices__list--dropdown > .choices__list {
+    max-height: 260px !important;
+
+    padding: 6px !important;
+
+    overflow-y: auto;
+}
+
+/* گزینه‌ها */
+.wpforms-container .choices__list--dropdown .choices__item--choice {
+    padding: 10px 12px !important;
+
+    color: #3f5148 !important;
+
+    background: transparent !important;
+
+    border-radius: 8px;
+
+    font-size: 13px !important;
+    line-height: 1.7 !important;
+
+    text-align: right;
+
+    transition:
+            background-color .15s ease,
+            color .15s ease;
+}
+
+/* Hover / Highlight */
+.wpforms-container
+.choices__list--dropdown
+.choices__item--choice.is-highlighted {
+    background: #eef8f2 !important;
+    color: #056b35 !important;
+}
+
+/* گزینه انتخاب‌شده */
+.wpforms-container
+.choices__list--dropdown
+.choices__item--choice.is-selected {
+    background: #e5f5eb !important;
+    color: #056b35 !important;
+
+    font-weight: 700;
+}
+
+/* Placeholder داخل dropdown */
+.wpforms-container
+.choices__list--dropdown
+.choices__item.choices__placeholder {
+    color: #9aa8a0 !important;
+    background: transparent !important;
+
+    font-weight: 400;
+}
+
+/* گزینه disabled */
+.wpforms-container
+.choices__list--dropdown
+.choices__item--disabled {
+    opacity: .55;
+    cursor: not-allowed;
+}
+
+/* Scrollbar */
+.wpforms-container
+.choices__list--dropdown
+> .choices__list::-webkit-scrollbar {
+    width: 7px;
+}
+
+.wpforms-container
+.choices__list--dropdown
+> .choices__list::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.wpforms-container
+.choices__list--dropdown
+> .choices__list::-webkit-scrollbar-thumb {
+    background: #c8ddd0;
+    border-radius: 20px;
+}
+
+.wpforms-container
+.choices__list--dropdown
+> .choices__list::-webkit-scrollbar-thumb:hover {
+    background: #9fc4ad;
+}
+
+div.wpforms-container-full .wpforms-form .wpforms-field.wpforms-field-select-style-modern .choices.is-open:before{
+    background:transparent !important;
+}
+/* خطای Choices */
+.wpforms-container .wpforms-has-error .choices__inner,
+.wpforms-container .choices.wpforms-error .choices__inner {
+    border-color: #c53d46 !important;
+
+    box-shadow:
+            0 0 0 3px rgba(197, 61, 70, .08) !important;
+}
+
+
+/* =========================================
+   Section / Content Heading
+   مثل «آدرس محل سکونت»
+   ========================================= */
+
+.wpforms-container .wpforms-field-content {
+    margin: 4px 0 20px !important;
+}
+
+.wpforms-container
+.wpforms-field-content
+.wpforms-field-row {
+    display: flex !important;
+    align-items: center;
+
+    gap: 10px !important;
+
+    padding: 12px 14px !important;
+
+    background: var(--ba-green-soft);
+
+    border: 1px solid #d7eee0;
+    border-radius: 11px;
+    width: 100%;
+    margin: 0 auto;
+    max-width: unset !important;
+    justify-content: center;
+}
+
+.wpforms-container .wpforms-field-content h5 {
+    margin: 0 !important;
+
+    color: var(--ba-green-dark) !important;
+
+    font-size: 14px !important;
+    font-weight: 800 !important;
+}
+
+.wpforms-container .wpforms-field-content h5::before {
+    content: "";
+
+    display: inline-block;
+
+    width: 7px;
+    height: 7px;
+
+    margin-inline-end: 8px;
+
+    border-radius: 50%;
+
+    background: var(--ba-gold);
+}
+
+
+/* ========================================
+   WPForms - Radio Cards
+   استایل قبلی: ظاهر کارت روی Label
+   ======================================== */
+
+/* لیست گزینه‌ها */
+.wpforms-container .wpforms-field-radio ul {
+    list-style: none !important;
+
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px !important;
+
+    width: 100% !important;
+
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+
+/* خود li دیگر ظاهر کارت ندارد */
+.wpforms-container .wpforms-field-radio ul li {
+    position: relative;
+
+    width: 100% !important;
+
+    margin: 0 !important;
+    padding: 0 !important;
+
+    background: transparent !important;
+    border: 0 !important;
+}
+
+
+/* مخفی کردن Radio واقعی */
+.wpforms-container
+.wpforms-field-radio
+ul li
+input[type="radio"] {
+    position: absolute !important;
+
+    width: 1px !important;
+    height: 1px !important;
+
+    margin: 0 !important;
+    padding: 0 !important;
+
+    opacity: 0 !important;
+
+    overflow: hidden !important;
+
+    clip: rect(0, 0, 0, 0) !important;
+    clip-path: inset(50%) !important;
+
+    white-space: nowrap !important;
+}
+
+
+/* خود Label تبدیل به کارت می‌شود */
+.wpforms-container
+.wpforms-field-radio
+ul li
+label {
+    position: relative;
+
+    display: flex !important;
+    align-items: center !important;
+
+    width: 100% !important;
+    min-height: 50px;
+
+    padding: 11px 15px 11px 44px !important;
+
+    box-sizing: border-box;
+
+    color: #3f5148 !important;
+    background: #fff !important;
+
+    border: 1px solid #dce9e1 !important;
+    border-radius: 11px !important;
+
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    line-height: 1.7 !important;
+
+    cursor: pointer;
+
+    transition:
+            border-color .18s ease,
+            background-color .18s ease,
+            color .18s ease,
+            box-shadow .18s ease,
+            transform .18s ease;
+}
+
+
+/* Hover */
+.wpforms-container
+.wpforms-field-radio
+ul li
+label:hover {
+    color: #173329 !important;
+
+    background: #fbfdfc !important;
+
+    border-color: #b8d3c3 !important;
+}
+
+
+/* دایره Radio سفارشی داخل Label */
+.wpforms-container
+.wpforms-field-radio
+ul li
+label::before {
+    content: "";
+
+    position: absolute;
+
+    left: 15px;
+    top: 50%;
+
+    width: 18px;
+    height: 18px;
+
+    background: #fff;
+
+    border: 1.5px solid #a8bbb0;
+    border-radius: 50%;
+
+    transform: translateY(-50%);
+
+    box-sizing: border-box;
+
+    transition:
+            border-color .18s ease,
+            background-color .18s ease,
+            box-shadow .18s ease;
+}
+
+
+/* نقطه داخلی */
+.wpforms-container
+.wpforms-field-radio
+ul li
+label::after {
+    content: "";
+
+    position: absolute;
+
+    left: 20px;
+    top: 50%;
+
+    width: 8px;
+    height: 8px;
+
+    background: #fff;
+
+    border-radius: 50%;
+
+    transform:
+            translateY(-50%)
+            scale(0);
+
+    transition: transform .16s ease;
+}
+
+
+/* گزینه انتخاب‌شده */
+.wpforms-container
+.wpforms-field-radio
+ul li
+input[type="radio"]:checked + label {
+    color: #056b35 !important;
+
+    background: #eef8f2 !important;
+
+    border-color: #079447 !important;
+
+    box-shadow:
+            0 0 0 2px rgba(7, 148, 71, .08) !important;
+}
+
+
+/* دایره انتخاب شده */
+.wpforms-container
+.wpforms-field-radio
+ul li
+input[type="radio"]:checked + label::before {
+    background: #079447;
+
+    border-color: #079447;
+
+    box-shadow:
+            0 0 0 3px rgba(7, 148, 71, .10);
+}
+
+
+/* نمایش نقطه سفید */
+.wpforms-container
+.wpforms-field-radio
+ul li
+input[type="radio"]:checked + label::after {
+    transform:
+            translateY(-50%)
+            scale(1);
+}
+
+
+/* Keyboard Focus */
+.wpforms-container
+.wpforms-field-radio
+ul li
+input[type="radio"]:focus-visible + label {
+    border-color: #079447 !important;
+
+    box-shadow:
+            0 0 0 3px rgba(7, 148, 71, .13) !important;
+}
+
+
+/* Disabled */
+.wpforms-container
+.wpforms-field-radio
+ul li
+input[type="radio"]:disabled + label {
+    opacity: .55;
+
+    cursor: not-allowed;
+
+    background: #f6f8f7 !important;
+}
+
+
+/* =========================================
+   Validation Errors
+   ========================================= */
+
+.wpforms-container .wpforms-error,
+.wpforms-container label.wpforms-error {
+    margin-top: 6px !important;
+
+    color: var(--ba-danger) !important;
+
+    font-size: 12px !important;
+    font-weight: 600 !important;
+}
+
+.wpforms-container input.wpforms-error,
+.wpforms-container textarea.wpforms-error,
+.wpforms-container select.wpforms-error {
+    border-color: var(--ba-danger) !important;
+
+    box-shadow:
+            0 0 0 3px
+            rgba(197, 61, 70, .09) !important;
+}
+
+
+/* =========================================
+   Submit
+   ========================================= */
+
+.wpforms-container .wpforms-submit-container {
+    margin-top: 6px !important;
+    padding: 18px 0 0 !important;
+
+    border-top:
+            1px solid var(--ba-line);
+}
+
+.wpforms-container button.wpforms-submit {
+    width: 100% !important;
+    min-height: 52px !important;
+
+    margin: 0 !important;
+    padding: 12px 22px !important;
+
+    background: var(--ba-green) !important;
+    color: #fff !important;
+
+    border:
+            1px solid var(--ba-green) !important;
+
+    border-radius: 11px !important;
+
+    font-size: 15px !important;
+    font-weight: 800 !important;
+
+    cursor: pointer;
+
+    box-shadow:
+            0 8px 20px
+            rgba(7, 148, 71, .16) !important;
+
+    transform: none !important;
+
+    transition:
+            background-color .18s ease,
+            border-color .18s ease,
+            box-shadow .18s ease,
+            transform .18s ease !important;
+}
+
+.wpforms-container button.wpforms-submit:hover {
+    background: var(--ba-green-dark) !important;
+    border-color: var(--ba-green-dark) !important;
+
+    box-shadow:
+            0 10px 24px
+            rgba(5, 107, 53, .2) !important;
+
+    transform:
+            translateY(-1px) !important;
+}
+
+
+/* =========================================
+   Mobile
+   ========================================= */
+
+@media (max-width: 767px) {
+
+    .wpforms-container {
+        margin: 20px 12px !important;
+        padding: 22px 16px !important;
+
+        border-radius: 16px !important;
+
+        box-shadow:
+                0 10px 35px
+                rgba(23, 51, 41, .07) !important;
+    }
+
+    .wpforms-container .wpforms-layout-row,
+    .wpforms-container
+    .wpforms-field-name
+    .wpforms-field-row {
+        grid-template-columns:
+			1fr !important;
+
+        gap: 12px !important;
+    }
+
+    .wpforms-container .wpforms-field {
+        margin-bottom: 18px !important;
+    }
+
+    .wpforms-container .choices__inner {
+        min-height: 48px !important;
+    }
+
+    .wpforms-container .choices__list--single .choices__item {
+        line-height: 46px;
+    }
+
+    .wpforms-container .choices__list--dropdown > .choices__list {
+        max-height: 220px !important;
+    }
+
+    .wpforms-container .wpforms-field-radio ul {
+        grid-template-columns: 1fr !important;
+    }
+
+    .wpforms-container
+    .wpforms-field-radio
+    ul li
+    label {
+        min-height: 48px;
+
+        padding:
+                10px 14px 10px 42px !important;
+    }
+}
