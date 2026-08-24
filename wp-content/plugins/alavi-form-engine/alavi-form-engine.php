@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Alavi Form Engine
  * Description: Code-first extensible form engine for WordPress with submissions, workflows, data sources, conditional logic and Elementor integration.
- * Version: 1.0.22
+ * Version: 1.0.23
  * Requires at least: 6.4
  * Requires PHP: 8.3
  * Author: Bonyad Alavi
@@ -17,7 +17,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-define('AFE_VERSION', '1.0.22');
+define('AFE_VERSION', '1.0.23');
 define('AFE_DB_VERSION', '1.0.4');
 define('AFE_FILE', __FILE__);
 define('AFE_PATH', plugin_dir_path(__FILE__));

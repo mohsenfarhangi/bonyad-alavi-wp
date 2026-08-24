@@ -293,7 +293,12 @@
         hideAfterChange: true,
         showTodayBtn: true,
         showEmptyBtn: true,
-        position: 'right'
+        container: 'body',
+        position: 'right',
+        topSpace: 6,
+        bottomSpace: 6,
+        overflowSpace: 12,
+        zIndex: 2147480000
       });
     } catch (error) {
       console.error('[AFE] Failed to initialize admin JalaliDatePicker', error);

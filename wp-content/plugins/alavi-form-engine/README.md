@@ -19,7 +19,7 @@
 
 `[alavi_form id="jihadi-group-registration"]`
 
-## ویژگی‌های نسخه 1.0.20
+## ویژگی‌های نسخه 1.0.23
 
 - Fluent DSL برای Form / Step / Field / Repeater
 - HTML Block بین فیلدها
@@ -144,3 +144,32 @@ The admin field override screen can switch each select between Custom and Native
 - اصلاح نمایش منوی «اطلاعات ارسالی» و «گزارش‌ها» برای نقش‌هایی که فقط روی فرم مشخص دسترسی دارند.
 - Capabilityهای سراسری لازم برای ورود به صفحات مدیریت اکنون به‌عنوان gateway به‌صورت خودکار از روی Capabilityهای فرم همگام می‌شوند.
 - این همگام‌سازی دسترسی به فرم‌های دیگر ایجاد نمی‌کند؛ فیلتر فرم‌به‌فرم همچنان در `FormAccess` اعمال می‌شود.
+
+## تغییرات 1.0.23 — دارایی‌های لوکال، اصلاحات تقویم و فرم جهادی
+
+- تمام JavaScript/CSSهای مرورگری AFE به مسیرهای لوکال افزونه منتقل شدند و وابستگی Runtime به CDN برای JalaliDatePicker حذف شد.
+- JalaliDatePicker دیگر داخل بسته افزونه باندل نمی‌شود؛ مدیر سایت باید فایل‌های رسمی `jalalidatepicker.min.js` و `jalalidatepicker.min.css` را در `assets/vendor/jalalidatepicker/` قرار دهد. اگر فایل‌ها وجود نداشته باشند، پنل مدیریت هشدار نمایش می‌دهد.
+- Google reCAPTCHA خارجی از Runtime فرم حذف شد؛ در تنظیمات قدیمی Google، کپچای داخلی Server-side AFE به‌عنوان fallback استفاده می‌شود.
+- موقعیت JalaliDatePicker در دسکتاپ بر اساس مختصات واقعی input بازتنظیم می‌شود و هنگام `scroll` و `resize` دوباره همگام می‌شود تا داخل Elementor/قالب با فاصله از فیلد نمایش داده نشود.
+- محدودیت `overflow` کادر اصلی فرم برای Dropdownها و کنترل‌های بازشونده اصلاح شد تا محتوای مرحله ۴ بریده نشود.
+- عنوان فرم جهادی به «شناسنامه گروه‌های مردمی و جهادی | طرح جهادگر شهید رسول عالم باقری» و توضیح آن به «برای همکاری با بنیاد علوی در محرومیت‌زدایی» تغییر کرد.
+- متن شعار فرم جهادی در Header فرم اضافه/به‌روزرسانی شد.
+- تلفن همراه گروه دقیقاً ۱۱ رقم است، فقط عدد می‌پذیرد و با پیشوند ثابت `09` کار می‌کند؛ Validation سمت سرور نیز همین قرارداد را کنترل می‌کند.
+- شماره شبای حقوقی اختیاری شد؛ کاربر فقط ۲۴ رقم وارد می‌کند و `IR` صرفاً به‌صورت Prefix نمایشی نشان داده می‌شود. ورودی‌های قدیمی دارای `IR` نیز هنگام نمایش/ویرایش normalize می‌شوند.
+- کد ملی مسئول و جانشین فقط ۱۰ رقم عددی می‌پذیرد و اعتبارسنجی checksum قبلی حفظ شده است.
+- عنوان «اعضای شورای مرکزی» به «اعضای شورای مرکزی (هسته اصلی)» تغییر کرد.
+- «مناطق تحت پوشش» در مرحله ۶ به Repeater تبدیل شد تا چند نقطه جغرافیایی ثبت شود؛ استان الزامی و شهرستان/بخش اختیاری هستند و dependency استان → شهرستان → بخش در هر ردیف مستقل عمل می‌کند.
+- داده‌های قدیمی `target_province`, `target_county`, `target_district`, `target_area_type`, `target_area_detail` به اولین ردیف Repeater جدید نگاشت می‌شوند تا سازگاری Submissionهای قبلی حفظ شود.
+- پیام‌های Validation مرورگر برای موبایل، کد ملی و شبا دقیق‌تر و فارسی شدند و همان محدودیت‌ها در سمت PHP نیز enforce می‌شوند.
+
+### نصب لوکال JalaliDatePicker
+
+دو فایل رسمی `dist` را از مخزن `majidh1/JalaliDatePicker` دریافت و در مسیرهای زیر قرار دهید:
+
+```text
+wp-content/plugins/alavi-form-engine/assets/vendor/jalalidatepicker/jalalidatepicker.min.js
+wp-content/plugins/alavi-form-engine/assets/vendor/jalalidatepicker/jalalidatepicker.min.css
+```
+
+AFE هیچ‌کدام از این دو فایل را از CDN در Runtime درخواست نمی‌کند.
+

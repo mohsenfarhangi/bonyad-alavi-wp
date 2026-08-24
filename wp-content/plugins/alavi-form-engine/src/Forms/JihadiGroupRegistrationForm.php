@@ -75,20 +75,26 @@ final class JihadiGroupRegistrationForm
             'phd'=>'دکترا',
         ];
 
-        $province = static fn(string $name='province') =>
-            SelectField::make($name)->label('استان')->required()->source(['type'=>'geo','level'=>'province']);
+        $province = static function(string $name='province', bool $required=true): SelectField {
+            $field=SelectField::make($name)->label('استان')->source(['type'=>'geo','level'=>'province']);
+            return $required ? $field->required() : $field;
+        };
 
-        $county = static fn(string $name='county', string $parent='province') =>
-            SelectField::make($name)->label('شهرستان')->required()
+        $county = static function(string $name='county', string $parent='province', bool $required=true): SelectField {
+            $field=SelectField::make($name)->label('شهرستان')
                 ->source(['type'=>'geo','level'=>'county','parent'=>$parent])->dependsOn($parent);
+            return $required ? $field->required() : $field;
+        };
 
-        $district = static fn(string $name='district', string $parent='county') =>
-            SelectField::make($name)->label('بخش')->required()
+        $district = static function(string $name='district', string $parent='county', bool $required=true): SelectField {
+            $field=SelectField::make($name)->label('بخش')
                 ->source(['type'=>'geo','level'=>'district','parent'=>$parent])->dependsOn($parent);
+            return $required ? $field->required() : $field;
+        };
 
         return Form::make('jihadi-group-registration')
-            ->title('ثبت نام گروه‌های مردمی و جهادی')
-            ->description('برای همکاری با بنیاد علوی در محرومیت‌زدایی از نقاط کم‌برخوردار کشور')
+            ->title('شناسنامه گروه‌های مردمی و جهادی | طرح جهادگر شهید رسول عالم باقری')
+            ->description('برای همکاری با بنیاد علوی در محرومیت‌زدایی')
             ->steps([
                 Step::make('identity', '۱. اطلاعات هویتی')->fields([
                     HtmlBlock::make('<div class="afe-section-intro"><strong>مشخصات ثبتی و هویتی گروه</strong><span>اطلاعات مطابق مدارک رسمی وارد شود.</span></div>'),
@@ -107,27 +113,32 @@ final class JihadiGroupRegistrationForm
                     $county()->width(4),
                     $district()->width(4),
                     TextField::make('village_neighborhood')->label('روستا / محله')->placeholder('نام روستا یا محله را تایپ کنید')->required()->width(12),
-                    TelField::make('group_mobile')->label('تلفن همراه گروه')->rule('mobile')->required()->width(6),
+                    TelField::make('group_mobile')->label('تلفن همراه گروه')->default('09')->rule('mobile_09')->required()->width(6)
+                        ->attributes(['maxlength'=>11,'minlength'=>11,'pattern'=>'09[0-9]{9}','inputmode'=>'numeric','autocomplete'=>'tel','data-afe-digits-only'=>'1','data-afe-fixed-prefix'=>'09','data-afe-invalid-message'=>'شماره همراه باید دقیقاً ۱۱ رقم و با ۰۹ شروع شود.']),
                     TelField::make('group_landline')->label('تلفن ثابت گروه')->width(6),
-                    TextField::make('legal_iban')->label('شماره شبای حقوقی')->placeholder('IRxxxxxxxxxxxxxxxxxxxxxxxx')->rule('iban')->required()->width(12),
+                    TextField::make('legal_iban')->label('شماره شبای حقوقی')->placeholder('۲۴ رقم شماره شبا')->rule('iban_digits')->width(12)
+                        ->attributes(['maxlength'=>24,'minlength'=>24,'pattern'=>'[0-9]{24}','inputmode'=>'numeric','dir'=>'ltr','autocomplete'=>'off','data-afe-digits-only'=>'1','data-afe-invalid-message'=>'شماره شبا باید دقیقاً ۲۴ رقم باشد.'])
+                        ->meta('input_prefix','IR')->meta('display_prefix','IR')->meta('normalize_input_prefix','IR'),
                 ]),
 
                 Step::make('officials', '۲. مسئولین')->fields([
                     HtmlBlock::make('<div class="afe-inline-title">مسئول گروه</div>'),
                     TextField::make('leader_full_name')->label('نام و نام خانوادگی مسئول گروه')->required()->width(6),
-                    TextField::make('leader_national_id')->label('کد ملی مسئول گروه')->rule('national_id')->required()->width(6),
+                    TextField::make('leader_national_id')->label('کد ملی مسئول گروه')->rule('national_id')->required()->width(6)
+                        ->attributes(['maxlength'=>10,'minlength'=>10,'pattern'=>'[0-9]{10}','inputmode'=>'numeric','autocomplete'=>'off','data-afe-digits-only'=>'1','data-afe-invalid-message'=>'کد ملی باید دقیقاً ۱۰ رقم باشد.']),
                     DateField::make('leader_birth_date')->jalali()->label('تاریخ تولد مسئول گروه')->required()->width(6),
                     TelField::make('leader_mobile')->label('تلفن همراه مسئول گروه')->rule('mobile')->required()->width(6),
                     FileField::make('leader_photo')->label('عکس پرسنلی مسئول گروه')->required()->multiple(false)->maxFiles(1)->maxSizeMb(5)
                         ->accept(['image/jpeg','image/png','image/webp'])->width(12),
                     HtmlBlock::make('<div class="afe-inline-title">جانشین گروه</div>'),
                     TextField::make('deputy_full_name')->label('نام و نام خانوادگی جانشین')->required()->width(6),
-                    TextField::make('deputy_national_id')->label('کد ملی جانشین')->rule('national_id')->required()->width(6),
+                    TextField::make('deputy_national_id')->label('کد ملی جانشین')->rule('national_id')->required()->width(6)
+                        ->attributes(['maxlength'=>10,'minlength'=>10,'pattern'=>'[0-9]{10}','inputmode'=>'numeric','autocomplete'=>'off','data-afe-digits-only'=>'1','data-afe-invalid-message'=>'کد ملی باید دقیقاً ۱۰ رقم باشد.']),
                     DateField::make('deputy_birth_date')->jalali()->label('تاریخ تولد جانشین')->required()->width(6),
                     TelField::make('deputy_mobile')->label('تلفن همراه جانشین')->rule('mobile')->required()->width(6),
                     FileField::make('deputy_photo')->label('عکس پرسنلی جانشین')->multiple(false)->maxFiles(1)->maxSizeMb(5)
                         ->accept(['image/jpeg','image/png','image/webp'])->width(12),
-                    RepeaterField::make('central_council')->label('اعضای شورای مرکزی')->required()->min(1)->max(30)->addButton('افزودن عضو شورای مرکزی')
+                    RepeaterField::make('central_council')->label('اعضای شورای مرکزی (هسته اصلی)')->required()->min(1)->max(30)->addButton('افزودن عضو شورای مرکزی')
                         ->fields([
                             TextField::make('full_name')->label('نام و نام خانوادگی')->required()->width(6),
                             TelField::make('mobile')->label('شماره تماس')->rule('mobile')->required()->width(6),
@@ -160,14 +171,23 @@ final class JihadiGroupRegistrationForm
                 ]),
 
                 Step::make('target', '۶. جامعه هدف')->fields([
-                    HtmlBlock::make('<div class="afe-inline-title">مناطق تحت پوشش</div>'),
-                    $province('target_province')->width(4),
-                    $county('target_county','target_province')->width(4),
-                    $district('target_district','target_county')->width(4),
-                    SelectField::make('target_area_type')->label('نوع منطقه')->options([
-                        'city'=>'شهر','suburb'=>'حاشیه شهر','village'=>'روستا','regional_project'=>'پروژه خاص منطقه‌ای'
-                    ])->required()->width(6),
-                    TextField::make('target_area_detail')->label('نام/توضیح منطقه یا پروژه')->required()->width(6),
+                    RepeaterField::make('coverage_areas')->label('مناطق تحت پوشش')->required()->min(1)->max(50)->addButton('افزودن منطقه تحت پوشش')
+                        ->meta('legacy_row_map',[
+                            'target_province'=>'province',
+                            'target_county'=>'county',
+                            'target_district'=>'district',
+                            'target_area_type'=>'area_type',
+                            'target_area_detail'=>'area_detail',
+                        ])
+                        ->fields([
+                            $province('province',true)->width(4),
+                            $county('county','province',false)->width(4),
+                            $district('district','county',false)->width(4),
+                            SelectField::make('area_type')->label('نوع منطقه')->options([
+                                'province'=>'استان','county'=>'شهرستان','city'=>'شهر','suburb'=>'حاشیه شهر','village'=>'روستا','regional_project'=>'پروژه خاص منطقه‌ای'
+                            ])->required()->width(6),
+                            TextField::make('area_detail')->label('نام/توضیح تکمیلی منطقه یا پروژه')->placeholder('در صورت نیاز توضیح تکمیلی وارد کنید')->width(6),
+                        ]),
                     TextareaField::make('target_groups')->label('گروه‌های هدف')->placeholder('اقشار و گروه‌های هدف را توضیح دهید.')->required(),
                     SelectField::make('activity_scope')->label('گستره فعالیت')->options([
                         'local'=>'محلی','rural'=>'روستایی','urban'=>'شهری','county'=>'شهرستانی','province'=>'استانی','national'=>'ملی'
@@ -239,6 +259,7 @@ final class JihadiGroupRegistrationForm
             ])
             ->settings([
                 'wizard'=>true,
+                'header_slogan'=>'هر گروه یک نقطه‌ی آغاز و هر حرکت یک قدم به سوی آینده. (خانه نوآوری جهاد)',
                 'save_draft'=>true,
                 'show_progress'=>true,
                 'editing_enabled'=>true,

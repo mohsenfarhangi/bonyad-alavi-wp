@@ -374,6 +374,10 @@ final class SubmissionService
     {
         if (is_array($value)) return array_map('sanitize_text_field',$value);
         $value = Validators::latinDigits((string)$value);
+        $normalizePrefix=trim((string)($field['normalize_input_prefix']??''));
+        if ($normalizePrefix !== '' && str_starts_with(strtoupper($value),strtoupper($normalizePrefix))) {
+            $value=substr($value,strlen($normalizePrefix));
+        }
         return match ($field['type']??'text') {
             'textarea' => sanitize_textarea_field($value),
             'email' => sanitize_email($value),

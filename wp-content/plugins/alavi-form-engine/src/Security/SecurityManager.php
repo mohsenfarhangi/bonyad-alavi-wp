@@ -34,13 +34,11 @@ final class SecurityManager
     public function captchaMarkup(string $provider): string
     {
         if ($provider === 'none') return '';
-        if ($provider === 'google') {
-            $settings = get_option('afe_settings', []);
-            $siteKey = (string)($settings['recaptcha_site_key'] ?? '');
-            if ($siteKey === '') return '<div class="afe-notice afe-notice-warning">کلید Site Key گوگل reCAPTCHA تنظیم نشده است.</div>';
-            wp_enqueue_script('google-recaptcha', 'https://www.google.com/recaptcha/api.js?hl=fa', [], null, true);
-            return '<div class="g-recaptcha" data-sitekey="'.esc_attr($siteKey).'"></div>';
-        }
+        // AFE runs in local-browser-assets mode. Google reCAPTCHA requires a
+        // remotely loaded browser script and therefore cannot satisfy that
+        // policy. Keep old form definitions working by transparently falling
+        // back to AFE's server-side custom CAPTCHA instead of loading Google JS.
+        if ($provider === 'google') $provider = 'custom';
 
         $challenge = $this->newCustomCaptchaChallenge();
         return '<div class="afe-captcha" data-afe-captcha>'
@@ -63,19 +61,7 @@ final class SecurityManager
     public function verifyCaptcha(string $provider): true|WP_Error
     {
         if ($provider === 'none') return true;
-        if ($provider === 'google') {
-            $settings = get_option('afe_settings', []);
-            $secret = (string)($settings['recaptcha_secret_key'] ?? '');
-            $response = sanitize_text_field(wp_unslash($_POST['g-recaptcha-response'] ?? ''));
-            if ($secret === '' || $response === '') return new WP_Error('captcha', 'کپچا تکمیل نشده است.');
-            $remote = wp_remote_post('https://www.google.com/recaptcha/api/siteverify', [
-                'timeout'=>10,
-                'body'=>['secret'=>$secret,'response'=>$response,'remoteip'=>$_SERVER['REMOTE_ADDR']??''],
-            ]);
-            if (is_wp_error($remote)) return new WP_Error('captcha_http','اعتبارسنجی کپچا در دسترس نیست.');
-            $json = json_decode(wp_remote_retrieve_body($remote), true);
-            return !empty($json['success']) ? true : new WP_Error('captcha','کپچا نامعتبر است.');
-        }
+        if ($provider === 'google') $provider = 'custom';
         $token = sanitize_text_field(wp_unslash($_POST['_afe_captcha_token'] ?? ''));
         $answer = sanitize_text_field(wp_unslash($_POST['_afe_captcha_answer'] ?? ''));
         if ($token === '') return new WP_Error('captcha','کپچا نامعتبر است.');

@@ -162,10 +162,14 @@ final class Plugin
     private function registerAssets(): void
     {
         add_action('wp_enqueue_scripts', static function(): void {
-            wp_register_style('afe-jalali-datepicker', 'https://unpkg.com/@majidh1/jalalidatepicker@1.0.0/dist/jalalidatepicker.min.css', [], '1.0.0');
-            wp_register_script('afe-jalali-datepicker', 'https://unpkg.com/@majidh1/jalalidatepicker@1.0.0/dist/jalalidatepicker.min.js', [], '1.0.0', true);
+            // Third-party browser assets are deliberately self-hosted. The package
+            // itself does not bundle JalaliDatePicker; site owners place the two
+            // official dist files in assets/vendor/jalalidatepicker/.
+            $jdpBase = AFE_URL.'assets/vendor/jalalidatepicker/';
+            wp_register_style('afe-jalali-datepicker', $jdpBase.'jalalidatepicker.min.css', [], '1.0.0');
+            wp_register_script('afe-jalali-datepicker', $jdpBase.'jalalidatepicker.min.js', [], '1.0.0', true);
             wp_register_style('afe-frontend', AFE_URL.'assets/css/frontend.css', [], AFE_VERSION);
-            wp_register_script('afe-frontend', AFE_URL.'assets/js/frontend.js', ['afe-jalali-datepicker'], AFE_VERSION, true);
+            wp_register_script('afe-frontend', AFE_URL.'assets/js/frontend.js', [], AFE_VERSION, true);
             wp_localize_script('afe-frontend','afeFrontend',[
                 'ajaxUrl'=>admin_url('admin-ajax.php'),
                 'geoNonce'=>wp_create_nonce('afe_geo'),
@@ -177,8 +181,9 @@ final class Plugin
             $dates=new LocaleDateService();
             $deps=[];
             if($dates->isJalali()){
-                wp_enqueue_style('afe-admin-jalali-datepicker','https://unpkg.com/@majidh1/jalalidatepicker@1.0.0/dist/jalalidatepicker.min.css',[],'1.0.0');
-                wp_enqueue_script('afe-admin-jalali-datepicker','https://unpkg.com/@majidh1/jalalidatepicker@1.0.0/dist/jalalidatepicker.min.js',[],'1.0.0',true);
+                $jdpBase = AFE_URL.'assets/vendor/jalalidatepicker/';
+                wp_enqueue_style('afe-admin-jalali-datepicker',$jdpBase.'jalalidatepicker.min.css',[],'1.0.0');
+                wp_enqueue_script('afe-admin-jalali-datepicker',$jdpBase.'jalalidatepicker.min.js',[],'1.0.0',true);
                 $deps[]='afe-admin-jalali-datepicker';
             }
             wp_enqueue_style('afe-admin', AFE_URL.'assets/css/admin.css', [], AFE_VERSION);
@@ -191,6 +196,14 @@ final class Plugin
                 'calendar' => $dates->calendar(),
                 'isJalali' => $dates->isJalali(),
             ]);
+        });
+
+        add_action('admin_notices', static function(): void {
+            if (!current_user_can('manage_options')) return;
+            $js = AFE_PATH.'assets/vendor/jalalidatepicker/jalalidatepicker.min.js';
+            $css = AFE_PATH.'assets/vendor/jalalidatepicker/jalalidatepicker.min.css';
+            if (is_readable($js) && is_readable($css)) return;
+            echo '<div class="notice notice-warning"><p><strong>Alavi Form Engine:</strong> فایل‌های لوکال JalaliDatePicker پیدا نشدند. فایل‌های <code>jalalidatepicker.min.js</code> و <code>jalalidatepicker.min.css</code> را داخل <code>assets/vendor/jalalidatepicker/</code> قرار دهید.</p></div>';
         });
     }
 

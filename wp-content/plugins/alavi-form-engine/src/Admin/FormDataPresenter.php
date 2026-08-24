@@ -52,7 +52,9 @@ final class FormDataPresenter
     public function displayField(array $field,mixed $value,array $context=[]): string
     {
         if (($field['type'] ?? '') === 'repeater') {
-            return $this->displayRepeater($field,is_array($value)?$value:[],$context);
+            $rows=is_array($value)?$value:[];
+            if (!$rows) $rows=$this->legacyRepeaterRows($field,$context);
+            return $this->displayRepeater($field,$rows,$context);
         }
         return $this->displayScalar($field,$value,$context);
     }
@@ -60,7 +62,9 @@ final class FormDataPresenter
     public function plainField(array $field,mixed $value,array $context=[]): string
     {
         if (($field['type'] ?? '') === 'repeater') {
-            if (!is_array($value) || !$value) return '—';
+            $value=is_array($value)?$value:[];
+            if (!$value) $value=$this->legacyRepeaterRows($field,$context);
+            if (!$value) return '—';
             $lines=[];
             $children=$this->children($field);
             foreach (array_values($value) as $index=>$row) {
@@ -87,13 +91,18 @@ final class FormDataPresenter
 
         $options=$this->optionsFor($field,$context);
         $key=(string)$value;
-        return isset($options[$key]) ? (string)$options[$key] : $key;
+        $text=isset($options[$key]) ? (string)$options[$key] : $key;
+        $prefix=trim((string)($field['display_prefix']??''));
+        if ($prefix !== '' && !str_starts_with(strtoupper($text),strtoupper($prefix))) $text=$prefix.$text;
+        return $text;
     }
 
     public function editField(array $field,mixed $value,array $context=[],string $base='afe_admin_data'): string
     {
         if (($field['type'] ?? '') === 'repeater') {
-            return $this->editRepeater($field,is_array($value)?$value:[],$context,$base);
+            $rows=is_array($value)?$value:[];
+            if (!$rows) $rows=$this->legacyRepeaterRows($field,$context);
+            return $this->editRepeater($field,$rows,$context,$base);
         }
         $name=(string)($field['name'] ?? '');
         return $this->editScalar($field,$value,$context,$base.'['.$name.']');
@@ -123,6 +132,7 @@ final class FormDataPresenter
                         if ($this->rowHasValue($cleanRow)) $rows[]=$cleanRow;
                     }
                     $clean[$name]=$rows;
+                    foreach (array_keys((array)($field['legacy_row_map']??[])) as $legacyKey) unset($clean[(string)$legacyKey]);
                     continue;
                 }
                 $clean[$name]=$this->sanitizeScalar($field,$input[$name]??'');
@@ -142,6 +152,19 @@ final class FormDataPresenter
             }
         }
         return $map;
+    }
+
+    private function legacyRepeaterRows(array $field,array $context): array
+    {
+        $map=(array)($field['legacy_row_map']??[]);
+        if (!$map) return [];
+        $row=[]; $has=false;
+        foreach ($map as $legacy=>$child) {
+            $value=$context[(string)$legacy]??'';
+            $row[(string)$child]=$value;
+            if ($value !== '' && $value !== null) $has=true;
+        }
+        return $has ? [$row] : [];
     }
 
     private function displayRepeater(array $field,array $rows,array $context): string
@@ -214,6 +237,11 @@ final class FormDataPresenter
 
     private function editScalar(array $field,mixed $value,array $context,string $inputName): string
     {
+        $normalizePrefix=trim((string)($field['normalize_input_prefix']??''));
+        if ($normalizePrefix !== '' && is_scalar($value)) {
+            $raw=(string)$value;
+            if (str_starts_with(strtoupper($raw),strtoupper($normalizePrefix))) $value=substr($raw,strlen($normalizePrefix));
+        }
         $type=(string)($field['type']??'text');
         $attrs=' name="'.esc_attr($inputName).'" class="afe-admin-control"';
         if ($type==='textarea') {
@@ -279,6 +307,10 @@ final class FormDataPresenter
     {
         if (is_array($value)) return array_values(array_map(static fn($v)=>sanitize_text_field(wp_unslash((string)$v)),$value));
         $value=wp_unslash((string)$value);
+        $normalizePrefix=trim((string)($field['normalize_input_prefix']??''));
+        if ($normalizePrefix !== '' && str_starts_with(strtoupper($value),strtoupper($normalizePrefix))) {
+            $value=substr($value,strlen($normalizePrefix));
+        }
         return match((string)($field['type']??'text')) {
             'textarea' => sanitize_textarea_field($value),
             'email' => sanitize_email($value),

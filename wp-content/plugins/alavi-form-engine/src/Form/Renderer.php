@@ -51,11 +51,11 @@ final class Renderer
         $previewEnabled = !empty($form['settings']['preview_enabled']);
 
         wp_enqueue_style('afe-frontend');
-        wp_enqueue_script('afe-frontend');
         if ($this->usesJalaliCalendar($form)) {
             wp_enqueue_style('afe-jalali-datepicker');
             wp_enqueue_script('afe-jalali-datepicker');
         }
+        wp_enqueue_script('afe-frontend');
 
         if ($row && trim((string)$row->custom_css) !== '') {
             wp_add_inline_style('afe-frontend', (string)$row->custom_css);
@@ -102,16 +102,19 @@ final class Renderer
         }
 
         $steps = implode('', $stepHtml);
+        $slogan = trim((string)($form['settings']['header_slogan'] ?? ''));
+        $sloganHtml = $slogan !== '' ? '<div class="afe-form-slogan">'.esc_html($slogan).'</div>' : '';
         $template = $row ? trim((string)$row->template_html) : '';
         if ($template !== '') {
             $content = strtr(wp_kses_post($template), [
                 '{{steps}}'=>$steps,
                 '{{title}}'=>esc_html($form['title']),
                 '{{description}}'=>esc_html($form['description']),
+                '{{slogan}}'=>$sloganHtml,
             ]);
         } else {
             $content = '<header class="afe-form-header"><div class="afe-brand-mark" aria-hidden="true"><span></span><span></span></div>'
-                . '<div><h1>'.esc_html($form['title']).'</h1><p>'.esc_html($form['description']).'</p></div></header>'
+                . '<div><h1>'.esc_html($form['title']).'</h1><p>'.esc_html($form['description']).'</p>'.$sloganHtml.'</div></header>'
                 . $this->progress($form, $total) . $steps;
         }
 
@@ -209,7 +212,11 @@ final class Renderer
 
         $name=$field['name'];
         $value = $repeaterContext !== null ? ($repeaterContext[$name]??($field['default']??'')) : ($values[$name]??($field['default']??''));
-        if (($field['type']??'')==='repeater') return $this->renderRepeater($field,(array)$value,$form);
+        if (($field['type']??'')==='repeater') {
+            $rows=(array)$value;
+            if (!$rows && $repeaterContext === null) $rows=$this->legacyRepeaterRows($field,$values);
+            return $this->renderRepeater($field,$rows,$form);
+        }
 
         $conditions = !empty($field['conditions']) ? esc_attr(wp_json_encode($field['conditions'],JSON_UNESCAPED_UNICODE)) : '';
         $classes='afe-field afe-col-'.(int)($field['width']??12);
@@ -227,23 +234,62 @@ final class Renderer
     private function input(array $field, mixed $value, array $allValues, ?string $nameOverride): string
     {
         $name = $nameOverride ?: 'afe_data['.$field['name'].']';
+        $normalizePrefix=trim((string)($field['normalize_input_prefix']??''));
+        if ($normalizePrefix !== '' && is_scalar($value)) {
+            $raw=(string)$value;
+            if (str_starts_with(strtoupper($raw),strtoupper($normalizePrefix))) $value=substr($raw,strlen($normalizePrefix));
+        }
         $id = 'afe_' . sanitize_html_class(str_replace(['[',']'],'_',$name));
         $required = !empty($field['required']) && empty($field['conditions']) ? ' required' : '';
         $placeholder = !empty($field['placeholder']) ? ' placeholder="'.esc_attr((string)$field['placeholder']).'"' : '';
-        $common = ' id="'.esc_attr($id).'" name="'.esc_attr($name).'"'.$placeholder.$required;
+        $common = ' id="'.esc_attr($id).'" name="'.esc_attr($name).'"'.$placeholder.$required.$this->inputAttributes($field);
 
-        return match ($field['type']) {
+        $control = match ($field['type']) {
             'textarea' => '<textarea class="afe-control" rows="5"'.$common.'>'.esc_textarea((string)$value).'</textarea>',
             'select' => $this->select($field,$value,$allValues,$name,$id,$required),
             'radio' => $this->radio($field,$value,$name),
             'file' => $this->fileInput($field, $id),
             'number' => '<input class="afe-control" type="number" inputmode="numeric"'.$common.' value="'.esc_attr((string)$value).'">',
             'date' => $this->dateInput($field,$value,$common),
-            'tel' => '<input class="afe-control" type="tel" inputmode="tel"'.$common.' value="'.esc_attr((string)$value).'">',
+            'tel' => '<input class="afe-control" type="tel"'.$common.' value="'.esc_attr((string)$value).'">',
             'email' => '<input class="afe-control" type="email"'.$common.' value="'.esc_attr((string)$value).'">',
             'url' => '<input class="afe-control" type="url"'.$common.' value="'.esc_attr((string)$value).'">',
             default => '<input class="afe-control" type="text"'.$common.' value="'.esc_attr((string)$value).'">',
         };
+
+        $prefix=trim((string)($field['input_prefix']??''));
+        if ($prefix !== '' && in_array((string)($field['type']??''),['text','tel','number'],true)) {
+            return '<div class="afe-input-affix" data-afe-input-affix><span class="afe-input-prefix" dir="ltr">'.esc_html($prefix).'</span>'.$control.'</div>';
+        }
+        return $control;
+    }
+
+    private function inputAttributes(array $field): string
+    {
+        $out='';
+        $allowed=['maxlength','minlength','pattern','inputmode','autocomplete','dir','min','max','step','aria-label','aria-describedby'];
+        foreach ((array)($field['attributes']??[]) as $key=>$value) {
+            $key=strtolower(trim((string)$key));
+            if ($key==='' || str_starts_with($key,'on')) continue;
+            if (!in_array($key,$allowed,true) && !str_starts_with($key,'data-afe-')) continue;
+            if ($value === false || $value === null) continue;
+            if ($value === true) { $out.=' '.esc_attr($key); continue; }
+            $out.=' '.esc_attr($key).'="'.esc_attr((string)$value).'"';
+        }
+        return $out;
+    }
+
+    private function legacyRepeaterRows(array $field,array $values): array
+    {
+        $map=(array)($field['legacy_row_map']??[]);
+        if (!$map) return [];
+        $row=[]; $has=false;
+        foreach ($map as $legacy=>$child) {
+            $value=$values[(string)$legacy]??'';
+            $row[(string)$child]=$value;
+            if ($value !== '' && $value !== null) $has=true;
+        }
+        return $has ? [$row] : [];
     }
 
     private function dateInput(array $field, mixed $value, string $common): string

@@ -76,6 +76,12 @@ final class Validator
         if (!empty($rules['iban']) && !Validators::iranIban($string)) {
             $errors[$field['name']] = 'شماره شبا باید با IR شروع شود و اعتبار IBAN صحیح داشته باشد.';
         }
+        if (!empty($rules['iban_digits']) && !Validators::iranIbanDigits($string)) {
+            $errors[$field['name']] = 'شماره شبا باید دقیقاً ۲۴ رقم و دارای اعتبار صحیح شبا باشد.';
+        }
+        if (!empty($rules['mobile_09']) && !Validators::mobile09($string)) {
+            $errors[$field['name']] = 'شماره همراه باید دقیقاً ۱۱ رقم و با ۰۹ شروع شود.';
+        }
         if (!empty($rules['mobile']) && !Validators::mobile($string)) {
             $errors[$field['name']] = 'شماره همراه معتبر نیست.';
         }

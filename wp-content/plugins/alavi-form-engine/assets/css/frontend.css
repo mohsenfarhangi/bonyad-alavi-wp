@@ -1094,3 +1094,82 @@ textarea.afe-control { resize:vertical; min-height:118px; line-height:1.9; }
 .afe-shell .afe-captcha__refresh.is-loading{opacity:.65;cursor:wait}
 .afe-shell .afe-captcha__refresh.is-loading::first-letter{display:inline-block}
 @media(max-width:520px){.afe-shell .afe-captcha__head{align-items:flex-start;flex-direction:column}}
+
+/* --------------------------------------------------------------------------
+ * 1.0.23 – unclipped overlays, input affixes and form header slogan
+ * -------------------------------------------------------------------------- */
+/* Custom-select panels and browser overlays must be allowed to leave the card.
+   Rounded visual sections own their own radii; clipping the whole form breaks
+   long dropdowns/scrollbars on desktop. */
+.afe-form {
+  overflow: visible;
+}
+.afe-form-header {
+  border-radius: 27px 27px 0 0;
+}
+.afe-form-slogan {
+  margin-top: 10px;
+  color: var(--afe-green-dark);
+  font-size: 13px;
+  font-weight: 750;
+  line-height: 1.9;
+}
+
+.afe-input-affix {
+  display: flex;
+  align-items: stretch;
+  width: 100%;
+  min-width: 0;
+  direction: ltr;
+}
+.afe-input-affix .afe-input-prefix {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  min-width: 50px;
+  padding: 0 12px;
+  border: 1px solid var(--afe-border);
+  border-right: 0;
+  border-radius: 13px 0 0 13px;
+  background: var(--afe-bg);
+  color: var(--afe-green-dark);
+  font-weight: 800;
+  letter-spacing: .04em;
+  user-select: none;
+}
+.afe-input-affix .afe-control {
+  min-width: 0;
+  border-radius: 0 13px 13px 0;
+}
+.afe-input-affix:focus-within .afe-input-prefix {
+  border-color: var(--afe-green);
+  box-shadow: 0 0 0 4px rgba(15,107,79,.09);
+}
+.afe-input-affix:focus-within .afe-control {
+  position: relative;
+  z-index: 1;
+}
+.afe-field.has-error .afe-input-affix .afe-input-prefix {
+  border-color: var(--afe-danger);
+}
+
+/* JalaliDatePicker is mounted directly under body, outside .afe-shell, so give
+   it a defensive stacking level independent of Elementor/theme overlays. */
+body > jdp-container,
+body > jdp-overlay {
+  z-index: 2147480000 !important;
+}
+
+.afe-shell.afe-isolation-strong .afe-form .afe-input-affix {
+  display:flex !important;
+  width:100% !important;
+  max-width:none !important;
+  margin:0 !important;
+}
+.afe-shell.afe-isolation-strong .afe-form .afe-input-prefix {
+  display:inline-flex !important;
+  float:none !important;
+  margin:0 !important;
+  text-transform:none !important;
+}

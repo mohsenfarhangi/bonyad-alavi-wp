@@ -26,8 +26,8 @@ final class SettingsPage
         echo '<div class="afe-admin-card"><h2>API و کپچا</h2><div class="afe-admin-grid">';
         echo '<label><input type="checkbox" name="api_enabled" value="1" '.checked(!empty($settings['api_enabled']),true,false).'> REST API مدیریت فعال باشد</label>';
         echo '<label><input type="checkbox" name="api_public_forms" value="1" '.checked(!empty($settings['api_public_forms']),true,false).'> Schema فرم‌ها بدون ورود قابل خواندن باشد</label>';
-        echo '<label>Google reCAPTCHA Site Key<input class="regular-text" name="recaptcha_site_key" value="'.esc_attr((string)($settings['recaptcha_site_key']??'')).'"></label>';
-        echo '<label>Google reCAPTCHA Secret Key<input class="regular-text" type="password" autocomplete="new-password" name="recaptcha_secret_key" value="'.esc_attr((string)($settings['recaptcha_secret_key']??'')).'"></label>';
+        echo '<label>Google reCAPTCHA Site Key<input class="regular-text" name="recaptcha_site_key" value="'.esc_attr((string)($settings['recaptcha_site_key']??'')).'" disabled><span class="description">در حالت Local-only بارگذاری اسکریپت خارجی گوگل انجام نمی‌شود و provider قدیمی Google به کپچای داخلی AFE تبدیل می‌شود.</span></label>';
+        echo '<label>Google reCAPTCHA Secret Key<input class="regular-text" type="password" autocomplete="new-password" value="" disabled><span class="description">برای جلوگیری از وابستگی مرورگر به سرویس خارجی استفاده نمی‌شود.</span></label>';
         echo '<label class="afe-span-2"><input type="checkbox" name="delete_data_on_uninstall" value="1" '.checked(!empty($settings['delete_data_on_uninstall']),true,false).'> هنگام Uninstall تمام داده‌ها و جداول افزونه حذف شوند <strong>(غیرقابل بازگشت)</strong></label>';
         echo '</div></div>';
 
@@ -80,12 +80,11 @@ final class SettingsPage
     {
         check_admin_referer('afe_save_settings','afe_settings_nonce');
         $old=get_option('afe_settings',[]);
-        $secret=wp_unslash($_POST['recaptcha_secret_key']??'');
         $settings=array_replace((array)$old,[
             'api_enabled'=>!empty($_POST['api_enabled']),
             'api_public_forms'=>!empty($_POST['api_public_forms']),
-            'recaptcha_site_key'=>sanitize_text_field(wp_unslash($_POST['recaptcha_site_key']??'')),
-            'recaptcha_secret_key'=>sanitize_text_field($secret),
+            'recaptcha_site_key'=>(string)($old['recaptcha_site_key']??''),
+            'recaptcha_secret_key'=>(string)($old['recaptcha_secret_key']??''),
             'delete_data_on_uninstall'=>!empty($_POST['delete_data_on_uninstall']),
             'style_isolation'=>(new StyleIsolationManager())->normalize(sanitize_key(wp_unslash($_POST['style_isolation']??StyleIsolationManager::MODE_STRONG))),
         ]);

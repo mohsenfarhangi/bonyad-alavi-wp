@@ -7,8 +7,10 @@ final class Validators
 {
     public static function nationalId(string $value): bool
     {
-        $value = preg_replace('/\D+/', '', self::latinDigits($value));
-        if (!is_string($value) || strlen($value) !== 10 || preg_match('/^(\d)\1{9}$/', $value)) return false;
+        $value = trim(self::latinDigits($value));
+        // Never silently strip letters/separators. A national ID is exactly ten
+        // digits; rejecting malformed direct POSTs keeps UI and server rules equal.
+        if (!preg_match('/^\d{10}$/', $value) || preg_match('/^(\d)\1{9}$/', $value)) return false;
         $check = (int)$value[9];
         $sum = 0;
         for ($i=0; $i<9; $i++) $sum += ((int)$value[$i]) * (10-$i);
@@ -24,6 +26,20 @@ final class Validators
         $mod = 0;
         foreach (str_split($rearranged) as $digit) $mod = ($mod * 10 + (int)$digit) % 97;
         return $mod === 1;
+    }
+
+    public static function iranIbanDigits(string $value): bool
+    {
+        $value = strtoupper(trim(self::latinDigits($value)));
+        if (str_starts_with($value,'IR')) $value=substr($value,2); // legacy submissions/pages
+        if (!preg_match('/^\d{24}$/', $value)) return false;
+        return self::iranIban('IR'.$value);
+    }
+
+    public static function mobile09(string $value): bool
+    {
+        $value = trim(self::latinDigits($value));
+        return (bool)preg_match('/^09\d{9}$/', $value);
     }
 
     public static function mobile(string $value): bool

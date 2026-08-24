@@ -1047,6 +1047,55 @@
     if (options.scroll !== false) result.scrollIntoView({behavior:'smooth', block:'center'});
   }
 
+  function latinDigits(value) {
+    return String(value ?? '').replace(/[۰-۹]/g, d => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d)).replace(/[٠-٩]/g, d => '٠١٢٣٤٥٦٧٨٩'.indexOf(d));
+  }
+
+  function normalizeConstrainedInput(input, initialize = false) {
+    if (!(input instanceof HTMLInputElement)) return;
+    let value = latinDigits(input.value);
+    if (input.dataset.afeDigitsOnly === '1') value = value.replace(/\D+/g, '');
+
+    const prefix = String(input.dataset.afeFixedPrefix || '');
+    if (prefix) {
+      if (value.startsWith(prefix)) {
+        value = prefix + value.slice(prefix.length).replace(/\D+/g, '');
+      } else {
+        let suffix = value.replace(/\D+/g, '');
+        if (suffix.startsWith('9') && prefix === '09') suffix = suffix.slice(1);
+        else if (suffix.startsWith('0')) suffix = suffix.slice(1);
+        value = prefix + suffix;
+      }
+    }
+
+    const maxLength = Number(input.getAttribute('maxlength') || 0);
+    if (maxLength > 0 && value.length > maxLength) value = value.slice(0, maxLength);
+    if (input.value !== value || (initialize && !input.value && prefix)) input.value = value || prefix;
+  }
+
+  function initConstrainedInputs(root) {
+    qsa(root, 'input[data-afe-digits-only="1"],input[data-afe-fixed-prefix]').forEach(input => {
+      if (input.dataset.afeConstraintReady === '1') return;
+      input.dataset.afeConstraintReady = '1';
+      normalizeConstrainedInput(input, true);
+      input.addEventListener('input', () => normalizeConstrainedInput(input));
+      input.addEventListener('blur', () => normalizeConstrainedInput(input));
+      input.addEventListener('keydown', event => {
+        const prefix = String(input.dataset.afeFixedPrefix || '');
+        if (!prefix) return;
+        const start = Number(input.selectionStart ?? 0);
+        if ((event.key === 'Backspace' && start <= prefix.length) || (event.key === 'Delete' && start < prefix.length)) {
+          event.preventDefault();
+          input.setSelectionRange(prefix.length, prefix.length);
+        }
+      });
+      input.addEventListener('focus', () => {
+        const prefix = String(input.dataset.afeFixedPrefix || '');
+        if (prefix && Number(input.selectionStart ?? 0) < prefix.length) input.setSelectionRange(prefix.length, prefix.length);
+      });
+    });
+  }
+
   function validateStep(form, step, options = {}) {
     const shouldScroll = options.scroll !== false;
     let ok = true;
@@ -1061,6 +1110,18 @@
           ok = false;
           return;
         }
+      }
+      const nativeControls = qsa(wrapper, 'input:not([type="hidden"]),select,textarea')
+        .filter(el => !el.disabled && !el.closest('.afe-custom-select'));
+      const invalidControl = nativeControls.find(el => {
+        if (el.type === 'file' || el.type === 'radio' || el.type === 'checkbox') return false;
+        const hasValue = String(el.value || '').trim() !== '';
+        return hasValue && typeof el.checkValidity === 'function' && !el.checkValidity();
+      });
+      if (invalidControl) {
+        setError(wrapper, invalidControl.dataset.afeInvalidMessage || 'مقدار واردشده با قالب مورد انتظار مطابقت ندارد.');
+        ok = false;
+        return;
       }
       if (!required) return;
       const repeater = wrapper.classList.contains('afe-repeater');
@@ -1124,6 +1185,7 @@
           rows.appendChild(row);
           initCustomSelects(row);
           initFileUploads(row);
+          initConstrainedInputs(row);
           updateRepeater(wrapper);
           row.scrollIntoView({behavior:'smooth', block:'nearest'});
           return;
@@ -1155,12 +1217,25 @@
     return match ? match[1] : '';
   }
 
+  function dependencyParentValue(form, select, parentName) {
+    const row = select.closest('.afe-repeater-row');
+    if (row) {
+      const suffix = `[${parentName}]`;
+      const parent = qsa(row, '[name]').find(control => String(control.name || '').endsWith(suffix));
+      if (parent) {
+        if (parent.tagName === 'SELECT' && parent.multiple) return Array.from(parent.selectedOptions).map(o => o.value);
+        return parent.value ?? '';
+      }
+    }
+    return fieldValue(form, parentName);
+  }
+
   async function loadDependent(form, select) {
     const parentName = select.dataset.dependsOn;
     const level = select.dataset.sourceLevel;
     if (!parentName || !level) return;
 
-    const parentValue = fieldValue(form, parentName);
+    const parentValue = dependencyParentValue(form, select, parentName);
     const requestId = String((Number(select.dataset.afeGeoRequest || 0) + 1));
     select.dataset.afeGeoRequest = requestId;
 
@@ -1174,6 +1249,7 @@
       select.disabled = false;
       select.removeAttribute('aria-busy');
       refreshCustomSelect(select, true);
+      select.dispatchEvent(new Event('change', {bubbles:true}));
       select.dispatchEvent(new CustomEvent('afe:dependent-updated', {bubbles:true, detail:{level, parent:''}}));
       return;
     }
@@ -1249,10 +1325,12 @@
       const fieldKey = controlFieldKey(source);
       if (!fieldKey) return;
 
+      const sourceRow = source.closest('.afe-repeater-row');
       qsa(form, 'select[data-depends-on]').forEach(dependent => {
-        if (dependent.dataset.dependsOn === fieldKey) {
-          loadDependent(form, dependent);
-        }
+        if (dependent.dataset.dependsOn !== fieldKey) return;
+        const dependentRow = dependent.closest('.afe-repeater-row');
+        if (sourceRow ? dependentRow !== sourceRow : dependentRow !== null) return;
+        loadDependent(form, dependent);
       });
     });
   }
@@ -1638,16 +1716,63 @@
     initReadonly(form);
     initSelectIsolation(form);
     initFileUploads(form);
+    initConstrainedInputs(form);
     initRepeaters(form);
     initDependencies(form);
     initUniqueGroups(form);
     renderStep(current);
   }
 
+  let activeJalaliInput = null;
+
+  function positionJalaliPicker(input) {
+    if (!(input instanceof HTMLInputElement) || window.innerWidth <= 481) return;
+    const picker = document.querySelector('jdp-container');
+    if (!picker || getComputedStyle(picker).display === 'none') return;
+    const inputRect = input.getBoundingClientRect();
+    const pickerRect = picker.getBoundingClientRect();
+    const gap = 6;
+    const edge = 12;
+    const scrollX = window.scrollX || document.documentElement.scrollLeft || 0;
+    const scrollY = window.scrollY || document.documentElement.scrollTop || 0;
+    let top = inputRect.bottom + scrollY + gap;
+    if (inputRect.bottom + gap + pickerRect.height > window.innerHeight - edge && inputRect.top - gap - pickerRect.height >= edge) {
+      top = inputRect.top + scrollY - pickerRect.height - gap;
+    }
+    let left = inputRect.right + scrollX - pickerRect.width;
+    left = Math.max(scrollX + edge, Math.min(left, scrollX + window.innerWidth - pickerRect.width - edge));
+    picker.style.top = `${Math.round(top)}px`;
+    picker.style.left = `${Math.round(left)}px`;
+    picker.style.right = 'auto';
+  }
+
+  function scheduleJalaliPosition(input) {
+    activeJalaliInput = input;
+    requestAnimationFrame(() => requestAnimationFrame(() => positionJalaliPicker(input)));
+    setTimeout(() => positionJalaliPicker(input), 60);
+  }
+
+  document.addEventListener('focusin', event => {
+    const input = event.target.closest?.('input[data-afe-calendar="jalali"]');
+    if (input) scheduleJalaliPosition(input);
+  });
+  document.addEventListener('click', event => {
+    const input = event.target.closest?.('input[data-afe-calendar="jalali"]');
+    if (input) scheduleJalaliPosition(input);
+  });
+  window.addEventListener('resize', () => activeJalaliInput && positionJalaliPicker(activeJalaliInput));
+  window.addEventListener('scroll', () => activeJalaliInput && positionJalaliPicker(activeJalaliInput), {passive:true});
+
   document.addEventListener('DOMContentLoaded', () => {
     if (window.jalaliDatepicker && qs(document, 'input[data-afe-calendar="jalali"]')) {
       window.jalaliDatepicker.startWatch({
         selector: 'input[data-afe-calendar="jalali"]',
+        container: 'body',
+        position: 'right',
+        topSpace: 6,
+        bottomSpace: 6,
+        overflowSpace: 12,
+        zIndex: 2147480000,
         persianDigits: false,
         autoReadOnlyInput: false,
         date: true,
