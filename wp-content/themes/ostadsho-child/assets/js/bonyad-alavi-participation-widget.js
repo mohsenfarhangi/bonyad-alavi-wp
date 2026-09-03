@@ -1,10 +1,13 @@
 /**
- * Bonyad Alavi participation widget frontend handler.
- * Loaded only when the Elementor widget is rendered.
+ * Handler فرانت‌اند ویجت مشارکت مردمی بنیاد علوی.
+ * این فایل فقط هنگام حضور ویجت در خروجی Elementor بارگذاری می‌شود.
  */
 (() => {
 	'use strict';
 
+	/**
+	 * Handler اصلی رفتارهای تعاملی صفحه مشارکت مردمی.
+	 */
 	class BonyadAlaviParticipationHandler extends elementorModules.frontend.handlers.Base {
 		onInit() {
 			super.onInit();
@@ -35,6 +38,7 @@
 			this.readConfiguration();
 			this.renderFundingState();
 			this.bindWidgetEvents();
+			this.setupMediaCarousel();
 			this.setupStickySidebar();
 		}
 
@@ -55,6 +59,7 @@
 				donationColumn: this.root.querySelector('.bap__donation-column'),
 				donationCard: this.root.querySelector('.bap__donation-card'),
 				toast: this.root.querySelector('.bap__toast'),
+				mediaCarouselRoot: this.root.querySelector('.bap__media-carousel[data-carousel-enabled="true"]'),
 				zoomButton: this.root.querySelector('.bap__zoom'),
 				lightbox: this.root.querySelector('.bap__lightbox'),
 				lightboxClose: this.root.querySelector('.bap__lightbox-close'),
@@ -161,7 +166,7 @@
 			});
 
 			if (zoomButton && lightbox && lightboxClose) {
-				zoomButton.addEventListener('click', () => this.openLightbox(0), this.listenerOptions);
+				zoomButton.addEventListener('click', () => this.openLightbox(this.mediaCarousel ? this.mediaCarousel.index : 0), this.listenerOptions);
 				lightboxClose.addEventListener('click', () => this.closeLightbox(), this.listenerOptions);
 				lightbox.addEventListener('click', (event) => {
 					if (event.target === lightbox) {
@@ -220,6 +225,27 @@
 					}
 				}, this.listenerOptions);
 			}
+		}
+
+
+		/**
+		 * هسته مشترک کاروسل را به بخش رسانه اصلی پروژه متصل می‌کند.
+		 */
+		setupMediaCarousel() {
+			const { mediaCarouselRoot } = this.elements;
+			const Carousel = window.BonyadAlavi && window.BonyadAlavi.ProductCarousel;
+
+			if (!mediaCarouselRoot || !Carousel) {
+				return;
+			}
+
+			this.mediaCarousel = new Carousel(mediaCarouselRoot, {
+				slideSelector: '.bap__media-slide',
+				prevSelector: '.bap__media-nav--prev',
+				nextSelector: '.bap__media-nav--next',
+				viewportSelector: '.bap__media-viewport',
+				activeClass: 'bap__media-slide--active',
+			});
 		}
 
 		renderFundingState() {
@@ -838,6 +864,11 @@
 
 			if (this.elements && this.elements.lightbox && !this.elements.lightbox.hidden) {
 				this.closeLightbox();
+			}
+
+			if (this.mediaCarousel) {
+				this.mediaCarousel.destroy();
+				this.mediaCarousel = null;
 			}
 
 			if (this.sidebarResizeObserver) {

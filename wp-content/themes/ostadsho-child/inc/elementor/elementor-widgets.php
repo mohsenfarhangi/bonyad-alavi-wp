@@ -1,92 +1,175 @@
 <?php
 /**
- * Elementor widgets bootstrap for the Bonyad Alavi child theme.
- *
- * Copy this file to: /wp-content/themes/YOUR-CHILD-THEME/inc/elementor-widgets.php
- * Then require it from the child-theme functions.php.
+ * Bootstrap شی‌گرا برای ویجت‌ها و Assetهای اختصاصی المنتور در قالب فرزند بنیاد علوی.
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-/**
- * Resolve an asset version from filemtime so browser caches are invalidated after deployment.
- */
-function bonyad_alavi_widget_asset_version( $relative_path ) {
-	$file = trailingslashit( get_stylesheet_directory() ) . ltrim( $relative_path, '/' );
-
-	return file_exists( $file ) ? (string) filemtime( $file ) : '1.0.0';
-}
+require_once get_stylesheet_directory() . '/inc/helpers/class-ba-media-helper.php';
+require_once get_stylesheet_directory() . '/inc/services/class-ba-product-media-service.php';
 
 /**
- * Register the widget stylesheet. It is not enqueued globally; Elementor enqueues it only when
- * the widget exists on the rendered page/editor preview through get_style_depends().
+ * مسئول ثبت فایل‌های CSS و JavaScript ویجت‌های اختصاصی المنتور.
+ *
+ * این کلاس فقط Assetها را مدیریت می‌کند تا مسئولیت ثبت ویجت‌ها از آن جدا باقی بماند.
  */
-function bonyad_alavi_register_participation_widget_style() {
-	$handle = 'bonyad-alavi-participation-widget';
+final class BA_Elementor_Assets {
 
-	if ( wp_style_is( $handle, 'registered' ) ) {
-		return;
+	/**
+	 * Hookهای لازم برای ثبت Assetها در فرانت‌اند و ادیتور المنتور را متصل می‌کند.
+	 */
+	public function register_hooks() {
+		add_action( 'wp_enqueue_scripts', array( $this, 'register_assets' ), 5 );
+		add_action( 'elementor/frontend/after_register_styles', array( $this, 'register_styles' ) );
+		add_action( 'elementor/frontend/after_register_scripts', array( $this, 'register_scripts' ) );
 	}
 
-	wp_register_style(
-		$handle,
-		trailingslashit( get_stylesheet_directory_uri() ) . 'assets/css/bonyad-alavi-participation-widget.css',
-		array(),
-		bonyad_alavi_widget_asset_version( 'assets/css/bonyad-alavi-participation-widget.css' )
-	);
-}
-
-/**
- * Register the widget script. Elementor frontend is declared as a dependency because the script
- * uses Elementor's frontend handler API and must also re-initialize inside the editor preview.
- */
-function bonyad_alavi_register_participation_widget_script() {
-	$handle = 'bonyad-alavi-participation-widget';
-
-	if ( wp_script_is( $handle, 'registered' ) ) {
-		return;
+	/**
+	 * همه استایل‌ها و اسکریپت‌های مورد نیاز ویجت‌ها را ثبت می‌کند.
+	 */
+	public function register_assets() {
+		$this->register_styles();
+		$this->register_scripts();
 	}
 
-	wp_register_script(
-		$handle,
-		trailingslashit( get_stylesheet_directory_uri() ) . 'assets/js/bonyad-alavi-participation-widget.js',
-		array( 'elementor-frontend' ),
-		bonyad_alavi_widget_asset_version( 'assets/js/bonyad-alavi-participation-widget.js' ),
-		true
-	);
-}
+	/**
+	 * استایل‌های ویجت‌ها را بدون enqueue سراسری ثبت می‌کند تا Elementor فقط در محل نیاز بارگذاری کند.
+	 */
+	public function register_styles() {
+		$this->register_style(
+			'bonyad-alavi-participation-widget',
+			'assets/css/bonyad-alavi-participation-widget.css'
+		);
 
-function bonyad_alavi_register_participation_widget_assets() {
-	bonyad_alavi_register_participation_widget_style();
-	bonyad_alavi_register_participation_widget_script();
-}
+		$this->register_style(
+			'bonyad-alavi-product-gallery-widget',
+			'assets/css/bonyad-alavi-product-gallery-widget.css'
+		);
+	}
 
-add_action( 'wp_enqueue_scripts', 'bonyad_alavi_register_participation_widget_assets', 5 );
-add_action( 'elementor/frontend/after_register_styles', 'bonyad_alavi_register_participation_widget_style' );
-add_action( 'elementor/frontend/after_register_scripts', 'bonyad_alavi_register_participation_widget_script' );
+	/**
+	 * اسکریپت هسته کاروسل و Handlerهای اختصاصی ویجت‌ها را با وابستگی‌های صحیح ثبت می‌کند.
+	 */
+	public function register_scripts() {
+		$this->register_script(
+			'ba-product-carousel-core',
+			'assets/js/ba-product-carousel-core.js',
+			array()
+		);
+
+		$this->register_script(
+			'bonyad-alavi-participation-widget',
+			'assets/js/bonyad-alavi-participation-widget.js',
+			array( 'elementor-frontend', 'ba-product-carousel-core' )
+		);
+
+		$this->register_script(
+			'bonyad-alavi-product-gallery-widget',
+			'assets/js/bonyad-alavi-product-gallery-widget.js',
+			array( 'elementor-frontend', 'ba-product-carousel-core' )
+		);
+	}
+
+	/**
+	 * یک فایل CSS را با نسخه مبتنی بر filemtime ثبت می‌کند.
+	 *
+	 * @param string $handle        نام Handle وردپرس.
+	 * @param string $relative_path مسیر نسبی فایل در قالب فرزند.
+	 */
+	private function register_style( $handle, $relative_path ) {
+		if ( wp_style_is( $handle, 'registered' ) ) {
+			return;
+		}
+
+		wp_register_style(
+			$handle,
+			trailingslashit( get_stylesheet_directory_uri() ) . ltrim( $relative_path, '/' ),
+			array(),
+			$this->get_asset_version( $relative_path )
+		);
+	}
+
+	/**
+	 * یک فایل JavaScript را با وابستگی‌ها و نسخه مبتنی بر filemtime ثبت می‌کند.
+	 *
+	 * @param string $handle        نام Handle وردپرس.
+	 * @param string $relative_path مسیر نسبی فایل در قالب فرزند.
+	 * @param array  $dependencies  وابستگی‌های اسکریپت.
+	 */
+	private function register_script( $handle, $relative_path, array $dependencies ) {
+		if ( wp_script_is( $handle, 'registered' ) ) {
+			return;
+		}
+
+		wp_register_script(
+			$handle,
+			trailingslashit( get_stylesheet_directory_uri() ) . ltrim( $relative_path, '/' ),
+			$dependencies,
+			$this->get_asset_version( $relative_path ),
+			true
+		);
+	}
+
+	/**
+	 * نسخه Asset را از زمان آخرین تغییر فایل می‌سازد تا Cache پس از Deploy خودکار باطل شود.
+	 *
+	 * @param string $relative_path مسیر نسبی فایل در قالب فرزند.
+	 *
+	 * @return string
+	 */
+	private function get_asset_version( $relative_path ) {
+		$file = trailingslashit( get_stylesheet_directory() ) . ltrim( $relative_path, '/' );
+
+		return file_exists( $file ) ? (string) filemtime( $file ) : '1.0.0';
+	}
+}
 
 /**
- * Add a dedicated Elementor category for child-theme widgets.
+ * مسئول ثبت دسته و کلاس‌های ویجت اختصاصی در Elementor Widgets Manager.
  */
-function bonyad_alavi_register_elementor_category( $elements_manager ) {
-	$elements_manager->add_category(
-		'bonyad-alavi',
-		array(
-			'title' => esc_html__( 'بنیاد علوی', 'bonyad-alavi-child' ),
-			'icon'  => 'fa fa-plug',
-		)
-	);
-}
-add_action( 'elementor/elements/categories_registered', 'bonyad_alavi_register_elementor_category' );
+final class BA_Elementor_Widgets_Registrar {
 
-/**
- * Register the custom widget after Elementor has initialized its widget manager.
- */
-function bonyad_alavi_register_participation_widget( $widgets_manager ) {
-	require_once get_stylesheet_directory() . '/inc/elementor/widgets/class-bonyad-alavi-participation-widget.php';
+	/**
+	 * Hookهای لازم برای ساخت دسته و ثبت ویجت‌های اختصاصی را متصل می‌کند.
+	 */
+	public function register_hooks() {
+		add_action( 'elementor/elements/categories_registered', array( $this, 'register_category' ) );
+		add_action( 'elementor/widgets/register', array( $this, 'register_widgets' ) );
+	}
 
-	$widgets_manager->register( new \Bonyad_Alavi_Participation_Widget() );
+	/**
+	 * دسته «بنیاد علوی» را در پنل ویجت‌های Elementor ایجاد می‌کند.
+	 *
+	 * @param Elementor\Elements_Manager $elements_manager مدیر عناصر المنتور.
+	 */
+	public function register_category( $elements_manager ) {
+		$elements_manager->add_category(
+			'bonyad-alavi',
+			array(
+				'title' => esc_html__( 'بنیاد علوی', 'bonyad-alavi-child' ),
+				'icon'  => 'fa fa-plug',
+			)
+		);
+	}
+
+	/**
+	 * همه ویجت‌های اختصاصی قالب را پس از آماده‌شدن Widgets Manager ثبت می‌کند.
+	 *
+	 * @param Elementor\Widgets_Manager $widgets_manager مدیر ویجت‌های المنتور.
+	 */
+	public function register_widgets( $widgets_manager ) {
+		require_once get_stylesheet_directory() . '/inc/elementor/widgets/class-bonyad-alavi-participation-widget.php';
+		require_once get_stylesheet_directory() . '/inc/elementor/widgets/class-bonyad-alavi-product-gallery-widget.php';
+
+		$widgets_manager->register( new \Bonyad_Alavi_Participation_Widget() );
+		$widgets_manager->register( new \Bonyad_Alavi_Product_Gallery_Widget() );
+	}
 }
-add_action( 'elementor/widgets/register', 'bonyad_alavi_register_participation_widget' );
+
+$ba_elementor_assets = new BA_Elementor_Assets();
+$ba_elementor_assets->register_hooks();
+
+$ba_elementor_widgets_registrar = new BA_Elementor_Widgets_Registrar();
+$ba_elementor_widgets_registrar->register_hooks();

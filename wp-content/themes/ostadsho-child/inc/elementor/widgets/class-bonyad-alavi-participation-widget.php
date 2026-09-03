@@ -1,6 +1,6 @@
 <?php
 /**
- * Elementor widget: Bonyad Alavi public participation project.
+ * ویجت اختصاصی صفحه مشارکت مردمی بنیاد علوی.
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -16,6 +16,9 @@ use Elementor\Icons_Manager;
 use Elementor\Repeater;
 use Elementor\Widget_Base;
 
+/**
+ * ویجت صفحه مشارکت مردمی با اطلاعات مالی، فرم مشارکت و رسانه‌های محصول ووکامرس.
+ */
 class Bonyad_Alavi_Participation_Widget extends Widget_Base {
 
 	public function get_name() {
@@ -63,6 +66,9 @@ class Bonyad_Alavi_Participation_Widget extends Widget_Base {
 		$this->register_mobile_style_controls();
 	}
 
+	/**
+	 * کنترل‌های اطلاعات اصلی پروژه و رفتار گالری رسانه را ثبت می‌کند.
+	 */
 	private function register_project_controls() {
 		$this->start_controls_section(
 			'project_content',
@@ -83,15 +89,6 @@ class Bonyad_Alavi_Participation_Widget extends Widget_Base {
 			)
 		);
 
-		$this->add_control(
-			'project_image',
-			array(
-				'label'   => esc_html__( 'تصویر اصلی', 'bonyad-alavi-child' ),
-				'type'    => Controls_Manager::MEDIA,
-				'default' => array( 'url' => \Elementor\Utils::get_placeholder_image_src() ),
-				'dynamic' => array( 'active' => true ),
-			)
-		);
 
 		$this->add_control(
 			'project_category',
@@ -1503,16 +1500,19 @@ class Bonyad_Alavi_Participation_Widget extends Widget_Base {
         return $normalized;
     }
 
+	/**
+	 * خروجی صفحه مشارکت را با محصول جاری و رسانه‌های استاندارد ووکامرس تولید می‌کند.
+	 */
 	protected function render() {
+		$media_service = BA_Product_Media_Service::instance();
+		$product       = $media_service->resolve_context_product();
 
-        global $product;
+		if ( ! $product ) {
+			echo '<h1>' . esc_html__( 'این ویجت فقط در صفحه محصول قابل نمایش است.', 'bonyad-alavi-child' ) . '</h1>';
+			return;
+		}
 
-        if ( empty( $product ) ) {
-            echo "<h1>این ویجت فقط در صفحه محصول تکی قابل نمایش است.</h1>";
-            return;
-        }
-
-        $product_id = $product->get_id();
+		$product_id = $product->get_id();
 
 		$settings          = $this->get_settings_for_display();
 		$uid               = 'bap-' . $this->get_id();
@@ -1523,59 +1523,14 @@ class Bonyad_Alavi_Participation_Widget extends Widget_Base {
 		$form_mode         = in_array( $settings['form_mode'], array( 'event', 'post' ), true ) ? $settings['form_mode'] : 'event';
 		$form_method       = 'get' === $settings['form_method'] ? 'get' : 'post';
 		$form_action       = ( 'post' === $form_mode && ! empty( $settings['form_action']['url'] ) ) ? $settings['form_action']['url'] : '';
-		$image_url         = ! empty( $settings['project_image']['url'] ) ? $settings['project_image']['url'] : \Elementor\Utils::get_placeholder_image_src();
-		$image_id          = ! empty( $settings['project_image']['id'] ) ? absint( $settings['project_image']['id'] ) : 0;
-		$image_alt         = '';
-
-		if ( $image_id ) {
-			$image_alt = get_post_meta( $image_id, '_wp_attachment_image_alt', true );
-		}
-		if ( ! $image_alt ) {
-			$image_alt = $product->get_title();
-		}
-
-		/*
-		 * تصاویر کاروسل بزرگ‌نمایی:
-		 * تصویر انتخاب‌شده در ویجت + تصویر شاخص محصول + گالری ووکامرس.
-		 */
-		$lightbox_items = array();
-		$used_image_ids = array();
-
-		if ( $image_id ) {
-			$lightbox_items[] = array(
-				'id'  => $image_id,
-				'url' => '',
-				'alt' => $image_alt,
-			);
-			$used_image_ids[] = $image_id;
-		} elseif ( $image_url ) {
-			$lightbox_items[] = array(
-				'id'  => 0,
-				'url' => $image_url,
-				'alt' => $image_alt,
-			);
-		}
-
-		$product_media_ids = array_merge(
-			array( absint( $product->get_image_id() ) ),
-			array_map( 'absint', $product->get_gallery_image_ids() )
-		);
-
-		foreach ( array_unique( array_filter( $product_media_ids ) ) as $media_id ) {
-			if ( in_array( $media_id, $used_image_ids, true ) ) {
-				continue;
-			}
-
-			$media_alt = get_post_meta( $media_id, '_wp_attachment_image_alt', true );
-			$lightbox_items[] = array(
-				'id'  => $media_id,
-				'url' => '',
-				'alt' => $media_alt ? $media_alt : $product->get_title(),
-			);
-			$used_image_ids[] = $media_id;
-		}
-
-		$lightbox_count = count( $lightbox_items );
+		$product_media_items = $media_service->get_product_items( $product );
+		$has_product_gallery = $media_service->has_gallery( $product );
+		$display_media_items = ! empty( $product_media_items )
+			? $product_media_items
+			: array( $media_service->get_placeholder_item( $product ) );
+		$show_media_carousel = $has_product_gallery && count( $display_media_items ) > 1;
+		$lightbox_items      = $product_media_items;
+		$lightbox_count      = count( $lightbox_items );
 
         //آمار
 
@@ -1682,30 +1637,42 @@ class Bonyad_Alavi_Participation_Widget extends Widget_Base {
 								</div>
 							<?php endif; ?>
 
-							<?php
-							if ( $image_id ) {
-								echo wp_get_attachment_image(
-									$image_id,
-									'full',
-									false,
-									array(
-										'class'         => 'bap__main-image',
-										'alt'           => $image_alt,
-										'loading'       => 'eager',
-										'fetchpriority' => 'high',
-										'decoding'      => 'async',
-									)
-								); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-							} else {
-								?>
-								<img class="bap__main-image" src="<?php echo esc_url( $image_url ); ?>" alt="<?php echo esc_attr( $image_alt ); ?>" loading="eager" fetchpriority="high" decoding="async">
-								<?php
-							}
-							?>
+							<div class="bap__media-carousel<?php echo $show_media_carousel ? ' bap__media-carousel--enabled' : ' bap__media-carousel--static'; ?>" data-carousel-enabled="<?php echo $show_media_carousel ? 'true' : 'false'; ?>">
+								<div class="bap__media-viewport" data-carousel-viewport <?php echo $show_media_carousel ? 'tabindex="0" role="region" aria-label="' . esc_attr__( 'کاروسل تصاویر پروژه', 'bonyad-alavi-child' ) . '"' : ''; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
+									<div class="bap__media-slides">
+										<?php foreach ( $display_media_items as $index => $item ) : ?>
+											<figure class="bap__media-slide<?php echo 0 === $index ? ' bap__media-slide--active' : ''; ?>" data-carousel-slide aria-hidden="<?php echo 0 === $index ? 'false' : 'true'; ?>">
+												<?php
+												echo BA_Media_Helper::render_image(
+													$item,
+													'full',
+													array(
+														'class'         => 'bap__main-image',
+														'loading'       => 0 === $index ? 'eager' : 'lazy',
+														'fetchpriority' => 0 === $index ? 'high' : 'auto',
+														'decoding'      => 'async',
+													)
+												); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+												?>
+											</figure>
+										<?php endforeach; ?>
+									</div>
 
-							<?php if ( 'yes' === $settings['enable_lightbox'] ) : ?>
-								<button class="bap__zoom" type="button" aria-label="<?php echo esc_attr__( 'نمایش بزرگ تصویر', 'bonyad-alavi-child' ); ?>" aria-controls="<?php echo esc_attr( $uid . '-lightbox' ); ?>">
-									<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11 4a7 7 0 1 0 4.9 12l4 4 1.4-1.4-4-4A7 7 0 0 0 11 4Zm0 2a5 5 0 1 1 0 10 5 5 0 0 1 0-10Z"/></svg>
+									<?php if ( $show_media_carousel ) : ?>
+										<button type="button" class="bap__media-nav bap__media-nav--prev" data-carousel-prev aria-label="<?php echo esc_attr__( 'تصویر قبلی', 'bonyad-alavi-child' ); ?>">
+											<?php echo BA_Media_Helper::get_chevron_svg( 'prev' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+										</button>
+										<button type="button" class="bap__media-nav bap__media-nav--next" data-carousel-next aria-label="<?php echo esc_attr__( 'تصویر بعدی', 'bonyad-alavi-child' ); ?>">
+											<?php echo BA_Media_Helper::get_chevron_svg( 'next' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+										</button>
+									<?php endif; ?>
+								</div>
+							</div>
+
+							<?php if ( 'yes' === $settings['enable_lightbox'] && $lightbox_count > 0 ) : ?>
+								<?php $zoom_label = $has_product_gallery ? esc_html__( 'نمایش گالری تصاویر', 'bonyad-alavi-child' ) : esc_html__( 'نمایش بزرگ تصویر', 'bonyad-alavi-child' ); ?>
+								<button class="bap__zoom<?php echo $has_product_gallery ? ' bap__zoom--gallery' : ' bap__zoom--zoom'; ?>" type="button" aria-label="<?php echo esc_attr( $zoom_label ); ?>" aria-controls="<?php echo esc_attr( $uid . '-lightbox' ); ?>">
+									<?php echo BA_Media_Helper::get_gallery_action_svg( $has_product_gallery ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 								</button>
 							<?php endif; ?>
 						</div>
@@ -1957,22 +1924,14 @@ class Bonyad_Alavi_Participation_Widget extends Widget_Base {
 								<?php foreach ( $lightbox_items as $index => $item ) : ?>
 									<figure class="bap__lightbox-slide<?php echo 0 === $index ? ' is-active' : ''; ?>" data-lightbox-index="<?php echo esc_attr( $index ); ?>" aria-hidden="<?php echo 0 === $index ? 'false' : 'true'; ?>">
 										<?php
-										if ( ! empty( $item['id'] ) ) {
-											echo wp_get_attachment_image(
-												$item['id'],
-												'large',
-												false,
-												array(
-													'alt'      => $item['alt'],
-													'loading'  => 0 === $index ? 'eager' : 'lazy',
-													'decoding' => 'async',
-												)
-											); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-										} else {
-											?>
-											<img src="<?php echo esc_url( $item['url'] ); ?>" alt="<?php echo esc_attr( $item['alt'] ); ?>" loading="<?php echo 0 === $index ? 'eager' : 'lazy'; ?>" decoding="async">
-											<?php
-										}
+										echo BA_Media_Helper::render_image(
+											$item,
+											'large',
+											array(
+												'loading'  => 0 === $index ? 'eager' : 'lazy',
+												'decoding' => 'async',
+											)
+										); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 										?>
 									</figure>
 								<?php endforeach; ?>
@@ -2000,13 +1959,11 @@ class Bonyad_Alavi_Participation_Widget extends Widget_Base {
 									<?php foreach ( $lightbox_items as $index => $item ) : ?>
 										<button type="button" class="bap__lightbox-thumb<?php echo 0 === $index ? ' is-active' : ''; ?>" data-lightbox-index="<?php echo esc_attr( $index ); ?>" aria-label="<?php echo esc_attr( sprintf( esc_html__( 'تصویر %d', 'bonyad-alavi-child' ), $index + 1 ) ); ?>" aria-current="<?php echo 0 === $index ? 'true' : 'false'; ?>">
 											<?php
-											if ( ! empty( $item['id'] ) ) {
-												echo wp_get_attachment_image( $item['id'], 'thumbnail', false, array( 'alt' => '', 'loading' => 'lazy', 'decoding' => 'async' ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-											} else {
-												?>
-												<img src="<?php echo esc_url( $item['url'] ); ?>" alt="" loading="lazy" decoding="async">
-												<?php
-											}
+											echo BA_Media_Helper::render_image(
+												$item,
+												'thumbnail',
+												array( 'alt' => '', 'loading' => 'lazy', 'decoding' => 'async' )
+											); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 											?>
 										</button>
 									<?php endforeach; ?>
