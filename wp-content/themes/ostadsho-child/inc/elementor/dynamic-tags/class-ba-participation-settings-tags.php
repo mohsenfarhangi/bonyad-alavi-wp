@@ -14,6 +14,97 @@ use Elementor\Core\DynamicTags\Data_Tag;
 use Elementor\Modules\DynamicTags\Module;
 
 /**
+ * Shared base for textual participation-setting tags.
+ */
+abstract class BA_Elementor_Participation_Text_Tag extends Data_Tag {
+
+	/**
+	 * Option key inside ba_participation_settings.
+	 *
+	 * @return string
+	 */
+	abstract protected function get_option_key();
+
+	public function get_group() {
+		return array( 'bonyad-alavi-settings' );
+	}
+
+	public function get_categories() {
+		return array( Module::TEXT_CATEGORY );
+	}
+
+	/**
+	 * Return the sanitized title stored in the participation settings.
+	 *
+	 * @param array $options Elementor value options.
+	 * @return string
+	 */
+	public function get_value( array $options = array() ) {
+		$settings = function_exists( 'ba_get_participation_settings' )
+			? ba_get_participation_settings()
+			: get_option( 'ba_participation_settings', array() );
+
+		$key = $this->get_option_key();
+
+		return isset( $settings[ $key ] ) ? sanitize_text_field( $settings[ $key ] ) : '';
+	}
+}
+
+/**
+ * Editable title for the total donated amount.
+ */
+class BA_Elementor_Donated_Amount_Title_Tag extends BA_Elementor_Participation_Text_Tag {
+
+	public function get_name() {
+		return 'ba-participation-donated-amount-title';
+	}
+
+	public function get_title() {
+		return esc_html__( 'عنوان: مبلغ واریز شده توسط خیرین', 'ostadsho-child' );
+	}
+
+	protected function get_option_key() {
+		return 'donated_amount_title';
+	}
+}
+
+/**
+ * Editable title for the completed-project count.
+ */
+class BA_Elementor_Completed_Projects_Title_Tag extends BA_Elementor_Participation_Text_Tag {
+
+	public function get_name() {
+		return 'ba-participation-completed-projects-title';
+	}
+
+	public function get_title() {
+		return esc_html__( 'عنوان: تعداد پروژه‌های انجام شده با مشارکت مردم', 'ostadsho-child' );
+	}
+
+	protected function get_option_key() {
+		return 'completed_projects_title';
+	}
+}
+
+/**
+ * Editable title for the executed-project value.
+ */
+class BA_Elementor_Executed_Projects_Value_Title_Tag extends BA_Elementor_Participation_Text_Tag {
+
+	public function get_name() {
+		return 'ba-participation-executed-projects-value-title';
+	}
+
+	public function get_title() {
+		return esc_html__( 'عنوان: ارزش پروژه‌های اجرا شده با همکاری خیرین', 'ostadsho-child' );
+	}
+
+	protected function get_option_key() {
+		return 'executed_projects_value_title';
+	}
+}
+
+/**
  * Shared base for numeric participation settings.
  */
 abstract class BA_Elementor_Participation_Number_Tag extends Data_Tag {

@@ -21,6 +21,7 @@
 /wp-content/themes/*
 !/wp-content/themes/ostadsho-child/
 !/wp-content/themes/ostadsho-child/**
+!/wp-content/themes/PATCH-MANIFEST.md
 
 
 *.zip

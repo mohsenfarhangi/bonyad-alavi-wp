@@ -36,8 +36,11 @@ function ba_register_elementor_dynamic_tags( $dynamic_tags_manager ) {
 	require_once get_stylesheet_directory() . '/inc/elementor/dynamic-tags/class-ba-participation-settings-tags.php';
 
 	$tag_classes = array(
+		'BA_Elementor_Donated_Amount_Title_Tag',
 		'BA_Elementor_Donated_Amount_Tag',
+		'BA_Elementor_Completed_Projects_Title_Tag',
 		'BA_Elementor_Completed_Projects_Tag',
+		'BA_Elementor_Executed_Projects_Value_Title_Tag',
 		'BA_Elementor_Executed_Projects_Value_Tag',
 		'BA_Elementor_Participation_Slider_Gallery_Tag',
 	);

@@ -43,8 +43,11 @@ function ba_register_participation_settings_fields( $tab ) {
 			'type'              => 'array',
 			'sanitize_callback' => 'ba_sanitize_participation_settings',
 			'default'           => array(
+				'donated_amount_title'          => 'مبلغ واریز شده توسط خیرین',
 				'donated_amount'          => 0,
+				'completed_projects_title'      => 'تعداد پروژه‌های انجام شده با مشارکت مردم',
 				'completed_projects'      => 0,
+				'executed_projects_value_title' => 'ارزش پروژه‌های اجرا شده با همکاری خیرین',
 				'executed_projects_value' => 0,
 				'slider_images'           => array(),
 			),
@@ -56,6 +59,19 @@ function ba_register_participation_settings_fields( $tab ) {
 		'',
 		'ba_render_participation_settings_intro',
 		$tab['page_slug']
+	);
+
+	add_settings_field(
+		'donated_amount_title',
+		'عنوان مبلغ واریز شده توسط خیرین',
+		'ba_render_participation_text_field',
+		$tab['page_slug'],
+		'ba_participation_general_section',
+		array(
+			'option_name' => $tab['option_name'],
+			'key'         => 'donated_amount_title',
+			'description' => 'عنوانی که بالای مبلغ واریزشده توسط خیرین نمایش داده می‌شود.',
+		)
 	);
 
 	add_settings_field(
@@ -73,6 +89,19 @@ function ba_register_participation_settings_fields( $tab ) {
 	);
 
 	add_settings_field(
+		'completed_projects_title',
+		'عنوان تعداد پروژه‌های انجام شده با مشارکت مردم',
+		'ba_render_participation_text_field',
+		$tab['page_slug'],
+		'ba_participation_general_section',
+		array(
+			'option_name' => $tab['option_name'],
+			'key'         => 'completed_projects_title',
+			'description' => 'عنوانی که بالای تعداد پروژه‌های تکمیل‌شده نمایش داده می‌شود.',
+		)
+	);
+
+	add_settings_field(
 		'completed_projects',
 		'تعداد پروژه‌های انجام شده با مشارکت مردم',
 		'ba_render_participation_number_field',
@@ -83,6 +112,19 @@ function ba_register_participation_settings_fields( $tab ) {
 			'key'         => 'completed_projects',
 			'format'      => false,
 			'description' => 'تعداد پروژه‌های تکمیل‌شده را به‌صورت عدد صحیح وارد کنید.',
+		)
+	);
+
+	add_settings_field(
+		'executed_projects_value_title',
+		'عنوان ارزش پروژه‌های اجرا شده با همکاری خیرین',
+		'ba_render_participation_text_field',
+		$tab['page_slug'],
+		'ba_participation_general_section',
+		array(
+			'option_name' => $tab['option_name'],
+			'key'         => 'executed_projects_value_title',
+			'description' => 'عنوانی که بالای ارزش پروژه‌های اجراشده نمایش داده می‌شود.',
 		)
 	);
 
@@ -132,8 +174,11 @@ function ba_render_participation_settings_intro() {
  */
 function ba_get_participation_settings() {
 	$defaults = array(
+		'donated_amount_title'          => 'مبلغ واریز شده توسط خیرین',
 		'donated_amount'          => 0,
+		'completed_projects_title'      => 'تعداد پروژه‌های انجام شده با مشارکت مردم',
 		'completed_projects'      => 0,
+		'executed_projects_value_title' => 'ارزش پروژه‌های اجرا شده با همکاری خیرین',
 		'executed_projects_value' => 0,
 		'slider_images'           => array(),
 	);
@@ -215,11 +260,37 @@ function ba_sanitize_participation_settings( $input ) {
 	$slider_images = array_values( array_unique( array_filter( array_map( 'absint', $slider_images ) ) ) );
 
 	return array(
+		'donated_amount_title'          => sanitize_text_field( isset( $input['donated_amount_title'] ) ? $input['donated_amount_title'] : '' ),
 		'donated_amount'          => ba_sanitize_integer_value( isset( $input['donated_amount'] ) ? $input['donated_amount'] : 0 ),
+		'completed_projects_title'      => sanitize_text_field( isset( $input['completed_projects_title'] ) ? $input['completed_projects_title'] : '' ),
 		'completed_projects'      => ba_sanitize_integer_value( isset( $input['completed_projects'] ) ? $input['completed_projects'] : 0 ),
+		'executed_projects_value_title' => sanitize_text_field( isset( $input['executed_projects_value_title'] ) ? $input['executed_projects_value_title'] : '' ),
 		'executed_projects_value' => ba_sanitize_integer_value( isset( $input['executed_projects_value'] ) ? $input['executed_projects_value'] : 0 ),
 		'slider_images'           => $slider_images,
 	);
+}
+
+/**
+ * Render a text setting field.
+ *
+ * @param array $args Field args.
+ * @return void
+ */
+function ba_render_participation_text_field( $args ) {
+	$options = ba_get_participation_settings();
+	$key     = $args['key'];
+	$value   = isset( $options[ $key ] ) ? (string) $options[ $key ] : '';
+	?>
+	<input
+		type="text"
+		class="regular-text"
+		name="<?php echo esc_attr( $args['option_name'] . '[' . $key . ']' ); ?>"
+		value="<?php echo esc_attr( $value ); ?>"
+	/>
+	<?php if ( ! empty( $args['description'] ) ) : ?>
+		<p class="description"><?php echo esc_html( $args['description'] ); ?></p>
+	<?php endif; ?>
+	<?php
 }
 
 /**
