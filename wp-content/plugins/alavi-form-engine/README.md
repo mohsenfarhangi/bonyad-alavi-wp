@@ -48,6 +48,7 @@
 - Template Registry مشترک برای Form / Preview / Step با Default HTML واقعی و Tokenهای پویا
 - نمایش قالب پیش‌فرض داخل Editor، وضعیت Default/Custom و بازگردانی یک‌کلیکی به Default
 - Field Override مدیریتی بدون تغییر Source Definition
+- UI چیدمان متمرکز: تب «فیلدها و چیدمان» فقط Drag & Drop را نمایش می‌دهد و Override هر Field با کلیک روی همان Field در `afe-admin-side` باز می‌شود
 - Input Mask Registry عمومی برای text/tel با presetهای موبایل، تلفن ثابت، کد ملی، کد پستی، کارت بانکی، شبا و Mask سفارشی
 - Conditional Logic با show/hide/required/optional
 - Data Source: static, callback, database, posts, taxonomy, users, JSON, REST, geography, custom

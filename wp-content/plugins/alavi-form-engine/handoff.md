@@ -23,6 +23,17 @@
 - فرم جهادی برای موبایل‌ها، تلفن ثابت گروه، کدهای ملی و شبای حقوقی preset پیش‌فرض دارد؛ Admin Override همچنان اولویت دارد.
 - Hook توسعه‌دهنده: `afe_register_input_mask_definitions`.
 
+## Patch UI فیلدها و چیدمان
+
+- تب «فیلدها و چیدمان» اکنون فقط لیست چیدمان Drag & Drop را نمایش می‌دهد.
+- Editorهای Override هر Field از محتوای اصلی تب حذف و به `afe-admin-side` منتقل شدند.
+- با کلیک روی Field یا Child Field داخل Repeater، پنل تنظیمات همان Field در سایدبار باز می‌شود؛ HtmlBlock فقط قابل مرتب‌سازی است و Override فیلدی ندارد.
+- انتخاب Field در UI مشخص می‌ماند، پنل قابل بستن است و انتخاب آخر در همان session مرورگر حفظ می‌شود.
+- برای اینکه inputهای سایدبار همراه سایر تنظیمات ذخیره شوند، کل `afe-admin-layout` داخل فرم تنظیمات واحد قرار گرفت؛ مسیر ذخیره و sanitizerهای قبلی بدون تغییر باقی ماندند.
+- «قالب اختصاصی هر مرحله» از تب فیلدها به تب «قالب‌ها» منتقل شد تا تب فیلدها واقعاً فقط چیدمان داشته باشد.
+- در حالت تب فیلدها، ستون سایدبار در دسکتاپ عریض‌تر و قابل اسکرول می‌شود و در عرض‌های کوچک به layout تک‌ستونه برمی‌گردد.
+- Regression اختصاصی: `tests/admin-field-layout-sidebar.php`.
+
 ## انجام‌شده در checkpoint جدید
 
 ### Release hardening اکشن‌های WordPress User
@@ -46,8 +57,8 @@
 ## QA این checkpoint
 
 - `tools/qa.sh`: PASS
-- Regression: **41/41 PASS**
-- PHP lint: **141 فایل PASS**
+- Regression: **42/42 PASS**
+- PHP lint: **142 فایل PASS**
 - JavaScript syntax: PASS
 - composer.json: PASS
 - local JalaliDatePicker: PASS

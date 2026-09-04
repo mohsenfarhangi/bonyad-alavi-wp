@@ -8,6 +8,10 @@ The project administrator reported the real MeliPayamak account test **PASS** on
 
 ## Changes in this checkpoint
 
+- Simplified the «فیلدها و چیدمان» tab to layout-only Drag & Drop; Field Override editors now open contextually in `afe-admin-side` when a Field/Repeater child is selected.
+- Kept HtmlBlock items reorderable but non-configurable, added selected-field/close/session UX, and moved per-Step template editors to the Templates tab.
+- Moved the settings form boundary around the full admin layout so sidebar override controls submit through the existing save/sanitization path.
+- Added responsive/sticky sidebar styling for field configuration and `tests/admin-field-layout-sidebar.php` regression coverage.
 - Added `UserActionGuard` and runtime privileged-target checks for Login/Update/Assign Role/Update User Meta and existing-user branches of Create User. Administrator accounts and custom accounts with `manage_options` require an explicit protected opt-in controlled by `afe_manage_settings`.
 - Blocked WordPress capability/session/application-password meta keys (`*_capabilities`, `*_user_level`, `session_tokens`, `_application_passwords`) from Create User mappings and Update User Meta at runtime.
 - Prevalidates the complete User Meta mapping before user creation/update or the first meta write, preventing rejected protected keys from leaving partial user side effects.
@@ -21,8 +25,8 @@ The project administrator reported the real MeliPayamak account test **PASS** on
 ## QA performed
 
 - Unified `tools/qa.sh`: **PASS**.
-- Standalone regression suite: **PASS (41 test scripts)**.
-- PHP syntax lint across `src/`, `tests/`, plugin bootstrap and uninstall: **PASS (141 PHP files)**.
+- Standalone regression suite: **PASS (42 test scripts)**.
+- PHP syntax lint across `src/`, `tests/`, plugin bootstrap and uninstall: **PASS (142 PHP files)**.
 - `assets/js/admin.js` and `assets/js/frontend.js`: **PASS**.
 - `composer.json`: **PASS**.
 - Local JalaliDatePicker JS/CSS presence: **PASS**.
@@ -67,7 +71,7 @@ Do **not** bump to `1.0.28` / DB `1.0.5` / Stable tag `1.0.28` until that live m
 
 ## Automated checks performed for this package
 
-- PHP syntax lint across `src/` and `tests/`: PASS (141 PHP files including bootstrap/uninstall at this checkpoint; code target remains PHP >= 8.3).
+- PHP syntax lint across `src/` and `tests/`: PASS (142 PHP files including bootstrap/uninstall at this checkpoint; code target remains PHP >= 8.3).
 - Built-in validator tests: PASS (Iran IBAN checksum, National ID valid/invalid checksum, Persian mobile digits, digit normalization).
 - Built-in Jihadi Group Registration form construction: PASS (13 steps, 62 top-level non-HTML items, 3 repeaters, 5 file fields).
 - JavaScript syntax check for front-end/admin assets: PASS.

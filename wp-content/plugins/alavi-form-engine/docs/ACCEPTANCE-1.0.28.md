@@ -73,6 +73,9 @@ Run on a staging clone using the same PHP/WordPress/Elementor major versions int
    - The provider/account connectivity itself is already reported PASS by the project administrator.
 
 8. **Field ordering / Repeater ordering**
+   - در تب «فیلدها و چیدمان» تأیید کنید فقط بخش چیدمان دیده می‌شود و Editorهای Override در محتوای اصلی تب وجود ندارند.
+   - روی یک Field کلیک کنید و تأیید کنید تنظیمات Override همان Field داخل `afe-admin-side` باز می‌شود؛ سپس یک Child Field داخل Repeater را نیز بررسی کنید.
+   - روی HtmlBlock کلیک کنید/بررسی کنید که فقط Drag & Drop دارد و پنل Override فیلدی برای آن باز نمی‌شود.
    - Drag several fields and an HtmlBlock within one Step, save, reload admin and frontend, and confirm the same order.
    - Reorder children inside a Repeater and confirm new rows follow the saved order.
    - Confirm a field cannot be dragged to another Step in this version.

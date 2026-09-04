@@ -496,6 +496,10 @@
           panel.hidden = !active;
           panel.classList.toggle('is-active', active);
         });
+        const fieldSidebar = form.querySelector('[data-afe-field-override-sidebar]');
+        const adminLayout = form.querySelector('[data-afe-admin-layout]');
+        if (fieldSidebar) fieldSidebar.hidden = key !== 'fields';
+        adminLayout?.classList.toggle('is-fields-tab', key === 'fields');
         try { window.sessionStorage.setItem(storageKey, key); } catch (error) {}
       };
 
@@ -827,6 +831,61 @@
     });
   };
 
+  const initFieldOverrideSidebar = () => {
+    document.querySelectorAll('[data-afe-field-override-sidebar]').forEach(sidebar => {
+      if (sidebar.dataset.afeFieldOverrideReady === '1') return;
+      sidebar.dataset.afeFieldOverrideReady = '1';
+      const form = sidebar.closest('form');
+      if (!form) return;
+      const panels = [...sidebar.querySelectorAll('[data-afe-field-override-panel]')];
+      const triggers = [...form.querySelectorAll('[data-afe-field-override-trigger]')];
+      const empty = sidebar.querySelector('[data-afe-field-override-empty]');
+      const close = sidebar.querySelector('[data-afe-field-override-close]');
+      const formSlug = new URLSearchParams(window.location.search).get('form') || '';
+      const storageKey = `afe-field-override:${window.location.pathname}:${formSlug}`;
+
+      const selectField = (path, options = {}) => {
+        const target = panels.find(panel => panel.dataset.afeFieldOverridePanel === path) || null;
+        panels.forEach(panel => { panel.hidden = panel !== target; });
+        triggers.forEach(trigger => {
+          const active = Boolean(target) && trigger.dataset.afeFieldPath === path;
+          trigger.classList.toggle('is-active', active);
+          trigger.setAttribute('aria-pressed', active ? 'true' : 'false');
+          trigger.closest('[data-afe-field-order-item]')?.classList.toggle('is-selected', active);
+        });
+        if (empty) empty.hidden = Boolean(target);
+        if (close) close.hidden = !target;
+        if (target) {
+          sidebar.dataset.selectedField = path;
+          try { window.sessionStorage.setItem(storageKey, path); } catch (error) {}
+          if (options.focus !== false) target.querySelector('input,select,textarea,button')?.focus({ preventScroll: true });
+          if (options.scroll !== false && window.matchMedia('(max-width: 1000px)').matches) {
+            sidebar.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }
+        } else {
+          delete sidebar.dataset.selectedField;
+          try { window.sessionStorage.removeItem(storageKey); } catch (error) {}
+        }
+      };
+
+      triggers.forEach(trigger => {
+        trigger.addEventListener('click', event => {
+          event.stopPropagation();
+          selectField(trigger.dataset.afeFieldPath || '');
+        });
+      });
+      close?.addEventListener('click', () => selectField(''));
+
+      let remembered = '';
+      try { remembered = window.sessionStorage.getItem(storageKey) || ''; } catch (error) {}
+      if (remembered && panels.some(panel => panel.dataset.afeFieldOverridePanel === remembered)) {
+        selectField(remembered, { focus: false, scroll: false });
+      } else {
+        selectField('', { focus: false, scroll: false });
+      }
+    });
+  };
+
   const initInputMaskOverrides = () => {
     document.querySelectorAll('[data-afe-input-mask-override]').forEach(root => {
       const select = qs(root, '[data-afe-input-mask-select]');
@@ -904,6 +963,7 @@
     initActionBuilders();
     initDuplicateSettings();
     initFieldOrdering();
+    initFieldOverrideSidebar();
     initValidatorOverrides();
     initInputMaskOverrides();
     initAdminDatePickers();

@@ -21,6 +21,7 @@
 | Date input modes | Implemented | Jalali/Gregorian combined/picker/manual |
 | Character/length overrides | Implemented | backend authoritative + frontend UX |
 | Input Mask Registry/UI | Implemented | presets + custom syntax + PHP normalization + Jihadi defaults |
+| Field layout / override sidebar | Implemented | layout-only tab + click-to-edit Field Override in `afe-admin-side` + Repeater child support |
 | Validator Registry/UI | Implemented | Iran validators + custom regex safeguards |
 | Jihadi default SMS template | Implemented | `leader_mobile`, once, disabled/no hard-coded body |
 | Elementor constructor compatibility | Implemented | native constructor regression |

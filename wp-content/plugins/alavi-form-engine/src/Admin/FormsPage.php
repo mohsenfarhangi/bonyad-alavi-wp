@@ -58,19 +58,21 @@ final class FormsPage
         echo '<div class="wrap afe-admin-wrap"><h1>مدیریت فرم‌ها</h1>';
         if (!empty($_GET['updated'])) echo '<div class="notice notice-success is-dismissible"><p>تنظیمات فرم ذخیره شد.</p></div>';
         if (!empty($_GET['afe_error'])) echo '<div class="notice notice-error is-dismissible"><p>'.esc_html(sanitize_text_field(wp_unslash((string)$_GET['afe_error']))).'</p></div>';
-        echo '<div class="afe-admin-layout"><aside class="afe-admin-side"><h3>فرم‌های کدنویسی‌شده</h3>';
+        echo '<form method="post" id="afe-form-settings">';
+        wp_nonce_field('afe_save_form_'.$slug,'afe_form_nonce');
+        echo '<input type="hidden" name="afe_save_form" value="1">';
+        echo '<div class="afe-admin-layout" data-afe-admin-layout><aside class="afe-admin-side"><div class="afe-admin-form-navigation"><h3>فرم‌های کدنویسی‌شده</h3>';
         foreach ($all as $key=>$obj) {
             $active=$key===$slug?' is-active':'';
             echo '<a class="afe-admin-form-link'.$active.'" href="'.esc_url(admin_url('admin.php?page=alavi-form-engine-forms&form='.$key)).'">'.esc_html($obj->toArray()['title']).'<code>'.esc_html($key).'</code></a>';
         }
+        echo '</div>';
+        $this->renderFieldOverrideSidebar($codeForm,$storedOverrides,$resolvedFlat);
         echo '</aside><main class="afe-admin-main">';
 
         echo '<div class="afe-admin-card"><div class="afe-admin-card-head"><div><h2>'.esc_html($form['title']).'</h2><p>'.esc_html($form['description']).'</p></div><code>[alavi_form id="'.esc_html($slug).'"]</code></div>';
         echo '<p class="description">تعریف PHP منبع حقیقت است. مقادیر این صفحه فقط Override می‌شوند و با بروزرسانی تعریف فرم از بین نمی‌روند.</p></div>';
 
-        echo '<form method="post">';
-        wp_nonce_field('afe_save_form_'.$slug,'afe_form_nonce');
-        echo '<input type="hidden" name="afe_save_form" value="1">';
         $this->renderTabs();
 
         echo '<section class="afe-form-tab-panel is-active" data-afe-form-tab-panel="general">';
@@ -140,87 +142,21 @@ final class FormsPage
 
         echo '<section class="afe-form-tab-panel" data-afe-form-tab-panel="fields" hidden>';
         $this->renderFieldOrdering($form);
-        echo '<div class="afe-admin-card afe-overrides-card"><div class="afe-admin-card-title"><div><h2>Override فیلدها</h2><p>فیلدها بر اساس مرحله گروه‌بندی شده‌اند. عنوان اصلی فیلد درشت نمایش داده می‌شود و کلید فنی فقط به‌عنوان مرجع ثانویه باقی می‌ماند.</p></div></div>';
-        echo '<div class="afe-override-steps">';
-        foreach ($this->registry->get($slug)->toArray()['steps'] as $stepDef) {
-            $stepFields=[];
-            foreach ((array)($stepDef['items']??[]) as $fieldDef) $this->flattenField($fieldDef,$stepFields,'');
-            $stepFields=array_filter($stepFields,static fn($field)=>(($field['type']??'')!=='html'));
-            if(!$stepFields) continue;
-            echo '<details class="afe-override-step" open><summary><strong>'.esc_html((string)($stepDef['title']??'مرحله')).'</strong><span>'.number_format_i18n(count($stepFields)).' فیلد</span></summary><div class="afe-override-fields">';
-            foreach ($stepFields as $path=>$field) {
-                $ov=(array)($storedOverrides['fields'][$path]??[]);
-                $options='';
-                if (isset($ov['options']) && is_array($ov['options'])) foreach ($ov['options'] as $k=>$v) $options.=$k.'|'.$v."\n";
-                $req=array_key_exists('required',$ov)?($ov['required']?'required':'optional'):'inherit';
-                $displayField=$resolvedFlat[$path]??$field;
-                $fieldTitle=(string)($displayField['label']??$field['label']??$field['name']??$path);
-                echo '<article class="afe-override-field"><header><div><strong>'.esc_html($fieldTitle).'</strong><small><code>'.esc_html($path).'</code> · '.esc_html($this->fieldTypeLabel((string)($field['type']??''))).'</small></div>';
-                if(!empty($field['required'])) echo '<span class="afe-override-badge">الزامی در کد</span>';
-                echo '</header><div class="afe-override-field-grid">';
-                echo '<label><span>عنوان نمایشی</span><input name="field_override['.esc_attr($path).'][label]" value="'.esc_attr((string)($ov['label']??'')).'" placeholder="'.esc_attr($fieldTitle).'"></label>';
-                echo '<label><span>Placeholder</span><input name="field_override['.esc_attr($path).'][placeholder]" value="'.esc_attr((string)($ov['placeholder']??'')).'" placeholder="'.esc_attr((string)($field['placeholder']??'')).'"></label>';
-                echo '<label><span>الزامی بودن</span><select name="field_override['.esc_attr($path).'][required]"><option value="inherit" '.selected($req==='inherit',true,false).'>ارث‌بری از کد</option><option value="required" '.selected($req==='required',true,false).'>الزامی</option><option value="optional" '.selected($req==='optional',true,false).'>اختیاری</option></select></label>';
-                if (in_array($field['type']??'',['select','radio'],true)) {
-                    echo '<label class="afe-override-span-2"><span>گزینه‌ها <small>هر خط value|label</small></span><textarea rows="4" name="field_override['.esc_attr($path).'][options]">'.esc_textarea(trim($options)).'</textarea></label>';
-                }
-                if (($field['type']??'')==='select') {
-                    $selectMode=(string)($ov['select_mode']??'inherit');
-                    $searchable=array_key_exists('searchable',$ov)?($ov['searchable']?'yes':'no'):'inherit';
-                    echo '<label><span>نوع Select</span><select name="field_override['.esc_attr($path).'][select_mode]"><option value="inherit" '.selected($selectMode,'inherit',false).'>ارث‌بری ('.esc_html((string)($field['select_mode']??'custom')).')</option><option value="custom" '.selected($selectMode,'custom',false).'>Select اختصاصی</option><option value="native" '.selected($selectMode,'native',false).'>Native</option></select></label>';
-                    echo '<label><span>جستجو</span><select name="field_override['.esc_attr($path).'][searchable]"><option value="inherit" '.selected($searchable,'inherit',false).'>خودکار</option><option value="yes" '.selected($searchable,'yes',false).'>فعال</option><option value="no" '.selected($searchable,'no',false).'>غیرفعال</option></select></label>';
-                }
-                if (($field['type']??'')==='date') {
-                    $calendar=(string)($ov['calendar']??'inherit');
-                    echo '<label><span>تقویم</span><select name="field_override['.esc_attr($path).'][calendar]"><option value="inherit" '.selected($calendar,'inherit',false).'>ارث‌بری ('.esc_html((string)($field['calendar']??'gregorian')).')</option><option value="jalali" '.selected($calendar,'jalali',false).'>جلالی</option><option value="gregorian" '.selected($calendar,'gregorian',false).'>میلادی</option></select></label>';
-                    $dateMode=(string)($ov['date_input_mode']??'inherit');
-                    echo '<label><span>روش ورود تاریخ</span><select name="field_override['.esc_attr($path).'][date_input_mode]"><option value="inherit" '.selected($dateMode,'inherit',false).'>ارث‌بری ('.esc_html((string)($field['date_input_mode']??'combined')).')</option><option value="combined" '.selected($dateMode,'combined',false).'>انتخاب + ورود دستی</option><option value="picker" '.selected($dateMode,'picker',false).'>فقط انتخاب از تقویم</option><option value="manual" '.selected($dateMode,'manual',false).'>فقط ورود دستی</option></select></label>';
-                }
-                if (in_array((string)($field['type']??''),['text','tel'],true)) {
-                    $maskOverride=$ov['input_mask']??null;
-                    if (is_string($maskOverride)) $maskOverride=['key'=>$maskOverride];
-                    $maskKey=is_array($maskOverride)?sanitize_key((string)($maskOverride['key']??'')):'inherit';
-                    if ($maskKey==='') $maskKey='inherit';
-                    $sourceMask=$field['input_mask']??null;
-                    if (is_string($sourceMask)) $sourceMask=['key'=>$sourceMask];
-                    $sourceMaskKey=is_array($sourceMask)?sanitize_key((string)($sourceMask['key']??'')):'';
-                    $inheritLabel='ارث‌بری'.($sourceMaskKey!==''?' ('.($this->inputMasks->get($sourceMaskKey)?->label??$sourceMaskKey).')':' (بدون Mask)');
-                    echo '<div class="afe-override-span-2 afe-input-mask-override" data-afe-input-mask-override><label><span>Input Mask</span><select name="field_override['.esc_attr($path).'][input_mask_key]" data-afe-input-mask-select>';
-                    echo '<option value="inherit" '.selected($maskKey,'inherit',false).'>'.esc_html($inheritLabel).'</option>';
-                    echo '<option value="none" '.selected($maskKey,'none',false).'>بدون Mask</option>';
-                    foreach ($this->inputMasks->forFieldType((string)($field['type']??'')) as $maskDefinition) {
-                        $label=$maskDefinition->label.($maskDefinition->example!==''?' — '.$maskDefinition->example:'');
-                        echo '<option value="'.esc_attr($maskDefinition->key).'" '.selected($maskKey,$maskDefinition->key,false).'>'.esc_html($label).'</option>';
-                    }
-                    echo '<option value="custom" '.selected($maskKey,'custom',false).'>Mask سفارشی</option></select></label>';
-                    $customPattern=is_array($maskOverride)?(string)($maskOverride['pattern']??''):'';
-                    echo '<label data-afe-custom-mask-row'.($maskKey==='custom'?'':' hidden').'><span>الگوی Mask سفارشی</span><input dir="ltr" maxlength="'.esc_attr((string)InputMaskPattern::MAX_PATTERN_LENGTH).'" name="field_override['.esc_attr($path).'][input_mask_pattern]" value="'.esc_attr($customPattern).'" placeholder="9999 999 9999"><small>9 = رقم، A = حرف، * = حرف یا رقم. جداکننده‌ها مثل فاصله، / و - فقط نمایشی هستند. برای نوشتن خود 9/A/* به‌صورت literal از \ استفاده کنید.</small></label>';
-                    echo '<p class="description afe-input-mask-help">Mask فقط UX ورودی است؛ مقدار قبل از Validation، Duplicate، Token، SMS و ذخیره‌سازی بدون جداکننده‌های Mask نرمال می‌شود.</p></div>';
-                }
-                if (($field['type']??'')==='date') {
-                    echo '<p class="afe-override-span-2 description">Input Mask تاریخ به‌صورت خودکار از تقویم تعیین می‌شود: جلالی <code>YYYY/MM/DD</code> و میلادی <code>YYYY-MM-DD</code>.</p>';
-                }
-                if (in_array((string)($field['type']??''),['text','textarea','tel','email','url'],true)) {
-                    $characterMode=(string)($ov['character_mode']??'inherit');
-                    echo '<label><span>نوع کاراکتر</span><select name="field_override['.esc_attr($path).'][character_mode]"><option value="inherit" '.selected($characterMode,'inherit',false).'>ارث‌بری / Normal</option><option value="normal" '.selected($characterMode,'normal',false).'>Normal</option><option value="digits" '.selected($characterMode,'digits',false).'>فقط اعداد</option><option value="persian" '.selected($characterMode,'persian',false).'>فقط حروف فارسی</option><option value="english" '.selected($characterMode,'english',false).'>فقط حروف انگلیسی</option><option value="alnum" '.selected($characterMode,'alnum',false).'>حروف و اعداد</option></select></label>';
-                    echo '<label><span>کاراکترهای مجاز اضافی</span><input name="field_override['.esc_attr($path).'][allowed_extra]" value="'.esc_attr((string)($ov['allowed_extra']??'')).'" maxlength="50" placeholder="مثلاً -_/"></label>';
-                    echo '<label><span>کاراکترهای ممنوع اضافی</span><input name="field_override['.esc_attr($path).'][forbidden_extra]" value="'.esc_attr((string)($ov['forbidden_extra']??'')).'" maxlength="50"></label>';
-                    echo '<label><span>حداقل طول</span><input type="number" min="1" max="10000" name="field_override['.esc_attr($path).'][min_length]" value="'.esc_attr((string)($ov['min_length']??'')).'"></label>';
-                    echo '<label><span>حداکثر طول</span><input type="number" min="1" max="10000" name="field_override['.esc_attr($path).'][max_length]" value="'.esc_attr((string)($ov['max_length']??'')).'"></label>';
-                    echo '<label><span>طول دقیق</span><input type="number" min="1" max="10000" name="field_override['.esc_attr($path).'][exact_length]" value="'.esc_attr((string)($ov['exact_length']??'')).'" placeholder="در صورت تنظیم، اولویت دارد"></label>';
-                }
-                $this->renderValidatorOverride($path,$field,$ov);
-                if (($field['type']??'')==='file') {
-                    echo '<label><span>حداکثر تعداد فایل</span><input type="number" min="1" name="field_override['.esc_attr($path).'][max_files]" value="'.esc_attr((string)($ov['max_files']??'')).'" placeholder="'.esc_attr((string)($field['max_files']??1)).'"></label>';
-                    echo '<label><span>حداکثر حجم هر فایل (MB)</span><input type="number" min="1" name="field_override['.esc_attr($path).'][max_size_mb]" value="'.esc_attr((string)($ov['max_size_mb']??'')).'" placeholder="'.esc_attr((string)($field['max_size_mb']??5)).'"></label>';
-                    echo '<label class="afe-override-span-2"><span>MIMEهای مجاز</span><input name="field_override['.esc_attr($path).'][accept]" value="'.esc_attr(isset($ov['accept'])?implode(',',(array)$ov['accept']):'').'" placeholder="'.esc_attr(implode(',',(array)($field['accept']??[]))).'"></label>';
-                }
-                echo '</div></article>';
-            }
-            echo '</div></details>';
-        }
-        echo '</div></div>';
+        echo '</section>';
 
+        echo '<section class="afe-form-tab-panel" data-afe-form-tab-panel="duplicate" hidden>';
+        $this->renderDuplicateSettings($form);
+        echo '</section>';
+
+        echo '<section class="afe-form-tab-panel" data-afe-form-tab-panel="actions" hidden>';
+        $this->renderActionBuilder($form,$codeForm,$storedSettings);
+        echo '</section>';
+
+        echo '<section class="afe-form-tab-panel" data-afe-form-tab-panel="templates" hidden>';
+        $template=$row?(string)$row->template_html:'';
+        $css=$row?(string)$row->custom_css:'';
+        $js=$row?(string)$row->custom_js:'';
+        $workflow=(array)($storedSettings['workflow']??$form['workflow']);
         $stepDefinition=$this->templates->definition('step');
         echo '<div class="afe-admin-card"><h2>قالب اختصاصی هر مرحله</h2><p class="description">قالب پیش‌فرض واقعی هر Step در Editor نمایش داده می‌شود. فقط در صورت تغییر، Override ذخیره خواهد شد.</p>';
         foreach ((array)($codeForm['steps']??[]) as $stepDef) {
@@ -241,21 +177,6 @@ final class FormsPage
             echo '</details>';
         }
         echo '</div>';
-        echo '</section>';
-
-        echo '<section class="afe-form-tab-panel" data-afe-form-tab-panel="duplicate" hidden>';
-        $this->renderDuplicateSettings($form);
-        echo '</section>';
-
-        echo '<section class="afe-form-tab-panel" data-afe-form-tab-panel="actions" hidden>';
-        $this->renderActionBuilder($form,$codeForm,$storedSettings);
-        echo '</section>';
-
-        echo '<section class="afe-form-tab-panel" data-afe-form-tab-panel="templates" hidden>';
-        $template=$row?(string)$row->template_html:'';
-        $css=$row?(string)$row->custom_css:'';
-        $js=$row?(string)$row->custom_js:'';
-        $workflow=(array)($storedSettings['workflow']??$form['workflow']);
         $formDefinition=$this->templates->definition('form');
         $formDefault=wp_kses_post($this->templates->defaultForm($codeForm));
         echo '<div class="afe-admin-card"><h2>کد قالب فرم</h2><p class="description">ساختار پیش‌فرض واقعی فرم با Tokenهای داینامیک نمایش داده می‌شود. اگر آن را تغییر ندهید، Override جداگانه‌ای ذخیره نمی‌شود.</p>';
@@ -287,7 +208,7 @@ final class FormsPage
         echo '<div class="afe-form-sticky-save">';
         submit_button('ذخیره Overrideهای فرم','primary','submit',false);
         echo '<span>تغییرات همه تب‌ها با این دکمه ذخیره می‌شوند.</span></div>';
-        echo '</form></main></div></div>';
+        echo '</main></div></form></div>';
     }
 
     private function renderTabs(): void
@@ -620,6 +541,107 @@ final class FormsPage
         if(($field['type']??'')==='repeater') foreach((array)($field['fields']??[]) as $child) $this->collectFieldLabel((array)$child,$path,$labels);
     }
 
+    /**
+     * Field override editors live in the global admin sidebar. They remain inside
+     * the same settings form so hidden panels are submitted together with the
+     * active layout and no Ajax-specific persistence path is required.
+     *
+     * @param array<string,mixed> $codeForm
+     * @param array<string,mixed> $storedOverrides
+     * @param array<string,array<string,mixed>> $resolvedFlat
+     */
+    private function renderFieldOverrideSidebar(array $codeForm,array $storedOverrides,array $resolvedFlat): void
+    {
+        echo '<section class="afe-field-override-sidebar" data-afe-field-override-sidebar hidden>';
+        echo '<div class="afe-field-override-sidebar__title"><div><strong>تنظیمات فیلد</strong><span>برای ویرایش Override روی یک فیلد در چیدمان کلیک کنید.</span></div><button type="button" class="afe-field-override-close" data-afe-field-override-close aria-label="بستن تنظیمات فیلد" hidden>×</button></div>';
+        echo '<div class="afe-field-override-empty" data-afe-field-override-empty><span class="dashicons dashicons-admin-generic" aria-hidden="true"></span><strong>فیلدی انتخاب نشده است</strong><p>در تب «فیلدها و چیدمان» روی نام هر فیلد کلیک کنید تا تنظیمات Override آن در همین بخش نمایش داده شود.</p></div>';
+        foreach ((array)($codeForm['steps']??[]) as $stepDef) {
+            $stepFields=[];
+            foreach ((array)($stepDef['items']??[]) as $fieldDef) $this->flattenField((array)$fieldDef,$stepFields,'');
+            foreach ($stepFields as $path=>$field) {
+                if (($field['type']??'')==='html') continue;
+                $ov=(array)($storedOverrides['fields'][$path]??[]);
+                $displayField=$resolvedFlat[$path]??$field;
+                $fieldTitle=(string)($displayField['label']??$field['label']??$field['name']??$path);
+                echo '<article class="afe-field-override-panel" data-afe-field-override-panel="'.esc_attr($path).'" hidden>';
+                echo '<header class="afe-field-override-panel__head"><div><strong>'.esc_html($fieldTitle).'</strong><small><code>'.esc_html($path).'</code> · '.esc_html($this->fieldTypeLabel((string)($field['type']??''))).'</small></div>';
+                if(!empty($field['required'])) echo '<span class="afe-override-badge">الزامی در کد</span>';
+                echo '</header><div class="afe-override-field-grid">';
+                $this->renderFieldOverrideControls($path,$field,$ov,$fieldTitle);
+                echo '</div></article>';
+            }
+        }
+        echo '</section>';
+    }
+
+    /**
+     * @param array<string,mixed> $field
+     * @param array<string,mixed> $ov
+     */
+    private function renderFieldOverrideControls(string $path,array $field,array $ov,string $fieldTitle): void
+    {
+        $options='';
+        if (isset($ov['options']) && is_array($ov['options'])) foreach ($ov['options'] as $k=>$v) $options.=$k.'|'.$v."\n";
+        $req=array_key_exists('required',$ov)?($ov['required']?'required':'optional'):'inherit';
+        echo '<label><span>عنوان نمایشی</span><input name="field_override['.esc_attr($path).'][label]" value="'.esc_attr((string)($ov['label']??'')).'" placeholder="'.esc_attr($fieldTitle).'"></label>';
+        echo '<label><span>Placeholder</span><input name="field_override['.esc_attr($path).'][placeholder]" value="'.esc_attr((string)($ov['placeholder']??'')).'" placeholder="'.esc_attr((string)($field['placeholder']??'')).'"></label>';
+        echo '<label><span>الزامی بودن</span><select name="field_override['.esc_attr($path).'][required]"><option value="inherit" '.selected($req==='inherit',true,false).'>ارث‌بری از کد</option><option value="required" '.selected($req==='required',true,false).'>الزامی</option><option value="optional" '.selected($req==='optional',true,false).'>اختیاری</option></select></label>';
+        if (in_array($field['type']??'',['select','radio'],true)) {
+            echo '<label class="afe-override-span-2"><span>گزینه‌ها <small>هر خط value|label</small></span><textarea rows="4" name="field_override['.esc_attr($path).'][options]">'.esc_textarea(trim($options)).'</textarea></label>';
+        }
+        if (($field['type']??'')==='select') {
+            $selectMode=(string)($ov['select_mode']??'inherit');
+            $searchable=array_key_exists('searchable',$ov)?($ov['searchable']?'yes':'no'):'inherit';
+            echo '<label><span>نوع Select</span><select name="field_override['.esc_attr($path).'][select_mode]"><option value="inherit" '.selected($selectMode,'inherit',false).'>ارث‌بری ('.esc_html((string)($field['select_mode']??'custom')).')</option><option value="custom" '.selected($selectMode,'custom',false).'>Select اختصاصی</option><option value="native" '.selected($selectMode,'native',false).'>Native</option></select></label>';
+            echo '<label><span>جستجو</span><select name="field_override['.esc_attr($path).'][searchable]"><option value="inherit" '.selected($searchable,'inherit',false).'>خودکار</option><option value="yes" '.selected($searchable,'yes',false).'>فعال</option><option value="no" '.selected($searchable,'no',false).'>غیرفعال</option></select></label>';
+        }
+        if (($field['type']??'')==='date') {
+            $calendar=(string)($ov['calendar']??'inherit');
+            echo '<label><span>تقویم</span><select name="field_override['.esc_attr($path).'][calendar]"><option value="inherit" '.selected($calendar,'inherit',false).'>ارث‌بری ('.esc_html((string)($field['calendar']??'gregorian')).')</option><option value="jalali" '.selected($calendar,'jalali',false).'>جلالی</option><option value="gregorian" '.selected($calendar,'gregorian',false).'>میلادی</option></select></label>';
+            $dateMode=(string)($ov['date_input_mode']??'inherit');
+            echo '<label><span>روش ورود تاریخ</span><select name="field_override['.esc_attr($path).'][date_input_mode]"><option value="inherit" '.selected($dateMode,'inherit',false).'>ارث‌بری ('.esc_html((string)($field['date_input_mode']??'combined')).')</option><option value="combined" '.selected($dateMode,'combined',false).'>انتخاب + ورود دستی</option><option value="picker" '.selected($dateMode,'picker',false).'>فقط انتخاب از تقویم</option><option value="manual" '.selected($dateMode,'manual',false).'>فقط ورود دستی</option></select></label>';
+        }
+        if (in_array((string)($field['type']??''),['text','tel'],true)) {
+            $maskOverride=$ov['input_mask']??null;
+            if (is_string($maskOverride)) $maskOverride=['key'=>$maskOverride];
+            $maskKey=is_array($maskOverride)?sanitize_key((string)($maskOverride['key']??'')):'inherit';
+            if ($maskKey==='') $maskKey='inherit';
+            $sourceMask=$field['input_mask']??null;
+            if (is_string($sourceMask)) $sourceMask=['key'=>$sourceMask];
+            $sourceMaskKey=is_array($sourceMask)?sanitize_key((string)($sourceMask['key']??'')):'';
+            $inheritLabel='ارث‌بری'.($sourceMaskKey!==''?' ('.($this->inputMasks->get($sourceMaskKey)?->label??$sourceMaskKey).')':' (بدون Mask)');
+            echo '<div class="afe-override-span-2 afe-input-mask-override" data-afe-input-mask-override><label><span>Input Mask</span><select name="field_override['.esc_attr($path).'][input_mask_key]" data-afe-input-mask-select>';
+            echo '<option value="inherit" '.selected($maskKey,'inherit',false).'>'.esc_html($inheritLabel).'</option>';
+            echo '<option value="none" '.selected($maskKey,'none',false).'>بدون Mask</option>';
+            foreach ($this->inputMasks->forFieldType((string)($field['type']??'')) as $maskDefinition) {
+                $label=$maskDefinition->label.($maskDefinition->example!==''?' — '.$maskDefinition->example:'');
+                echo '<option value="'.esc_attr($maskDefinition->key).'" '.selected($maskKey,$maskDefinition->key,false).'>'.esc_html($label).'</option>';
+            }
+            echo '<option value="custom" '.selected($maskKey,'custom',false).'>Mask سفارشی</option></select></label>';
+            $customPattern=is_array($maskOverride)?(string)($maskOverride['pattern']??''):'';
+            echo '<label data-afe-custom-mask-row'.($maskKey==='custom'?'':' hidden').'><span>الگوی Mask سفارشی</span><input dir="ltr" maxlength="'.esc_attr((string)InputMaskPattern::MAX_PATTERN_LENGTH).'" name="field_override['.esc_attr($path).'][input_mask_pattern]" value="'.esc_attr($customPattern).'" placeholder="9999 999 9999"><small>9 = رقم، A = حرف، * = حرف یا رقم. جداکننده‌ها مثل فاصله، / و - فقط نمایشی هستند. برای نوشتن خود 9/A/* به‌صورت literal از \\ استفاده کنید.</small></label>';
+            echo '<p class="description afe-input-mask-help">Mask فقط UX ورودی است؛ مقدار قبل از Validation، Duplicate، Token، SMS و ذخیره‌سازی بدون جداکننده‌های Mask نرمال می‌شود.</p></div>';
+        }
+        if (($field['type']??'')==='date') {
+            echo '<p class="afe-override-span-2 description">Input Mask تاریخ به‌صورت خودکار از تقویم تعیین می‌شود: جلالی <code>YYYY/MM/DD</code> و میلادی <code>YYYY-MM-DD</code>.</p>';
+        }
+        if (in_array((string)($field['type']??''),['text','textarea','tel','email','url'],true)) {
+            $characterMode=(string)($ov['character_mode']??'inherit');
+            echo '<label><span>نوع کاراکتر</span><select name="field_override['.esc_attr($path).'][character_mode]"><option value="inherit" '.selected($characterMode,'inherit',false).'>ارث‌بری / Normal</option><option value="normal" '.selected($characterMode,'normal',false).'>Normal</option><option value="digits" '.selected($characterMode,'digits',false).'>فقط اعداد</option><option value="persian" '.selected($characterMode,'persian',false).'>فقط حروف فارسی</option><option value="english" '.selected($characterMode,'english',false).'>فقط حروف انگلیسی</option><option value="alnum" '.selected($characterMode,'alnum',false).'>حروف و اعداد</option></select></label>';
+            echo '<label><span>کاراکترهای مجاز اضافی</span><input name="field_override['.esc_attr($path).'][allowed_extra]" value="'.esc_attr((string)($ov['allowed_extra']??'')).'" maxlength="50" placeholder="مثلاً -_/"></label>';
+            echo '<label><span>کاراکترهای ممنوع اضافی</span><input name="field_override['.esc_attr($path).'][forbidden_extra]" value="'.esc_attr((string)($ov['forbidden_extra']??'')).'" maxlength="50"></label>';
+            echo '<label><span>حداقل طول</span><input type="number" min="1" max="10000" name="field_override['.esc_attr($path).'][min_length]" value="'.esc_attr((string)($ov['min_length']??'')).'"></label>';
+            echo '<label><span>حداکثر طول</span><input type="number" min="1" max="10000" name="field_override['.esc_attr($path).'][max_length]" value="'.esc_attr((string)($ov['max_length']??'')).'"></label>';
+            echo '<label><span>طول دقیق</span><input type="number" min="1" max="10000" name="field_override['.esc_attr($path).'][exact_length]" value="'.esc_attr((string)($ov['exact_length']??'')).'" placeholder="در صورت تنظیم، اولویت دارد"></label>';
+        }
+        $this->renderValidatorOverride($path,$field,$ov);
+        if (($field['type']??'')==='file') {
+            echo '<label><span>حداکثر تعداد فایل</span><input type="number" min="1" name="field_override['.esc_attr($path).'][max_files]" value="'.esc_attr((string)($ov['max_files']??'')).'" placeholder="'.esc_attr((string)($field['max_files']??1)).'"></label>';
+            echo '<label><span>حداکثر حجم هر فایل (MB)</span><input type="number" min="1" name="field_override['.esc_attr($path).'][max_size_mb]" value="'.esc_attr((string)($ov['max_size_mb']??'')).'" placeholder="'.esc_attr((string)($field['max_size_mb']??5)).'"></label>';
+            echo '<label class="afe-override-span-2"><span>MIMEهای مجاز</span><input name="field_override['.esc_attr($path).'][accept]" value="'.esc_attr(isset($ov['accept'])?implode(',',(array)$ov['accept']):'').'" placeholder="'.esc_attr(implode(',',(array)($field['accept']??[]))).'"></label>';
+        }
+    }
+
     private function renderFieldOrdering(array $form): void
     {
         echo '<div class="afe-admin-card afe-field-order-card" data-afe-field-ordering><div class="afe-admin-card-title"><div><h2>چیدمان فیلدها</h2><p>Drag & Drop فقط داخل همان Step مجاز است. HtmlBlockها نیز قابل جابه‌جایی هستند و فیلدهای داخل Repeater فقط در همان Repeater مرتب می‌شوند.</p></div></div>';
@@ -643,7 +665,15 @@ final class FormsPage
             $plain=trim(wp_strip_all_tags((string)($item['html']??'')));
             $label=$plain!==''?(function_exists('mb_substr')?mb_substr($plain,0,72):substr($plain,0,72)):'بلوک HTML';
         } else $label=(string)($item['label']??$name);
-        echo '<li class="afe-field-order-item" draggable="true" data-afe-field-order-item><div class="afe-field-order-item__row"><span class="afe-field-order-drag" aria-hidden="true">↕</span><strong>'.esc_html($label).'</strong><small>'.esc_html($this->fieldTypeLabel($type)).'</small><code>'.esc_html($path).'</code><input type="hidden" name="'.esc_attr($inputName).'" value="'.esc_attr($name).'"></div>';
+        $configurable=$type!=='html';
+        echo '<li class="afe-field-order-item'.($configurable?' afe-field-order-item--configurable':'').'" draggable="true" data-afe-field-order-item'.($configurable?' data-afe-field-path="'.esc_attr($path).'"':'').'>';
+        echo '<div class="afe-field-order-item__row"><span class="afe-field-order-drag" aria-hidden="true">↕</span>';
+        if ($configurable) {
+            echo '<button type="button" class="afe-field-order-select" data-afe-field-override-trigger data-afe-field-path="'.esc_attr($path).'" aria-pressed="false"><strong>'.esc_html($label).'</strong><code>'.esc_html($path).'</code></button>';
+        } else {
+            echo '<span class="afe-field-order-static"><strong>'.esc_html($label).'</strong><code>'.esc_html($path).'</code></span>';
+        }
+        echo '<small>'.esc_html($this->fieldTypeLabel($type)).'</small><span class="afe-field-order-settings-hint">'.($configurable?'تنظیمات':'HTML').'</span><input type="hidden" name="'.esc_attr($inputName).'" value="'.esc_attr($name).'"></div>';
         if ($type==='repeater') {
             $hash=substr(md5($path),0,12);
             echo '<div class="afe-field-order-children"><span>ترتیب فیلدهای داخل Repeater</span><input type="hidden" name="repeater_order['.esc_attr($hash).'][path]" value="'.esc_attr($path).'">';
