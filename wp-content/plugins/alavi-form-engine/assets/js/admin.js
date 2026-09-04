@@ -347,6 +347,46 @@
     });
   };
 
+
+  const initTemplateEditors = () => {
+    document.querySelectorAll('[data-afe-template-editor]').forEach(root => {
+      if (root.dataset.afeTemplateReady === '1') return;
+      root.dataset.afeTemplateReady = '1';
+
+      const input = qs(root, '[data-afe-template-input]');
+      const defaultInput = qs(root, '[data-afe-template-default]');
+      const reset = qs(root, '[data-afe-template-reset]');
+      const status = qs(root, '[data-afe-template-status]');
+      const hint = qs(root, '[data-afe-template-hint]');
+      if (!input || !defaultInput) return;
+
+      const canonical = value => String(value || '').replace(/\r\n?/g, '\n').trim();
+      const sync = () => {
+        const isDefault = canonical(input.value) === canonical(defaultInput.value);
+        if (status) {
+          status.textContent = isDefault ? 'قالب پیش‌فرض' : 'قالب سفارشی';
+          status.classList.toggle('is-default', isDefault);
+          status.classList.toggle('is-custom', !isDefault);
+        }
+        if (hint) {
+          hint.textContent = isDefault
+            ? 'در حال استفاده از قالب پیش‌فرض کد/AFE است؛ تا زمان تغییر، Override ذخیره نمی‌شود.'
+            : 'پس از ذخیره، این HTML به‌عنوان Override همین فرم استفاده می‌شود.';
+        }
+      };
+
+      input.addEventListener('input', sync);
+      reset?.addEventListener('click', () => {
+        const alreadyDefault = canonical(input.value) === canonical(defaultInput.value);
+        if (!alreadyDefault && !window.confirm('تغییرات این قالب کنار گذاشته شود و قالب پیش‌فرض فعلی بازگردانی شود؟')) return;
+        input.value = defaultInput.value;
+        input.dispatchEvent(new Event('input', { bubbles: true }));
+        input.focus();
+      });
+      sync();
+    });
+  };
+
   const initAdminDatePickers = () => {
     if (!window.afeAdmin?.isJalali || !window.jalaliDatepicker) return;
     try {
@@ -387,6 +427,7 @@
     document.querySelectorAll('[data-afe-geo-chunk-uploader]').forEach(root => new GeoChunkUploader(root));
     initAdminRepeaters(document);
     initBrandMarkSettings();
+    initTemplateEditors();
     initAdminDatePickers();
   });
 })();

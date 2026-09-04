@@ -10,6 +10,7 @@ use BonyadAlavi\FormEngine\Localization\LocaleDateService;
 use BonyadAlavi\FormEngine\Security\SecurityManager;
 use BonyadAlavi\FormEngine\Submission\SubmissionService;
 use BonyadAlavi\FormEngine\Style\StyleIsolationManager;
+use BonyadAlavi\FormEngine\Template\TemplateResolver;
 
 final class Renderer
 {
@@ -23,7 +24,8 @@ final class Renderer
         private readonly SecurityManager $security,
         private readonly StyleIsolationManager $styleIsolation,
         private readonly LocaleDateService $dates,
-        private readonly PreviewRenderer $previewRenderer
+        private readonly PreviewRenderer $previewRenderer,
+        private readonly TemplateResolver $templates
     ) {}
 
     public function shortcode(array|string $atts = []): string
@@ -80,9 +82,7 @@ final class Renderer
                 if (!empty($item['name'])) $byName[$item['name']] = $html;
             }
             $body = implode('', $items);
-            if (!empty($step['template'])) {
-                $body = $this->applyTokens((string)$step['template'], $byName, $body);
-            }
+            $body = $this->applyTokens($this->templates->resolveStep($step), $byName, $body);
             $stepHtml[] = '<section class="afe-step'.($index===0?' is-active':'').'" data-step="'.esc_attr((string)$index).'">'
                 . '<div class="afe-step-heading"><span class="afe-step-kicker">مرحله '.esc_html((string)($index+1)).' از '.esc_html((string)$total).'</span>'
                 . '<h2>'.esc_html($step['title']).'</h2>'
@@ -105,20 +105,16 @@ final class Renderer
         $slogan = trim((string)($form['settings']['header_slogan'] ?? ''));
         $sloganHtml = $slogan !== '' ? '<div class="afe-form-slogan">'.esc_html($slogan).'</div>' : '';
         $brandMarkHtml = $this->renderBrandMark($form);
-        $template = $row ? trim((string)$row->template_html) : '';
-        if ($template !== '') {
-            $content = strtr(wp_kses_post($template), [
-                '{{steps}}'=>$steps,
-                '{{title}}'=>esc_html($form['title']),
-                '{{description}}'=>esc_html($form['description']),
-                '{{slogan}}'=>$sloganHtml,
-                '{{brand_mark}}'=>$brandMarkHtml,
-            ]);
-        } else {
-            $content = '<header class="afe-form-header">'.$brandMarkHtml
-                . '<div><h1>'.esc_html($form['title']).'</h1><p>'.esc_html($form['description']).'</p>'.$sloganHtml.'</div></header>'
-                . $this->progress($form, $total) . $steps;
-        }
+        $progressHtml = $this->progress($form, $total);
+        $template = $this->templates->resolveForm($form, $row ? (string)$row->template_html : '');
+        $content = strtr(wp_kses_post($template), [
+            '{{steps}}'=>$steps,
+            '{{title}}'=>esc_html($form['title']),
+            '{{description}}'=>esc_html($form['description']),
+            '{{slogan}}'=>$sloganHtml,
+            '{{brand_mark}}'=>$brandMarkHtml,
+            '{{progress}}'=>$progressHtml,
+        ]);
 
         $hidden = '<input type="hidden" name="action" value="afe_submit">'
             . '<input type="hidden" name="afe_form_slug" value="'.esc_attr($slug).'">'

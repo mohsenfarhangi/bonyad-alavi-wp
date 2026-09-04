@@ -9,6 +9,7 @@ use BonyadAlavi\FormEngine\Style\StyleIsolationManager;
 use BonyadAlavi\FormEngine\Form\FormRegistry;
 use BonyadAlavi\FormEngine\Repository\FormRepository;
 use BonyadAlavi\FormEngine\Submission\SubmissionService;
+use BonyadAlavi\FormEngine\Template\TemplateResolver;
 
 final class FormsPage
 {
@@ -16,7 +17,8 @@ final class FormsPage
         private readonly FormRegistry $registry,
         private readonly FormRepository $forms,
         private readonly SubmissionService $service,
-        private readonly FormAccess $access
+        private readonly FormAccess $access,
+        private readonly TemplateResolver $templates
     ) {}
 
     public function render(): void
@@ -35,6 +37,7 @@ final class FormsPage
         $row=$this->forms->row($slug);
         $storedOverrides=$this->forms->overrides($slug);
         $storedSettings=$this->forms->adminSettings($slug);
+        $codeForm=$this->registry->get($slug)->toArray();
         $resolvedFlat=$this->flatten((array)($form['steps']??[]));
 
         echo '<div class="wrap afe-admin-wrap"><h1>مدیریت فرم‌ها</h1>';
@@ -92,7 +95,8 @@ final class FormsPage
         $previewEnabled=!empty($storedSettings['preview_enabled']??$form['settings']['preview_enabled']);
         $lockAfter=!empty($storedSettings['lock_after_submit']??$form['settings']['lock_after_submit']);
         $showRequest=!empty($storedSettings['show_edit_request_button']??$form['settings']['show_edit_request_button']);
-        $previewTemplate=(string)($storedSettings['preview_template']??$form['settings']['preview_template']??'');
+        $previewStored=(string)($storedSettings['preview_template']??'');
+        $previewDefault=wp_kses_post($this->templates->defaultPreview($codeForm));
         echo '<div class="afe-admin-card"><div class="afe-admin-card-title"><div><h2>پیش‌نمایش و قفل فرم</h2><p>مرحله پیش‌نمایش یک مرحله سیستمی قبل از ثبت نهایی است و می‌تواند برای هر فرم مستقل فعال شود.</p></div></div><div class="afe-admin-grid">';
         echo '<label><input type="checkbox" name="preview_enabled" value="1" '.checked($previewEnabled,true,false).'> نمایش مرحله پیش‌نمایش قبل از ثبت نهایی</label>';
         echo '<label><input type="checkbox" name="lock_after_submit" value="1" '.checked($lockAfter,true,false).'> قفل ثبت بعد از ارسال نهایی</label>';
@@ -100,8 +104,18 @@ final class FormsPage
         echo '<label>عنوان مرحله پیش‌نمایش<input name="preview_title" value="'.esc_attr((string)($storedSettings['preview_title']??$form['settings']['preview_title']??'پیش‌نمایش اطلاعات ارسالی')).'"></label>';
         echo '<label class="afe-span-2">توضیحات پیش‌نمایش<textarea name="preview_description" rows="3">'.esc_textarea((string)($storedSettings['preview_description']??$form['settings']['preview_description']??'')).'</textarea></label>';
         echo '<label class="afe-span-2">هشدار قفل بعد از ارسال<textarea name="lock_warning" rows="3">'.esc_textarea((string)($storedSettings['lock_warning']??$form['settings']['lock_warning']??'')).'</textarea></label>';
-        echo '</div><p class="description">توکن‌های قالب: <code>{{title}}</code>، <code>{{description}}</code>، <code>{{preview_title}}</code>، <code>{{preview_description}}</code>، <code>{{preview_fields}}</code> و <code>{{field:field_name}}</code>.</p>';
-        echo '<textarea class="afe-code" name="preview_template" rows="10" spellcheck="false">'.esc_textarea($previewTemplate).'</textarea></div>';
+        echo '</div>';
+        $previewDefinition=$this->templates->definition('preview');
+        $this->renderTemplateEditor(
+            'preview_template',
+            $previewDefinition->label(),
+            $previewDefinition->description(),
+            $previewDefault,
+            $previewStored,
+            $previewDefinition->tokens(),
+            12
+        );
+        echo '</div>';
 
         echo '<div class="afe-admin-card afe-overrides-card"><div class="afe-admin-card-title"><div><h2>Override فیلدها</h2><p>فیلدها بر اساس مرحله گروه‌بندی شده‌اند. عنوان اصلی فیلد درشت نمایش داده می‌شود و کلید فنی فقط به‌عنوان مرجع ثانویه باقی می‌ماند.</p></div></div>';
         echo '<div class="afe-override-steps">';
@@ -148,12 +162,23 @@ final class FormsPage
         }
         echo '</div></div>';
 
-        echo '<div class="afe-admin-card"><h2>قالب اختصاصی هر مرحله</h2><p class="description">در هر Step می‌توانید HTML دلخواه بنویسید و از <code>{{items}}</code> یا <code>{{field:field_name}}</code> استفاده کنید. اگر خالی باشد چیدمان کد استفاده می‌شود.</p>';
-        foreach ($this->registry->get($slug)->toArray()['steps'] as $stepDef) {
-            $stepKey=$stepDef['key'];
-            $current=(string)($storedOverrides['steps'][$stepKey]['template']??'');
-            echo '<details class="afe-step-template"><summary>'.esc_html($stepDef['title']).' <code>'.esc_html($stepKey).'</code></summary>';
-            echo '<textarea class="afe-code" name="step_template['.esc_attr($stepKey).']" rows="9" spellcheck="false">'.esc_textarea($current).'</textarea>';
+        $stepDefinition=$this->templates->definition('step');
+        echo '<div class="afe-admin-card"><h2>قالب اختصاصی هر مرحله</h2><p class="description">قالب پیش‌فرض واقعی هر Step در Editor نمایش داده می‌شود. فقط در صورت تغییر، Override ذخیره خواهد شد.</p>';
+        foreach ((array)($codeForm['steps']??[]) as $stepDef) {
+            $stepKey=(string)$stepDef['key'];
+            $storedStep=(string)($storedOverrides['steps'][$stepKey]['template']??'');
+            $stepDefault=wp_kses_post($this->templates->defaultStep($stepDef));
+            echo '<details class="afe-step-template"><summary>'.esc_html((string)$stepDef['title']).' <code>'.esc_html($stepKey).'</code></summary>';
+            $this->renderTemplateEditor(
+                'step_template['.$stepKey.']',
+                $stepDefinition->label(),
+                $stepDefinition->description(),
+                $stepDefault,
+                $storedStep,
+                $stepDefinition->tokens(),
+                9,
+                true
+            );
             echo '</details>';
         }
         echo '</div>';
@@ -162,8 +187,19 @@ final class FormsPage
         $css=$row?(string)$row->custom_css:'';
         $js=$row?(string)$row->custom_js:'';
         $workflow=(array)($storedSettings['workflow']??$form['workflow']);
-        echo '<div class="afe-admin-card"><h2>کد قالب فرم</h2><p>توکن‌های سطح فرم: <code>{{title}}</code>، <code>{{description}}</code>، <code>{{brand_mark}}</code> و <code>{{steps}}</code>. اگر خالی باشد قالب استاندارد افزونه استفاده می‌شود.</p>';
-        echo '<textarea class="afe-code" name="template_html" rows="10" spellcheck="false">'.esc_textarea($template).'</textarea></div>';
+        $formDefinition=$this->templates->definition('form');
+        $formDefault=wp_kses_post($this->templates->defaultForm($codeForm));
+        echo '<div class="afe-admin-card"><h2>کد قالب فرم</h2><p class="description">ساختار پیش‌فرض واقعی فرم با Tokenهای داینامیک نمایش داده می‌شود. اگر آن را تغییر ندهید، Override جداگانه‌ای ذخیره نمی‌شود.</p>';
+        $this->renderTemplateEditor(
+            'template_html',
+            $formDefinition->label(),
+            $formDefinition->description(),
+            $formDefault,
+            $template,
+            $formDefinition->tokens(),
+            14
+        );
+        echo '</div>';
         echo '<div class="afe-admin-card"><h2>CSS اختصاصی</h2><textarea class="afe-code" name="custom_css" rows="10" spellcheck="false">'.esc_textarea($css).'</textarea></div>';
         echo '<div class="afe-admin-card"><h2>JavaScript اختصاصی</h2><div class="afe-warning">این کد در Front-end اجرا می‌شود و فقط کاربران دارای دسترسی تنظیمات باید آن را ویرایش کنند. PHP خام از پنل اجرا نمی‌شود.</div><textarea class="afe-code" name="custom_js" rows="10" spellcheck="false">'.esc_textarea($js).'</textarea></div>';
         echo '<div class="afe-admin-card"><h2>Workflow</h2><p>JSON وضعیت‌ها به شکل <code>{"new":"جدید","approved":"تأیید شده"}</code></p><textarea class="afe-code" name="workflow_json" rows="8">'.esc_textarea(wp_json_encode($workflow,JSON_UNESCAPED_UNICODE|JSON_PRETTY_PRINT)).'</textarea></div>';
@@ -176,6 +212,7 @@ final class FormsPage
     {
         check_admin_referer('afe_save_form_'.$slug,'afe_form_nonce');
         $existing=$this->forms->overrides($slug);
+        $codeForm=$this->registry->get($slug)->toArray();
         $overrides=[
             'title'=>sanitize_text_field(wp_unslash($_POST['override_title']??'')),
             'description'=>sanitize_textarea_field(wp_unslash($_POST['override_description']??'')),
@@ -210,9 +247,14 @@ final class FormsPage
             if ($one) $overrides['fields'][$path]=$one;
         }
         $overrides['steps']=[];
+        $codeSteps=[];
+        foreach ((array)($codeForm['steps']??[]) as $stepDef) $codeSteps[(string)($stepDef['key']??'')]=$stepDef;
         foreach ((array)($_POST['step_template']??[]) as $stepKey=>$templateValue) {
             $stepKey=sanitize_key((string)$stepKey);
+            if (!isset($codeSteps[$stepKey])) continue;
             $templateValue=wp_kses_post(wp_unslash($templateValue));
+            $default=wp_kses_post($this->templates->defaultStep($codeSteps[$stepKey]));
+            $templateValue=$this->templates->normalizeOverride($templateValue,$default);
             if (trim($templateValue)!=='') $overrides['steps'][$stepKey]=['template'=>$templateValue];
         }
 
@@ -230,7 +272,6 @@ final class FormsPage
             'preview_enabled'=>!empty($_POST['preview_enabled']),
             'preview_title'=>sanitize_text_field(wp_unslash($_POST['preview_title']??'پیش‌نمایش اطلاعات ارسالی')),
             'preview_description'=>sanitize_textarea_field(wp_unslash($_POST['preview_description']??'')),
-            'preview_template'=>wp_kses_post(wp_unslash($_POST['preview_template']??'')),
             'lock_after_submit'=>!empty($_POST['lock_after_submit']),
             'show_edit_request_button'=>!empty($_POST['show_edit_request_button']),
             'lock_warning'=>sanitize_textarea_field(wp_unslash($_POST['lock_warning']??'')),
@@ -240,16 +281,47 @@ final class FormsPage
             'brand_mark_alt'=>sanitize_text_field(wp_unslash($_POST['brand_mark_alt']??'')),
             'workflow'=>$workflowClean,
         ];
+        $previewSubmitted=wp_kses_post(wp_unslash($_POST['preview_template']??''));
+        $previewDefault=wp_kses_post($this->templates->defaultPreview($codeForm));
+        $previewOverride=$this->templates->normalizeOverride($previewSubmitted,$previewDefault);
+        if ($previewOverride!=='') $settings['preview_template']=$previewOverride;
+
         $styleIsolation=sanitize_key((string)($_POST['style_isolation']??'inherit'));
         if (array_key_exists($styleIsolation, StyleIsolationManager::modes())) {
             $settings['style_isolation']=$styleIsolation;
         }
 
         $template=wp_kses_post(wp_unslash($_POST['template_html']??''));
+        $template=$this->templates->normalizeOverride($template,wp_kses_post($this->templates->defaultForm($codeForm)));
         $css=wp_strip_all_tags(wp_unslash($_POST['custom_css']??''));
         $js=current_user_can(Capabilities::MANAGE_SETTINGS) ? wp_unslash($_POST['custom_js']??'') : '';
         $this->forms->saveAdminConfig($slug,$overrides,$template,$css,$js,$settings);
         wp_safe_redirect(admin_url('admin.php?page=alavi-form-engine-forms&form='.$slug.'&updated=1')); exit;
+    }
+
+    /** @param list<string> $tokens */
+    private function renderTemplateEditor(
+        string $name,
+        string $label,
+        string $description,
+        string $default,
+        string $stored,
+        array $tokens,
+        int $rows = 10,
+        bool $compact = false
+    ): void {
+        $value=$this->templates->editorValue($stored,$default);
+        $hasOverride=$this->templates->hasOverride($stored,$default);
+        $tokenHtml='';
+        foreach ($tokens as $token) $tokenHtml.='<code>'.esc_html($token).'</code>';
+        $classes='afe-template-editor'.($compact?' afe-template-editor--compact':'');
+        echo '<div class="'.esc_attr($classes).'" data-afe-template-editor>';
+        echo '<div class="afe-template-editor__head"><div><h3>'.esc_html($label).'</h3><p>'.esc_html($description).'</p></div><span class="afe-template-status'.($hasOverride?' is-custom':' is-default').'" data-afe-template-status>'.($hasOverride?'قالب سفارشی':'قالب پیش‌فرض').'</span></div>';
+        if ($tokenHtml!=='') echo '<div class="afe-template-tokens"><span>Tokenهای قابل استفاده:</span>'.$tokenHtml.'</div>';
+        echo '<textarea class="afe-code" name="'.esc_attr($name).'" rows="'.esc_attr((string)$rows).'" spellcheck="false" data-afe-template-input>'.esc_textarea($value).'</textarea>';
+        echo '<textarea hidden tabindex="-1" aria-hidden="true" data-afe-template-default>'.esc_textarea($default).'</textarea>';
+        echo '<div class="afe-template-editor__footer"><button type="button" class="button" data-afe-template-reset>بازگردانی به قالب پیش‌فرض</button><span data-afe-template-hint>'.($hasOverride?'این فرم در حال استفاده از Override ذخیره‌شده است.':'در حال استفاده از قالب پیش‌فرض کد/AFE است؛ تا زمان تغییر، Override ذخیره نمی‌شود.').'</span></div>';
+        echo '</div>';
     }
 
     private function parseOptions(string $text): array

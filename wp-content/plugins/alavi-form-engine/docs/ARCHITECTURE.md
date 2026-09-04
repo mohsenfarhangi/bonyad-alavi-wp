@@ -55,18 +55,42 @@ Only whitelisted field properties are overrideable in version 1. This protects v
 
 ## Template system
 
+AFE 1.0.27 uses a shared `TemplateDefinition -> TemplateRegistry -> TemplateResolver` pipeline. The renderer and the admin editor therefore read the same default source instead of maintaining separate hard-coded markup.
+
+Core template definitions are:
+
+- `form` — overall form shell/header/progress/steps.
+- `preview` — preview/read-only data layout.
+- `step` — content layout inside a Step grid.
+
+A code-defined Form/Step/Preview template becomes that form's default. If code does not provide one, the registry's AFE core default is used. Admin HTML is only stored when it differs from that resolved default. Resetting an editor and saving removes the override, allowing future code-default changes to flow through.
+
 A developer can use `HtmlBlock` anywhere between fields.
 
-A Step can define an HTML template and place fields using:
+Step templates support:
 
 - `{{items}}`
 - `{{field:field_name}}`
 
-Admin Step templates use the same tokens. The overall form template supports:
+The overall form template supports:
 
 - `{{title}}`
 - `{{description}}`
+- `{{brand_mark}}`
+- `{{slogan}}`
+- `{{progress}}`
 - `{{steps}}`
+
+Preview templates support:
+
+- `{{title}}`
+- `{{description}}`
+- `{{preview_title}}`
+- `{{preview_description}}`
+- `{{preview_fields}}`
+- `{{field:field_name}}`
+
+New template definitions can be registered through `afe_register_templates`. Admin template editors use one generic reset/status behavior for all registered/current template surfaces.
 
 ## Extensibility
 
@@ -76,6 +100,7 @@ Use the WordPress actions:
 - `afe_register_data_sources`
 - `afe_register_actions`
 - `afe_register_events`
+- `afe_register_templates`
 - `afe_booted`
 
 The engine can therefore be extended by a site plugin or theme without editing the Alavi Form Engine plugin itself.

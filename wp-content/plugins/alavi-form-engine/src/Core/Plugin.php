@@ -30,6 +30,9 @@ use BonyadAlavi\FormEngine\Security\SecurityManager;
 use BonyadAlavi\FormEngine\Submission\FileUploader;
 use BonyadAlavi\FormEngine\Submission\SubmissionService;
 use BonyadAlavi\FormEngine\Style\StyleIsolationManager;
+use BonyadAlavi\FormEngine\Template\TemplateRegistry;
+use BonyadAlavi\FormEngine\Template\TemplateResolver;
+use BonyadAlavi\FormEngine\Template\TemplateOverrideNormalizer;
 use Throwable;
 
 final class Plugin
@@ -82,6 +85,9 @@ final class Plugin
         $styleIsolation = new StyleIsolationManager();
         $formAccess = new FormAccess();
         $dates = new LocaleDateService();
+        $templateRegistry = new TemplateRegistry();
+        do_action('afe_register_templates', $templateRegistry);
+        $templates = new TemplateResolver($templateRegistry);
 
         do_action('afe_register_data_sources', $sources);
         do_action('afe_register_actions', $actions);
@@ -92,10 +98,11 @@ final class Plugin
             $fileUploader, $actions, $events, $dedicated, $formAccess
         );
         $previewPresenter = new FormDataPresenter($sources, $dates);
-        $previewRenderer = new PreviewRenderer($previewPresenter, $submissionRepo);
-        $renderer = new Renderer($registry, $formRepo, $submissionRepo, $service, $sources, $security, $styleIsolation, $dates, $previewRenderer);
+        $previewRenderer = new PreviewRenderer($previewPresenter, $submissionRepo, $templates);
+        $renderer = new Renderer($registry, $formRepo, $submissionRepo, $service, $sources, $security, $styleIsolation, $dates, $previewRenderer, $templates);
 
         $formRepo->syncRegistry($registry);
+        (new TemplateOverrideNormalizer($formRepo,$templates))->run($registry);
         $formAccess->sync($registry);
         Capabilities::syncAccess();
         foreach ($registry->all() as $form) {
@@ -125,6 +132,8 @@ final class Plugin
         $this->container->set(FormAccess::class,$formAccess);
         $this->container->set(LocaleDateService::class,$dates);
         $this->container->set(PreviewRenderer::class,$previewRenderer);
+        $this->container->set(TemplateRegistry::class,$templateRegistry);
+        $this->container->set(TemplateResolver::class,$templates);
 
         $this->registerAssets();
         add_shortcode('alavi_form', [$renderer,'shortcode']);
@@ -140,7 +149,7 @@ final class Plugin
         add_action('wp_ajax_afe_geo_import_chunk', [$this,'ajaxGeoImportChunk']);
 
         if (is_admin()) {
-            $formsPage = new FormsPage($registry,$formRepo,$service,$formAccess);
+            $formsPage = new FormsPage($registry,$formRepo,$service,$formAccess,$templates);
             $submissionsPage = new SubmissionsPage($registry,$submissionRepo,$service,$sources,$formAccess,$dates);
             $reportsPage = new ReportsPage($registry,$submissionRepo,$formAccess,$dates);
             $databasePage = new DatabasePage(new Migrator(),$registry,$dedicated,$dates);

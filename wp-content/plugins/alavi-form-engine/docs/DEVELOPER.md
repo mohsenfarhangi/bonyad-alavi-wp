@@ -317,3 +317,54 @@ Form::make('example-clean')
 
 Custom form templates can place the resolved markup with `{{brand_mark}}`.
 
+## Template registry and defaults
+
+AFE 1.0.27 centralizes editable HTML templates. The code definition remains the source of truth: a template defined through `Form::template()`, `Form::previewTemplate()` or `Step::template()` is treated as that form/step default. The admin editor displays that default source with tokens and only persists an override when the submitted HTML is different.
+
+Core form template tokens:
+
+```text
+{{title}}
+{{description}}
+{{brand_mark}}
+{{slogan}}
+{{progress}}
+{{steps}}
+```
+
+Core preview tokens:
+
+```text
+{{title}}
+{{description}}
+{{preview_title}}
+{{preview_description}}
+{{preview_fields}}
+{{field:field_name}}
+```
+
+Step tokens:
+
+```text
+{{items}}
+{{field:field_name}}
+```
+
+Extensions may register future definitions without modifying the core registry:
+
+```php
+use BonyadAlavi\FormEngine\Template\TemplateDefinition;
+
+add_action('afe_register_templates', function ($templates) {
+    $templates->register(new TemplateDefinition(
+        'my-template',
+        'قالب سفارشی من',
+        'توضیح قالب',
+        '<div>{{content}}</div>',
+        ['{{content}}']
+    ));
+});
+```
+
+Do not execute PHP from template HTML. Dynamic values must be exposed through explicitly supported tokens.
+

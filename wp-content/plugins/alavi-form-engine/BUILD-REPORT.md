@@ -1,10 +1,10 @@
-# Build / QA Report — Alavi Form Engine 1.0.26
+# Build / QA Report — Alavi Form Engine 1.0.27
 
 Prepared for PHP 8.3+ / WordPress 6.4+.
 
 ## Automated checks performed for this package
 
-- PHP syntax lint across all plugin PHP files: PASS (executed with PHP CLI 8.4.23; code target remains PHP >= 8.3).
+- PHP syntax lint across all plugin PHP files: PASS (74 PHP files including regression tests; executed with PHP CLI, code target remains PHP >= 8.3).
 - Built-in validator tests: PASS (Iran IBAN checksum, National ID valid/invalid checksum, Persian mobile digits, digit normalization).
 - Built-in Jihadi Group Registration form construction: PASS (13 steps, 62 top-level non-HTML items, 3 repeaters, 5 file fields).
 - JavaScript syntax check for front-end/admin assets: PASS.
@@ -187,3 +187,15 @@ Browser print / Save as PDF is always available from a submission. Direct server
 - Frontend now uses only `data-jdp` and the standard `jalaliDatepicker.startWatch()` initialization used by AFE before 1.0.23.
 - Removed custom frontend `jdp-container`/`jdp-overlay` positioning CSS.
 - README.md and readme.txt updated for 1.0.26.
+
+## 1.0.27 Template Registry / Default Source Editors
+
+- Added shared `TemplateDefinition`, `TemplateRegistry` and `TemplateResolver`.
+- Admin editors for form, preview and step templates now display the resolved code/AFE default HTML instead of blank override fields.
+- Generic reset-to-default behavior and live Default/Custom status implemented once for all current template editors.
+- Default-equivalent submitted HTML is normalized to an empty stored override, preserving code defaults as the source of truth.
+- One-time legacy normalizer removes stored form/preview/step template copies that are byte-equivalent after canonicalization to the current resolved default.
+- Overall form template now exposes `{{progress}}`; renderer and editor use the same default source.
+- Added `afe_register_templates` for future template definitions.
+- Added `tests/template-registry.php` regression coverage.
+

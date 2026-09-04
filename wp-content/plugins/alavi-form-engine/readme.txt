@@ -3,7 +3,7 @@ Contributors: bonyadalavi
 Tags: forms, form-engine, submissions, workflow, elementor
 Requires at least: 6.4
 Requires PHP: 8.3
-Stable tag: 1.0.26
+Stable tag: 1.0.27
 License: GPLv3 or later
 
 Code-first extensible form engine for WordPress.
@@ -25,6 +25,17 @@ The package includes the "ثبت نام گروه‌های مردمی و جهاد
 5. Use [alavi_form id="jihadi-group-registration"].
 
 == Changelog ==
+
+= 1.0.27 =
+* Added a shared Template Registry/Resolver for all editable AFE HTML templates.
+* Form, Preview and Step template editors now show the actual resolved default HTML with dynamic tokens instead of an empty textarea.
+* Added a generic “Restore default template” control and live Default/Custom status to every template editor.
+* Saving an unchanged default template no longer creates an admin override; resetting and saving removes the stored override so future code defaults can flow through.
+* Added a one-time 1.0.27 normalizer that removes legacy stored template copies when they exactly match the current code/AFE default.
+* Added {{progress}} to the overall form template so the editable default source matches the standard AFE layout.
+* Renderer and admin editor now use the same default template source, including code-defined Form/Step/Preview defaults.
+* Added afe_register_templates extension hook plus TemplateDefinition, TemplateRegistry and TemplateResolver for future template types.
+* Updated README.md, readme.txt, BUILD-REPORT.md and developer architecture documentation.
 
 = 1.0.26 =
 * Reverted all custom frontend JalaliDatePicker opening and positioning logic to the library's standard watcher behavior.

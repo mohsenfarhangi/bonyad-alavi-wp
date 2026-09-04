@@ -19,11 +19,13 @@
 
 `[alavi_form id="jihadi-group-registration"]`
 
-## ویژگی‌های نسخه 1.0.26
+## ویژگی‌های نسخه 1.0.27
 
 - Fluent DSL برای Form / Step / Field / Repeater
 - HTML Block بین فیلدها
 - Template سطح Form و Step
+- Template Registry مشترک برای Form / Preview / Step با Default HTML واقعی و Tokenهای پویا
+- نمایش قالب پیش‌فرض داخل Editor، وضعیت Default/Custom و بازگردانی یک‌کلیکی به Default
 - Field Override مدیریتی بدون تغییر Source Definition
 - Conditional Logic با show/hide/required/optional
 - Data Source: static, callback, database, posts, taxonomy, users, JSON, REST, geography, custom
@@ -214,3 +216,18 @@ Form::make('my-form')->hideBrandMark();
 - CSS اختصاصی برای `jdp-container` و `jdp-overlay` که در تغییرات جایگذاری اضافه شده بود حذف شد.
 - فیلد جلالی اکنون مانند نسخه‌های پایدار اولیه فقط با `data-jdp` و `jalaliDatepicker.startWatch()` کار می‌کند و بازشدن/جایگذاری را کاملاً به خود کتابخانه می‌سپارد.
 - `README.md` و `readme.txt` هم‌زمان با نسخه 1.0.26 به‌روزرسانی شدند.
+
+## تغییرات 1.0.27 — Template Registry و ویرایش Default HTML
+
+- یک لایه مشترک `TemplateDefinition`، `TemplateRegistry` و `TemplateResolver` اضافه شد تا Renderer و پنل مدیریت از یک منبع واحد برای قالب‌های پیش‌فرض استفاده کنند.
+- Editor قالب کل فرم، قالب Preview و قالب هر Step دیگر خالی نمایش داده نمی‌شود؛ HTML پیش‌فرض واقعی همان بخش همراه با Tokenهای داینامیک نمایش داده می‌شود.
+- قالب پیش‌فرض کل فرم شامل `{{brand_mark}}`، `{{title}}`، `{{description}}`، `{{slogan}}`، `{{progress}}` و `{{steps}}` است.
+- Preview از Template تعریف‌شده در کد فرم به‌عنوان Default استفاده می‌کند و در نبود آن، Template استاندارد AFE نمایش داده می‌شود.
+- Step نیز Template تعریف‌شده در کد را به‌عنوان Default می‌گیرد و در حالت استاندارد `{{items}}` را نشان می‌دهد.
+- برای تمام Template Editorها دکمه «بازگردانی به قالب پیش‌فرض» اضافه شد و وضعیت «قالب پیش‌فرض / قالب سفارشی» به‌صورت زنده نمایش داده می‌شود.
+- اگر کاربر Default را بدون تغییر ذخیره کند، Override جدیدی در دیتابیس ایجاد نمی‌شود. اگر قالب سفارشی را Reset و ذخیره کند، Override پاک می‌شود و از آن پس تغییرات Default کد در نسخه‌های بعدی خودکار اعمال خواهند شد.
+- یک Normalizer یک‌باره برای 1.0.27 اضافه شد تا Overrideهای قدیمی که صرفاً کپی دقیق Default فعلی هستند پاک شوند و به‌اشتباه Defaultهای آینده را Freeze نکنند.
+- Token جدید `{{progress}}` به قالب کل فرم اضافه شد تا Source نمایش‌داده‌شده در Editor دقیقاً ساختار استاندارد AFE را بازنمایی کند.
+- Hook جدید `afe_register_templates` برای ثبت Template Definitionهای آینده اضافه شد.
+- `README.md`، `readme.txt`، `BUILD-REPORT.md` و مستندات توسعه هم‌زمان با نسخه 1.0.27 به‌روزرسانی شدند.
+

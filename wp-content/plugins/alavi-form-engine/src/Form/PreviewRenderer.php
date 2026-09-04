@@ -5,20 +5,19 @@ namespace BonyadAlavi\FormEngine\Form;
 
 use BonyadAlavi\FormEngine\Admin\FormDataPresenter;
 use BonyadAlavi\FormEngine\Repository\SubmissionRepository;
+use BonyadAlavi\FormEngine\Template\TemplateResolver;
 
 final class PreviewRenderer
 {
     public function __construct(
         private readonly FormDataPresenter $presenter,
-        private readonly SubmissionRepository $submissions
+        private readonly SubmissionRepository $submissions,
+        private readonly TemplateResolver $templates
     ) {}
 
     public function render(array $form, array $values = [], int $submissionId = 0, bool $live = false): string
     {
-        $template = trim((string)($form['settings']['preview_template'] ?? ''));
-        if ($template === '') {
-            $template = '<div class="afe-preview-layout"><div class="afe-preview-intro"><h3>{{preview_title}}</h3><p>{{preview_description}}</p></div>{{preview_fields}}</div>';
-        }
+        $template = $this->templates->resolvePreview($form);
 
         $blocks = [];
         $groups = '';
