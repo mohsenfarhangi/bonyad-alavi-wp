@@ -66,7 +66,7 @@ final class BA_Center_Settings_Tab {
 	}
 
 	/**
-	 * Assetهای اختصاصی تب مرکز را فقط در همان تب بارگذاری می‌کند.
+	 * Assetهای اختصاصی تب مرکز و Repeater عمومی را فقط در همان تب بارگذاری می‌کند.
 	 *
 	 * @return void
 	 */
@@ -78,10 +78,29 @@ final class BA_Center_Settings_Tab {
 			return;
 		}
 
-		$version = wp_get_theme()->get( 'Version' );
+		BA_Admin_Repeater_Component::enqueue_assets();
 		wp_enqueue_media();
-		wp_enqueue_style( 'ba-center-settings', get_stylesheet_directory_uri() . '/assets/css/ba-center-settings.css', array( 'ba-admin-settings' ), $version );
-		wp_enqueue_script( 'ba-center-settings', get_stylesheet_directory_uri() . '/assets/js/ba-center-settings.js', array( 'jquery' ), $version, true );
+
+		$style_relative = 'assets/css/ba-center-settings.css';
+		$script_relative = 'assets/js/ba-center-settings.js';
+		$style_path = trailingslashit( get_stylesheet_directory() ) . $style_relative;
+		$script_path = trailingslashit( get_stylesheet_directory() ) . $script_relative;
+		$style_version = file_exists( $style_path ) ? (string) filemtime( $style_path ) : wp_get_theme()->get( 'Version' );
+		$script_version = file_exists( $script_path ) ? (string) filemtime( $script_path ) : wp_get_theme()->get( 'Version' );
+
+		wp_enqueue_style(
+			'ba-center-settings',
+			trailingslashit( get_stylesheet_directory_uri() ) . $style_relative,
+			array( 'ba-admin-settings', BA_Admin_Repeater_Component::STYLE_HANDLE ),
+			$style_version
+		);
+		wp_enqueue_script(
+			'ba-center-settings',
+			trailingslashit( get_stylesheet_directory_uri() ) . $script_relative,
+			array( 'jquery', BA_Admin_Repeater_Component::SCRIPT_HANDLE ),
+			$script_version,
+			true
+		);
 		wp_localize_script(
 			'ba-center-settings',
 			'BACenterSettings',
@@ -116,6 +135,123 @@ final class BA_Center_Settings_Tab {
 
 			<?php submit_button( 'ذخیره تنظیمات مرکز' ); ?>
 		</form>
+		<?php
+	}
+
+	/**
+	 * فیلدهای یک ردیف آمار را برای Repeater عمومی رندر می‌کند.
+	 *
+	 * @param string|int $index   اندیس ردیف.
+	 * @param array      $item    داده ردیف.
+	 * @param mixed      $context نام option والد.
+	 * @return void
+	 */
+	public static function render_stat_repeater_fields( $index, array $item, $context ) {
+		$item = wp_parse_args( $item, array( 'number' => '', 'title' => '', 'subtitle' => '' ) );
+		$name = (string) $context;
+		?>
+		<div class="ba-center-settings__grid">
+			<?php self::render_repeater_text_field( $name, 'stats', $index, 'number', 'عدد', $item['number'] ); ?>
+			<?php self::render_repeater_text_field( $name, 'stats', $index, 'title', 'عنوان', $item['title'] ); ?>
+			<?php self::render_repeater_text_field( $name, 'stats', $index, 'subtitle', 'زیرعنوان', $item['subtitle'] ); ?>
+		</div>
+		<?php
+	}
+
+	/**
+	 * فیلدهای یک کارت سامانه را برای Repeater عمومی رندر می‌کند.
+	 *
+	 * @param string|int $index   اندیس ردیف.
+	 * @param array      $item    داده ردیف.
+	 * @param mixed      $context نام option والد.
+	 * @return void
+	 */
+	public static function render_system_card_repeater_fields( $index, array $item, $context ) {
+		$item = wp_parse_args( $item, array( 'icon_id' => 0, 'title' => '', 'url' => '' ) );
+		$name = (string) $context;
+		?>
+		<div class="ba-center-settings__grid">
+			<?php self::render_repeater_text_field( $name, 'system_cards', $index, 'title', 'عنوان', $item['title'] ); ?>
+			<?php self::render_repeater_url_field( $name, 'system_cards', $index, 'url', 'لینک', $item['url'] ); ?>
+		</div>
+		<?php
+		self::render_media_control(
+			BA_Admin_Repeater_Component::field_name( $name, 'system_cards', $index, 'icon_id' ),
+			'آیکون (تصویر یا SVG)',
+			absint( $item['icon_id'] ),
+			'image',
+			'انتخاب آیکون'
+		);
+	}
+
+	/**
+	 * فیلدهای یک همراه مرکز را برای Repeater عمومی رندر می‌کند.
+	 *
+	 * @param string|int $index   اندیس ردیف.
+	 * @param array      $item    داده ردیف.
+	 * @param mixed      $context نام option والد.
+	 * @return void
+	 */
+	public static function render_partner_repeater_fields( $index, array $item, $context ) {
+		$item = wp_parse_args( $item, array( 'media_type' => 'image', 'image_id' => 0, 'svg_id' => 0, 'title' => '', 'url' => '' ) );
+		$name = (string) $context;
+		$type = 'svg' === $item['media_type'] ? 'svg' : 'image';
+		$media_type_name = BA_Admin_Repeater_Component::field_name( $name, 'partners', $index, 'media_type' );
+		?>
+		<div class="ba-center-settings__partner" data-ba-partner-row>
+			<div class="ba-center-settings__switcher">
+				<span>تصویر</span>
+				<label><input type="checkbox" data-ba-media-type-switch <?php checked( 'svg', $type ); ?>><span></span></label>
+				<span>SVG / آیکون</span>
+				<input type="hidden" data-ba-media-type-value name="<?php echo esc_attr( $media_type_name ); ?>" value="<?php echo esc_attr( $type ); ?>">
+			</div>
+			<div data-ba-media-mode="image" <?php echo 'image' === $type ? '' : 'hidden'; ?>>
+				<?php
+				self::render_media_control(
+					BA_Admin_Repeater_Component::field_name( $name, 'partners', $index, 'image_id' ),
+					'تصویر لوگو',
+					absint( $item['image_id'] ),
+					'image',
+					'انتخاب تصویر'
+				);
+				?>
+			</div>
+			<div data-ba-media-mode="svg" <?php echo 'svg' === $type ? '' : 'hidden'; ?>>
+				<?php
+				self::render_media_control(
+					BA_Admin_Repeater_Component::field_name( $name, 'partners', $index, 'svg_id' ),
+					'فایل SVG / آیکون',
+					absint( $item['svg_id'] ),
+					'image/svg+xml',
+					'انتخاب SVG'
+				);
+				?>
+			</div>
+			<div class="ba-center-settings__grid">
+				<?php self::render_repeater_text_field( $name, 'partners', $index, 'title', 'عنوان (اختیاری)', $item['title'] ); ?>
+				<?php self::render_repeater_url_field( $name, 'partners', $index, 'url', 'لینک (اختیاری)', $item['url'] ); ?>
+			</div>
+		</div>
+		<?php
+	}
+
+	/**
+	 * فیلدهای یک پرسش متداول را برای Repeater عمومی رندر می‌کند.
+	 *
+	 * @param string|int $index   اندیس ردیف.
+	 * @param array      $item    داده ردیف.
+	 * @param mixed      $context نام option والد.
+	 * @return void
+	 */
+	public static function render_faq_repeater_fields( $index, array $item, $context ) {
+		$item = wp_parse_args( $item, array( 'question' => '', 'answer' => '' ) );
+		$name = (string) $context;
+		?>
+		<?php self::render_repeater_text_field( $name, 'faqs', $index, 'question', 'سؤال', $item['question'], true ); ?>
+		<label class="ba-center-settings__field ba-center-settings__field--wide">
+			<span class="ba-center-settings__label">پاسخ</span>
+			<textarea rows="5" name="<?php echo esc_attr( BA_Admin_Repeater_Component::field_name( $name, 'faqs', $index, 'answer' ) ); ?>"><?php echo esc_textarea( $item['answer'] ); ?></textarea>
+		</label>
 		<?php
 	}
 
@@ -155,15 +291,19 @@ final class BA_Center_Settings_Tab {
 				<?php self::render_text( $name, 'stats_title', 'عنوان پنل آمار', $settings['stats_title'] ); ?>
 				<?php self::render_text( $name, 'stats_subtitle', 'زیرعنوان پنل آمار', $settings['stats_subtitle'] ); ?>
 			</div>
-			<div class="ba-center-settings__repeater" data-ba-repeater="stats">
-				<div class="ba-center-settings__repeater-list" data-ba-repeater-list>
-					<?php foreach ( (array) $settings['stats'] as $index => $item ) : ?>
-						<?php self::render_stat_row( $name, $index, $item ); ?>
-					<?php endforeach; ?>
-				</div>
-				<button type="button" class="button button-secondary" data-ba-repeater-add data-template="ba-center-stat-template">افزودن آمار</button>
-			</div>
-			<?php self::render_template( 'ba-center-stat-template', self::get_stat_row_template( $name ) ); ?>
+			<?php
+			BA_Admin_Repeater_Component::render(
+				array(
+					'id'           => 'ba-center-stats-repeater',
+					'items'        => (array) $settings['stats'],
+					'item_label'   => 'آیتم آمار',
+					'add_label'    => 'افزودن آمار',
+					'empty_label'  => 'هنوز آماری اضافه نشده است.',
+					'row_renderer' => array( __CLASS__, 'render_stat_repeater_fields' ),
+					'context'      => $name,
+				)
+			);
+			?>
 		</section>
 		<?php
 	}
@@ -209,15 +349,19 @@ final class BA_Center_Settings_Tab {
 		?>
 		<section class="ba-center-settings__section">
 			<h2 class="ba-center-settings__section-title">کارت‌های بخش‌های مرکز</h2>
-			<div class="ba-center-settings__repeater" data-ba-repeater="system-cards">
-				<div class="ba-center-settings__repeater-list" data-ba-repeater-list>
-					<?php foreach ( (array) $settings['system_cards'] as $index => $item ) : ?>
-						<?php self::render_system_card_row( $name, $index, $item ); ?>
-					<?php endforeach; ?>
-				</div>
-				<button type="button" class="button button-secondary" data-ba-repeater-add data-template="ba-center-system-card-template">افزودن کارت</button>
-			</div>
-			<?php self::render_template( 'ba-center-system-card-template', self::get_system_card_row_template( $name ) ); ?>
+			<?php
+			BA_Admin_Repeater_Component::render(
+				array(
+					'id'           => 'ba-center-system-cards-repeater',
+					'items'        => (array) $settings['system_cards'],
+					'item_label'   => 'کارت مرکز',
+					'add_label'    => 'افزودن کارت',
+					'empty_label'  => 'هنوز کارتی برای این بخش اضافه نشده است.',
+					'row_renderer' => array( __CLASS__, 'render_system_card_repeater_fields' ),
+					'context'      => $name,
+				)
+			);
+			?>
 		</section>
 		<?php
 	}
@@ -239,15 +383,19 @@ final class BA_Center_Settings_Tab {
 				<?php self::render_text( $name, 'partners_title', 'عنوان', $settings['partners_title'] ); ?>
 				<?php self::render_text( $name, 'partners_subtitle', 'زیرعنوان', $settings['partners_subtitle'] ); ?>
 			</div>
-			<div class="ba-center-settings__repeater" data-ba-repeater="partners">
-				<div class="ba-center-settings__repeater-list" data-ba-repeater-list>
-					<?php foreach ( (array) $settings['partners'] as $index => $item ) : ?>
-						<?php self::render_partner_row( $name, $index, $item ); ?>
-					<?php endforeach; ?>
-				</div>
-				<button type="button" class="button button-secondary" data-ba-repeater-add data-template="ba-center-partner-template">افزودن همراه</button>
-			</div>
-			<?php self::render_template( 'ba-center-partner-template', self::get_partner_row_template( $name ) ); ?>
+			<?php
+			BA_Admin_Repeater_Component::render(
+				array(
+					'id'           => 'ba-center-partners-repeater',
+					'items'        => (array) $settings['partners'],
+					'item_label'   => 'همراه مرکز',
+					'add_label'    => 'افزودن همراه',
+					'empty_label'  => 'هنوز همراهی اضافه نشده است.',
+					'row_renderer' => array( __CLASS__, 'render_partner_repeater_fields' ),
+					'context'      => $name,
+				)
+			);
+			?>
 		</section>
 		<?php
 	}
@@ -269,15 +417,19 @@ final class BA_Center_Settings_Tab {
 				<?php self::render_text( $name, 'faq_title', 'عنوان', $settings['faq_title'] ); ?>
 				<?php self::render_text( $name, 'faq_subtitle', 'زیرعنوان', $settings['faq_subtitle'] ); ?>
 			</div>
-			<div class="ba-center-settings__repeater" data-ba-repeater="faqs">
-				<div class="ba-center-settings__repeater-list" data-ba-repeater-list>
-					<?php foreach ( (array) $settings['faqs'] as $index => $item ) : ?>
-						<?php self::render_faq_row( $name, $index, $item ); ?>
-					<?php endforeach; ?>
-				</div>
-				<button type="button" class="button button-secondary" data-ba-repeater-add data-template="ba-center-faq-template">افزودن پرسش</button>
-			</div>
-			<?php self::render_template( 'ba-center-faq-template', self::get_faq_row_template( $name ) ); ?>
+			<?php
+			BA_Admin_Repeater_Component::render(
+				array(
+					'id'           => 'ba-center-faq-repeater',
+					'items'        => (array) $settings['faqs'],
+					'item_label'   => 'پرسش',
+					'add_label'    => 'افزودن پرسش',
+					'empty_label'  => 'هنوز پرسشی اضافه نشده است.',
+					'row_renderer' => array( __CLASS__, 'render_faq_repeater_fields' ),
+					'context'      => $name,
+				)
+			);
+			?>
 		</section>
 		<?php
 	}
@@ -319,7 +471,7 @@ final class BA_Center_Settings_Tab {
 	}
 
 	/**
-	 * انتخاب یک فایل رسانه‌ای را همراه با پیش‌نمایش رندر می‌کند.
+	 * انتخاب یک فایل رسانه‌ای سطح اصلی را همراه با پیش‌نمایش رندر می‌کند.
 	 *
 	 * @param string $name       نام option.
 	 * @param string $key        کلید.
@@ -329,13 +481,39 @@ final class BA_Center_Settings_Tab {
 	 * @return void
 	 */
 	private static function render_media_field( $name, $key, $label, $attachment, $accept = 'image' ) {
+		self::render_media_control(
+			$name . '[' . $key . ']',
+			$label,
+			$attachment,
+			$accept,
+			'انتخاب رسانه',
+			true
+		);
+	}
+
+	/**
+	 * کنترل رسانه‌ای قابل استفاده مجدد برای فیلدهای ساده و تو در تو می‌سازد.
+	 *
+	 * @param string $input_name  نام کامل input.
+	 * @param string $label       برچسب.
+	 * @param int    $attachment  شناسه پیوست.
+	 * @param string $accept      نوع رسانه مورد انتظار.
+	 * @param string $button_text متن دکمه انتخاب.
+	 * @param bool   $wide        آیا فیلد تمام عرض باشد.
+	 * @return void
+	 */
+	private static function render_media_control( $input_name, $label, $attachment, $accept = 'image', $button_text = 'انتخاب رسانه', $wide = false ) {
+		$classes = 'ba-center-settings__field';
+		if ( $wide ) {
+			$classes .= ' ba-center-settings__field--wide';
+		}
 		?>
-		<div class="ba-center-settings__field ba-center-settings__field--wide" data-ba-media-field data-accept="<?php echo esc_attr( $accept ); ?>">
-			<label class="ba-center-settings__label"><?php echo esc_html( $label ); ?></label>
-			<input type="hidden" data-ba-media-input name="<?php echo esc_attr( $name . '[' . $key . ']' ); ?>" value="<?php echo esc_attr( $attachment ); ?>">
-			<div class="ba-center-settings__media-preview" data-ba-media-preview><?php echo self::get_attachment_preview( $attachment ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></div>
+		<div class="<?php echo esc_attr( $classes ); ?>" data-ba-media-field data-accept="<?php echo esc_attr( $accept ); ?>">
+			<span class="ba-center-settings__label"><?php echo esc_html( $label ); ?></span>
+			<input type="hidden" data-ba-media-input name="<?php echo esc_attr( $input_name ); ?>" value="<?php echo esc_attr( absint( $attachment ) ); ?>">
+			<div class="ba-center-settings__media-preview" data-ba-media-preview><?php echo self::get_attachment_preview( absint( $attachment ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></div>
 			<div class="ba-center-settings__media-actions">
-				<button type="button" class="button" data-ba-media-select>انتخاب رسانه</button>
+				<button type="button" class="button" data-ba-media-select><?php echo esc_html( $button_text ); ?></button>
 				<button type="button" class="button-link-delete" data-ba-media-remove <?php echo $attachment ? '' : 'hidden'; ?>>حذف</button>
 			</div>
 		</div>
@@ -343,168 +521,48 @@ final class BA_Center_Settings_Tab {
 	}
 
 	/**
-	 * یک ردیف آمار را رندر می‌کند.
+	 * یک فیلد متن داخل Repeater را با نام استاندارد Component رندر می‌کند.
 	 *
-	 * @param string $name  نام option.
-	 * @param int    $index اندیس.
-	 * @param array  $item  داده ردیف.
+	 * @param string     $name       نام option.
+	 * @param string     $collection کلید مجموعه.
+	 * @param string|int $index      اندیس ردیف.
+	 * @param string     $field      کلید فیلد.
+	 * @param string     $label      برچسب.
+	 * @param string     $value      مقدار.
+	 * @param bool       $wide       آیا فیلد تمام عرض باشد.
 	 * @return void
 	 */
-	private static function render_stat_row( $name, $index, array $item ) {
-		echo str_replace( '__INDEX__', (string) absint( $index ), self::get_stat_row_template( $name, $item ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-	}
-
-	/**
-	 * قالب HTML یک ردیف آمار را می‌سازد.
-	 *
-	 * @param string $name نام option.
-	 * @param array  $item مقادیر ردیف.
-	 * @return string
-	 */
-	private static function get_stat_row_template( $name, array $item = array() ) {
-		$item = wp_parse_args( $item, array( 'number' => '', 'title' => '', 'subtitle' => '' ) );
-		ob_start();
+	private static function render_repeater_text_field( $name, $collection, $index, $field, $label, $value, $wide = false ) {
+		$classes = 'ba-center-settings__field';
+		if ( $wide ) {
+			$classes .= ' ba-center-settings__field--wide';
+		}
 		?>
-		<div class="ba-center-settings__repeater-item" data-ba-repeater-item>
-			<div class="ba-center-settings__repeater-toolbar"><strong>آیتم آمار</strong><button type="button" class="button-link-delete" data-ba-repeater-remove>حذف</button></div>
-			<div class="ba-center-settings__grid">
-				<label class="ba-center-settings__field"><span class="ba-center-settings__label">عدد</span><input type="text" name="<?php echo esc_attr( $name ); ?>[stats][__INDEX__][number]" value="<?php echo esc_attr( $item['number'] ); ?>"></label>
-				<label class="ba-center-settings__field"><span class="ba-center-settings__label">عنوان</span><input type="text" name="<?php echo esc_attr( $name ); ?>[stats][__INDEX__][title]" value="<?php echo esc_attr( $item['title'] ); ?>"></label>
-				<label class="ba-center-settings__field"><span class="ba-center-settings__label">زیرعنوان</span><input type="text" name="<?php echo esc_attr( $name ); ?>[stats][__INDEX__][subtitle]" value="<?php echo esc_attr( $item['subtitle'] ); ?>"></label>
-			</div>
-		</div>
+		<label class="<?php echo esc_attr( $classes ); ?>">
+			<span class="ba-center-settings__label"><?php echo esc_html( $label ); ?></span>
+			<input type="text" name="<?php echo esc_attr( BA_Admin_Repeater_Component::field_name( $name, $collection, $index, $field ) ); ?>" value="<?php echo esc_attr( $value ); ?>">
+		</label>
 		<?php
-		return ob_get_clean();
 	}
 
 	/**
-	 * یک ردیف کارت سامانه را رندر می‌کند.
+	 * یک فیلد URL داخل Repeater را با نام استاندارد Component رندر می‌کند.
 	 *
-	 * @param string $name  نام option.
-	 * @param int    $index اندیس.
-	 * @param array  $item  داده ردیف.
+	 * @param string     $name       نام option.
+	 * @param string     $collection کلید مجموعه.
+	 * @param string|int $index      اندیس ردیف.
+	 * @param string     $field      کلید فیلد.
+	 * @param string     $label      برچسب.
+	 * @param string     $value      مقدار.
 	 * @return void
 	 */
-	private static function render_system_card_row( $name, $index, array $item ) {
-		echo str_replace( '__INDEX__', (string) absint( $index ), self::get_system_card_row_template( $name, $item ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-	}
-
-	/**
-	 * قالب HTML یک کارت سامانه را می‌سازد.
-	 *
-	 * @param string $name نام option.
-	 * @param array  $item مقادیر ردیف.
-	 * @return string
-	 */
-	private static function get_system_card_row_template( $name, array $item = array() ) {
-		$item = wp_parse_args( $item, array( 'icon_id' => 0, 'title' => '', 'url' => '' ) );
-		ob_start();
+	private static function render_repeater_url_field( $name, $collection, $index, $field, $label, $value ) {
 		?>
-		<div class="ba-center-settings__repeater-item" data-ba-repeater-item>
-			<div class="ba-center-settings__repeater-toolbar"><strong>کارت مرکز</strong><button type="button" class="button-link-delete" data-ba-repeater-remove>حذف</button></div>
-			<div class="ba-center-settings__grid">
-				<label class="ba-center-settings__field"><span class="ba-center-settings__label">عنوان</span><input type="text" name="<?php echo esc_attr( $name ); ?>[system_cards][__INDEX__][title]" value="<?php echo esc_attr( $item['title'] ); ?>"></label>
-				<label class="ba-center-settings__field"><span class="ba-center-settings__label">لینک</span><input type="url" dir="ltr" name="<?php echo esc_attr( $name ); ?>[system_cards][__INDEX__][url]" value="<?php echo esc_attr( $item['url'] ); ?>"></label>
-			</div>
-			<div class="ba-center-settings__field" data-ba-media-field data-accept="image">
-				<span class="ba-center-settings__label">آیکون (تصویر یا SVG)</span>
-				<input type="hidden" data-ba-media-input name="<?php echo esc_attr( $name ); ?>[system_cards][__INDEX__][icon_id]" value="<?php echo esc_attr( absint( $item['icon_id'] ) ); ?>">
-				<div class="ba-center-settings__media-preview" data-ba-media-preview><?php echo self::get_attachment_preview( absint( $item['icon_id'] ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></div>
-				<div class="ba-center-settings__media-actions"><button type="button" class="button" data-ba-media-select>انتخاب آیکون</button><button type="button" class="button-link-delete" data-ba-media-remove <?php echo $item['icon_id'] ? '' : 'hidden'; ?>>حذف</button></div>
-			</div>
-		</div>
+		<label class="ba-center-settings__field">
+			<span class="ba-center-settings__label"><?php echo esc_html( $label ); ?></span>
+			<input type="url" dir="ltr" name="<?php echo esc_attr( BA_Admin_Repeater_Component::field_name( $name, $collection, $index, $field ) ); ?>" value="<?php echo esc_attr( $value ); ?>">
+		</label>
 		<?php
-		return ob_get_clean();
-	}
-
-	/**
-	 * یک ردیف همراه را رندر می‌کند.
-	 *
-	 * @param string $name  نام option.
-	 * @param int    $index اندیس.
-	 * @param array  $item  داده ردیف.
-	 * @return void
-	 */
-	private static function render_partner_row( $name, $index, array $item ) {
-		echo str_replace( '__INDEX__', (string) absint( $index ), self::get_partner_row_template( $name, $item ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-	}
-
-	/**
-	 * قالب HTML یک همراه را با Switcher نوع رسانه می‌سازد.
-	 *
-	 * @param string $name نام option.
-	 * @param array  $item مقادیر ردیف.
-	 * @return string
-	 */
-	private static function get_partner_row_template( $name, array $item = array() ) {
-		$item = wp_parse_args( $item, array( 'media_type' => 'image', 'image_id' => 0, 'svg_id' => 0, 'title' => '', 'url' => '' ) );
-		$type = 'svg' === $item['media_type'] ? 'svg' : 'image';
-		ob_start();
-		?>
-		<div class="ba-center-settings__repeater-item" data-ba-repeater-item data-ba-partner-row>
-			<div class="ba-center-settings__repeater-toolbar"><strong>همراه مرکز</strong><button type="button" class="button-link-delete" data-ba-repeater-remove>حذف</button></div>
-			<div class="ba-center-settings__switcher">
-				<span>تصویر</span>
-				<label><input type="checkbox" data-ba-media-type-switch <?php checked( 'svg', $type ); ?>><span></span></label>
-				<span>SVG / آیکون</span>
-				<input type="hidden" data-ba-media-type-value name="<?php echo esc_attr( $name ); ?>[partners][__INDEX__][media_type]" value="<?php echo esc_attr( $type ); ?>">
-			</div>
-			<div data-ba-media-mode="image" <?php echo 'image' === $type ? '' : 'hidden'; ?>>
-				<div class="ba-center-settings__field" data-ba-media-field data-accept="image"><span class="ba-center-settings__label">تصویر لوگو</span><input type="hidden" data-ba-media-input name="<?php echo esc_attr( $name ); ?>[partners][__INDEX__][image_id]" value="<?php echo esc_attr( absint( $item['image_id'] ) ); ?>"><div class="ba-center-settings__media-preview" data-ba-media-preview><?php echo self::get_attachment_preview( absint( $item['image_id'] ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></div><div class="ba-center-settings__media-actions"><button type="button" class="button" data-ba-media-select>انتخاب تصویر</button><button type="button" class="button-link-delete" data-ba-media-remove <?php echo $item['image_id'] ? '' : 'hidden'; ?>>حذف</button></div></div>
-			</div>
-			<div data-ba-media-mode="svg" <?php echo 'svg' === $type ? '' : 'hidden'; ?>>
-				<div class="ba-center-settings__field" data-ba-media-field data-accept="image/svg+xml"><span class="ba-center-settings__label">فایل SVG / آیکون</span><input type="hidden" data-ba-media-input name="<?php echo esc_attr( $name ); ?>[partners][__INDEX__][svg_id]" value="<?php echo esc_attr( absint( $item['svg_id'] ) ); ?>"><div class="ba-center-settings__media-preview" data-ba-media-preview><?php echo self::get_attachment_preview( absint( $item['svg_id'] ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></div><div class="ba-center-settings__media-actions"><button type="button" class="button" data-ba-media-select>انتخاب SVG</button><button type="button" class="button-link-delete" data-ba-media-remove <?php echo $item['svg_id'] ? '' : 'hidden'; ?>>حذف</button></div></div>
-			</div>
-			<div class="ba-center-settings__grid">
-				<label class="ba-center-settings__field"><span class="ba-center-settings__label">عنوان (اختیاری)</span><input type="text" name="<?php echo esc_attr( $name ); ?>[partners][__INDEX__][title]" value="<?php echo esc_attr( $item['title'] ); ?>"></label>
-				<label class="ba-center-settings__field"><span class="ba-center-settings__label">لینک (اختیاری)</span><input type="url" dir="ltr" name="<?php echo esc_attr( $name ); ?>[partners][__INDEX__][url]" value="<?php echo esc_attr( $item['url'] ); ?>"></label>
-			</div>
-		</div>
-		<?php
-		return ob_get_clean();
-	}
-
-	/**
-	 * یک ردیف پرسش متداول را رندر می‌کند.
-	 *
-	 * @param string $name  نام option.
-	 * @param int    $index اندیس.
-	 * @param array  $item  داده ردیف.
-	 * @return void
-	 */
-	private static function render_faq_row( $name, $index, array $item ) {
-		echo str_replace( '__INDEX__', (string) absint( $index ), self::get_faq_row_template( $name, $item ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-	}
-
-	/**
-	 * قالب HTML یک پرسش متداول را می‌سازد.
-	 *
-	 * @param string $name نام option.
-	 * @param array  $item مقادیر ردیف.
-	 * @return string
-	 */
-	private static function get_faq_row_template( $name, array $item = array() ) {
-		$item = wp_parse_args( $item, array( 'question' => '', 'answer' => '' ) );
-		ob_start();
-		?>
-		<div class="ba-center-settings__repeater-item" data-ba-repeater-item>
-			<div class="ba-center-settings__repeater-toolbar"><strong>پرسش</strong><button type="button" class="button-link-delete" data-ba-repeater-remove>حذف</button></div>
-			<label class="ba-center-settings__field ba-center-settings__field--wide"><span class="ba-center-settings__label">سؤال</span><input type="text" name="<?php echo esc_attr( $name ); ?>[faqs][__INDEX__][question]" value="<?php echo esc_attr( $item['question'] ); ?>"></label>
-			<label class="ba-center-settings__field ba-center-settings__field--wide"><span class="ba-center-settings__label">پاسخ</span><textarea rows="5" name="<?php echo esc_attr( $name ); ?>[faqs][__INDEX__][answer]" ><?php echo esc_textarea( $item['answer'] ); ?></textarea></label>
-		</div>
-		<?php
-		return ob_get_clean();
-	}
-
-	/**
-	 * قالب یک Repeater را در script غیرقابل اجرا قرار می‌دهد.
-	 *
-	 * @param string $id   شناسه قالب.
-	 * @param string $html HTML قالب.
-	 * @return void
-	 */
-	private static function render_template( $id, $html ) {
-		printf( '<script type="text/html" id="%1$s">%2$s</script>', esc_attr( $id ), $html ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 	}
 
 	/**

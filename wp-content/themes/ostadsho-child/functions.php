@@ -93,7 +93,10 @@ add_filter( 'woocommerce_checkout_fields', 'bap_remove_checkout_address_fields',
 include __DIR__."/inc/shortcodes/active-projects-count.php";
 include __DIR__."/inc/shortcodes/product-crowdfunding-data.php";
 
-// ووکامرس : سوالات متداول
+// کامپوننت‌های عمومی مدیریت.
+require_once get_stylesheet_directory() . '/inc/admin/components/class-ba-admin-repeater-component.php';
+
+// ووکامرس: سوالات متداول محصول.
 require_once get_stylesheet_directory() . '/inc/woocommerce/product-faq-metabox.php';
 /* المنتور: ویجت صفحه مشارکت مردمی */
 require_once get_stylesheet_directory() . '/inc/elementor/elementor-widgets.php';

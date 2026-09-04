@@ -73,6 +73,31 @@ Patch نباید تنها محل نگهداری تغییرات باشد؛ نسخ
 
 برای UI مستقل تصویر محصول در Loop، Block رزروشده `ba-product-gallery` است و تمام Elementها/Modifierهای آن باید زیر همین Block باقی بمانند.
 
+
+## کامپوننت عمومی Repeater مدیریت
+
+از نسخه `v0.3.1` تمام Repeaterهای سفارشی در `wp-admin` باید از `BA_Admin_Repeater_Component` استفاده کنند. این Component مدیریت Template، Index، افزودن، حذف، جابه‌جایی، Empty State و Assetهای مشترک را متمرکز می‌کند.
+
+مسیر کلاس:
+
+`inc/admin/components/class-ba-admin-repeater-component.php`
+
+Block عمومی BEM:
+
+`ba-admin-repeater`
+
+قواعد ثابت:
+
+- برای Add/Remove/Move یک Repeater سفارشی نباید JavaScript جداگانه در Feature نوشته شود.
+- فیلدهای داخل ردیف باید BEM همان Feature را حفظ کنند.
+- Sanitize و ذخیره‌سازی مسئولیت Component نیست و باید در Service/Handler قابلیت انجام شود.
+- نام فیلدهای تو در تو ترجیحاً با `BA_Admin_Repeater_Component::field_name()` ساخته شود.
+- این Component مخصوص UI سفارشی مدیریت است؛ Repeaterهای Elementor همچنان باید از `Elementor\Repeater` استفاده کنند.
+
+راهنمای کامل:
+
+[راهنمای کامپوننت Repeater مدیریت](components/admin-repeater.md)
+
 ## وضعیت اولیه‌ی کد
 
 در زمان ایجاد این Handoff، قالب از قبل شامل بخش‌های مشارکت مردمی، فرم‌ها، ووکامرس، تنظیمات مدیریتی و ویجت/داینامیک‌تگ‌های المنتور است.
@@ -85,6 +110,7 @@ Patch نباید تنها محل نگهداری تغییرات باشد؛ نسخ
 - [v0.2.0 — کاروسل تصاویر محصول و ویجت Loop](versions/v0.2.0.md)
 - [v0.2.1 — بهینه‌سازی Lazy Load کاروسل تصویر محصول](versions/v0.2.1.md)
 - [v0.3.0 — ویجت و تنظیمات مرکز حرکت‌های مردمی و جهادی](versions/v0.3.0.md)
+- [v0.3.1 — کامپوننت عمومی Repeater مدیریت](versions/v0.3.1.md)
 
 ## معماری صفحه مرکز حرکت‌های مردمی و جهادی
 

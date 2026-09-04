@@ -2,7 +2,9 @@
     'use strict';
 
     /**
-     * کنترل انتخاب رسانه در تب تنظیمات مرکز.
+     * کنترل انتخاب رسانه در تب تنظیمات مرکز را باز می‌کند.
+     *
+     * @param {jQuery} $field ریشه فیلد رسانه.
      */
     function openMediaFrame($field) {
         var frame = wp.media({
@@ -28,20 +30,6 @@
         frame.open();
     }
 
-    /**
-     * اندیس بعدی یک Repeater را از تعداد ردیف‌های فعلی می‌سازد.
-     */
-    function getNextIndex($repeater) {
-        var max = -1;
-        $repeater.find('[data-ba-repeater-item] :input[name]').each(function () {
-            var match = String(this.name).match(/\[(\d+)\]/);
-            if (match) {
-                max = Math.max(max, parseInt(match[1], 10));
-            }
-        });
-        return max + 1;
-    }
-
     $(document).on('click', '[data-ba-media-select]', function () {
         openMediaFrame($(this).closest('[data-ba-media-field]'));
     });
@@ -51,18 +39,6 @@
         $field.find('[data-ba-media-input]').val('');
         $field.find('[data-ba-media-preview]').empty();
         $(this).prop('hidden', true);
-    });
-
-    $(document).on('click', '[data-ba-repeater-add]', function () {
-        var $button = $(this);
-        var $repeater = $button.closest('[data-ba-repeater]');
-        var template = $('#' + $button.data('template')).html() || '';
-        var index = getNextIndex($repeater);
-        $repeater.find('[data-ba-repeater-list]').append(template.replace(/__INDEX__/g, index));
-    });
-
-    $(document).on('click', '[data-ba-repeater-remove]', function () {
-        $(this).closest('[data-ba-repeater-item]').remove();
     });
 
     $(document).on('change', '[data-ba-media-type-switch]', function () {
