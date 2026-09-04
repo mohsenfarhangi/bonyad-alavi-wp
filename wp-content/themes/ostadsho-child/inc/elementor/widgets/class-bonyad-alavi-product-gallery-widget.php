@@ -268,12 +268,14 @@ final class Bonyad_Alavi_Product_Gallery_Widget extends Widget_Base {
 					<?php foreach ( $items as $index => $item ) : ?>
 						<figure class="ba-product-gallery__slide<?php echo 0 === $index ? ' ba-product-gallery__slide--active' : ''; ?>" data-carousel-slide aria-hidden="<?php echo 0 === $index ? 'false' : 'true'; ?>">
 							<?php
+							$loading_strategy = $is_carousel && 0 === $index ? 'eager' : 'lazy';
+
 							echo BA_Media_Helper::render_image(
 								$item,
 								$image_size,
 								array(
 									'class'    => 'ba-product-gallery__image',
-									'loading'  => 'lazy',
+									'loading'  => $loading_strategy,
 									'decoding' => 'async',
 								)
 							); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
