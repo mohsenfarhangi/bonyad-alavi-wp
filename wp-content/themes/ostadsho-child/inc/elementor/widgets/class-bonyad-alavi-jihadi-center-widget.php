@@ -83,6 +83,7 @@ final class Bonyad_Alavi_Jihadi_Center_Widget extends Widget_Base {
 	 */
 	protected function register_controls() {
 		$this->register_hero_controls();
+		$this->register_stats_controls();
 		$this->register_intro_controls();
 		$this->register_news_controls();
 		$this->register_media_controls();
@@ -106,74 +107,58 @@ final class Bonyad_Alavi_Jihadi_Center_Widget extends Widget_Base {
 	private function register_hero_controls() {
 		$this->start_controls_section(
 			'content_hero',
-			array(
-				'label' => 'Hero',
-				'tab'   => Controls_Manager::TAB_CONTENT,
-			)
+			array( 'label' => 'Hero', 'tab' => Controls_Manager::TAB_CONTENT )
 		);
-
-		$this->add_control(
-			'hero_note',
-			array(
-				'type'            => Controls_Manager::RAW_HTML,
-				'raw'             => 'عنوان و دکمه Hero از «تنظیمات بنیاد علوی ← مرکز حرکت‌های مردمی و جهادی» خوانده می‌شوند. تصویر این بخش فقط وقتی استفاده می‌شود که در داشبورد تصویری ثبت نشده باشد.',
-				'content_classes' => 'elementor-panel-alert elementor-panel-alert-info',
-			)
-		);
-
-		$this->add_control(
-			'hero_eyebrow',
-			array(
-				'label'   => 'متن بالای عنوان',
-				'type'    => Controls_Manager::TEXT,
-				'default' => 'بنیاد علوی',
-			)
-		);
-
-		$this->add_control(
-			'hero_background',
-			array(
-				'label'   => 'تصویر پس‌زمینه جایگزین',
-				'type'    => Controls_Manager::MEDIA,
-				'default' => array(),
-			)
-		);
-
+		$this->add_control( 'hero_enabled', array( 'label' => 'نمایش سکشن', 'type' => Controls_Manager::SWITCHER, 'return_value' => 'yes', 'default' => 'yes' ) );
+		$this->add_control( 'hero_note', array( 'type' => Controls_Manager::RAW_HTML, 'raw' => 'مقادیر ذخیره‌شده در تنظیمات بنیاد علوی بر کنترل‌های متناظر این بخش اولویت دارند.', 'content_classes' => 'elementor-panel-alert elementor-panel-alert-info' ) );
+		$this->add_control( 'hero_eyebrow', array( 'label' => 'متن بالای عنوان', 'type' => Controls_Manager::TEXT, 'default' => 'بنیاد علوی' ) );
+		$this->add_control( 'hero_title', array( 'label' => 'عنوان هیرو', 'type' => Controls_Manager::TEXTAREA, 'default' => 'مرکز هماهنگی حرکت های مردمی و جهادی' ) );
+		$this->add_control( 'hero_button_text', array( 'label' => 'متن دکمه ثبت‌نام', 'type' => Controls_Manager::TEXT, 'default' => 'ثبت‌نام گروه‌های مردمی و جهادی' ) );
+		$this->add_control( 'hero_button_url', array( 'label' => 'لینک دکمه ثبت‌نام', 'type' => Controls_Manager::URL, 'placeholder' => 'https://', 'options' => array( 'url', 'is_external', 'nofollow' ) ) );
+		$this->add_control( 'hero_background', array( 'label' => 'تصویر پس‌زمینه', 'type' => Controls_Manager::MEDIA, 'default' => array() ) );
 		$this->end_controls_section();
 	}
 
 	/**
-	 * کنترل متن کوچک بخش معرفی را ثبت می‌کند.
+	 * کنترل‌های محتوایی پنل آمار را با Repeater مستقل Elementor ثبت می‌کند.
+	 *
+	 * @return void
+	 */
+	private function register_stats_controls() {
+		$this->start_controls_section( 'content_stats', array( 'label' => 'آمار مرکز', 'tab' => Controls_Manager::TAB_CONTENT ) );
+		$this->add_control( 'stats_enabled', array( 'label' => 'نمایش سکشن', 'type' => Controls_Manager::SWITCHER, 'return_value' => 'yes', 'default' => 'yes' ) );
+		$this->add_control( 'stats_note', array( 'type' => Controls_Manager::RAW_HTML, 'raw' => 'در صورت ذخیره تنظیمات آمار در داشبورد، همان مقادیر بر این بخش اولویت دارند.', 'content_classes' => 'elementor-panel-alert elementor-panel-alert-info' ) );
+		$this->add_control( 'stats_title', array( 'label' => 'عنوان پنل آمار', 'type' => Controls_Manager::TEXT, 'default' => 'گزارش برخط اقدامات' ) );
+		$this->add_control( 'stats_subtitle', array( 'label' => 'زیرعنوان پنل آمار', 'type' => Controls_Manager::TEXT, 'default' => 'بر پایه آمارهای شاخص منتشرشده در سال ۱۴۰۵' ) );
+		$repeater = new Repeater();
+		$repeater->add_control( 'number', array( 'label' => 'عدد', 'type' => Controls_Manager::TEXT ) );
+		$repeater->add_control( 'title', array( 'label' => 'عنوان', 'type' => Controls_Manager::TEXT ) );
+		$repeater->add_control( 'subtitle', array( 'label' => 'زیرعنوان', 'type' => Controls_Manager::TEXT ) );
+		$this->add_control( 'stats', array( 'label' => 'آمار', 'type' => Controls_Manager::REPEATER, 'fields' => $repeater->get_controls(), 'title_field' => '{{{ number || title || "آمار" }}}', 'default' => BA_Center_Settings_Service::get_defaults()['stats'] ) );
+		$this->end_controls_section();
+	}
+
+	/**
+	 * کنترل‌های کامل بخش معرفی را ثبت می‌کند.
 	 *
 	 * @return void
 	 */
 	private function register_intro_controls() {
-		$this->start_controls_section(
-			'content_intro',
-			array(
-				'label' => 'معرفی مرکز',
-				'tab'   => Controls_Manager::TAB_CONTENT,
-			)
-		);
-
-		$this->add_control(
-			'intro_note',
-			array(
-				'type'            => Controls_Manager::RAW_HTML,
-				'raw'             => 'عنوان، توضیحات و کارت‌های این بخش از تنظیمات داشبورد خوانده می‌شوند.',
-				'content_classes' => 'elementor-panel-alert elementor-panel-alert-info',
-			)
-		);
-
-		$this->add_control(
-			'intro_kicker',
-			array(
-				'label'   => 'Kicker',
-				'type'    => Controls_Manager::TEXT,
-				'default' => 'معرفی مرکز',
-			)
-		);
-
+		$this->start_controls_section( 'content_intro', array( 'label' => 'معرفی مرکز', 'tab' => Controls_Manager::TAB_CONTENT ) );
+		$this->add_control( 'intro_enabled', array( 'label' => 'نمایش سکشن', 'type' => Controls_Manager::SWITCHER, 'return_value' => 'yes', 'default' => 'yes' ) );
+		$this->add_control( 'intro_note', array( 'type' => Controls_Manager::RAW_HTML, 'raw' => 'مقادیر ذخیره‌شده معرفی و کارت‌ها در داشبورد بر این کنترل‌ها اولویت دارند.', 'content_classes' => 'elementor-panel-alert elementor-panel-alert-info' ) );
+		$this->add_control( 'intro_kicker', array( 'label' => 'Kicker', 'type' => Controls_Manager::TEXT, 'default' => 'معرفی مرکز' ) );
+		$this->add_control( 'intro_title', array( 'label' => 'عنوان', 'type' => Controls_Manager::TEXT, 'default' => 'مرکز هماهنگی حرکت‌های مردمی و جهادی' ) );
+		$this->add_control( 'intro_description', array( 'label' => 'توضیحات', 'type' => Controls_Manager::WYSIWYG, 'default' => BA_Center_Settings_Service::get_defaults()['intro_description'] ) );
+		$repeater = new Repeater();
+		$repeater->add_control( 'icon', array( 'label' => 'آیکون (تصویر یا SVG)', 'type' => Controls_Manager::MEDIA ) );
+		$repeater->add_control( 'title', array( 'label' => 'عنوان', 'type' => Controls_Manager::TEXT ) );
+		$repeater->add_control( 'url', array( 'label' => 'لینک', 'type' => Controls_Manager::URL, 'options' => array( 'url', 'is_external', 'nofollow' ) ) );
+		$default_cards = array();
+		foreach ( BA_Center_Settings_Service::get_defaults()['system_cards'] as $card ) {
+			$default_cards[] = array( 'title' => $card['title'], 'icon' => array(), 'url' => array() );
+		}
+		$this->add_control( 'system_cards', array( 'label' => 'کارت‌های بخش‌های مرکز', 'type' => Controls_Manager::REPEATER, 'fields' => $repeater->get_controls(), 'title_field' => '{{{ title || "کارت مرکز" }}}', 'default' => $default_cards ) );
 		$this->end_controls_section();
 	}
 
@@ -191,6 +176,8 @@ final class Bonyad_Alavi_Jihadi_Center_Widget extends Widget_Base {
 			)
 		);
 
+		$this->add_control( 'news_enabled', array( 'label' => 'نمایش سکشن', 'type' => Controls_Manager::SWITCHER, 'return_value' => 'yes', 'default' => 'yes' ) );
+		$this->add_control( 'news_note', array( 'type' => Controls_Manager::RAW_HTML, 'raw' => 'محتوا و Query ذخیره‌شده در داشبورد بر کنترل‌های متناظر این بخش اولویت دارند.', 'content_classes' => 'elementor-panel-alert elementor-panel-alert-info' ) );
 		$this->add_control( 'news_kicker', array( 'label' => 'Kicker', 'type' => Controls_Manager::TEXT, 'default' => 'اخبار مرکز' ) );
 		$this->add_control( 'news_title', array( 'label' => 'عنوان', 'type' => Controls_Manager::TEXT, 'default' => 'آخرین اخبار و رویدادها' ) );
 		$this->add_control( 'news_subtitle', array( 'label' => 'زیرعنوان', 'type' => Controls_Manager::TEXTAREA, 'default' => 'تازه‌ترین خبرها، گزارش‌ها و رویدادهای مرتبط با فعالیت‌های مرکز و گروه‌های مردمی.' ) );
@@ -215,6 +202,8 @@ final class Bonyad_Alavi_Jihadi_Center_Widget extends Widget_Base {
 			)
 		);
 
+		$this->add_control( 'media_enabled', array( 'label' => 'نمایش سکشن', 'type' => Controls_Manager::SWITCHER, 'return_value' => 'yes', 'default' => 'yes' ) );
+		$this->add_control( 'media_note', array( 'type' => Controls_Manager::RAW_HTML, 'raw' => 'محتوا و Query ذخیره‌شده در داشبورد بر کنترل‌های متناظر این بخش اولویت دارند.', 'content_classes' => 'elementor-panel-alert elementor-panel-alert-info' ) );
 		$this->add_control( 'media_kicker', array( 'label' => 'Kicker', 'type' => Controls_Manager::TEXT, 'default' => 'روایت تصویری فعالیت‌ها' ) );
 		$this->add_control( 'media_title', array( 'label' => 'عنوان', 'type' => Controls_Manager::TEXT, 'default' => 'چندرسانه‌ای' ) );
 		$this->add_control( 'media_subtitle', array( 'label' => 'زیرعنوان', 'type' => Controls_Manager::TEXTAREA, 'default' => 'ویدیوها و گزارش‌های تصویری از فعالیت‌ها، اردوها و برنامه‌های اجراشده مرکز.' ) );
@@ -248,11 +237,13 @@ final class Bonyad_Alavi_Jihadi_Center_Widget extends Widget_Base {
 			)
 		);
 
+		$this->add_control( 'partners_enabled', array( 'label' => 'نمایش سکشن', 'type' => Controls_Manager::SWITCHER, 'return_value' => 'yes', 'default' => 'yes' ) );
+
 		$this->add_control(
 			'partners_note',
 			array(
 				'type'            => Controls_Manager::RAW_HTML,
-				'raw'             => 'اگر در داشبورد حداقل یک همراه معتبر ثبت شده باشد، عنوان‌ها و Repeater این بخش از داشبورد اولویت می‌گیرند.',
+				'raw'             => 'پس از ذخیره تنظیمات این بخش در داشبورد، مقادیر داشبورد بر کنترل‌های متناظر Elementor اولویت دارند.',
 				'content_classes' => 'elementor-panel-alert elementor-panel-alert-info',
 			)
 		);
@@ -318,11 +309,13 @@ final class Bonyad_Alavi_Jihadi_Center_Widget extends Widget_Base {
 			)
 		);
 
+		$this->add_control( 'faq_enabled', array( 'label' => 'نمایش سکشن', 'type' => Controls_Manager::SWITCHER, 'return_value' => 'yes', 'default' => 'yes' ) );
+
 		$this->add_control(
 			'faq_note',
 			array(
 				'type'            => Controls_Manager::RAW_HTML,
-				'raw'             => 'اگر در داشبورد حداقل یک پرسش معتبر ثبت شده باشد، عنوان‌ها و Repeater این بخش از داشبورد اولویت می‌گیرند.',
+				'raw'             => 'پس از ذخیره تنظیمات این بخش در داشبورد، مقادیر داشبورد بر کنترل‌های متناظر Elementor اولویت دارند.',
 				'content_classes' => 'elementor-panel-alert elementor-panel-alert-info',
 			)
 		);
@@ -683,32 +676,31 @@ final class Bonyad_Alavi_Jihadi_Center_Widget extends Widget_Base {
 	 */
 	protected function render() {
 		$elementor = $this->get_settings_for_display();
-		$dashboard = BA_Center_Settings_Service::get_settings();
+		$settings  = BA_Center_Settings_Service::get_effective_settings( $elementor );
 		?>
 		<div class="ba-jihadi-center" data-ba-jihadi-center>
-			<?php $this->render_hero( $elementor, $dashboard ); ?>
-			<?php $this->render_stats( $dashboard ); ?>
-			<?php $this->render_intro( $elementor, $dashboard ); ?>
-			<?php $this->render_news( $elementor ); ?>
-			<?php $this->render_media( $elementor ); ?>
-			<?php $this->render_partners( $elementor, $dashboard ); ?>
-			<?php $this->render_faq( $elementor, $dashboard ); ?>
+			<?php if ( BA_Center_Settings_Service::is_section_enabled( $settings, 'hero' ) ) { $this->render_hero( $settings ); } ?>
+			<?php if ( BA_Center_Settings_Service::is_section_enabled( $settings, 'stats' ) ) { $this->render_stats( $settings ); } ?>
+			<?php if ( BA_Center_Settings_Service::is_section_enabled( $settings, 'intro' ) ) { $this->render_intro( $settings ); } ?>
+			<?php if ( BA_Center_Settings_Service::is_section_enabled( $settings, 'news' ) ) { $this->render_news( $settings ); } ?>
+			<?php if ( BA_Center_Settings_Service::is_section_enabled( $settings, 'media' ) ) { $this->render_media( $settings ); } ?>
+			<?php if ( BA_Center_Settings_Service::is_section_enabled( $settings, 'partners' ) ) { $this->render_partners( $settings ); } ?>
+			<?php if ( BA_Center_Settings_Service::is_section_enabled( $settings, 'faq' ) ) { $this->render_faq( $settings ); } ?>
 		</div>
 		<?php
 	}
 
 	/**
-	 * Hero را با اولویت تصویر و متن داشبورد رندر می‌کند.
+	 * Hero را از تنظیمات مؤثر با اولویت داشبورد رندر می‌کند.
 	 *
-	 * @param array $elementor تنظیمات Elementor.
-	 * @param array $dashboard تنظیمات داشبورد.
+	 * @param array $settings تنظیمات مؤثر پس از اعمال اولویت.
 	 * @return void
 	 */
-	private function render_hero( array $elementor, array $dashboard ) {
-		$background = $this->resolve_hero_background( $elementor, $dashboard );
-		$title      = (string) $dashboard['hero_title'];
-		$button     = (string) $dashboard['hero_button_text'];
-		$button_url = (string) $dashboard['hero_button_url'];
+	private function render_hero( array $settings ) {
+		$background = $this->resolve_hero_background( $settings );
+		$title      = (string) ( $settings['hero_title'] ?? '' );
+		$button     = (string) ( $settings['hero_button_text'] ?? '' );
+		$link       = is_array( $settings['hero_button_url'] ?? null ) ? $settings['hero_button_url'] : array( 'url' => (string) ( $settings['hero_button_url'] ?? '' ) );
 		?>
 		<section class="ba-jihadi-center__hero">
 			<div class="ba-jihadi-center__hero-media">
@@ -716,9 +708,9 @@ final class Bonyad_Alavi_Jihadi_Center_Widget extends Widget_Base {
 			</div>
 			<div class="ba-jihadi-center__container ba-jihadi-center__hero-inner">
 				<div class="ba-jihadi-center__hero-copy">
-					<?php if ( ! empty( $elementor['hero_eyebrow'] ) ) : ?><span class="ba-jihadi-center__eyebrow"><?php echo esc_html( $elementor['hero_eyebrow'] ); ?></span><?php endif; ?>
+					<?php if ( ! empty( $settings['hero_eyebrow'] ) ) : ?><span class="ba-jihadi-center__eyebrow"><?php echo esc_html( $settings['hero_eyebrow'] ); ?></span><?php endif; ?>
 					<?php if ( $title ) : ?><h1 class="ba-jihadi-center__hero-title"><?php echo esc_html( $title ); ?></h1><?php endif; ?>
-					<?php if ( $button && $button_url ) : ?><div class="ba-jihadi-center__hero-actions"><a class="ba-jihadi-center__hero-button" href="<?php echo esc_url( $button_url ); ?>"><?php echo esc_html( $button ); ?></a></div><?php endif; ?>
+					<?php if ( $button && ! empty( $link['url'] ) ) : ?><div class="ba-jihadi-center__hero-actions"><a class="ba-jihadi-center__hero-button"<?php echo $this->build_elementor_link_attributes( $link ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>><?php echo esc_html( $button ); ?></a></div><?php endif; ?>
 				</div>
 			</div>
 		</section>
@@ -728,20 +720,19 @@ final class Bonyad_Alavi_Jihadi_Center_Widget extends Widget_Base {
 	/**
 	 * تصویر Hero را بر اساس اولویت داشبورد، Elementor و فایل پیش‌فرض قالب پیدا می‌کند.
 	 *
-	 * @param array $elementor تنظیمات Elementor.
-	 * @param array $dashboard تنظیمات داشبورد.
+	 * @param array $settings تنظیمات مؤثر ویجت.
 	 * @return string
 	 */
-	private function resolve_hero_background( array $elementor, array $dashboard ) {
-		if ( ! empty( $dashboard['hero_background_id'] ) ) {
-			$url = wp_get_attachment_image_url( absint( $dashboard['hero_background_id'] ), 'full' );
+	private function resolve_hero_background( array $settings ) {
+		if ( ! empty( $settings['hero_background_id'] ) ) {
+			$url = wp_get_attachment_image_url( absint( $settings['hero_background_id'] ), 'full' );
 			if ( $url ) {
 				return $url;
 			}
 		}
 
-		if ( ! empty( $elementor['hero_background']['url'] ) ) {
-			return $elementor['hero_background']['url'];
+		if ( ! empty( $settings['hero_background']['url'] ) ) {
+			return $settings['hero_background']['url'];
 		}
 
 		return get_stylesheet_directory_uri() . '/assets/images/jihadi-center/hero.jpg';
@@ -750,12 +741,12 @@ final class Bonyad_Alavi_Jihadi_Center_Widget extends Widget_Base {
 	/**
 	 * پنل آمار پویا را از Repeater داشبورد رندر می‌کند.
 	 *
-	 * @param array $dashboard تنظیمات داشبورد.
+	 * @param array $settings تنظیمات مؤثر ویجت.
 	 * @return void
 	 */
-	private function render_stats( array $dashboard ) {
-		$stats = array_values( array_filter( (array) $dashboard['stats'], array( $this, 'has_stat_content' ) ) );
-		if ( ! $stats && ! $dashboard['stats_title'] && ! $dashboard['stats_subtitle'] ) {
+	private function render_stats( array $settings ) {
+		$stats = array_values( array_filter( (array) $settings['stats'], array( $this, 'has_stat_content' ) ) );
+		if ( ! $stats && ! $settings['stats_title'] && ! $settings['stats_subtitle'] ) {
 			return;
 		}
 		?>
@@ -763,8 +754,8 @@ final class Bonyad_Alavi_Jihadi_Center_Widget extends Widget_Base {
 			<div class="ba-jihadi-center__container">
 				<div class="ba-jihadi-center__stats-panel" style="--ba-jc-stat-count:<?php echo esc_attr( max( 1, count( $stats ) ) ); ?>" aria-label="آمار فعالیت‌های مرکز">
 					<div class="ba-jihadi-center__stats-intro">
-						<?php if ( $dashboard['stats_title'] ) : ?><strong class="ba-jihadi-center__stats-title"><?php echo esc_html( $dashboard['stats_title'] ); ?></strong><?php endif; ?>
-						<?php if ( $dashboard['stats_subtitle'] ) : ?><span class="ba-jihadi-center__stats-subtitle"><?php echo esc_html( $dashboard['stats_subtitle'] ); ?></span><?php endif; ?>
+						<?php if ( $settings['stats_title'] ) : ?><strong class="ba-jihadi-center__stats-title"><?php echo esc_html( $settings['stats_title'] ); ?></strong><?php endif; ?>
+						<?php if ( $settings['stats_subtitle'] ) : ?><span class="ba-jihadi-center__stats-subtitle"><?php echo esc_html( $settings['stats_subtitle'] ); ?></span><?php endif; ?>
 					</div>
 					<?php foreach ( $stats as $stat ) : ?>
 						<div class="ba-jihadi-center__stat">
@@ -792,21 +783,21 @@ final class Bonyad_Alavi_Jihadi_Center_Widget extends Widget_Base {
 	/**
 	 * بخش معرفی و کارت‌های سامانه را رندر می‌کند.
 	 *
-	 * @param array $elementor تنظیمات Elementor.
-	 * @param array $dashboard تنظیمات داشبورد.
+	 * @param array $settings تنظیمات مؤثر ویجت.
 	 * @return void
 	 */
-	private function render_intro( array $elementor, array $dashboard ) {
-		$cards = array_values( array_filter( (array) $dashboard['system_cards'], array( $this, 'has_system_card_content' ) ) );
+	private function render_intro( array $settings ) {
+		$from_dashboard = BA_Center_Settings_Service::has_dashboard_override( 'system_cards' );
+		$cards = array_values( array_filter( (array) ( $settings['system_cards'] ?? array() ), array( $this, 'has_system_card_content' ) ) );
 		?>
 		<section class="ba-jihadi-center__intro-section" id="ba-jihadi-center-systems">
 			<div class="ba-jihadi-center__container">
 				<div class="ba-jihadi-center__intro-head">
-					<?php $this->render_kicker( $elementor['intro_kicker'] ); ?>
-					<?php if ( $dashboard['intro_title'] ) : ?><h2 class="ba-jihadi-center__intro-title"><?php echo esc_html( $dashboard['intro_title'] ); ?></h2><?php endif; ?>
-					<?php if ( $dashboard['intro_description'] ) : ?><div class="ba-jihadi-center__intro-description"><?php echo wp_kses_post( wpautop( $dashboard['intro_description'] ) ); ?></div><?php endif; ?>
+					<?php $this->render_kicker( $settings['intro_kicker'] ?? '' ); ?>
+					<?php if ( ! empty( $settings['intro_title'] ) ) : ?><h2 class="ba-jihadi-center__intro-title"><?php echo esc_html( $settings['intro_title'] ); ?></h2><?php endif; ?>
+					<?php if ( ! empty( $settings['intro_description'] ) ) : ?><div class="ba-jihadi-center__intro-description"><?php echo wp_kses_post( wpautop( $settings['intro_description'] ) ); ?></div><?php endif; ?>
 				</div>
-				<?php if ( $cards ) : ?><div class="ba-jihadi-center__systems-grid"><?php foreach ( $cards as $card ) { $this->render_system_card( $card ); } ?></div><?php endif; ?>
+				<?php if ( $cards ) : ?><div class="ba-jihadi-center__systems-grid"><?php foreach ( $cards as $card ) { $this->render_system_card( $card, $from_dashboard ); } ?></div><?php endif; ?>
 			</div>
 		</section>
 		<?php
@@ -819,21 +810,30 @@ final class Bonyad_Alavi_Jihadi_Center_Widget extends Widget_Base {
 	 * @return bool
 	 */
 	private function has_system_card_content( $card ) {
-		return is_array( $card ) && ( ! empty( $card['icon_id'] ) || ! empty( $card['title'] ) || ! empty( $card['url'] ) );
+		if ( ! is_array( $card ) ) {
+			return false;
+		}
+		$has_media = ! empty( $card['icon_id'] ) || ! empty( $card['icon']['url'] );
+		$has_url   = ! empty( $card['url'] ) && ( is_string( $card['url'] ) || ! empty( $card['url']['url'] ) );
+		return $has_media || ! empty( $card['title'] ) || $has_url;
 	}
 
 	/**
 	 * یک کارت سامانه را با Tag مناسب لینک یا div رندر می‌کند.
 	 *
-	 * @param array $card داده کارت.
+	 * @param array $card           داده کارت.
+	 * @param bool  $from_dashboard آیا ساختار کارت از داشبورد آمده است.
 	 * @return void
 	 */
-	private function render_system_card( array $card ) {
-		$tag = ! empty( $card['url'] ) ? 'a' : 'div';
+	private function render_system_card( array $card, $from_dashboard ) {
+		$link = $from_dashboard ? array( 'url' => (string) ( $card['url'] ?? '' ) ) : ( is_array( $card['url'] ?? null ) ? $card['url'] : array( 'url' => (string) ( $card['url'] ?? '' ) ) );
+		$tag  = ! empty( $link['url'] ) ? 'a' : 'div';
 		?>
-		<<?php echo esc_attr( $tag ); ?> class="ba-jihadi-center__system-card"<?php echo 'a' === $tag ? ' href="' . esc_url( $card['url'] ) . '"' : ''; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
-			<?php if ( ! empty( $card['icon_id'] ) ) : ?>
+		<<?php echo esc_attr( $tag ); ?> class="ba-jihadi-center__system-card"<?php echo 'a' === $tag ? $this->build_elementor_link_attributes( $link ) : ''; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
+			<?php if ( $from_dashboard && ! empty( $card['icon_id'] ) ) : ?>
 				<span class="ba-jihadi-center__system-icon"><?php echo wp_get_attachment_image( absint( $card['icon_id'] ), 'thumbnail', false, array( 'loading' => 'lazy' ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></span>
+			<?php elseif ( ! $from_dashboard && ! empty( $card['icon']['url'] ) ) : ?>
+				<span class="ba-jihadi-center__system-icon"><img src="<?php echo esc_url( $card['icon']['url'] ); ?>" alt="" loading="lazy"></span>
 			<?php endif; ?>
 			<?php if ( ! empty( $card['title'] ) ) : ?><h3 class="ba-jihadi-center__system-title"><?php echo esc_html( $card['title'] ); ?></h3><?php endif; ?>
 		</<?php echo esc_attr( $tag ); ?>>
@@ -983,16 +983,15 @@ final class Bonyad_Alavi_Jihadi_Center_Widget extends Widget_Base {
 	/**
 	 * سکشن همراهان را با اولویت سطح سکشن برای داشبورد رندر می‌کند.
 	 *
-	 * @param array $elementor تنظیمات Elementor.
-	 * @param array $dashboard تنظیمات داشبورد.
+	 * @param array $settings تنظیمات مؤثر ویجت.
 	 * @return void
 	 */
-	private function render_partners( array $elementor, array $dashboard ) {
-		$use_dashboard = BA_Center_Settings_Service::has_dashboard_partners();
-		$partners      = $use_dashboard ? (array) $dashboard['partners'] : (array) $elementor['partners'];
-		$kicker        = $dashboard['partners_kicker'] ?: $elementor['partners_kicker'];
-		$title         = $dashboard['partners_title'] ?: $elementor['partners_title'];
-		$subtitle      = $dashboard['partners_subtitle'] ?: $elementor['partners_subtitle'];
+	private function render_partners( array $settings ) {
+		$use_dashboard = BA_Center_Settings_Service::has_dashboard_override( 'partners' ) && BA_Center_Settings_Service::has_dashboard_partners();
+		$partners      = (array) ( $settings['partners'] ?? array() );
+		$kicker        = $settings['partners_kicker'] ?? '';
+		$title         = $settings['partners_title'] ?? '';
+		$subtitle      = $settings['partners_subtitle'] ?? '';
 		$partners      = array_values( array_filter( $partners, $use_dashboard ? array( $this, 'is_dashboard_partner_valid' ) : array( $this, 'is_elementor_partner_valid' ) ) );
 
 		if ( ! $partners && ! $title && ! $subtitle && ! $kicker ) {
@@ -1125,16 +1124,14 @@ final class Bonyad_Alavi_Jihadi_Center_Widget extends Widget_Base {
 	/**
 	 * FAQ را با اولویت سطح سکشن برای تنظیمات داشبورد رندر می‌کند.
 	 *
-	 * @param array $elementor تنظیمات Elementor.
-	 * @param array $dashboard تنظیمات داشبورد.
+	 * @param array $settings تنظیمات مؤثر ویجت.
 	 * @return void
 	 */
-	private function render_faq( array $elementor, array $dashboard ) {
-		$use_dashboard = BA_Center_Settings_Service::has_dashboard_faqs();
-		$faqs          = $use_dashboard ? (array) $dashboard['faqs'] : (array) $elementor['faqs'];
-		$kicker        = $dashboard['faq_kicker'] ?: $elementor['faq_kicker'];
-		$title         = $dashboard['faq_title'] ?: $elementor['faq_title'];
-		$subtitle      = $dashboard['faq_subtitle'] ?: $elementor['faq_subtitle'];
+	private function render_faq( array $settings ) {
+		$faqs     = (array) ( $settings['faqs'] ?? array() );
+		$kicker   = $settings['faq_kicker'] ?? '';
+		$title    = $settings['faq_title'] ?? '';
+		$subtitle = $settings['faq_subtitle'] ?? '';
 		$faqs          = array_values( array_filter( $faqs, array( $this, 'is_faq_valid' ) ) );
 
 		if ( ! $faqs && ! $title && ! $subtitle && ! $kicker ) {

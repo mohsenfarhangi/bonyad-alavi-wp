@@ -130,6 +130,8 @@ final class BA_Center_Settings_Tab {
 			<?php self::render_stats_section( $name, $settings ); ?>
 			<?php self::render_intro_section( $name, $settings ); ?>
 			<?php self::render_system_cards_section( $name, $settings ); ?>
+			<?php self::render_news_section( $name, $settings ); ?>
+			<?php self::render_media_section( $name, $settings ); ?>
 			<?php self::render_partners_section( $name, $settings ); ?>
 			<?php self::render_faq_section( $name, $settings ); ?>
 
@@ -266,7 +268,9 @@ final class BA_Center_Settings_Tab {
 		?>
 		<section class="ba-center-settings__section">
 			<h2 class="ba-center-settings__section-title">Hero</h2>
+			<?php self::render_toggle( $name, 'hero_enabled', 'نمایش سکشن Hero', $settings['hero_enabled'] ); ?>
 			<div class="ba-center-settings__grid">
+				<?php self::render_text( $name, 'hero_eyebrow', 'متن بالای عنوان', $settings['hero_eyebrow'] ); ?>
 				<?php self::render_text( $name, 'hero_title', 'عنوان هیرو', $settings['hero_title'] ); ?>
 				<?php self::render_text( $name, 'hero_button_text', 'متن دکمه ثبت‌نام', $settings['hero_button_text'] ); ?>
 				<?php self::render_url( $name, 'hero_button_url', 'لینک دکمه ثبت‌نام', $settings['hero_button_url'] ); ?>
@@ -287,6 +291,7 @@ final class BA_Center_Settings_Tab {
 		?>
 		<section class="ba-center-settings__section">
 			<h2 class="ba-center-settings__section-title">آمار مرکز</h2>
+			<?php self::render_toggle( $name, 'stats_enabled', 'نمایش سکشن آمار', $settings['stats_enabled'] ); ?>
 			<div class="ba-center-settings__grid">
 				<?php self::render_text( $name, 'stats_title', 'عنوان پنل آمار', $settings['stats_title'] ); ?>
 				<?php self::render_text( $name, 'stats_subtitle', 'زیرعنوان پنل آمار', $settings['stats_subtitle'] ); ?>
@@ -319,7 +324,11 @@ final class BA_Center_Settings_Tab {
 		?>
 		<section class="ba-center-settings__section">
 			<h2 class="ba-center-settings__section-title">معرفی مرکز</h2>
-			<?php self::render_text( $name, 'intro_title', 'عنوان', $settings['intro_title'] ); ?>
+			<?php self::render_toggle( $name, 'intro_enabled', 'نمایش سکشن معرفی مرکز', $settings['intro_enabled'] ); ?>
+			<div class="ba-center-settings__grid">
+				<?php self::render_text( $name, 'intro_kicker', 'Kicker', $settings['intro_kicker'] ); ?>
+				<?php self::render_text( $name, 'intro_title', 'عنوان', $settings['intro_title'] ); ?>
+			</div>
 			<div class="ba-center-settings__field ba-center-settings__field--wide">
 				<label class="ba-center-settings__label" for="ba-center-intro-description">توضیحات</label>
 				<?php
@@ -366,6 +375,129 @@ final class BA_Center_Settings_Tab {
 		<?php
 	}
 
+
+	/**
+	 * تنظیمات کامل سکشن اخبار و Query آن را در داشبورد رندر می‌کند.
+	 *
+	 * @param string $name     نام option.
+	 * @param array  $settings تنظیمات.
+	 * @return void
+	 */
+	private static function render_news_section( $name, array $settings ) {
+		?>
+		<section class="ba-center-settings__section">
+			<h2 class="ba-center-settings__section-title">اخبار مرکز</h2>
+			<?php self::render_toggle( $name, 'news_enabled', 'نمایش سکشن اخبار', $settings['news_enabled'] ); ?>
+			<div class="ba-center-settings__grid">
+				<?php self::render_text( $name, 'news_kicker', 'Kicker', $settings['news_kicker'] ); ?>
+				<?php self::render_text( $name, 'news_title', 'عنوان', $settings['news_title'] ); ?>
+				<?php self::render_text( $name, 'news_subtitle', 'زیرعنوان', $settings['news_subtitle'] ); ?>
+				<?php self::render_text( $name, 'news_all_text', 'متن مشاهده همه', $settings['news_all_text'] ); ?>
+				<?php self::render_url( $name, 'news_all_url', 'لینک مشاهده همه', $settings['news_all_url'] ); ?>
+			</div>
+			<?php self::render_query_fields( $name, $settings, 'news', 'Query اخبار' ); ?>
+		</section>
+		<?php
+	}
+
+	/**
+	 * تنظیمات کامل سکشن چندرسانه‌ای و Query آن را در داشبورد رندر می‌کند.
+	 *
+	 * @param string $name     نام option.
+	 * @param array  $settings تنظیمات.
+	 * @return void
+	 */
+	private static function render_media_section( $name, array $settings ) {
+		?>
+		<section class="ba-center-settings__section">
+			<h2 class="ba-center-settings__section-title">چندرسانه‌ای</h2>
+			<?php self::render_toggle( $name, 'media_enabled', 'نمایش سکشن چندرسانه‌ای', $settings['media_enabled'] ); ?>
+			<div class="ba-center-settings__grid">
+				<?php self::render_text( $name, 'media_kicker', 'Kicker', $settings['media_kicker'] ); ?>
+				<?php self::render_text( $name, 'media_title', 'عنوان', $settings['media_title'] ); ?>
+				<?php self::render_text( $name, 'media_subtitle', 'زیرعنوان', $settings['media_subtitle'] ); ?>
+				<?php self::render_text( $name, 'media_all_text', 'متن مشاهده همه', $settings['media_all_text'] ); ?>
+				<?php self::render_url( $name, 'media_all_url', 'لینک مشاهده همه', $settings['media_all_url'] ); ?>
+				<?php self::render_text( $name, 'media_duration_meta_key', 'کلید متای مدت ویدیو', $settings['media_duration_meta_key'] ); ?>
+			</div>
+			<?php self::render_query_fields( $name, $settings, 'media', 'Query چندرسانه‌ای' ); ?>
+		</section>
+		<?php
+	}
+
+	/**
+	 * فیلدهای Query مشترک اخبار و چندرسانه‌ای را رندر می‌کند.
+	 * نام فیلدها عمداً با کنترل‌های Elementor یکسان است تا Resolver مشترک قابل استفاده باشد.
+	 *
+	 * @param string $name     نام option.
+	 * @param array  $settings تنظیمات.
+	 * @param string $prefix   پیشوند Query.
+	 * @param string $title    عنوان مجموعه.
+	 * @return void
+	 */
+	private static function render_query_fields( $name, array $settings, $prefix, $title ) {
+		$post_types = get_post_types( array( 'public' => true ), 'objects' );
+		$post_type_options = array();
+		foreach ( $post_types as $post_type ) {
+			$post_type_options[ $post_type->name ] = $post_type->labels->singular_name ?: $post_type->label;
+		}
+		$category_options = self::get_term_options( 'category' );
+		$tag_options      = self::get_term_options( 'post_tag' );
+		$author_options   = self::get_author_options();
+		?>
+		<div class="ba-center-settings__query">
+			<h3 class="ba-center-settings__subsection-title"><?php echo esc_html( $title ); ?></h3>
+			<div class="ba-center-settings__grid">
+				<?php self::render_multiselect( $name, $prefix . '_post_types', 'Post Type', $post_type_options, (array) $settings[ $prefix . '_post_types' ] ); ?>
+				<?php self::render_number( $name, $prefix . '_posts_per_page', 'تعداد نمایش', $settings[ $prefix . '_posts_per_page' ], 1, 30 ); ?>
+				<?php self::render_multiselect( $name, $prefix . '_categories', 'دسته‌بندی‌ها', $category_options, (array) $settings[ $prefix . '_categories' ] ); ?>
+				<?php self::render_multiselect( $name, $prefix . '_tags', 'برچسب‌ها', $tag_options, (array) $settings[ $prefix . '_tags' ] ); ?>
+				<?php self::render_multiselect( $name, $prefix . '_authors', 'نویسندگان', $author_options, (array) $settings[ $prefix . '_authors' ] ); ?>
+				<?php self::render_text( $name, $prefix . '_include_ids', 'فقط شناسه نوشته‌ها', $settings[ $prefix . '_include_ids' ] ); ?>
+				<?php self::render_text( $name, $prefix . '_exclude_ids', 'حذف شناسه نوشته‌ها', $settings[ $prefix . '_exclude_ids' ] ); ?>
+				<?php self::render_select( $name, $prefix . '_orderby', 'مرتب‌سازی بر اساس', array( 'date' => 'تاریخ انتشار', 'modified' => 'آخرین ویرایش', 'title' => 'عنوان', 'menu_order' => 'ترتیب منو', 'rand' => 'تصادفی', 'ID' => 'شناسه' ), $settings[ $prefix . '_orderby' ] ); ?>
+				<?php self::render_select( $name, $prefix . '_order', 'ترتیب', array( 'DESC' => 'نزولی', 'ASC' => 'صعودی' ), $settings[ $prefix . '_order' ] ); ?>
+				<?php self::render_number( $name, $prefix . '_offset', 'Offset', $settings[ $prefix . '_offset' ], 0 ); ?>
+				<?php self::render_text( $name, $prefix . '_date_after', 'تاریخ از', $settings[ $prefix . '_date_after' ] ); ?>
+				<?php self::render_text( $name, $prefix . '_date_before', 'تاریخ تا', $settings[ $prefix . '_date_before' ] ); ?>
+			</div>
+			<?php self::render_elementor_toggle( $name, $prefix . '_ignore_sticky', 'نادیده گرفتن Sticky Posts', $settings[ $prefix . '_ignore_sticky' ] ); ?>
+		</div>
+		<?php
+	}
+
+	/**
+	 * گزینه‌های یک taxonomy را برای select داشبورد می‌سازد.
+	 *
+	 * @param string $taxonomy نام taxonomy.
+	 * @return array
+	 */
+	private static function get_term_options( $taxonomy ) {
+		$options = array();
+		$terms = get_terms( array( 'taxonomy' => $taxonomy, 'hide_empty' => false ) );
+		if ( is_wp_error( $terms ) ) {
+			return $options;
+		}
+		foreach ( $terms as $term ) {
+			$options[ (string) $term->term_id ] = $term->name;
+		}
+		return $options;
+	}
+
+	/**
+	 * گزینه‌های نویسندگان را برای select داشبورد می‌سازد.
+	 *
+	 * @return array
+	 */
+	private static function get_author_options() {
+		$options = array();
+		$users = get_users( array( 'who' => 'authors', 'fields' => array( 'ID', 'display_name' ) ) );
+		foreach ( $users as $user ) {
+			$options[ (string) $user->ID ] = $user->display_name;
+		}
+		return $options;
+	}
+
 	/**
 	 * تنظیمات سرصفحه و Repeater همراهان را رندر می‌کند.
 	 *
@@ -377,7 +509,8 @@ final class BA_Center_Settings_Tab {
 		?>
 		<section class="ba-center-settings__section">
 			<h2 class="ba-center-settings__section-title">همراهان مرکز</h2>
-			<p class="description">اگر حداقل یک همراه معتبر در این بخش ذخیره شود، لیست همراهان Elementor به‌طور کامل نادیده گرفته می‌شود.</p>
+			<?php self::render_toggle( $name, 'partners_enabled', 'نمایش سکشن همراهان', $settings['partners_enabled'] ); ?>
+			<p class="description">مقادیر ذخیره‌شده این بخش بر کنترل‌های متناظر Elementor اولویت دارند.</p>
 			<div class="ba-center-settings__grid">
 				<?php self::render_text( $name, 'partners_kicker', 'Kicker', $settings['partners_kicker'] ); ?>
 				<?php self::render_text( $name, 'partners_title', 'عنوان', $settings['partners_title'] ); ?>
@@ -411,7 +544,8 @@ final class BA_Center_Settings_Tab {
 		?>
 		<section class="ba-center-settings__section">
 			<h2 class="ba-center-settings__section-title">پرسش‌های متداول</h2>
-			<p class="description">اگر حداقل یک پرسش معتبر در این بخش ذخیره شود، Repeater پرسش‌های Elementor به‌طور کامل نادیده گرفته می‌شود.</p>
+			<?php self::render_toggle( $name, 'faq_enabled', 'نمایش سکشن پرسش‌های متداول', $settings['faq_enabled'] ); ?>
+			<p class="description">مقادیر ذخیره‌شده این بخش بر کنترل‌های متناظر Elementor اولویت دارند.</p>
 			<div class="ba-center-settings__grid">
 				<?php self::render_text( $name, 'faq_kicker', 'Kicker', $settings['faq_kicker'] ); ?>
 				<?php self::render_text( $name, 'faq_title', 'عنوان', $settings['faq_title'] ); ?>
@@ -431,6 +565,112 @@ final class BA_Center_Settings_Tab {
 			);
 			?>
 		</section>
+		<?php
+	}
+
+
+	/**
+	 * Switcher استاندارد فعال/غیرفعال سکشن را با مقدار 1/0 رندر می‌کند.
+	 *
+	 * @param string $name  نام option.
+	 * @param string $key   کلید.
+	 * @param string $label برچسب.
+	 * @param mixed  $value مقدار فعلی.
+	 * @return void
+	 */
+	private static function render_toggle( $name, $key, $label, $value ) {
+		?>
+		<label class="ba-center-settings__toggle">
+			<input type="hidden" name="<?php echo esc_attr( $name . '[' . $key . ']' ); ?>" value="0">
+			<input type="checkbox" name="<?php echo esc_attr( $name . '[' . $key . ']' ); ?>" value="1" <?php checked( in_array( $value, array( 1, '1', true, 'yes', 'on' ), true ) ); ?>>
+			<span class="ba-center-settings__toggle-text"><?php echo esc_html( $label ); ?></span>
+		</label>
+		<?php
+	}
+
+	/**
+	 * Switcher سازگار با مقدار yes کنترل‌های Query Elementor را رندر می‌کند.
+	 *
+	 * @param string $name  نام option.
+	 * @param string $key   کلید.
+	 * @param string $label برچسب.
+	 * @param mixed  $value مقدار فعلی.
+	 * @return void
+	 */
+	private static function render_elementor_toggle( $name, $key, $label, $value ) {
+		?>
+		<label class="ba-center-settings__toggle">
+			<input type="hidden" name="<?php echo esc_attr( $name . '[' . $key . ']' ); ?>" value="">
+			<input type="checkbox" name="<?php echo esc_attr( $name . '[' . $key . ']' ); ?>" value="yes" <?php checked( 'yes', $value ); ?>>
+			<span class="ba-center-settings__toggle-text"><?php echo esc_html( $label ); ?></span>
+		</label>
+		<?php
+	}
+
+	/**
+	 * یک ورودی عدد استاندارد را رندر می‌کند.
+	 *
+	 * @param string   $name  نام option.
+	 * @param string   $key   کلید.
+	 * @param string   $label برچسب.
+	 * @param int      $value مقدار.
+	 * @param int      $min   حداقل.
+	 * @param int|null $max   حداکثر اختیاری.
+	 * @return void
+	 */
+	private static function render_number( $name, $key, $label, $value, $min = 0, $max = null ) {
+		?>
+		<div class="ba-center-settings__field">
+			<label class="ba-center-settings__label"><?php echo esc_html( $label ); ?></label>
+			<input type="number" name="<?php echo esc_attr( $name . '[' . $key . ']' ); ?>" value="<?php echo esc_attr( (int) $value ); ?>" min="<?php echo esc_attr( (int) $min ); ?>" <?php echo null !== $max ? 'max="' . esc_attr( (int) $max ) . '"' : ''; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
+		</div>
+		<?php
+	}
+
+	/**
+	 * یک select استاندارد را رندر می‌کند.
+	 *
+	 * @param string $name    نام option.
+	 * @param string $key     کلید.
+	 * @param string $label   برچسب.
+	 * @param array  $options گزینه‌ها.
+	 * @param mixed  $value   مقدار انتخاب‌شده.
+	 * @return void
+	 */
+	private static function render_select( $name, $key, $label, array $options, $value ) {
+		?>
+		<div class="ba-center-settings__field">
+			<label class="ba-center-settings__label"><?php echo esc_html( $label ); ?></label>
+			<select name="<?php echo esc_attr( $name . '[' . $key . ']' ); ?>">
+				<?php foreach ( $options as $option_value => $option_label ) : ?>
+					<option value="<?php echo esc_attr( $option_value ); ?>" <?php selected( (string) $value, (string) $option_value ); ?>><?php echo esc_html( $option_label ); ?></option>
+				<?php endforeach; ?>
+			</select>
+		</div>
+		<?php
+	}
+
+	/**
+	 * یک select چندانتخابی استاندارد را رندر می‌کند.
+	 *
+	 * @param string $name     نام option.
+	 * @param string $key      کلید.
+	 * @param string $label    برچسب.
+	 * @param array  $options  گزینه‌ها.
+	 * @param array  $selected مقادیر انتخاب‌شده.
+	 * @return void
+	 */
+	private static function render_multiselect( $name, $key, $label, array $options, array $selected ) {
+		$selected = array_map( 'strval', $selected );
+		?>
+		<div class="ba-center-settings__field">
+			<label class="ba-center-settings__label"><?php echo esc_html( $label ); ?></label>
+			<select multiple size="6" name="<?php echo esc_attr( $name . '[' . $key . '][]' ); ?>">
+				<?php foreach ( $options as $option_value => $option_label ) : ?>
+					<option value="<?php echo esc_attr( $option_value ); ?>" <?php selected( in_array( (string) $option_value, $selected, true ) ); ?>><?php echo esc_html( $option_label ); ?></option>
+				<?php endforeach; ?>
+			</select>
+		</div>
 		<?php
 	}
 

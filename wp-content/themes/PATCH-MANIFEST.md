@@ -1,58 +1,61 @@
-# Patch Manifest — ostadsho-child v0.3.0
+# Patch Manifest — ostadsho-child v0.4.0
 
-## مبنا
+## مبدا و مقصد
 
-این Patch باید روی نسخه کامل `v0.2.1` قالب `ostadsho-child` اعمال شود.
+- نسخه مبدا: `v0.3.1`
+- نسخه مقصد: `v0.4.0`
+- نوع نسخه: `MINOR`
 
-## نوع نسخه
+## هدف
 
-`MINOR` — قابلیت جدید سازگار با نسخه قبل.
+یکسان‌سازی تنظیمات محتوایی، داده‌ای و Query صفحه «مرکز هماهنگی حرکت‌های مردمی و جهادی» بین تنظیمات بنیاد علوی و Elementor، با اولویت قطعی داشبورد پس از ذخیره Schema جدید، و افزودن امکان فعال/غیرفعال‌کردن تمام سکشن‌های اصلی در هر دو منبع.
 
-## قابلیت اصلی
+## فایل جدید
 
-افزودن ویجت Elementor صفحه «مرکز هماهنگی حرکت‌های مردمی و جهادی»، تب اختصاصی تنظیمات مرکز، Query Builder مشترک اخبار/چندرسانه‌ای، همراهان و FAQ با اولویت داشبورد و کنترل‌های گسترده استایل.
+- `ostadsho-child/docs/versions/v0.4.0.md`
 
-## فایل‌های جدید
+## فایل‌های تغییرکرده
 
-- `ostadsho-child/assets/images/jihadi-center/hero.jpg`
-- `ostadsho-child/assets/css/ba-center-settings.css`
-- `ostadsho-child/assets/js/ba-center-settings.js`
-- `ostadsho-child/assets/css/bonyad-alavi-jihadi-center-widget.css`
-- `ostadsho-child/assets/js/bonyad-alavi-jihadi-center-widget.js`
 - `ostadsho-child/inc/services/class-ba-center-settings-service.php`
-- `ostadsho-child/inc/services/class-ba-content-query-service.php`
 - `ostadsho-child/inc/admin/settings/class-ba-center-settings-tab.php`
 - `ostadsho-child/inc/elementor/widgets/class-bonyad-alavi-jihadi-center-widget.php`
-- `ostadsho-child/docs/versions/v0.3.0.md`
-
-## فایل‌های جایگزین‌شونده
-
-- `ostadsho-child/functions.php`
-- `ostadsho-child/inc/elementor/elementor-widgets.php`
+- `ostadsho-child/assets/css/ba-center-settings.css`
 - `ostadsho-child/docs/handoff.md`
 
-## نکته اعمال Patch
+## فایل حذف‌شده
 
-محتویات پوشه `ostadsho-child` این Patch را روی پوشه قالب موجود با حفظ ساختار مسیرها کپی و جایگزین کنید. فایل‌های دیگر قالب حذف نمی‌شوند.
+ندارد. فایل `DELETED-FILES.txt` عمداً خالی است.
 
-## تست‌های تحویل
+## تغییرات کلیدی
 
-- PHP lint کل قالب: بدون خطا
-- JavaScript syntax check کل `assets/js`: بدون خطا
-- بررسی Scope CSS جدید: فقط `ba-jihadi-center` و `ba-center-settings`
-- تست سلامت آرشیو ZIP: بدون خطا
+- افزودن Resolver مرکزی تنظیمات با اولویت داشبورد.
+- افزودن `settings_schema_version = 0.4.0` برای سازگاری با تنظیمات Legacy.
+- افزودن Switcher نمایش برای Hero، Stats، Intro، News، Media، Partners و FAQ در داشبورد و Elementor.
+- افزودن Hero کامل به Elementor و تکمیل Hero داشبورد با Eyebrow.
+- افزودن Repeater آمار به Elementor.
+- افزودن عنوان، توضیحات و Repeater کارت‌های مرکز به Elementor.
+- افزودن تنظیمات محتوا و Query کامل اخبار به داشبورد.
+- افزودن تنظیمات محتوا و Query کامل چندرسانه‌ای به داشبورد.
+- حفظ `BA_Content_Query_Service` به‌عنوان تنها محل ساخت WP_Query اخبار و چندرسانه‌ای.
+- حفظ `BA_Admin_Repeater_Component` برای Repeaterهای سفارشی wp-admin و `Elementor\Repeater` برای Elementor.
 
-## Commit پیشنهادی
+## روش اعمال Patch
 
-```text
-feat: افزودن ویجت و تنظیمات مرکز حرکت‌های مردمی و جهادی
+1. محتوای پوشه `ostadsho-child/` داخل Patch را روی پوشه قالب فرزند `ostadsho-child/` کپی کنید.
+2. فایل‌های هم‌نام را Replace کنید.
+3. چون فایل حذفی وجود ندارد، اقدام دیگری برای حذف فایل لازم نیست.
+4. یک‌بار تب «مرکز حرکت‌های مردمی و جهادی» را بازبینی و ذخیره کنید تا Schema جدید ثبت شود.
+5. Cache سایت/Elementor را در صورت وجود پاک کنید.
 
-- افزودن تب اختصاصی مرکز به تنظیمات بنیاد علوی
-- افزودن تنظیمات Hero، آمار، معرفی مرکز و کارت‌های سامانه
-- افزودن مدیریت همراهان و FAQ با اولویت تنظیمات داشبورد
-- ساخت ویجت کامل Elementor بر اساس طرح تأییدشده
-- افزودن Query Builder مشترک برای اخبار و چندرسانه‌ای
-- افزودن کنترل‌های گسترده استایل و Responsive در Elementor
-- پیاده‌سازی UI با BEM و سرویس‌های مشترک OOP
-- حذف enqueue تکراری استایل Checkout
-```
+## نکته اولویت
+
+بعد از اولین ذخیره تب مرکز با نسخه جدید، مقادیر ذخیره‌شده داشبورد مرجع فیلدهای متناظر هستند؛ حتی مقدار خالی و Switcher خاموش نیز انتخاب معتبر محسوب می‌شوند. کنترل‌های Style همچنان توسط Elementor مدیریت می‌شوند.
+
+## تست‌های انجام‌شده
+
+- `php -l` روی تمام ۲۳ فایل PHP قالب.
+- `node --check` روی تمام ۹ فایل JavaScript قالب.
+- تست واحد سبک Resolver و Sanitize تنظیمات با داده Stub.
+- بررسی وجود هفت Switcher سکشن در داشبورد و هفت Switcher متناظر در Elementor.
+- بررسی عدم ساخت `WP_Query` خارج از `BA_Content_Query_Service` برای قابلیت مرکز.
+- بررسی سلامت ZIP کامل و Patch با `unzip -t`.
