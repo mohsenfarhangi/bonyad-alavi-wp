@@ -718,7 +718,7 @@ final class Bonyad_Alavi_Jihadi_Center_Widget extends Widget_Base {
 		$button     = (string) ( $settings['hero_button_text'] ?? '' );
 		$link       = is_array( $settings['hero_button_url'] ?? null ) ? $settings['hero_button_url'] : array( 'url' => (string) ( $settings['hero_button_url'] ?? '' ) );
 		?>
-		<section class="ba-jihadi-center__hero">
+		<section class="ba-jihadi-center__hero ba-jihadi-center__viewport-section" data-ba-jc-reveal>
 			<div class="ba-jihadi-center__hero-media">
 				<?php if ( $background ) : ?><img class="ba-jihadi-center__hero-image" src="<?php echo esc_url( $background ); ?>" alt="" fetchpriority="high"><?php endif; ?>
 			</div>
@@ -766,7 +766,7 @@ final class Bonyad_Alavi_Jihadi_Center_Widget extends Widget_Base {
 			return;
 		}
 		?>
-		<div class="ba-jihadi-center__stats-wrap">
+		<div class="ba-jihadi-center__stats-wrap ba-jihadi-center__viewport-section ba-jihadi-center__viewport-section--lazy" data-ba-jc-reveal data-ba-jc-lazy-section>
 			<div class="ba-jihadi-center__container">
 				<div class="ba-jihadi-center__stats-panel" style="--ba-jc-stat-count:<?php echo esc_attr( max( 1, count( $stats ) ) ); ?>" aria-label="آمار فعالیت‌های مرکز">
 					<div class="ba-jihadi-center__stats-intro">
@@ -805,7 +805,7 @@ final class Bonyad_Alavi_Jihadi_Center_Widget extends Widget_Base {
 	private function render_intro( array $settings ) {
 		$cards = array_values( array_filter( (array) ( $settings['system_cards'] ?? array() ), array( $this, 'has_system_card_content' ) ) );
 		?>
-		<section class="ba-jihadi-center__intro-section" id="ba-jihadi-center-systems">
+		<section class="ba-jihadi-center__intro-section ba-jihadi-center__viewport-section ba-jihadi-center__viewport-section--lazy" id="ba-jihadi-center-systems" data-ba-jc-reveal data-ba-jc-lazy-section>
 			<div class="ba-jihadi-center__container">
 				<div class="ba-jihadi-center__intro-head">
 					<?php $this->render_kicker( $settings['intro_kicker'] ?? '' ); ?>
@@ -926,7 +926,7 @@ final class Bonyad_Alavi_Jihadi_Center_Widget extends Widget_Base {
 		$query = ( new BA_Content_Query_Service() )->create_query( $settings, 'news' );
 		$posts = $query->posts;
 		?>
-		<section class="ba-jihadi-center__news-section" id="ba-jihadi-center-news">
+		<section class="ba-jihadi-center__news-section ba-jihadi-center__viewport-section ba-jihadi-center__viewport-section--lazy" id="ba-jihadi-center-news" data-ba-jc-reveal data-ba-jc-lazy-section>
 			<div class="ba-jihadi-center__container">
 				<?php $this->render_section_heading( $settings['news_kicker'], $settings['news_title'], $settings['news_subtitle'], $settings['news_all_text'], $settings['news_all_url'] ); ?>
 				<?php if ( $posts ) : ?>
@@ -983,7 +983,7 @@ final class Bonyad_Alavi_Jihadi_Center_Widget extends Widget_Base {
 		$query = ( new BA_Content_Query_Service() )->create_query( $settings, 'media' );
 		$posts = $query->posts;
 		?>
-		<section class="ba-jihadi-center__media-section" id="ba-jihadi-center-media">
+		<section class="ba-jihadi-center__media-section ba-jihadi-center__viewport-section ba-jihadi-center__viewport-section--lazy" id="ba-jihadi-center-media" data-ba-jc-reveal data-ba-jc-lazy-section>
 			<div class="ba-jihadi-center__container">
 				<?php $this->render_section_heading( $settings['media_kicker'], $settings['media_title'], $settings['media_subtitle'], $settings['media_all_text'], $settings['media_all_url'] ); ?>
 				<?php if ( $posts ) : ?>
@@ -1074,7 +1074,7 @@ final class Bonyad_Alavi_Jihadi_Center_Widget extends Widget_Base {
 			return;
 		}
 		?>
-		<section class="ba-jihadi-center__partners-section" id="ba-jihadi-center-partners">
+		<section class="ba-jihadi-center__partners-section ba-jihadi-center__viewport-section ba-jihadi-center__viewport-section--lazy" id="ba-jihadi-center-partners" data-ba-jc-reveal data-ba-jc-lazy-section>
 			<div class="ba-jihadi-center__container">
 				<?php $this->render_section_heading( $kicker, $title, $subtitle ); ?>
 				<?php if ( $partners ) : ?><div class="ba-jihadi-center__partners-grid"><?php foreach ( $partners as $partner ) { $this->render_partner( $partner, $use_dashboard ); } ?></div><?php endif; ?>
@@ -1214,7 +1214,7 @@ final class Bonyad_Alavi_Jihadi_Center_Widget extends Widget_Base {
 			return;
 		}
 		?>
-		<section class="ba-jihadi-center__faq-section" id="ba-jihadi-center-faq">
+		<section class="ba-jihadi-center__faq-section ba-jihadi-center__viewport-section ba-jihadi-center__viewport-section--lazy" id="ba-jihadi-center-faq" data-ba-jc-reveal data-ba-jc-lazy-section>
 			<div class="ba-jihadi-center__container ba-jihadi-center__faq-grid">
 				<div class="ba-jihadi-center__faq-copy"><?php $this->render_section_heading( $kicker, $title, $subtitle ); ?></div>
 				<?php if ( $faqs ) : ?>

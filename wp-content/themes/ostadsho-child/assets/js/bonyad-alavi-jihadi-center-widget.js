@@ -80,6 +80,74 @@
     }
 
     /**
+     * سکشن‌های ویجت را هنگام ورود به viewport با Fade-in نمایش می‌دهد.
+     * برای بخش‌های پایین صفحه، lazy rendering مرورگر با content-visibility در CSS فعال است.
+     */
+    function initSectionReveal(root) {
+        var sections = root.querySelectorAll('[data-ba-jc-reveal]');
+        var reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+        /**
+         * یک سکشن را فقط یک بار نمایان می‌کند.
+         */
+        function reveal(section) {
+            if (section.dataset.baJcRevealed === '1') {
+                return;
+            }
+
+            section.dataset.baJcRevealed = '1';
+            section.classList.add('ba-jihadi-center__viewport-section--visible');
+
+            if (reduced || typeof section.animate !== 'function') {
+                return;
+            }
+
+            section.animate(
+                [
+                    { opacity: 0 },
+                    { opacity: 1 }
+                ],
+                {
+                    duration: 650,
+                    easing: 'cubic-bezier(0.22, 1, 0.36, 1)'
+                }
+            );
+        }
+
+        var isEditor = window.elementorFrontend && typeof window.elementorFrontend.isEditMode === 'function' && window.elementorFrontend.isEditMode();
+        if (isEditor) {
+            sections.forEach(function (section) {
+                section.dataset.baJcRevealed = '1';
+                section.classList.add('ba-jihadi-center__viewport-section--visible');
+            });
+            return;
+        }
+
+        if (reduced || !('IntersectionObserver' in window)) {
+            sections.forEach(reveal);
+            return;
+        }
+
+        var observer = new IntersectionObserver(function (entries) {
+            entries.forEach(function (entry) {
+                if (!entry.isIntersecting) {
+                    return;
+                }
+
+                reveal(entry.target);
+                observer.unobserve(entry.target);
+            });
+        }, {
+            threshold: 0.08,
+            rootMargin: '0px 0px -6% 0px'
+        });
+
+        sections.forEach(function (section) {
+            observer.observe(section);
+        });
+    }
+
+    /**
      * رفتار Accordion پرسش‌های متداول را داخل همان نمونه ویجت فعال می‌کند.
      */
     function initFaq(root) {
@@ -114,6 +182,7 @@
             return;
         }
         root.dataset.baJihadiCenterReady = '1';
+        initSectionReveal(root);
         initCounters(root);
         initFaq(root);
     }

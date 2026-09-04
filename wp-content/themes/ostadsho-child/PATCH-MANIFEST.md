@@ -1,29 +1,32 @@
-# Patch Manifest — v0.5.2
+# Patch Manifest — v0.5.3
 
 ## مبدا و مقصد
 
-- نسخه مبدا: `v0.5.1`
-- نسخه مقصد: `v0.5.2`
-- نوع تغییر: Patch / UI Fix
+- نسخه مبدا: `v0.5.2`
+- نسخه مقصد: `v0.5.3`
+- نوع نسخه: PATCH
+
+## هدف
+
+افزودن Lazy Rendering برای سکشن‌های پایین صفحه «مرکز حرکت‌های مردمی و جهادی» و اجرای Fade-in یک‌باره هنگام ورود هر سکشن به viewport.
 
 ## فایل‌های تغییرکرده
 
 - `assets/css/bonyad-alavi-jihadi-center-widget.css`
+- `assets/js/bonyad-alavi-jihadi-center-widget.js`
 - `inc/elementor/widgets/class-bonyad-alavi-jihadi-center-widget.php`
 - `docs/handoff.md`
 
 ## فایل‌های جدید
 
-- `docs/versions/v0.5.2.md`
+- `docs/versions/v0.5.3.md`
 
 ## فایل حذف‌شده
 
 ندارد.
 
-## خلاصه تغییر
+## نکات اعمال Patch
 
-- حذف `fill` اجباری از SVG آیکون System Card.
-- افزودن کنترل رنگ Hover مستقل برای آیکون‌ها.
-- هماهنگ‌سازی Hover و Focus آیکون با عنوان کارت.
-- حذف استایل ویژه اولین System Card.
-- وسط‌چین‌کردن `ba-jihadi-center__intro-head`.
+محتویات ZIP را در ریشه قالب `ostadsho-child` جایگزین کنید. ساختار مسیرها حفظ شده است.
+
+Hero عمداً Lazy Render نشده است تا LCP و اولویت تصویر اصلی صفحه آسیب نبیند؛ فقط Fade-in روی آن اجرا می‌شود.
