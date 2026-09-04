@@ -259,6 +259,9 @@ final class SubmissionRepository
             $wpdb->delete($p.'afe_notes',['submission_id'=>$id],['%d']);
             $wpdb->delete($p.'afe_files',['submission_id'=>$id],['%d']);
             $wpdb->delete($p.'afe_audit_log',['submission_id'=>$id],['%d']);
+            $wpdb->delete($p.'afe_action_log',['submission_id'=>$id],['%d']);
+            $wpdb->delete($p.'afe_action_once',['submission_id'=>$id],['%d']);
+            $wpdb->delete($p.'afe_submission_fingerprints',['submission_id'=>$id],['%d']);
             $dedicated=$p.'afe_form_'.sanitize_key(str_replace('-','_',$formSlug));
             if($wpdb->get_var($wpdb->prepare('SHOW TABLES LIKE %s',$dedicated))===$dedicated){
                 $wpdb->delete($dedicated,['submission_id'=>$id],['%d']);

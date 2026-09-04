@@ -1438,7 +1438,12 @@
       if (!json.success) {
         const payload = json.data || {};
         const count = showServerErrors(form, payload.errors || {}, payload.message || 'خطا در ثبت اطلاعات');
-        if (!count && result) result.innerHTML = `<div class="afe-notice afe-notice-error">${escapeHtml(payload.message || 'خطا در ثبت اطلاعات')}</div>`;
+        if (!count && result) {
+          const duplicateLink = payload.code === 'duplicate' && payload.edit_url
+            ? `<a class="afe-result-link" href="${escapeAttr(payload.edit_url)}">مشاهده یا ادامه ثبت قبلی</a>`
+            : '';
+          result.innerHTML = `<div class="afe-notice afe-notice-error">${escapeHtml(payload.message || 'خطا در ثبت اطلاعات')}${duplicateLink}</div>`;
+        }
         if (String(payload.code || '').startsWith('captcha')) {
           qs(form, '[data-afe-captcha-refresh]')?.click();
         }

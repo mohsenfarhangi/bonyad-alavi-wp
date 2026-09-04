@@ -1,3 +1,26 @@
+## وضعیت توسعه 1.0.28-dev (Action / SMS / Duplicate Checkpoint)
+
+> این بسته هنوز Production-ready نیست. مبنای پایدار `1.0.27` است و `Stable tag` عمداً روی `1.0.27` باقی مانده است. DB checkpoint فعلی `1.0.5-dev.2` است.
+
+در این checkpoint، معماری Event/Action و Duplicate از scaffold عبور کرده و به مسیر اجرایی واقعی وصل شده است:
+
+- `ActionDefinition` / `ActionRegistry` با schema عمومی تنظیمات، `action_key` پایدار، Conditional Logic و سیاست‌های اجرای `always` / `once_per_submission` / `first_in_cycle`.
+- Action Log و once-guard اتمیک به اجرای واقعی متصل شده‌اند؛ خطای Action ثبت موفق Submission را rollback نمی‌کند.
+- Eventهای canonical با Label فارسی به create/draft/submit/update/status/lock/edit-request/trash/restore وصل شده‌اند.
+- Email و Webhook از `TokenResolver` مشترک استفاده می‌کنند و Field Tokenها فقط از schema واقعی همان فرم resolve می‌شوند.
+- تب «رویدادها و اکشن‌ها» Registry-based است، چند Action در هر Event، Drag & Drop داخل Event، فعال/غیرفعال‌سازی، Conditional Logic و Token Palette click-to-copy دارد.
+- `SmsAction` و Provider ملی‌پیامک برای Legacy username/password و Console API token پیاده شده‌اند؛ Free SMS و Pattern/Shared هر دو پشتیبانی می‌شوند. Credentialهای حساس در تنظیمات سراسری به‌صورت رمز‌شده ذخیره می‌شوند.
+- گیرنده SMS می‌تواند Field فرم، شماره دستی، WordPress User/Admin یا Token داینامیک باشد.
+- DuplicatePolicy به create/update/REST/admin edit/trash/restore وصل است؛ Draftهای فعال در تطبیق شرکت می‌کنند، Submission جاری هنگام edit مستثنا است و Trashها در تطبیق نیستند.
+- رفتارهای Duplicate شامل block، reference امن به ثبت قبلی، پیام سفارشی و allow+mark است. حالت allow ستون‌های `is_duplicate` و `duplicate_of_submission_id` را نگه می‌دارد.
+- برای allow-mode، هنگام Trash/تغییر canonical owner یک Duplicate فعال به‌صورت تراکنشی promote می‌شود تا ترکیب fingerprint فعال از تشخیص خارج نشود.
+- تب «جلوگیری از تکرار» با انتخاب چند Field، رفتار، پیام و validation حداقل یک Field پیاده شده است.
+- `DuplicateFingerprint` بدون وابستگی اجباری به mbstring هم کار می‌کند.
+
+QA این checkpoint شامل PHP lint، JavaScript syntax check و کل regression suite است؛ تست‌های اختصاصی Action Registry/Manager، SMS Provider/Action، SecretStore و Duplicate Policy/Repository نیز پاس می‌شوند. قرارداد ملی‌پیامک با mock regression پوشش داده شده، اما قبل از انتشار Production باید روی حساب واقعی کاربر هم تست integration انجام شود.
+
+هنوز تکمیل نشده: Retry مدیریتی Action Log، Actionهای Redirect/User/Status/Note/PDF/Post، Field ordering واقعی، Date input modes، Character/Length overrides و Validator Registry/UI.
+
 # Alavi Form Engine
 
 موتور فرم Code-first برای وردپرس با معماری قابل توسعه، مدیریت Submission، Workflow، Data Source، Conditional Logic، Repeater و اتصال اختیاری Elementor.

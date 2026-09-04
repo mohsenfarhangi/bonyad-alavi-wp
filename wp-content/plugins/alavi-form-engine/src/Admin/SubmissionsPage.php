@@ -94,7 +94,7 @@ final class SubmissionsPage
                 $actions.=$this->trashActionForm((int)$row['id'],$trashView?'restore':'trash',$trashView?'بازیابی':'انتقال به زباله‌دان',$trashView?'secondary':'delete');
                 if($trashView) $actions.=$this->trashActionForm((int)$row['id'],'delete_permanently','حذف دائمی','delete',true);
             }
-            echo '<tr><td>'.(int)$row['id'].'</td><td><strong>'.esc_html($this->formTitle((string)$row['form_slug'])).'</strong></td><td>'.esc_html((string)$title).'</td><td><code dir="ltr">'.esc_html($row['tracking_code']).'</code></td><td><span class="afe-status afe-status-'.esc_attr($row['status']).'">'.esc_html($statuses[$row['status']]??$row['status']).'</span></td><td>'.esc_html($this->dates->formatUtc((string)$row['created_at'],true)).'</td><td><div class="afe-row-actions">'.$actions.'</div></td></tr>';
+            echo '<tr><td>'.(int)$row['id'].'</td><td><strong>'.esc_html($this->formTitle((string)$row['form_slug'])).'</strong></td><td>'.esc_html((string)$title).'</td><td><code dir="ltr">'.esc_html($row['tracking_code']).'</code></td><td><span class="afe-status afe-status-'.esc_attr($row['status']).'">'.esc_html($statuses[$row['status']]??$row['status']).'</span>'.(!empty($row['is_duplicate'])?'<small class="afe-duplicate-badge">Duplicate از #'.(int)($row['duplicate_of_submission_id']??0).'</small>':'').'</td><td>'.esc_html($this->dates->formatUtc((string)$row['created_at'],true)).'</td><td><div class="afe-row-actions">'.$actions.'</div></td></tr>';
         }
         echo '</tbody></table></div></div>';
 
@@ -128,6 +128,7 @@ final class SubmissionsPage
         echo '<div class="wrap afe-admin-wrap">';
         if (!empty($_GET['updated'])) echo '<div class="notice notice-success is-dismissible"><p>تغییرات ذخیره شد.</p></div>';
         if ($trashed) echo '<div class="notice notice-warning"><p><strong>این ثبت در زباله‌دان است.</strong> تا زمان بازیابی، در فرم عمومی و گزارش‌های فعال نمایش داده نمی‌شود.</p></div>';
+        if (!empty($row['is_duplicate'])) echo '<div class="notice notice-info"><p><strong>این ثبت به عنوان Duplicate علامت‌گذاری شده است.</strong> ثبت مرجع: #'.(int)($row['duplicate_of_submission_id']??0).'</p></div>';
         echo '<p><a href="'.esc_url(admin_url('admin.php?page=alavi-form-engine-submissions'.($trashed?'&view=trash':''))).'">← بازگشت به فهرست</a></p>';
         echo '<div class="afe-admin-card"><div class="afe-admin-card-head"><div><h1>'.esc_html($form['title']).' — ثبت #'.(int)$id.'</h1><p>کد رهگیری: <code dir="ltr">'.esc_html($row['tracking_code']).'</code> · تاریخ ثبت: <strong>'.esc_html($this->dates->formatUtc((string)$row['created_at'],true)).'</strong></p></div><div class="afe-admin-actions">';
         if(!$trashed && $this->access->can($formSlug,FormAccess::EDIT)) {
@@ -241,8 +242,13 @@ final class SubmissionsPage
         $formSlug=(string)$row['form_slug'];
         $changed=false;
         if(in_array($action,['trash','restore','delete_permanently'],true) && $this->canDelete($formSlug)) {
-            if($action==='trash') { $changed=$this->repo->trash((int)$row['id'],get_current_user_id()); if($changed) $this->repo->audit((int)$row['id'],$formSlug,'submission.trashed'); }
-            elseif($action==='restore') { $changed=$this->repo->restore((int)$row['id']); if($changed) $this->repo->audit((int)$row['id'],$formSlug,'submission.restored'); }
+            if($action==='trash') {
+                $changed=$this->service->trashSubmission((int)$row['id'],get_current_user_id());
+            } elseif($action==='restore') {
+                $restored=$this->service->restoreSubmission((int)$row['id']);
+                if(is_wp_error($restored)) wp_die(esc_html($restored->get_error_message()));
+                $changed=$restored;
+            }
             else { $changed=$this->repo->deletePermanently((int)$row['id']); if($changed){ wp_safe_redirect(admin_url('admin.php?page=alavi-form-engine-submissions&view=trash&deleted=1')); exit; } }
             wp_safe_redirect(add_query_arg('updated',$changed?'1':'0',$this->detailUrl((int)$row['id']))); exit;
         }
@@ -251,20 +257,26 @@ final class SubmissionsPage
             $now=current_time('mysql',true);
             if($action==='approve_edit_request' || $action==='unlock_submission') {
                 $this->repo->update((int)$row['id'],['is_locked'=>0,'locked_at'=>null,'edit_request_status'=>$action==='approve_edit_request'?'approved':(string)($row['edit_request_status']??''),'edit_request_updated_at'=>$now,'updated_at'=>$now]);
-                $this->repo->audit((int)$row['id'],$row['form_slug'],$action==='approve_edit_request'?'edit_request.approved':'submission.unlocked');
+                $eventKey=$action==='approve_edit_request'?'edit_request.approved':'submission.unlocked';
+                $this->repo->audit((int)$row['id'],$row['form_slug'],$eventKey);
+                $this->service->emitSubmissionEvent($eventKey,(int)$row['id']);
+                if($action==='approve_edit_request') $this->service->emitSubmissionEvent('submission.unlocked',(int)$row['id']);
             } elseif($action==='reject_edit_request') {
                 $this->repo->update((int)$row['id'],['is_locked'=>1,'edit_request_status'=>'rejected','edit_request_updated_at'=>$now,'updated_at'=>$now]);
                 $this->repo->audit((int)$row['id'],$row['form_slug'],'edit_request.rejected');
+                $this->service->emitSubmissionEvent('edit_request.rejected',(int)$row['id']);
             } else {
                 $this->repo->update((int)$row['id'],['is_locked'=>1,'locked_at'=>$now,'updated_at'=>$now]);
                 $this->repo->audit((int)$row['id'],$row['form_slug'],'submission.locked');
+                $this->service->emitSubmissionEvent('submission.locked',(int)$row['id']);
             }
             $changed=true;
         } elseif($action==='status' && $this->access->can($formSlug,FormAccess::MANAGE) && current_user_can(Capabilities::CHANGE_STATUS)) {
             $status=sanitize_key(wp_unslash($_POST['status']??''));
-            if(isset($form['workflow'][$status])) {
+            if(isset($form['workflow'][$status]) && $status !== (string)$row['status']) {
                 $this->repo->update((int)$row['id'],['status'=>$status,'updated_at'=>current_time('mysql',true)]);
-                $this->repo->audit((int)$row['id'],$row['form_slug'],'status.changed',['from'=>$row['status'],'to'=>$status]);
+                $this->repo->audit((int)$row['id'],$row['form_slug'],'submission.status_changed',['from'=>$row['status'],'to'=>$status]);
+                $this->service->emitSubmissionEvent('submission.status_changed',(int)$row['id']);
                 $changed=true;
             }
         } elseif($action==='note' && $this->access->can($formSlug,FormAccess::MANAGE) && current_user_can(Capabilities::ADD_NOTES)) {
@@ -277,10 +289,9 @@ final class SubmissionsPage
         } elseif($action==='edit_data' && $this->access->can($formSlug,FormAccess::EDIT)) {
             $input=is_array($_POST['afe_admin_data']??null)?(array)$_POST['afe_admin_data']:[];
             $clean=$this->presenter->sanitizeSubmitted($form,$input,(array)$row['data']);
-            $this->repo->update((int)$row['id'],['data_json'=>wp_json_encode($clean,JSON_UNESCAPED_UNICODE),'updated_at'=>current_time('mysql',true)]);
-            $this->repo->replaceValues((int)$row['id'],$clean);
-            $this->repo->audit((int)$row['id'],$row['form_slug'],'data.admin_edited');
-            $changed=true;
+            $updated=$this->service->updateSubmissionDataAdmin((int)$row['id'],$clean);
+            if(is_wp_error($updated)) wp_die(esc_html($updated->get_error_message()));
+            $changed=$updated;
         }
         wp_safe_redirect(add_query_arg('updated',$changed?'1':'0',$this->detailUrl((int)$row['id']))); exit;
     }
@@ -317,8 +328,13 @@ final class SubmissionsPage
         $formSlug=(string)$row['form_slug'];
         if(!$this->canDelete($formSlug)) wp_die('دسترسی حذف این فرم را ندارید.');
         $ok=false;
-        if($action==='trash' && empty($row['trashed_at'])) { $ok=$this->repo->trash($id,get_current_user_id()); if($ok) $this->repo->audit($id,$formSlug,'submission.trashed'); }
-        elseif($action==='restore' && !empty($row['trashed_at'])) { $ok=$this->repo->restore($id); if($ok) $this->repo->audit($id,$formSlug,'submission.restored'); }
+        if($action==='trash' && empty($row['trashed_at'])) {
+            $ok=$this->service->trashSubmission($id,get_current_user_id());
+        } elseif($action==='restore' && !empty($row['trashed_at'])) {
+            $restored=$this->service->restoreSubmission($id);
+            if(is_wp_error($restored)) wp_die(esc_html($restored->get_error_message()));
+            $ok=$restored;
+        }
         elseif($action==='delete_permanently' && !empty($row['trashed_at'])) { $ok=$this->repo->deletePermanently($id); }
         $view=$action==='trash'?'':'trash';
         $url=admin_url('admin.php?page=alavi-form-engine-submissions'.($view?'&view=trash':'').'&trash_updated='.($ok?'1':'0'));

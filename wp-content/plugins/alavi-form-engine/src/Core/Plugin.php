@@ -4,6 +4,11 @@ declare(strict_types=1);
 namespace BonyadAlavi\FormEngine\Core;
 
 use BonyadAlavi\FormEngine\Actions\ActionManager;
+use BonyadAlavi\FormEngine\Actions\ActionRegistry;
+use BonyadAlavi\FormEngine\Actions\ActionExecutionRepository;
+use BonyadAlavi\FormEngine\Actions\Tokens\TokenRegistry;
+use BonyadAlavi\FormEngine\Actions\Tokens\TokenResolver;
+use BonyadAlavi\FormEngine\Actions\Sms\MeliPayamakProvider;
 use BonyadAlavi\FormEngine\Admin\DatabasePage;
 use BonyadAlavi\FormEngine\Admin\FormsPage;
 use BonyadAlavi\FormEngine\Admin\Menu;
@@ -15,8 +20,12 @@ use BonyadAlavi\FormEngine\DataSource\DataSourceManager;
 use BonyadAlavi\FormEngine\Database\DedicatedStorage;
 use BonyadAlavi\FormEngine\Database\GeographyImporter;
 use BonyadAlavi\FormEngine\Database\Migrator;
+use BonyadAlavi\FormEngine\Duplicate\DuplicateFingerprint;
+use BonyadAlavi\FormEngine\Duplicate\DuplicatePolicy;
+use BonyadAlavi\FormEngine\Duplicate\DuplicateRepository;
 use BonyadAlavi\FormEngine\Elementor\Integration as ElementorIntegration;
 use BonyadAlavi\FormEngine\Events\EventDispatcher;
+use BonyadAlavi\FormEngine\Events\EventRegistry;
 use BonyadAlavi\FormEngine\Form\FormRegistry;
 use BonyadAlavi\FormEngine\Form\Renderer;
 use BonyadAlavi\FormEngine\Form\PreviewRenderer;
@@ -75,11 +84,26 @@ final class Plugin
 
         $formRepo = new FormRepository();
         $submissionRepo = new SubmissionRepository();
+        $duplicateRepo = new DuplicateRepository();
+        $duplicatePolicy = new DuplicatePolicy(new DuplicateFingerprint(), $duplicateRepo);
         $sources = new DataSourceManager();
         $security = new SecurityManager();
         $validator = new Validator();
         $fileUploader = new FileUploader();
-        $actions = new ActionManager();
+        $tokenRegistry = new TokenRegistry();
+        $tokenResolver = new TokenResolver();
+        $secretStore = new SecretStore();
+        $globalSettings = (array)get_option('afe_settings', []);
+        $smsSettings = isset($globalSettings['sms']) && is_array($globalSettings['sms']) ? $globalSettings['sms'] : [];
+        $smsSettings['password'] = $secretStore->decrypt((string)($smsSettings['password'] ?? ''));
+        $smsSettings['api_key'] = $secretStore->decrypt((string)($smsSettings['api_key'] ?? ''));
+        $smsProvider = new MeliPayamakProvider($smsSettings);
+        $actionRegistry = new ActionRegistry();
+        $actionRegistry->registerCore($tokenResolver);
+        $actionRegistry->registerSms($tokenResolver, $smsProvider);
+        $actionExecutions = new ActionExecutionRepository();
+        $actions = new ActionManager($actionRegistry, $actionExecutions);
+        $eventRegistry = new EventRegistry();
         $events = new EventDispatcher();
         $dedicated = new DedicatedStorage();
         $styleIsolation = new StyleIsolationManager();
@@ -90,12 +114,15 @@ final class Plugin
         $templates = new TemplateResolver($templateRegistry);
 
         do_action('afe_register_data_sources', $sources);
+        do_action('afe_register_action_definitions', $actionRegistry);
         do_action('afe_register_actions', $actions);
+        do_action('afe_register_event_definitions', $eventRegistry);
         do_action('afe_register_events', $events);
 
         $service = new SubmissionService(
             $registry, $formRepo, $submissionRepo, $security, $validator,
-            $fileUploader, $actions, $events, $dedicated, $formAccess
+            $fileUploader, $actions, $events, $dedicated, $formAccess,
+            $duplicatePolicy, $duplicateRepo
         );
         $previewPresenter = new FormDataPresenter($sources, $dates);
         $previewRenderer = new PreviewRenderer($previewPresenter, $submissionRepo, $templates);
@@ -122,9 +149,17 @@ final class Plugin
         $this->container->set(FormRegistry::class,$registry);
         $this->container->set(FormRepository::class,$formRepo);
         $this->container->set(SubmissionRepository::class,$submissionRepo);
+        $this->container->set(DuplicateRepository::class,$duplicateRepo);
+        $this->container->set(DuplicatePolicy::class,$duplicatePolicy);
         $this->container->set(DataSourceManager::class,$sources);
         $this->container->set(SecurityManager::class,$security);
+        $this->container->set(TokenRegistry::class,$tokenRegistry);
+        $this->container->set(TokenResolver::class,$tokenResolver);
+        $this->container->set(SecretStore::class,$secretStore);
+        $this->container->set(ActionRegistry::class,$actionRegistry);
+        $this->container->set(ActionExecutionRepository::class,$actionExecutions);
         $this->container->set(ActionManager::class,$actions);
+        $this->container->set(EventRegistry::class,$eventRegistry);
         $this->container->set(EventDispatcher::class,$events);
         $this->container->set(SubmissionService::class,$service);
         $this->container->set(Renderer::class,$renderer);
@@ -149,11 +184,11 @@ final class Plugin
         add_action('wp_ajax_afe_geo_import_chunk', [$this,'ajaxGeoImportChunk']);
 
         if (is_admin()) {
-            $formsPage = new FormsPage($registry,$formRepo,$service,$formAccess,$templates);
+            $formsPage = new FormsPage($registry,$formRepo,$service,$formAccess,$templates,$eventRegistry,$actionRegistry,$tokenRegistry,$duplicatePolicy);
             $submissionsPage = new SubmissionsPage($registry,$submissionRepo,$service,$sources,$formAccess,$dates);
             $reportsPage = new ReportsPage($registry,$submissionRepo,$formAccess,$dates);
             $databasePage = new DatabasePage(new Migrator(),$registry,$dedicated,$dates);
-            $settingsPage = new SettingsPage($registry,$formAccess);
+            $settingsPage = new SettingsPage($registry,$formAccess,$secretStore);
             (new Menu($formsPage,$submissionsPage,$reportsPage,$databasePage,$settingsPage))->register();
         }
 
@@ -224,11 +259,18 @@ final class Plugin
         try {
             $result = $service->handleHttp();
             if (is_wp_error($result)) {
-                wp_send_json_error([
+                $code=$result->get_error_code();
+                $errorData=(array)$result->get_error_data();
+                $payload=[
                     'message'=>$result->get_error_message(),
-                    'errors'=>(array)$result->get_error_data(),
-                    'code'=>$result->get_error_code(),
-                ], 422);
+                    'code'=>$code,
+                    'errors'=>$code==='validation'?$errorData:[],
+                ];
+                if($code==='duplicate'){
+                    $payload['duplicate']=true;
+                    if(!empty($errorData['edit_url'])) $payload['edit_url']=esc_url_raw((string)$errorData['edit_url']);
+                }
+                wp_send_json_error($payload, 422);
             }
             wp_send_json_success($result);
         } catch (Throwable $e) {

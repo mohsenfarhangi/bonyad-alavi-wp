@@ -10,6 +10,12 @@ use BonyadAlavi\FormEngine\Form\FormRegistry;
 use BonyadAlavi\FormEngine\Repository\FormRepository;
 use BonyadAlavi\FormEngine\Submission\SubmissionService;
 use BonyadAlavi\FormEngine\Template\TemplateResolver;
+use BonyadAlavi\FormEngine\Events\EventRegistry;
+use BonyadAlavi\FormEngine\Actions\ActionRegistry;
+use BonyadAlavi\FormEngine\Actions\ActionDefinition;
+use BonyadAlavi\FormEngine\Actions\ActionConfigSanitizer;
+use BonyadAlavi\FormEngine\Actions\Tokens\TokenRegistry;
+use BonyadAlavi\FormEngine\Duplicate\DuplicatePolicy;
 
 final class FormsPage
 {
@@ -18,7 +24,11 @@ final class FormsPage
         private readonly FormRepository $forms,
         private readonly SubmissionService $service,
         private readonly FormAccess $access,
-        private readonly TemplateResolver $templates
+        private readonly TemplateResolver $templates,
+        private readonly EventRegistry $events,
+        private readonly ActionRegistry $actions,
+        private readonly TokenRegistry $tokens,
+        private readonly DuplicatePolicy $duplicatePolicy
     ) {}
 
     public function render(): void
@@ -55,7 +65,9 @@ final class FormsPage
         echo '<form method="post">';
         wp_nonce_field('afe_save_form_'.$slug,'afe_form_nonce');
         echo '<input type="hidden" name="afe_save_form" value="1">';
+        $this->renderTabs();
 
+        echo '<section class="afe-form-tab-panel is-active" data-afe-form-tab-panel="general">';
         $titleOverride=(string)($storedOverrides['title']??'');
         $descOverride=(string)($storedOverrides['description']??'');
         echo '<div class="afe-admin-card"><h2>متن و رفتار فرم</h2><div class="afe-admin-grid">';
@@ -91,7 +103,9 @@ final class FormsPage
         echo '<input type="hidden" name="brand_mark_image_url" value="'.esc_attr($brandImageUrl).'" data-afe-brand-image-url>';
         echo '<div class="afe-brand-picker"><div class="afe-brand-picker__preview" data-afe-brand-preview>'.($brandImageUrl!==''?'<img src="'.esc_url($brandImageUrl).'" alt="">':'<span>هنوز تصویری انتخاب نشده است.</span>').'</div><div class="afe-brand-picker__actions"><button type="button" class="button button-secondary" data-afe-brand-select>انتخاب تصویر از رسانه</button><button type="button" class="button" data-afe-brand-remove'.($brandImageUrl!==''?'':' hidden').'>حذف تصویر انتخابی</button><p class="description">برای نتیجه بهتر از تصویر مربع یا نزدیک به مربع استفاده کنید. تصویر در اندازه نشان فرم و با <code>object-fit: contain</code> نمایش داده می‌شود.</p></div></div>';
         echo '</div></div></div>';
+        echo '</section>';
 
+        echo '<section class="afe-form-tab-panel" data-afe-form-tab-panel="preview" hidden>';
         $previewEnabled=!empty($storedSettings['preview_enabled']??$form['settings']['preview_enabled']);
         $lockAfter=!empty($storedSettings['lock_after_submit']??$form['settings']['lock_after_submit']);
         $showRequest=!empty($storedSettings['show_edit_request_button']??$form['settings']['show_edit_request_button']);
@@ -116,7 +130,9 @@ final class FormsPage
             12
         );
         echo '</div>';
+        echo '</section>';
 
+        echo '<section class="afe-form-tab-panel" data-afe-form-tab-panel="fields" hidden>';
         echo '<div class="afe-admin-card afe-overrides-card"><div class="afe-admin-card-title"><div><h2>Override فیلدها</h2><p>فیلدها بر اساس مرحله گروه‌بندی شده‌اند. عنوان اصلی فیلد درشت نمایش داده می‌شود و کلید فنی فقط به‌عنوان مرجع ثانویه باقی می‌ماند.</p></div></div>';
         echo '<div class="afe-override-steps">';
         foreach ($this->registry->get($slug)->toArray()['steps'] as $stepDef) {
@@ -182,7 +198,17 @@ final class FormsPage
             echo '</details>';
         }
         echo '</div>';
+        echo '</section>';
 
+        echo '<section class="afe-form-tab-panel" data-afe-form-tab-panel="duplicate" hidden>';
+        $this->renderDuplicateSettings($form);
+        echo '</section>';
+
+        echo '<section class="afe-form-tab-panel" data-afe-form-tab-panel="actions" hidden>';
+        $this->renderActionBuilder($form,$codeForm,$storedSettings);
+        echo '</section>';
+
+        echo '<section class="afe-form-tab-panel" data-afe-form-tab-panel="templates" hidden>';
         $template=$row?(string)$row->template_html:'';
         $css=$row?(string)$row->custom_css:'';
         $js=$row?(string)$row->custom_js:'';
@@ -200,12 +226,321 @@ final class FormsPage
             14
         );
         echo '</div>';
+        echo '</section>';
+
+        echo '<section class="afe-form-tab-panel" data-afe-form-tab-panel="assets" hidden>';
         echo '<div class="afe-admin-card"><h2>CSS اختصاصی</h2><textarea class="afe-code" name="custom_css" rows="10" spellcheck="false">'.esc_textarea($css).'</textarea></div>';
         echo '<div class="afe-admin-card"><h2>JavaScript اختصاصی</h2><div class="afe-warning">این کد در Front-end اجرا می‌شود و فقط کاربران دارای دسترسی تنظیمات باید آن را ویرایش کنند. PHP خام از پنل اجرا نمی‌شود.</div><textarea class="afe-code" name="custom_js" rows="10" spellcheck="false">'.esc_textarea($js).'</textarea></div>';
-        echo '<div class="afe-admin-card"><h2>Workflow</h2><p>JSON وضعیت‌ها به شکل <code>{"new":"جدید","approved":"تأیید شده"}</code></p><textarea class="afe-code" name="workflow_json" rows="8">'.esc_textarea(wp_json_encode($workflow,JSON_UNESCAPED_UNICODE|JSON_PRETTY_PRINT)).'</textarea></div>';
+        echo '</section>';
 
-        submit_button('ذخیره Overrideهای فرم');
+        echo '<section class="afe-form-tab-panel" data-afe-form-tab-panel="workflow" hidden>';
+        echo '<div class="afe-admin-card"><h2>Workflow</h2><p>JSON وضعیت‌ها به شکل <code>{"new":"جدید","approved":"تأیید شده"}</code></p><textarea class="afe-code" name="workflow_json" rows="8">'.esc_textarea(wp_json_encode($workflow,JSON_UNESCAPED_UNICODE|JSON_PRETTY_PRINT)).'</textarea></div>';
+        echo '</section>';
+
+        echo '<section class="afe-form-tab-panel" data-afe-form-tab-panel="access" hidden>';
+        echo '<div class="afe-admin-card"><div class="afe-admin-card-title"><div><h2>دسترسی</h2><p>Capabilityهای اختصاصی هر فرم در صفحه تنظیمات سراسری مدیریت می‌شوند تا یک ماتریس واحد برای نقش‌ها وجود داشته باشد.</p></div></div><a class="button button-secondary" href="'.esc_url(admin_url('admin.php?page=alavi-form-engine-settings')).'">مدیریت دسترسی نقش‌ها</a></div>';
+        echo '</section>';
+
+        echo '<div class="afe-form-sticky-save">';
+        submit_button('ذخیره Overrideهای فرم','primary','submit',false);
+        echo '<span>تغییرات همه تب‌ها با این دکمه ذخیره می‌شوند.</span></div>';
         echo '</form></main></div></div>';
+    }
+
+    private function renderTabs(): void
+    {
+        $tabs=[
+            'general'=>'عمومی',
+            'fields'=>'فیلدها و چیدمان',
+            'duplicate'=>'جلوگیری از تکرار',
+            'actions'=>'رویدادها و اکشن‌ها',
+            'workflow'=>'Workflow',
+            'preview'=>'Preview و Lock',
+            'templates'=>'قالب‌ها',
+            'assets'=>'CSS/JS',
+            'access'=>'دسترسی',
+        ];
+        echo '<nav class="afe-form-tabs" data-afe-form-tabs role="tablist" aria-label="تنظیمات فرم">';
+        foreach($tabs as $key=>$label){
+            echo '<button type="button" class="afe-form-tab'.($key==='general'?' is-active':'').'" role="tab" aria-selected="'.($key==='general'?'true':'false').'" data-afe-form-tab="'.esc_attr($key).'">'.esc_html($label).'</button>';
+        }
+        echo '</nav>';
+    }
+
+    private function renderDuplicateSettings(array $form): void
+    {
+        $config=$this->duplicatePolicy->config($form);
+        $fields=$this->duplicatePolicy->fieldLabels($form);
+        echo '<div class="afe-admin-card afe-duplicate-card" data-afe-duplicate-settings>';
+        echo '<div class="afe-admin-card-title"><div><h2>جلوگیری از ثبت تکراری</h2><p>Fingerprint از ترکیب همه فیلدهای انتخاب‌شده ساخته می‌شود. Draftهای دیگر هم تکراری محسوب می‌شوند؛ ثبت در حال ویرایش خودش مستثنا است و موارد زباله‌دان‌شده در تطبیق شرکت نمی‌کنند.</p></div></div>';
+        echo '<label class="afe-action-override-toggle"><input type="checkbox" name="duplicate_enabled" value="1" '.checked($config['enabled'],true,false).' data-afe-duplicate-enabled> جلوگیری از ثبت تکراری برای این فرم فعال باشد</label>';
+        echo '<div class="afe-admin-card-subsection"><h3>فیلدهای تشکیل‌دهنده Fingerprint <span class="afe-duplicate-count" data-afe-duplicate-count>'.count($config['fields']).' فیلد</span></h3><p class="description">تکراری بودن فقط زمانی رخ می‌دهد که مقدار همه فیلدهای انتخاب‌شده با یک ثبت فعال دیگر برابر باشد.</p>';
+        if($fields===[]){
+            echo '<div class="afe-warning">فیلد قابل استفاده‌ای برای Fingerprint پیدا نشد.</div>';
+        }else{
+            echo '<div class="afe-duplicate-fields">';
+            foreach($fields as $key=>$label){
+                echo '<label><input type="checkbox" name="duplicate_fields[]" value="'.esc_attr($key).'" '.checked(in_array($key,$config['fields'],true),true,false).'> <span>'.esc_html($label).'</span><code>'.esc_html($key).'</code></label>';
+            }
+            echo '</div>';
+        }
+        echo '<div class="afe-warning afe-duplicate-warning" data-afe-duplicate-warning hidden>برای فعال‌کردن جلوگیری از تکرار، حداقل یک فیلد Fingerprint انتخاب کنید.</div>';
+        echo '</div>';
+        echo '<div class="afe-admin-grid">';
+        echo '<label>رفتار در صورت تکراری بودن<select name="duplicate_behavior" data-afe-duplicate-behavior>';
+        foreach([
+            'block'=>'جلوگیری کامل از ثبت',
+            'reference'=>'ارجاع به ثبت قبلی در صورت داشتن دسترسی معتبر',
+            'message'=>'جلوگیری با پیام سفارشی',
+            'allow'=>'اجازه ثبت و علامت‌گذاری به عنوان Duplicate',
+        ] as $key=>$label){
+            echo '<option value="'.esc_attr($key).'" '.selected($config['behavior'],$key,false).'>'.esc_html($label).'</option>';
+        }
+        echo '</select></label>';
+        echo '<label class="afe-span-2">پیام تکراری<textarea name="duplicate_message" rows="3" placeholder="این اطلاعات قبلاً ثبت شده است.">'.esc_textarea($config['message']).'</textarea><span class="description">در حالت ارجاع، لینک ثبت قبلی فقط زمانی نمایش داده می‌شود که مالکیت/دسترسی معتبر کاربر سمت PHP تأیید شود.</span></label>';
+        echo '</div>';
+        echo '<div class="afe-admin-callout">حالت «اجازه ثبت» رکورد جدید را با <code>is_duplicate=1</code> و مرجع Submission اصلی ذخیره می‌کند. این علامت‌گذاری مستقل از Workflow است.</div>';
+        echo '</div>';
+    }
+
+    private function renderActionBuilder(array $resolvedForm,array $codeForm,array $storedSettings): void
+    {
+        $overrideEnabled=array_key_exists('actions',$storedSettings) && is_array($storedSettings['actions']);
+        $source=$overrideEnabled?(array)$storedSettings['actions']:(array)($codeForm['actions']??[]);
+        $groups=$this->actionGroupsForUi($source);
+        if($groups===[]) $groups=[['event'=>'submission.submitted','actions'=>[]]];
+        $fieldLabels=$this->fieldLabels($resolvedForm);
+        $definitions=$this->actions->all();
+
+        echo '<div class="afe-admin-card afe-action-builder-card" data-afe-action-builder>';
+        echo '<div class="afe-admin-card-title"><div><h2>رویدادها و اکشن‌ها</h2><p>Event با عنوان فارسی انتخاب می‌شود و slug فنی فقط به‌عنوان مرجع توسعه‌دهنده نمایش داده می‌شود. ترتیب اکشن‌ها با Drag & Drop قابل تغییر است.</p></div><span class="afe-action-source'.($overrideEnabled?' is-override':' is-code').'" data-afe-action-source>'.($overrideEnabled?'Override مدیریتی':'ارث‌بری از تعریف کد').'</span></div>';
+        echo '<label class="afe-action-override-toggle"><input type="checkbox" name="actions_override_enabled" value="1" '.checked($overrideEnabled,true,false).' data-afe-actions-override> Override مدیریتی اکشن‌ها برای این فرم فعال باشد <span class="description">با اولین تغییر در Builder به‌صورت خودکار فعال می‌شود. برای بازگشت کامل به تعریف PHP، تیک را بردارید و ذخیره کنید.</span></label>';
+
+        echo '<div class="afe-token-palette"><div class="afe-token-palette__head"><div><strong>Token Palette</strong><span>برای کپی روی Token کلیک کنید.</span></div><span class="afe-token-toast" data-afe-token-toast aria-live="polite"></span></div><div class="afe-token-palette__items">';
+        foreach($this->tokens->forForm($resolvedForm) as $token=>$definition){
+            if($token==='{{field:*}}') continue;
+            echo '<button type="button" class="afe-token-chip" data-afe-token-copy="'.esc_attr($token).'" title="'.esc_attr($definition->description).'"><span>'.esc_html($definition->label).'</span><code>'.esc_html($token).'</code></button>';
+        }
+        echo '</div></div>';
+
+        if($definitions===[]){
+            echo '<div class="afe-warning">هیچ ActionDefinition در Registry ثبت نشده است.</div></div>';
+            return;
+        }
+
+        echo '<div class="afe-event-groups" data-afe-event-groups>';
+        foreach($groups as $groupIndex=>$group) $this->renderActionGroup((string)$groupIndex,$group,$resolvedForm);
+        echo '</div>';
+        echo '<button type="button" class="button button-secondary" data-afe-add-event>افزودن Event</button>';
+
+        echo '<template data-afe-event-template>';
+        $this->renderActionGroup('__GROUP__',['event'=>'submission.submitted','actions'=>[]],$resolvedForm,true);
+        echo '</template>';
+
+        $firstType=(string)array_key_first($definitions);
+        echo '<template data-afe-action-row-template>';
+        $this->renderActionRow('__GROUP__','__ACTION__',[
+            'action_key'=>'__ACTION_KEY__','type'=>$firstType,'enabled'=>true,'execution_policy'=>'always','on_error'=>'continue','config'=>[],'when'=>[],
+        ],$resolvedForm,true);
+        echo '</template>';
+
+        foreach($definitions as $type=>$definition){
+            echo '<template data-afe-action-config-template="'.esc_attr($type).'">';
+            echo '<div class="afe-action-config-grid" data-afe-action-config-grid>';
+            $this->renderActionConfigFields($definition,[], 'action_groups[__GROUP__][actions][__ACTION__]', $resolvedForm);
+            echo '</div></template>';
+        }
+
+        echo '<template data-afe-condition-template>';
+        $this->renderConditionRow('__GROUP__','__ACTION__','__CONDITION__',[], $fieldLabels, true);
+        echo '</template>';
+        echo '</div>';
+    }
+
+    private function renderActionGroup(string $groupIndex,array $group,array $form,bool $template=false): void
+    {
+        $event=(string)($group['event']??'submission.submitted');
+        if(!$this->events->has($event)) $event='submission.submitted';
+        echo '<section class="afe-event-group" data-afe-event-group data-group-index="'.esc_attr($groupIndex).'">';
+        echo '<header class="afe-event-group__head"><label><span>رویداد</span><select name="action_groups['.esc_attr($groupIndex).'][event]" data-afe-event-select>';
+        foreach($this->events->all() as $key=>$definition){
+            echo '<option value="'.esc_attr($key).'" '.selected($event,$key,false).'>'.esc_html($definition->label).'</option>';
+        }
+        echo '</select><small>slug: <code data-afe-event-slug>'.esc_html($event).'</code></small></label><button type="button" class="button-link-delete" data-afe-remove-event>حذف Event</button></header>';
+        echo '<div class="afe-event-actions" data-afe-event-actions>';
+        foreach((array)($group['actions']??[]) as $actionIndex=>$action){
+            $this->renderActionRow($groupIndex,(string)$actionIndex,(array)$action,$form,$template);
+        }
+        echo '</div><button type="button" class="button" data-afe-add-action>افزودن Action</button></section>';
+    }
+
+    private function renderActionRow(string $groupIndex,string $actionIndex,array $action,array $form,bool $template=false): void
+    {
+        $definitions=$this->actions->all();
+        $type=sanitize_key((string)($action['type']??array_key_first($definitions)??''));
+        if(!$this->actions->has($type)) $type=(string)array_key_first($definitions);
+        $definition=$this->actions->get($type);
+        if(!$definition) return;
+
+        $actionKey=sanitize_key((string)($action['action_key']??''));
+        if($actionKey==='') $actionKey='ui_'.$type.'_'.substr(hash('sha256',$groupIndex.'|'.$actionIndex.'|'.$type),0,12);
+        if($template && (string)($action['action_key']??'')==='__ACTION_KEY__') $actionKey='__ACTION_KEY__';
+        $prefix='action_groups['.$groupIndex.'][actions]['.$actionIndex.']';
+        $enabled=!array_key_exists('enabled',$action)||!empty($action['enabled']);
+        $policy=(string)($action['execution_policy']??'always');
+        if(!in_array($policy,['always','once_per_submission','first_in_cycle'],true)) $policy='always';
+        $onError=(string)($action['on_error']??'continue');
+        if(!in_array($onError,['continue','stop'],true)) $onError='continue';
+
+        echo '<article class="afe-action-row" draggable="true" data-afe-action-row data-action-index="'.esc_attr($actionIndex).'">';
+        echo '<header class="afe-action-row__head"><button type="button" class="afe-action-drag" title="برای جابه‌جایی بکشید" aria-label="جابه‌جایی Action">⋮⋮</button><div><strong data-afe-action-label>'.esc_html($definition->label).'</strong><code>'.esc_html($actionKey).'</code></div><button type="button" class="button-link-delete" data-afe-remove-action>حذف</button></header>';
+        echo '<input type="hidden" name="'.esc_attr($prefix.'[action_key]').'" value="'.esc_attr($actionKey).'">';
+        echo '<div class="afe-action-meta-grid">';
+        echo '<label><span>نوع Action</span><select name="'.esc_attr($prefix.'[type]').'" data-afe-action-type>';
+        foreach($definitions as $key=>$one) echo '<option value="'.esc_attr($key).'" '.selected($type,$key,false).'>'.esc_html($one->label).'</option>';
+        echo '</select></label>';
+        echo '<label><span>سیاست اجرا</span><select name="'.esc_attr($prefix.'[execution_policy]').'"><option value="always" '.selected($policy,'always',false).'>هر بار Event</option><option value="once_per_submission" '.selected($policy,'once_per_submission',false).'>فقط یک بار برای Submission</option><option value="first_in_cycle" '.selected($policy,'first_in_cycle',false).'>فقط اولین بار در چرخه Event</option></select></label>';
+        echo '<label><span>رفتار در خطا</span><select name="'.esc_attr($prefix.'[on_error]').'"><option value="continue" '.selected($onError,'continue',false).'>ادامه Actionهای بعدی</option><option value="stop" '.selected($onError,'stop',false).'>توقف زنجیره</option></select></label>';
+        echo '<label class="afe-action-enabled"><input type="checkbox" name="'.esc_attr($prefix.'[enabled]').'" value="1" '.checked($enabled,true,false).'> فعال</label>';
+        echo '</div>';
+
+        echo '<div class="afe-action-config" data-afe-action-config><div class="afe-action-config-grid" data-afe-action-config-grid>';
+        $this->renderActionConfigFields($definition,(array)($action['config']??$this->legacyActionConfig($action)),$prefix,$form);
+        echo '</div></div>';
+
+        if($definition->supportsConditionalLogic){
+            $conditions=(array)($action['when']??[]);
+            echo '<details class="afe-action-conditions"'.($conditions!==[]?' open':'').'><summary>Conditional Logic <span>'.number_format_i18n(count($conditions)).' شرط</span></summary><div class="afe-condition-rows" data-afe-condition-rows>';
+            $fieldLabels=$this->fieldLabels($form);
+            foreach($conditions as $conditionIndex=>$condition) $this->renderConditionRow($groupIndex,$actionIndex,(string)$conditionIndex,(array)$condition,$fieldLabels,$template);
+            echo '</div><button type="button" class="button button-small" data-afe-add-condition>افزودن شرط</button></details>';
+        }
+        echo '</article>';
+    }
+
+    private function renderActionConfigFields(ActionDefinition $definition,array $config,string $prefix,array $form): void
+    {
+        $fields=$this->fieldLabels($form);
+        foreach($definition->settingsSchema as $key=>$schema){
+            if(!is_array($schema)) continue;
+            $type=sanitize_key((string)($schema['type']??'text'));
+            $value=$config[$key]??($schema['default']??'');
+            $showWhen=(array)($schema['show_when']??[]);
+            $attrs='';
+            if($showWhen!==[]){
+                $showField=(string)array_key_first($showWhen);
+                $attrs.=' data-afe-show-when-field="'.esc_attr($showField).'" data-afe-show-when-value="'.esc_attr((string)$showWhen[$showField]).'"';
+            }
+            $name=$prefix.'[config]['.$key.']';
+            echo '<label class="afe-action-config-field'.(in_array($type,['textarea','json','key_value','repeater_text'],true)?' is-wide':'').'"'.$attrs.'><span>'.esc_html((string)($schema['label']??$key));
+            if(!empty($schema['tokens'])) echo ' <small>Token ✓</small>';
+            echo '</span>';
+
+            if($type==='textarea'){
+                echo '<textarea rows="4" name="'.esc_attr($name).'" data-afe-config-field-key="'.esc_attr((string)$key).'">'.esc_textarea((string)$value).'</textarea>';
+            }elseif($type==='json'){
+                $json=is_array($value)?wp_json_encode($value,JSON_UNESCAPED_UNICODE|JSON_PRETTY_PRINT):(string)$value;
+                echo '<textarea rows="7" class="afe-code" name="'.esc_attr($name).'" data-afe-config-field-key="'.esc_attr((string)$key).'">'.esc_textarea((string)$json).'</textarea>';
+            }elseif($type==='key_value'){
+                $lines='';
+                if(is_array($value)) foreach($value as $oneKey=>$oneValue) $lines.=$oneKey.'|'.$oneValue."\n";
+                else $lines=(string)$value;
+                echo '<textarea rows="4" name="'.esc_attr($name).'" data-afe-config-field-key="'.esc_attr((string)$key).'" placeholder="Header|Value">'.esc_textarea(trim($lines)).'</textarea>';
+            }elseif($type==='repeater_text'){
+                $lines=is_array($value)?implode("\n",array_map('strval',$value)):(string)$value;
+                echo '<textarea rows="4" name="'.esc_attr($name).'" data-afe-config-field-key="'.esc_attr((string)$key).'" placeholder="هر پارامتر در یک خط">'.esc_textarea($lines).'</textarea>';
+            }elseif($type==='select'){
+                echo '<select name="'.esc_attr($name).'" data-afe-config-field-key="'.esc_attr((string)$key).'">';
+                foreach((array)($schema['options']??[]) as $option=>$label) echo '<option value="'.esc_attr((string)$option).'" '.selected((string)$value,(string)$option,false).'>'.esc_html((string)$label).'</option>';
+                echo '</select>';
+            }elseif($type==='field_select'){
+                echo '<select name="'.esc_attr($name).'" data-afe-config-field-key="'.esc_attr((string)$key).'"><option value="">انتخاب فیلد…</option>';
+                foreach($fields as $path=>$label) echo '<option value="'.esc_attr($path).'" '.selected((string)$value,$path,false).'>'.esc_html($label).' — '.esc_html($path).'</option>';
+                echo '</select>';
+            }elseif($type==='user'){
+                $dropdown=wp_dropdown_users(['name'=>$name,'selected'=>(int)$value,'show_option_none'=>'انتخاب کاربر…','option_none_value'=>'0','echo'=>0]);
+                echo is_string($dropdown)?$dropdown:'<input type="number" min="0" name="'.esc_attr($name).'" value="'.esc_attr((string)$value).'">';
+            }else{
+                $inputType=$type==='url'?'url':'text';
+                echo '<input type="'.esc_attr($inputType).'" name="'.esc_attr($name).'" value="'.esc_attr((string)$value).'" data-afe-config-field-key="'.esc_attr((string)$key).'">';
+            }
+            echo '</label>';
+        }
+    }
+
+    private function renderConditionRow(string $groupIndex,string $actionIndex,string $conditionIndex,array $condition,array $fieldLabels,bool $template=false): void
+    {
+        $prefix='action_groups['.$groupIndex.'][actions]['.$actionIndex.'][when]['.$conditionIndex.']';
+        $operator=(string)($condition['operator']??'=');
+        $value=$condition['value']??'';
+        if(is_array($value)) $value=implode(',',$value);
+        echo '<div class="afe-condition-row" data-afe-condition-row>';
+        echo '<select name="'.esc_attr($prefix.'[field]').'"><option value="">فیلد…</option>';
+        foreach($fieldLabels as $path=>$label) echo '<option value="'.esc_attr($path).'" '.selected((string)($condition['field']??''),$path,false).'>'.esc_html($label).'</option>';
+        echo '</select><select name="'.esc_attr($prefix.'[operator]').'" data-afe-condition-operator>';
+        foreach(['='=>'برابر','!='=>'نابرابر','>'=>'بزرگ‌تر','>='=>'بزرگ‌تر/برابر','<'=>'کوچک‌تر','<='=>'کوچک‌تر/برابر','in'=>'یکی از','contains'=>'شامل','empty'=>'خالی','not_empty'=>'غیرخالی'] as $key=>$label){
+            echo '<option value="'.esc_attr($key).'" '.selected($operator,$key,false).'>'.esc_html($label).'</option>';
+        }
+        echo '</select><input name="'.esc_attr($prefix.'[value]').'" value="'.esc_attr((string)$value).'" placeholder="مقدار" data-afe-condition-value><button type="button" class="button-link-delete" data-afe-remove-condition>حذف</button></div>';
+    }
+
+    private function actionGroupsForUi(array $source): array
+    {
+        $groups=[];
+        foreach($source as $item){
+            if(!is_array($item)) continue;
+            if(isset($item['actions']) && is_array($item['actions'])){
+                $event=(string)($item['event']??'submission.submitted');
+                if(!$this->events->has($event)) continue;
+                $groups[]=['event'=>$event,'actions'=>array_values(array_filter($item['actions'],'is_array'))];
+                continue;
+            }
+            $rawEvents=$item['events']??$item['on']??$item['event']??['submission.submitted'];
+            $rawEvents=is_array($rawEvents)?$rawEvents:[$rawEvents];
+            foreach($rawEvents as $event){
+                $event=$this->canonicalEvent((string)$event);
+                if(!$this->events->has($event)) continue;
+                $found=null;
+                foreach($groups as $index=>$group) if($group['event']===$event){$found=$index;break;}
+                if($found===null){$groups[]=['event'=>$event,'actions'=>[]];$found=array_key_last($groups);}
+                $groups[$found]['actions'][]=$item;
+            }
+        }
+        return $groups;
+    }
+
+    private function legacyActionConfig(array $action): array
+    {
+        $config=$action;
+        foreach(['type','action_key','enabled','on','events','event','when','execution_policy','on_error','actions'] as $reserved) unset($config[$reserved]);
+        return $config;
+    }
+
+    private function canonicalEvent(string $event): string
+    {
+        return match(trim($event)){
+            'created'=>'submission.created','updated'=>'submission.updated','submitted'=>'submission.submitted','draft','draft_saved'=>'submission.draft_saved',default=>trim($event),
+        };
+    }
+
+    /** @return array<string,string> */
+    private function fieldLabels(array $form): array
+    {
+        $labels=[];
+        foreach((array)($form['steps']??[]) as $step){
+            foreach((array)($step['items']??[]) as $field) $this->collectFieldLabel((array)$field,'',$labels);
+        }
+        return $labels;
+    }
+
+    /** @param array<string,string> $labels */
+    private function collectFieldLabel(array $field,string $prefix,array &$labels): void
+    {
+        $name=(string)($field['name']??'');
+        if($name===''||($field['type']??'')==='html') return;
+        $path=$prefix===''?$name:$prefix.'.'.$name;
+        $labels[$path]=(string)($field['label']??$path);
+        if(($field['type']??'')==='repeater') foreach((array)($field['fields']??[]) as $child) $this->collectFieldLabel((array)$child,$path,$labels);
     }
 
     private function save(string $slug): void
@@ -281,6 +616,25 @@ final class FormsPage
             'brand_mark_alt'=>sanitize_text_field(wp_unslash($_POST['brand_mark_alt']??'')),
             'workflow'=>$workflowClean,
         ];
+        $duplicateAllowed=array_keys($this->duplicatePolicy->fieldLabels($codeForm));
+        $duplicateFields=array_values(array_unique(array_intersect(
+            $duplicateAllowed,
+            array_map(static fn($one)=>sanitize_text_field(wp_unslash((string)$one)),(array)($_POST['duplicate_fields']??[]))
+        )));
+        $duplicateBehavior=sanitize_key((string)($_POST['duplicate_behavior']??'block'));
+        if(!in_array($duplicateBehavior,DuplicatePolicy::BEHAVIORS,true)) $duplicateBehavior='block';
+        $settings['duplicate']=[
+            'enabled'=>!empty($_POST['duplicate_enabled']) && $duplicateFields!==[],
+            'fields'=>$duplicateFields,
+            'behavior'=>$duplicateBehavior,
+            'message'=>sanitize_textarea_field(wp_unslash($_POST['duplicate_message']??'')),
+        ];
+        if(!empty($_POST['actions_override_enabled'])){
+            $settings['actions']=(new ActionConfigSanitizer($this->actions,$this->events))->sanitizeGroups(
+                (array)($_POST['action_groups']??[]),
+                $codeForm
+            );
+        }
         $previewSubmitted=wp_kses_post(wp_unslash($_POST['preview_template']??''));
         $previewDefault=wp_kses_post($this->templates->defaultPreview($codeForm));
         $previewOverride=$this->templates->normalizeOverride($previewSubmitted,$previewDefault);

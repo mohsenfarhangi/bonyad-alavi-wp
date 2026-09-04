@@ -6,6 +6,9 @@ namespace BonyadAlavi\FormEngine\Submission;
 use BonyadAlavi\FormEngine\Actions\ActionContext;
 use BonyadAlavi\FormEngine\Actions\ActionManager;
 use BonyadAlavi\FormEngine\Database\DedicatedStorage;
+use BonyadAlavi\FormEngine\Duplicate\DuplicateDecision;
+use BonyadAlavi\FormEngine\Duplicate\DuplicatePolicy;
+use BonyadAlavi\FormEngine\Duplicate\DuplicateRepository;
 use BonyadAlavi\FormEngine\Core\FormAccess;
 use BonyadAlavi\FormEngine\Events\EventDispatcher;
 use BonyadAlavi\FormEngine\Events\SubmissionCreated;
@@ -30,7 +33,9 @@ final class SubmissionService
         private readonly ActionManager $actions,
         private readonly EventDispatcher $events,
         private readonly DedicatedStorage $dedicated,
-        private readonly FormAccess $formAccess
+        private readonly FormAccess $formAccess,
+        private readonly DuplicatePolicy $duplicatePolicy,
+        private readonly DuplicateRepository $duplicateRepository
     ) {}
 
     public function handleHttp(): array|WP_Error
@@ -58,11 +63,18 @@ final class SubmissionService
             if (is_wp_error($captcha)) return $captcha;
         }
 
+        $duplicate = $this->duplicatePolicy->evaluate($form, $data, $existing ? (int)$existing['id'] : 0);
+        if ($duplicate->blocksDuplicate()) return $this->duplicateError($form, $duplicate);
+
         $now = current_time('mysql', true);
         $status = $draft ? 'draft' : 'new';
         $plainToken = '';
-        $actionEvent = $existing ? 'updated' : 'created';
+        $wasExisting = $existing !== null;
+        $wasLocked = $existing ? !empty($existing['is_locked']) : false;
 
+        global $wpdb;
+        $wpdb->query('START TRANSACTION');
+        try {
         if ($existing) {
             $id = (int)$existing['id'];
             if (!$draft && !in_array((string)$existing['status'], ['draft','revision','new'], true)) {
@@ -72,6 +84,7 @@ final class SubmissionService
                 'status'=>$status,
                 'data_json'=>wp_json_encode($data, JSON_UNESCAPED_UNICODE),
                 'updated_at'=>$now,
+                ...$this->duplicateMetadata($duplicate),
             ];
             if (!$draft && !empty($form['settings']['lock_after_submit'])) {
                 $updateRow['is_locked']=1;
@@ -81,10 +94,11 @@ final class SubmissionService
                 $updateRow['edit_requested_at']=null;
                 $updateRow['edit_request_updated_at']=$now;
             }
-            $this->submissions->update($id, $updateRow);
+            if (!$this->submissions->update($id, $updateRow)) {
+                throw new \RuntimeException('submission update failed');
+            }
             $tracking = (string)$existing['tracking_code'];
             $this->submissions->audit($id, $slug, 'submission.updated', ['status'=>$status]);
-            $this->events->dispatch(new SubmissionUpdated($id,$slug,$data,$status));
         } else {
             $tracking = $this->trackingCode();
             $plainToken = wp_generate_password(48, false, false);
@@ -100,12 +114,27 @@ final class SubmissionService
                 'is_locked'=>(!$draft && !empty($form['settings']['lock_after_submit'])) ? 1 : 0,
                 'locked_at'=>(!$draft && !empty($form['settings']['lock_after_submit'])) ? $now : null,
                 'edit_request_status'=>'',
+                ...$this->duplicateMetadata($duplicate),
                 'created_at'=>$now,
                 'updated_at'=>$now,
             ]);
-            if (!$id) return new WP_Error('database','ذخیره اطلاعات انجام نشد.');
+            if (!$id) {
+                $wpdb->query('ROLLBACK');
+                return new WP_Error('database','ذخیره اطلاعات انجام نشد.');
+            }
             $this->submissions->audit($id, $slug, 'submission.created', ['status'=>$status]);
-            $this->events->dispatch(new SubmissionCreated($id,$slug,$data));
+        }
+
+        $collision = $this->syncDuplicateFingerprint($form, $id, $duplicate);
+        if ($collision instanceof WP_Error) {
+            $wpdb->query('ROLLBACK');
+            return $collision;
+        }
+        $duplicate = $collision ?? $duplicate;
+        $wpdb->query('COMMIT');
+        } catch (\Throwable $e) {
+            $wpdb->query('ROLLBACK');
+            throw $e;
         }
 
         $uploaded = $this->files->process($form, $id);
@@ -116,8 +145,28 @@ final class SubmissionService
 
         $row = $this->submissions->find($id) ?: [];
         $actionErrors = [];
-        if (!$draft) {
-            $actionErrors = $this->actions->run($form['actions'] ?? [], new ActionContext($id,$slug,$data,$row,$actionEvent));
+
+        // Keep the original typed events for backward compatibility, while all
+        // new Action Engine execution uses the canonical registry event keys.
+        if ($wasExisting) {
+            $this->events->dispatch(new SubmissionUpdated($id,$slug,$data,$status));
+            $this->emitActionEvent('submission.updated', $form, $id, $data, $row, $actionErrors);
+        } else {
+            $this->events->dispatch(new SubmissionCreated($id,$slug,$data));
+            $this->emitActionEvent('submission.created', $form, $id, $data, $row, $actionErrors);
+        }
+
+        $this->emitActionEvent(
+            $draft ? 'submission.draft_saved' : 'submission.submitted',
+            $form,
+            $id,
+            $data,
+            $row,
+            $actionErrors
+        );
+
+        if (!$draft && !empty($row['is_locked']) && !$wasLocked) {
+            $this->emitActionEvent('submission.locked', $form, $id, $data, $row, $actionErrors);
         }
 
         $base = wp_get_referer() ?: home_url('/');
@@ -145,6 +194,8 @@ final class SubmissionService
             'uploaded'=>$uploaded,
             'files'=>$this->publicFiles($id),
             'action_errors'=>$actionErrors,
+            'is_duplicate'=>$duplicate->isDuplicate() && $duplicate->allowsDuplicate(),
+            'duplicate_of_submission_id'=>$duplicate->isDuplicate() && $duplicate->allowsDuplicate() ? (int)$duplicate->duplicateSubmissionId : 0,
             'locked'=>(!$draft && !empty($form['settings']['lock_after_submit'])),
             'message'=>$draft ? 'پیش‌نویس با موفقیت ذخیره شد.' : 'اطلاعات با موفقیت ثبت شد.',
         ];
@@ -170,10 +221,16 @@ final class SubmissionService
         );
         if ($errors) return new WP_Error('validation','اطلاعات ارسالی معتبر نیست.',$errors);
 
+        $duplicate = $this->duplicatePolicy->evaluate($form, $data);
+        if ($duplicate->blocksDuplicate()) return $this->duplicateError($form, $duplicate, false);
+
         $now = current_time('mysql', true);
         $status = $draft ? 'draft' : 'new';
         $tracking = $this->trackingCode();
         $plainToken = wp_generate_password(48, false, false);
+        global $wpdb;
+        $wpdb->query('START TRANSACTION');
+        try {
         $id = $this->submissions->create([
             'form_slug'=>$slug,
             'status'=>$status,
@@ -186,10 +243,25 @@ final class SubmissionService
             'is_locked'=>(!$draft && !empty($form['settings']['lock_after_submit'])) ? 1 : 0,
             'locked_at'=>(!$draft && !empty($form['settings']['lock_after_submit'])) ? $now : null,
             'edit_request_status'=>'',
+            ...$this->duplicateMetadata($duplicate),
             'created_at'=>$now,
             'updated_at'=>$now,
         ]);
-        if (!$id) return new WP_Error('database','ذخیره اطلاعات انجام نشد.');
+        if (!$id) {
+            $wpdb->query('ROLLBACK');
+            return new WP_Error('database','ذخیره اطلاعات انجام نشد.');
+        }
+        $collision = $this->syncDuplicateFingerprint($form, $id, $duplicate);
+        if ($collision instanceof WP_Error) {
+            $wpdb->query('ROLLBACK');
+            return $collision;
+        }
+        $duplicate = $collision ?? $duplicate;
+        $wpdb->query('COMMIT');
+        } catch (\Throwable $e) {
+            $wpdb->query('ROLLBACK');
+            throw $e;
+        }
 
         $uploaded = $this->files->process($form, $id);
         $this->submissions->replaceValues($id, $data);
@@ -200,10 +272,19 @@ final class SubmissionService
 
         $this->events->dispatch(new SubmissionCreated($id,$slug,$data));
         $row = $this->submissions->find($id) ?: [];
-        $actionErrors = $draft ? [] : $this->actions->run(
-            $form['actions'] ?? [],
-            new ActionContext($id,$slug,$data,$row,'created')
+        $actionErrors = [];
+        $this->emitActionEvent('submission.created', $form, $id, $data, $row, $actionErrors);
+        $this->emitActionEvent(
+            $draft ? 'submission.draft_saved' : 'submission.submitted',
+            $form,
+            $id,
+            $data,
+            $row,
+            $actionErrors
         );
+        if (!$draft && !empty($row['is_locked'])) {
+            $this->emitActionEvent('submission.locked', $form, $id, $data, $row, $actionErrors);
+        }
 
         return [
             'submission_id'=>$id,
@@ -213,6 +294,8 @@ final class SubmissionService
             'uploaded'=>$uploaded,
             'files'=>$this->publicFiles($id),
             'action_errors'=>$actionErrors,
+            'is_duplicate'=>$duplicate->isDuplicate() && $duplicate->allowsDuplicate(),
+            'duplicate_of_submission_id'=>$duplicate->isDuplicate() && $duplicate->allowsDuplicate() ? (int)$duplicate->duplicateSubmissionId : 0,
             'locked'=>(!$draft && !empty($form['settings']['lock_after_submit'])),
         ];
     }
@@ -247,6 +330,9 @@ final class SubmissionService
         $form['settings'] = array_replace_recursive($form['settings'], $adminSettings);
         if (!empty($adminSettings['workflow']) && is_array($adminSettings['workflow'])) {
             $form['workflow'] = $adminSettings['workflow'];
+        }
+        if (array_key_exists('actions', $adminSettings) && is_array($adminSettings['actions'])) {
+            $form['actions'] = $adminSettings['actions'];
         }
         return $form;
     }
@@ -303,7 +389,257 @@ final class SubmissionService
             'edit_request_updated_at'=>$now,
         ]);
         $this->submissions->audit($id,$slug,'edit_request.created',['reason'=>$reason]);
-        return ['message'=>'درخواست ویرایش با موفقیت ثبت شد.','status'=>'pending'];
+        $row = $this->submissions->find($id) ?: [];
+        $actionErrors = [];
+        $this->emitActionEvent('edit_request.created', $form, $id, $this->rowData($row), $row, $actionErrors);
+        return ['message'=>'درخواست ویرایش با موفقیت ثبت شد.','status'=>'pending','action_errors'=>$actionErrors];
+    }
+
+    /**
+     * Emits a canonical lifecycle event after an admin-side mutation. Action
+     * failures are returned for observability but never roll back the mutation.
+     *
+     * @return array<string, string>
+     */
+    public function emitSubmissionEvent(string $eventKey, int $submissionId): array
+    {
+        $row = $this->submissions->find($submissionId, true);
+        if (!$row || !$this->registry->has((string)$row['form_slug'])) return [];
+
+        $form = $this->resolvedForm((string)$row['form_slug']);
+        $errors = [];
+        $this->emitActionEvent($eventKey, $form, $submissionId, $this->rowData($row), $row, $errors);
+        return $errors;
+    }
+
+    private function emitActionEvent(string $eventKey, array $form, int $submissionId, array $data, array $row, array &$errors): void
+    {
+        $this->events->dispatch($eventKey, $submissionId, (string)$form['slug'], $data, $row);
+        $eventErrors = $this->actions->run(
+            (array)($form['actions'] ?? []),
+            new ActionContext(
+                $submissionId,
+                (string)$form['slug'],
+                $data,
+                $row,
+                $eventKey,
+                (string)($form['title'] ?? ''),
+                $this->fieldKeys($form)
+            )
+        );
+        foreach ($eventErrors as $actionKey => $message) {
+            $errors[$eventKey . ':' . $actionKey] = $message;
+        }
+    }
+
+    /** @return list<string> */
+    private function fieldKeys(array $form): array
+    {
+        $keys = [];
+        foreach ((array)($form['steps'] ?? []) as $step) {
+            foreach ((array)($step['items'] ?? []) as $field) {
+                $this->collectFieldKeys((array)$field, '', $keys);
+            }
+        }
+        return array_values(array_unique($keys));
+    }
+
+    /** @param list<string> $keys */
+    private function collectFieldKeys(array $field, string $prefix, array &$keys): void
+    {
+        $name = (string)($field['name'] ?? '');
+        if ($name === '' || ($field['type'] ?? '') === 'html') return;
+        $path = $prefix === '' ? $name : $prefix . '.' . $name;
+        $keys[] = $path;
+        if (($field['type'] ?? '') === 'repeater') {
+            foreach ((array)($field['fields'] ?? []) as $child) {
+                $this->collectFieldKeys((array)$child, $path, $keys);
+            }
+        }
+    }
+
+    /** @return array{is_duplicate:int,duplicate_of_submission_id:int} */
+    private function duplicateMetadata(DuplicateDecision $decision): array
+    {
+        return [
+            'is_duplicate'=>$decision->isDuplicate() && $decision->allowsDuplicate() ? 1 : 0,
+            'duplicate_of_submission_id'=>$decision->isDuplicate() && $decision->allowsDuplicate()
+                ? (int)$decision->duplicateSubmissionId
+                : 0,
+        ];
+    }
+
+    /**
+     * Synchronize the unique fingerprint inside the caller's transaction.
+     * A concurrent insert can turn a preflight-unique submission into a duplicate;
+     * allow-mode is converted into an explicit duplicate marker, while blocking
+     * modes return an error so the caller can roll the transaction back.
+     */
+    private function syncDuplicateFingerprint(array $form, int $submissionId, DuplicateDecision $decision): DuplicateDecision|WP_Error|null
+    {
+        $formSlug = (string)$form['slug'];
+        $existingFingerprint = $this->duplicateRepository->fingerprintForSubmission($submissionId);
+
+        // If this Submission already owns exactly the same fingerprint, keep the
+        // row in place. Besides avoiding unnecessary churn, this preserves the
+        // canonical owner while allow-mode dependants point to it.
+        if (
+            $decision->enabled
+            && !$decision->isDuplicate()
+            && $existingFingerprint !== ''
+            && hash_equals($existingFingerprint, $decision->fingerprint)
+        ) {
+            return null;
+        }
+
+        if ($existingFingerprint !== '') {
+            if ($decision->enabled) {
+                $this->duplicateRepository->releaseAndPromote($formSlug, $submissionId, $existingFingerprint);
+            } else {
+                $this->duplicateRepository->releaseBySubmission($submissionId);
+            }
+        }
+
+        if (!$decision->enabled || ($decision->isDuplicate() && $decision->allowsDuplicate())) return null;
+        if ($this->duplicateRepository->reserve($formSlug, $submissionId, $decision->fingerprint)) return null;
+
+        $duplicateId = $this->duplicateRepository->find($formSlug, $decision->fingerprint, $submissionId);
+        if ($duplicateId === null) return new WP_Error('duplicate_race','رزرو شناسه تکراری انجام نشد. دوباره تلاش کنید.');
+
+        $collision = new DuplicateDecision(true, $decision->fingerprint, $duplicateId, $decision->behavior, $decision->message);
+        if ($collision->allowsDuplicate()) {
+            $this->submissions->update($submissionId, $this->duplicateMetadata($collision));
+            return $collision;
+        }
+        return $this->duplicateError($form, $collision);
+    }
+
+    private function duplicateError(array $form, DuplicateDecision $decision, bool $allowReferenceUrl = true): WP_Error
+    {
+        $data = ['duplicate'=>true];
+        if ($allowReferenceUrl && $decision->behavior === 'reference' && $decision->duplicateSubmissionId) {
+            $row = $this->submissions->find((int)$decision->duplicateSubmissionId);
+            if ($row) {
+                $url = $this->duplicateReferenceUrl($form, $row);
+                if ($url !== '') $data['edit_url'] = $url;
+            }
+        }
+        return new WP_Error('duplicate', $decision->message, $data);
+    }
+
+    private function duplicateReferenceUrl(array $form, array $row): string
+    {
+        if (!$this->canApplicantAccess($form, $row)) return '';
+        $base = remove_query_arg(['afe_edit','afe_tracking','afe_submission'], wp_get_referer() ?: home_url('/'));
+        $modes = (array)($form['settings']['editing_modes'] ?? []);
+        if (in_array('wordpress',$modes,true) && is_user_logged_in() && (int)$row['user_id']===get_current_user_id() && get_current_user_id()>0) {
+            return add_query_arg('afe_submission', (int)$row['id'], $base);
+        }
+        $token = sanitize_text_field(wp_unslash($_POST['_afe_edit_token'] ?? ''));
+        if (in_array('link',$modes,true) && $token !== '' && hash_equals((string)$row['edit_token_hash'], hash('sha256',$token))) {
+            return add_query_arg('afe_edit', rawurlencode($token), $base);
+        }
+        $tracking = sanitize_text_field(wp_unslash($_POST['_afe_tracking'] ?? ''));
+        if (in_array('tracking',$modes,true) && $tracking !== '' && hash_equals((string)$row['tracking_code'],$tracking)) {
+            return add_query_arg('afe_tracking', rawurlencode($tracking), $base);
+        }
+        return '';
+    }
+
+    public function updateSubmissionDataAdmin(int $submissionId, array $data): bool|WP_Error
+    {
+        $row = $this->submissions->find($submissionId);
+        if (!$row || !$this->registry->has((string)$row['form_slug'])) return new WP_Error('not_found','ثبت پیدا نشد.');
+        $form = $this->resolvedForm((string)$row['form_slug']);
+        $decision = $this->duplicatePolicy->evaluate($form, $data, $submissionId);
+        if ($decision->blocksDuplicate()) return $this->duplicateError($form, $decision, false);
+
+        global $wpdb;
+        $wpdb->query('START TRANSACTION');
+        try {
+            if (!$this->submissions->update($submissionId,[
+                'data_json'=>wp_json_encode($data,JSON_UNESCAPED_UNICODE),
+                'updated_at'=>current_time('mysql',true),
+                ...$this->duplicateMetadata($decision),
+            ])) throw new \RuntimeException('submission update failed');
+            $collision = $this->syncDuplicateFingerprint($form,$submissionId,$decision);
+            if ($collision instanceof WP_Error) {
+                $wpdb->query('ROLLBACK');
+                return $collision;
+            }
+            $wpdb->query('COMMIT');
+        } catch (\Throwable $e) {
+            $wpdb->query('ROLLBACK');
+            throw $e;
+        }
+        $this->submissions->replaceValues($submissionId,$data);
+        $this->submissions->audit($submissionId,(string)$row['form_slug'],'submission.updated',['source'=>'admin']);
+        $this->emitSubmissionEvent('submission.updated',$submissionId);
+        return true;
+    }
+
+    public function trashSubmission(int $submissionId, int $userId): bool
+    {
+        $row = $this->submissions->find($submissionId);
+        if (!$row) return false;
+        $form = $this->registry->has((string)$row['form_slug'])
+            ? $this->resolvedForm((string)$row['form_slug'])
+            : null;
+        $duplicateEnabled = $form !== null && $this->duplicatePolicy->config($form)['enabled'];
+
+        global $wpdb;
+        $wpdb->query('START TRANSACTION');
+        try {
+            if (!$this->submissions->trash($submissionId,$userId)) { $wpdb->query('ROLLBACK'); return false; }
+            if ($duplicateEnabled) {
+                $this->duplicateRepository->releaseAndPromote((string)$row['form_slug'], $submissionId);
+            } else {
+                $this->duplicateRepository->releaseBySubmission($submissionId);
+            }
+            $wpdb->query('COMMIT');
+        } catch (\Throwable $e) {
+            $wpdb->query('ROLLBACK');
+            throw $e;
+        }
+        $this->submissions->audit($submissionId,(string)$row['form_slug'],'submission.trashed');
+        $this->emitSubmissionEvent('submission.trashed',$submissionId);
+        return true;
+    }
+
+    public function restoreSubmission(int $submissionId): bool|WP_Error
+    {
+        $row = $this->submissions->find($submissionId,true);
+        if (!$row || empty($row['trashed_at']) || !$this->registry->has((string)$row['form_slug'])) return false;
+        $form = $this->resolvedForm((string)$row['form_slug']);
+        $data = $this->rowData($row);
+        $decision = $this->duplicatePolicy->evaluate($form,$data,$submissionId);
+        if ($decision->blocksDuplicate()) return new WP_Error('duplicate_restore',$decision->message);
+
+        global $wpdb;
+        $wpdb->query('START TRANSACTION');
+        try {
+            if (!$this->submissions->restore($submissionId)) { $wpdb->query('ROLLBACK'); return false; }
+            $this->submissions->update($submissionId,$this->duplicateMetadata($decision));
+            $collision = $this->syncDuplicateFingerprint($form,$submissionId,$decision);
+            if ($collision instanceof WP_Error) {
+                $wpdb->query('ROLLBACK');
+                return new WP_Error('duplicate_restore',$collision->get_error_message());
+            }
+            $wpdb->query('COMMIT');
+        } catch (\Throwable $e) {
+            $wpdb->query('ROLLBACK');
+            throw $e;
+        }
+        $this->submissions->audit($submissionId,(string)$row['form_slug'],'submission.restored');
+        $this->emitSubmissionEvent('submission.restored',$submissionId);
+        return true;
+    }
+
+    private function rowData(array $row): array
+    {
+        if (isset($row['data']) && is_array($row['data'])) return $row['data'];
+        $decoded = json_decode((string)($row['data_json'] ?? '{}'), true);
+        return is_array($decoded) ? $decoded : [];
     }
 
     private function canApplicantAccess(array $form,array $row): bool

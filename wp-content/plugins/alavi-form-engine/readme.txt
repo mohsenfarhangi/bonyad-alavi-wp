@@ -26,6 +26,24 @@ The package includes the "ثبت نام گروه‌های مردمی و جهاد
 
 == Changelog ==
 
+= Unreleased / 1.0.28-dev action/sms/duplicate checkpoint =
+* Added registry-driven Action Builder with Persian Event labels, stable action keys, multiple actions, same-event drag/drop ordering, enable/disable controls, conditional logic and execution/error policies.
+* Added click-to-copy Token Palette with per-form field tokens; runtime field resolution is restricted to actual form fields.
+* Wired canonical submission, lock, status, edit-request, trash and restore events to the runtime Action Engine.
+* Added atomic once-per-submission guards and execution logs; Action failure no longer rolls back a successful Submission.
+* Refactored Email and Webhook actions to use the shared TokenResolver.
+* Added SmsAction and finalized MeliPayamak adapters for legacy username/password and console API-token modes, including free-text and pattern/shared sends.
+* Added encrypted global storage for SMS password/API token plus per-action recipient/body/pattern configuration.
+* SMS recipients can come from a form field, manual number, WordPress user/admin or a dynamic token.
+* Added DuplicatePolicy integration for frontend, REST, admin edits, trash and restore, including active Draft matching and current-Submission exclusion during edits.
+* Added block, secure-reference, custom-message and allow+mark duplicate behaviors with is_duplicate / duplicate_of_submission_id metadata.
+* Added transactional duplicate-owner promotion so an active allow-mode duplicate becomes canonical when the previous fingerprint owner is edited or trashed.
+* Added Duplicate settings UI with multi-field fingerprint selection, behavior/message controls and minimum-field validation.
+* Added regression coverage for Duplicate normalization/promotion, Action configuration, Action once guards, SMS provider/action and encrypted credential storage.
+* Added mbstring-independent fallback in DuplicateFingerprint normalization.
+* DB development checkpoint is 1.0.5-dev.2.
+* This checkpoint is still not production-ready; live-account MeliPayamak integration testing and the remaining Redirect/User/PDF/Post, Field/Date/Validator work are pending.
+
 = 1.0.27 =
 * Added a shared Template Registry/Resolver for all editable AFE HTML templates.
 * Form, Preview and Step template editors now show the actual resolved default HTML with dynamic tokens instead of an empty textarea.

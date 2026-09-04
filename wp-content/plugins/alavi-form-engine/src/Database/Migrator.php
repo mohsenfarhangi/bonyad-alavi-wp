@@ -50,6 +50,8 @@ final class Migrator
                 edit_request_updated_at datetime NULL,
                 trashed_at datetime NULL,
                 trashed_by bigint(20) unsigned NOT NULL DEFAULT 0,
+                is_duplicate tinyint(1) NOT NULL DEFAULT 0,
+                duplicate_of_submission_id bigint(20) unsigned NOT NULL DEFAULT 0,
                 created_at datetime NOT NULL,
                 updated_at datetime NOT NULL,
                 PRIMARY KEY  (id),
@@ -58,7 +60,8 @@ final class Migrator
                 KEY user_form (user_id,form_slug),
                 KEY updated_at (updated_at),
                 KEY locked_request (is_locked,edit_request_status),
-                KEY trash_scope (trashed_at,form_slug)
+                KEY trash_scope (trashed_at,form_slug),
+                KEY duplicate_scope (form_slug,is_duplicate,duplicate_of_submission_id)
             ) {$charset};",
 
             "CREATE TABLE {$p}afe_submission_values (
@@ -115,6 +118,51 @@ final class Migrator
                 KEY action (action)
             ) {$charset};",
 
+            "CREATE TABLE {$p}afe_action_log (
+                id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+                submission_id bigint(20) unsigned NOT NULL,
+                form_slug varchar(191) NOT NULL,
+                event_key varchar(191) NOT NULL,
+                action_key varchar(191) NOT NULL,
+                action_type varchar(100) NOT NULL,
+                status varchar(30) NOT NULL DEFAULT 'running',
+                attempts int unsigned NOT NULL DEFAULT 1,
+                context_json longtext NULL,
+                error_message longtext NULL,
+                created_at datetime NOT NULL,
+                updated_at datetime NOT NULL,
+                PRIMARY KEY  (id),
+                KEY submission_event (submission_id,event_key(80)),
+                KEY action_key (action_key(100)),
+                KEY status (status),
+                KEY form_slug (form_slug(100))
+            ) {$charset};",
+
+            "CREATE TABLE {$p}afe_action_once (
+                id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+                submission_id bigint(20) unsigned NOT NULL,
+                event_key varchar(191) NOT NULL,
+                action_key varchar(191) NOT NULL,
+                status varchar(30) NOT NULL DEFAULT 'claimed',
+                created_at datetime NOT NULL,
+                updated_at datetime NOT NULL,
+                PRIMARY KEY  (id),
+                UNIQUE KEY once_guard (submission_id,event_key(80),action_key(80)),
+                KEY status (status)
+            ) {$charset};",
+
+            "CREATE TABLE {$p}afe_submission_fingerprints (
+                id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+                form_slug varchar(191) NOT NULL,
+                submission_id bigint(20) unsigned NOT NULL,
+                fingerprint char(64) NOT NULL,
+                created_at datetime NOT NULL,
+                PRIMARY KEY  (id),
+                UNIQUE KEY form_fingerprint (form_slug(100),fingerprint),
+                UNIQUE KEY submission_id (submission_id),
+                KEY form_slug (form_slug(100))
+            ) {$charset};",
+
             "CREATE TABLE {$p}afe_geo_provinces (
                 id bigint(20) unsigned NOT NULL,
                 name varchar(191) NOT NULL,
@@ -164,7 +212,8 @@ final class Migrator
         global $wpdb;
         $required = [
             'afe_forms','afe_submissions','afe_submission_values','afe_files',
-            'afe_notes','afe_audit_log','afe_geo_provinces','afe_geo_counties','afe_geo_districts',
+            'afe_notes','afe_audit_log','afe_action_log','afe_action_once','afe_submission_fingerprints',
+            'afe_geo_provinces','afe_geo_counties','afe_geo_districts',
         ];
         $status = [];
         foreach ($required as $short) {

@@ -13,8 +13,9 @@ The core follows separation of concerns:
 - **Data-source layer**: Strategy-style source resolution.
 - **Submission layer**: application service coordinating validation, persistence, files, actions and events.
 - **Repository layer**: database persistence.
-- **Action pipeline**: post-submit commands/adapters.
-- **Event dispatcher**: listeners and WordPress-compatible hooks.
+- **Action registry + pipeline**: registry-driven action metadata/handlers, conditional execution, once guards and post-submit/lifecycle commands.
+- **Event registry + dispatcher**: canonical event definitions with Persian UI labels, listeners and WordPress-compatible hooks.
+- **Token registry/resolver**: whitelisted submission/form/field tokens shared by text-based actions.
 - **Infrastructure**: migrations, dedicated storage, REST and Elementor adapters.
 - **Admin UI**: form overrides, submissions, reports, database health and role capabilities.
 
@@ -98,7 +99,9 @@ Use the WordPress actions:
 
 - `afe_register_forms`
 - `afe_register_data_sources`
-- `afe_register_actions`
+- `afe_register_action_definitions`
+- `afe_register_actions` (legacy/runtime handler compatibility)
+- `afe_register_event_definitions`
 - `afe_register_events`
 - `afe_register_templates`
 - `afe_booted`

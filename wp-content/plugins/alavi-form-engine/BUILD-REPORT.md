@@ -1,10 +1,66 @@
-# Build / QA Report — Alavi Form Engine 1.0.27
+# Build / QA Report — Alavi Form Engine 1.0.28-dev Action / SMS / Duplicate Checkpoint
+
+## Status
+
+**Development checkpoint / not production-ready.** Stable production baseline remains **1.0.27**. Plugin version remains **1.0.28-dev**, Stable tag remains **1.0.27**, and the DB development checkpoint is **1.0.5-dev.2**.
+
+## Implemented in this checkpoint
+
+### Action / Event core
+
+- Registry-driven `ActionDefinition` / `ActionRegistry` with reusable configuration schemas.
+- Stable `action_key`, canonical Event keys, Conditional Logic, `always`, `once_per_submission`, `first_in_cycle`, and `on_error=continue|stop`.
+- `ActionExecutionRepository` connected to runtime success/failure logging and atomic once guards.
+- Canonical lifecycle emission from frontend, REST and admin mutation paths.
+- `EmailAction` and `WebhookAction` use shared `TokenResolver`; field tokens are schema-whitelisted.
+- Registry-driven admin Action Builder with Persian Event labels, multiple Actions, same-Event drag/drop ordering and Token Palette.
+
+### SMS / MeliPayamak
+
+- Added `SmsAction` and Registry schema.
+- MeliPayamak legacy username/password mode supports free-text and BaseServiceNumber pattern sends.
+- MeliPayamak Console API-token mode supports simple and shared/pattern sends.
+- Recipients can be resolved from form Field, manual number, WordPress User/Admin or dynamic Token.
+- Password/API token are encrypted at rest through `SecretStore`; endpoint hosts are fixed/validated rather than user-configurable.
+- Provider/action tests cover the four legacy/console + free/pattern paths using deterministic mock HTTP responses.
+- **Live account integration is still required before production release.**
+
+### Duplicate Policy
+
+- Added `DuplicatePolicy` / `DuplicateDecision` and connected fingerprint checks to frontend submit, REST submit, admin data edit, trash and restore.
+- Fingerprints support multi-field combinations, Persian/Arabic digit normalization, whitespace normalization and nested Repeater child paths.
+- Active Drafts participate; the current Submission is excluded during edit; trashed submissions do not participate.
+- Behaviors: block, secure reference to prior Submission, custom message, and allow+mark.
+- Allow-mode stores `is_duplicate` and `duplicate_of_submission_id` metadata.
+- Added transaction-safe owner promotion: when a canonical fingerprint owner is edited or trashed, one active allow-mode duplicate is promoted and remaining dependants are retargeted, preventing an active combination from becoming invisible.
+- Added admin Duplicate tab with field selection, behavior/message configuration and minimum-one-field validation.
+- Added mbstring-independent lowercase fallback to avoid introducing a new hard PHP extension dependency.
+
+## QA performed
+
+- PHP syntax lint across `src/` and `tests/`: **PASS**.
+- JavaScript syntax check across `assets/js/*.js`: **PASS**.
+- Full standalone regression suite under `tests/*.php`: **PASS**.
+- New Duplicate tests:
+  - `tests/duplicate-policy.php`: configuration whitelist, nested Repeater fields, normalization and combination changes.
+  - `tests/duplicate-repository.php`: canonical promotion, active dependant retargeting and trashed dependant exclusion.
+- Existing Action, SMS, SecretStore, access, file ownership, dates, templates and validators regression tests remain green.
+
+## Deliberately deferred
+
+- Admin Retry UI/workflow for failed Action executions.
+- Redirect, WordPress User, Status, Note, PDF and Post/CPT Actions.
+- Field ordering/renderer override work.
+- Date input modes and masks.
+- Character/input-mode and length overrides.
+- Validator Registry/UI and safe Custom Regex workflow.
+- Final production version/stable-tag bump and live WordPress/MySQL/Elementor acceptance testing.
 
 Prepared for PHP 8.3+ / WordPress 6.4+.
 
 ## Automated checks performed for this package
 
-- PHP syntax lint across all plugin PHP files: PASS (74 PHP files including regression tests; executed with PHP CLI, code target remains PHP >= 8.3).
+- PHP syntax lint across `src/` and `tests/`: PASS (97 PHP files at this checkpoint; code target remains PHP >= 8.3).
 - Built-in validator tests: PASS (Iran IBAN checksum, National ID valid/invalid checksum, Persian mobile digits, digit normalization).
 - Built-in Jihadi Group Registration form construction: PASS (13 steps, 62 top-level non-HTML items, 3 repeaters, 5 file fields).
 - JavaScript syntax check for front-end/admin assets: PASS.

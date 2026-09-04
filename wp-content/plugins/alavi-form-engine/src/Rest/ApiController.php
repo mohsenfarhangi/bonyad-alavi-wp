@@ -104,9 +104,14 @@ final class ApiController
 
         $result=$this->service->submitApi($slug,$data,$draft);
         if(is_wp_error($result)) {
-            $status=$result->get_error_code()==='validation'?422:400;
+            $code=$result->get_error_code();
+            $status=in_array($code,['validation','duplicate'],true)?422:400;
             $extra=(array)$result->get_error_data();
-            return new WP_Error($result->get_error_code(),$result->get_error_message(),['status'=>$status,'errors'=>$extra]);
+            return new WP_Error($code,$result->get_error_message(),[
+                'status'=>$status,
+                'errors'=>$code==='validation'?$extra:[],
+                'duplicate'=>$code==='duplicate',
+            ]);
         }
         return new WP_REST_Response($result,201);
     }

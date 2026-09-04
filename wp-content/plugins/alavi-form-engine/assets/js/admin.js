@@ -387,6 +387,327 @@
     });
   };
 
+  const initFormTabs = () => {
+    document.querySelectorAll('[data-afe-form-tabs]').forEach(nav => {
+      if (nav.dataset.afeTabsReady === '1') return;
+      nav.dataset.afeTabsReady = '1';
+      const form = nav.closest('form');
+      if (!form) return;
+      const buttons = [...nav.querySelectorAll('[data-afe-form-tab]')];
+      const panels = [...form.querySelectorAll('[data-afe-form-tab-panel]')];
+      const storageKey = `afe-form-tab:${window.location.pathname}:${new URLSearchParams(window.location.search).get('form') || ''}`;
+
+      const activate = key => {
+        if (!buttons.some(button => button.dataset.afeFormTab === key)) key = 'general';
+        buttons.forEach(button => {
+          const active = button.dataset.afeFormTab === key;
+          button.classList.toggle('is-active', active);
+          button.setAttribute('aria-selected', active ? 'true' : 'false');
+        });
+        panels.forEach(panel => {
+          const active = panel.dataset.afeFormTabPanel === key;
+          panel.hidden = !active;
+          panel.classList.toggle('is-active', active);
+        });
+        try { window.sessionStorage.setItem(storageKey, key); } catch (error) {}
+      };
+
+      buttons.forEach(button => button.addEventListener('click', () => activate(button.dataset.afeFormTab || 'general')));
+      let initial = 'general';
+      const hash = String(window.location.hash || '').replace(/^#afe-tab-/, '');
+      if (hash && buttons.some(button => button.dataset.afeFormTab === hash)) initial = hash;
+      else {
+        try { initial = window.sessionStorage.getItem(storageKey) || 'general'; } catch (error) {}
+      }
+      activate(initial);
+    });
+  };
+
+  const copyText = async text => {
+    if (navigator.clipboard?.writeText) {
+      await navigator.clipboard.writeText(text);
+      return;
+    }
+    const textarea = document.createElement('textarea');
+    textarea.value = text;
+    textarea.style.position = 'fixed';
+    textarea.style.opacity = '0';
+    document.body.appendChild(textarea);
+    textarea.select();
+    document.execCommand('copy');
+    textarea.remove();
+  };
+
+  const initTokenPalettes = () => {
+    document.querySelectorAll('.afe-token-palette').forEach(root => {
+      if (root.dataset.afeTokenReady === '1') return;
+      root.dataset.afeTokenReady = '1';
+      const toast = qs(root, '[data-afe-token-toast]');
+      let toastTimer = null;
+      root.addEventListener('click', async event => {
+        const chip = event.target.closest('[data-afe-token-copy]');
+        if (!chip) return;
+        const token = chip.dataset.afeTokenCopy || '';
+        if (!token) return;
+        try {
+          await copyText(token);
+          chip.classList.add('is-copied');
+          if (toast) toast.textContent = `کپی شد: ${token}`;
+          window.clearTimeout(toastTimer);
+          toastTimer = window.setTimeout(() => {
+            chip.classList.remove('is-copied');
+            if (toast) toast.textContent = '';
+          }, 1800);
+        } catch (error) {
+          if (toast) toast.textContent = 'کپی انجام نشد.';
+        }
+      });
+    });
+  };
+
+  const initActionBuilders = () => {
+    document.querySelectorAll('[data-afe-action-builder]').forEach(builder => {
+      if (builder.dataset.afeActionReady === '1') return;
+      builder.dataset.afeActionReady = '1';
+      const groupsRoot = qs(builder, '[data-afe-event-groups]');
+      const groupTemplate = qs(builder, 'template[data-afe-event-template]');
+      const actionTemplate = qs(builder, 'template[data-afe-action-row-template]');
+      const conditionTemplate = qs(builder, 'template[data-afe-condition-template]');
+      const override = qs(builder, '[data-afe-actions-override]');
+      const source = qs(builder, '[data-afe-action-source]');
+      let dragged = null;
+
+      const makeId = prefix => `${prefix}_${uuid()}`.replace(/[^a-zA-Z0-9_]/g, '_');
+      const htmlNode = html => {
+        const holder = document.createElement('div');
+        holder.innerHTML = html.trim();
+        return holder.firstElementChild;
+      };
+      const markOverride = () => {
+        if (override) override.checked = true;
+        if (source) {
+          source.textContent = 'Override مدیریتی';
+          source.classList.remove('is-code');
+          source.classList.add('is-override');
+        }
+      };
+      const syncSource = () => {
+        if (!source || !override) return;
+        source.textContent = override.checked ? 'Override مدیریتی' : 'ارث‌بری از تعریف کد';
+        source.classList.toggle('is-override', override.checked);
+        source.classList.toggle('is-code', !override.checked);
+      };
+      const syncShowWhen = card => {
+        card?.querySelectorAll('[data-afe-show-when-field]').forEach(field => {
+          const sourceKey = field.dataset.afeShowWhenField || '';
+          const expected = field.dataset.afeShowWhenValue || '';
+          const control = card.querySelector(`[data-afe-config-field-key="${sourceKey}"]`);
+          field.hidden = !!control && String(control.value) !== expected;
+        });
+      };
+      const syncCondition = row => {
+        if (!row) return;
+        const operator = qs(row, '[data-afe-condition-operator]');
+        const value = qs(row, '[data-afe-condition-value]');
+        if (!operator || !value) return;
+        const valueLess = ['empty', 'not_empty'].includes(operator.value);
+        value.hidden = valueLess;
+        value.disabled = valueLess;
+      };
+      const syncConditionCount = card => {
+        const summaryCount = card?.querySelector('.afe-action-conditions > summary span');
+        const rows = card?.querySelectorAll('[data-afe-condition-row]') || [];
+        if (summaryCount) summaryCount.textContent = `${faNumber(rows.length)} شرط`;
+      };
+      const syncCard = card => {
+        if (!card) return;
+        const type = qs(card, '[data-afe-action-type]');
+        const label = qs(card, '[data-afe-action-label]');
+        if (type && label) label.textContent = type.options[type.selectedIndex]?.text || type.value;
+        syncShowWhen(card);
+        card.querySelectorAll('[data-afe-condition-row]').forEach(syncCondition);
+        syncConditionCount(card);
+      };
+      const replaceActionConfig = card => {
+        const type = qs(card, '[data-afe-action-type]')?.value || '';
+        const config = qs(card, '[data-afe-action-config]');
+        const group = card.closest('[data-afe-event-group]')?.dataset.groupIndex || '';
+        const action = card.dataset.actionIndex || '';
+        const template = builder.querySelector(`template[data-afe-action-config-template="${type}"]`);
+        if (!config || !template) return;
+        const html = template.innerHTML
+          .replaceAll('__GROUP__', group)
+          .replaceAll('__ACTION__', action);
+        config.innerHTML = html;
+        syncCard(card);
+      };
+      const addAction = group => {
+        if (!actionTemplate) return;
+        const groupId = group.dataset.groupIndex || makeId('group');
+        const actionId = makeId('action');
+        const actionKey = `action_${uuid()}`.slice(0, 80);
+        const html = actionTemplate.innerHTML
+          .replaceAll('__GROUP__', groupId)
+          .replaceAll('__ACTION__', actionId)
+          .replaceAll('__ACTION_KEY__', actionKey);
+        const node = htmlNode(html);
+        if (!node) return;
+        node.dataset.actionIndex = actionId;
+        qs(group, '[data-afe-event-actions]')?.appendChild(node);
+        syncCard(node);
+        markOverride();
+        node.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      };
+      const addCondition = card => {
+        if (!conditionTemplate) return;
+        const groupId = card.closest('[data-afe-event-group]')?.dataset.groupIndex || '';
+        const actionId = card.dataset.actionIndex || '';
+        const conditionId = makeId('condition');
+        const html = conditionTemplate.innerHTML
+          .replaceAll('__GROUP__', groupId)
+          .replaceAll('__ACTION__', actionId)
+          .replaceAll('__CONDITION__', conditionId);
+        const node = htmlNode(html);
+        if (!node) return;
+        qs(card, '[data-afe-condition-rows]')?.appendChild(node);
+        syncCondition(node);
+        syncConditionCount(card);
+        markOverride();
+      };
+
+      qs(builder, '[data-afe-add-event]')?.addEventListener('click', () => {
+        if (!groupsRoot || !groupTemplate) return;
+        const groupId = makeId('group');
+        const html = groupTemplate.innerHTML.replaceAll('__GROUP__', groupId);
+        const node = htmlNode(html);
+        if (!node) return;
+        node.dataset.groupIndex = groupId;
+        groupsRoot.appendChild(node);
+        markOverride();
+        node.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      });
+
+      override?.addEventListener('change', syncSource);
+
+      builder.addEventListener('click', event => {
+        const addActionButton = event.target.closest('[data-afe-add-action]');
+        if (addActionButton) {
+          const group = addActionButton.closest('[data-afe-event-group]');
+          if (group) addAction(group);
+          return;
+        }
+        const removeAction = event.target.closest('[data-afe-remove-action]');
+        if (removeAction) {
+          removeAction.closest('[data-afe-action-row]')?.remove();
+          markOverride();
+          return;
+        }
+        const removeEvent = event.target.closest('[data-afe-remove-event]');
+        if (removeEvent) {
+          if (!window.confirm('این Event و تمام Actionهای داخل آن حذف شوند؟')) return;
+          removeEvent.closest('[data-afe-event-group]')?.remove();
+          markOverride();
+          return;
+        }
+        const addConditionButton = event.target.closest('[data-afe-add-condition]');
+        if (addConditionButton) {
+          const card = addConditionButton.closest('[data-afe-action-row]');
+          if (card) addCondition(card);
+          return;
+        }
+        const removeCondition = event.target.closest('[data-afe-remove-condition]');
+        if (removeCondition) {
+          const card = removeCondition.closest('[data-afe-action-row]');
+          removeCondition.closest('[data-afe-condition-row]')?.remove();
+          syncConditionCount(card);
+          markOverride();
+        }
+      });
+
+      builder.addEventListener('change', event => {
+        if (event.target === override) return;
+        const eventSelect = event.target.closest('[data-afe-event-select]');
+        if (eventSelect) {
+          const slug = eventSelect.closest('[data-afe-event-group]')?.querySelector('[data-afe-event-slug]');
+          if (slug) slug.textContent = eventSelect.value;
+        }
+        const type = event.target.closest('[data-afe-action-type]');
+        if (type) replaceActionConfig(type.closest('[data-afe-action-row]'));
+        const configControl = event.target.closest('[data-afe-config-field-key]');
+        if (configControl) syncShowWhen(configControl.closest('[data-afe-action-row]'));
+        const operator = event.target.closest('[data-afe-condition-operator]');
+        if (operator) syncCondition(operator.closest('[data-afe-condition-row]'));
+        markOverride();
+      });
+      builder.addEventListener('input', event => {
+        if (event.target === override) return;
+        if (event.target.closest('input,textarea,select')) markOverride();
+      });
+
+      builder.addEventListener('dragstart', event => {
+        const card = event.target.closest('[data-afe-action-row]');
+        if (!card || !event.target.closest('[data-afe-action-drag]')) {
+          if (card) event.preventDefault();
+          return;
+        }
+        dragged = card;
+        card.classList.add('is-dragging');
+        event.dataTransfer.effectAllowed = 'move';
+      });
+      builder.addEventListener('dragend', () => {
+        dragged?.classList.remove('is-dragging');
+        dragged = null;
+      });
+      builder.addEventListener('dragover', event => {
+        if (!dragged) return;
+        const target = event.target.closest('[data-afe-action-row]');
+        const container = event.target.closest('[data-afe-event-actions]');
+        if (!container || dragged.parentElement !== container) return;
+        event.preventDefault();
+        if (!target || target === dragged) return;
+        const rect = target.getBoundingClientRect();
+        const after = event.clientY > rect.top + rect.height / 2;
+        container.insertBefore(dragged, after ? target.nextSibling : target);
+      });
+      builder.addEventListener('drop', event => {
+        if (!dragged) return;
+        event.preventDefault();
+        markOverride();
+      });
+
+      builder.querySelectorAll('[data-afe-action-row]').forEach(syncCard);
+      syncSource();
+    });
+  };
+
+  const initDuplicateSettings = () => {
+    document.querySelectorAll('[data-afe-duplicate-settings]').forEach(root => {
+      const enabled = root.querySelector('[data-afe-duplicate-enabled]');
+      const fields = [...root.querySelectorAll('input[name="duplicate_fields[]"]')];
+      const count = root.querySelector('[data-afe-duplicate-count]');
+      const warning = root.querySelector('[data-afe-duplicate-warning]');
+      const form = root.closest('form');
+
+      const sync = () => {
+        const selected = fields.filter(field => field.checked).length;
+        if (count) count.textContent = `${faNumber(selected)} فیلد`;
+        if (warning) warning.hidden = !(enabled?.checked && selected === 0);
+        root.classList.toggle('is-disabled', !enabled?.checked);
+      };
+
+      enabled?.addEventListener('change', sync);
+      fields.forEach(field => field.addEventListener('change', sync));
+      form?.addEventListener('submit', event => {
+        if (!enabled?.checked || fields.some(field => field.checked)) return;
+        event.preventDefault();
+        warning && (warning.hidden = false);
+        root.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        window.alert('برای فعال‌کردن جلوگیری از تکرار، حداقل یک فیلد انتخاب کنید.');
+      });
+      sync();
+    });
+  };
+
   const initAdminDatePickers = () => {
     if (!window.afeAdmin?.isJalali || !window.jalaliDatepicker) return;
     try {
@@ -428,6 +749,10 @@
     initAdminRepeaters(document);
     initBrandMarkSettings();
     initTemplateEditors();
+    initFormTabs();
+    initTokenPalettes();
+    initActionBuilders();
+    initDuplicateSettings();
     initAdminDatePickers();
   });
 })();

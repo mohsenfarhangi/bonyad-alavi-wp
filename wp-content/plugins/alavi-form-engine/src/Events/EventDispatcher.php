@@ -22,6 +22,6 @@ final class EventDispatcher
             $listener(...$args);
         }
 
-        do_action('afe_event_' . sanitize_key(str_replace('\\', '_', $name)), ...$args);
+        do_action('afe_event_' . sanitize_key(str_replace(['\\', '.'], '_', $name)), ...$args);
     }
 }

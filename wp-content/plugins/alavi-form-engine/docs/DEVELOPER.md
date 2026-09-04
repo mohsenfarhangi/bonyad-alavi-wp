@@ -144,29 +144,63 @@ SelectField::make('district')
 
 ## 5. Custom action
 
-Implement `ActionInterface`:
+AFE 1.0.28-dev introduces `ActionRegistry` / `ActionDefinition`. New developer actions should register both their handler and UI metadata so the future Action Builder can render the action without hard-coded `FormsPage` logic.
 
 ```php
+use BonyadAlavi\FormEngine\Actions\ActionDefinition;
+use BonyadAlavi\FormEngine\Actions\ActionInterface;
+use BonyadAlavi\FormEngine\Actions\ActionContext;
+
 final class CrmAction implements ActionInterface
 {
     public function handle(ActionContext $context, array $config = []): void
     {
-        // Send to CRM.
+        // Send to CRM. Throw an exception on failure; AFE logs it and does not
+        // roll back an already successful Submission.
     }
 }
 
+add_action('afe_register_action_definitions', function ($registry) {
+    $registry->register(
+        new ActionDefinition(
+            'crm',
+            'ارسال به CRM',
+            'ارسال ثبت فرم به CRM سازمان.',
+            'integration',
+            [
+                'pipeline' => [
+                    'type' => 'text',
+                    'label' => 'Pipeline',
+                    'required' => true,
+                    'tokens' => false,
+                ],
+            ]
+        ),
+        new CrmAction()
+    );
+});
+```
+
+The older runtime-only hook remains compatible:
+
+```php
 add_action('afe_register_actions', function ($actions) {
     $actions->register('crm', new CrmAction());
 });
 ```
 
-In the form definition:
+The legacy hook can execute the action, but it does not provide rich UI schema metadata unless a matching `ActionDefinition` was registered.
+
+In the form definition, use a stable `action_key` and canonical event key:
 
 ```php
 ->actions([
     [
+        'action_key' => 'crm_high_priority_submit',
         'type' => 'crm',
-        'on' => ['created', 'updated'],
+        'on' => ['submission.submitted'],
+        'execution_policy' => 'once_per_submission',
+        'on_error' => 'continue',
         'when' => [
             ['field' => 'priority', 'operator' => '=', 'value' => 'high'],
         ],
@@ -175,19 +209,40 @@ In the form definition:
 ]);
 ```
 
+Execution policies currently supported by the backend are `always`, `once_per_submission`, and `first_in_cycle`. Conditional operators are `=`, `!=`, `>`, `>=`, `<`, `<=`, `in`, `contains`, `empty`, and `not_empty`.
+
+Text actions should use the shared TokenResolver. Core tokens include `{{tracking_code}}`, `{{submission_id}}`, `{{form_title}}`, `{{form_slug}}`, `{{status}}`, and concrete `{{field:field_name}}` tokens. Field tokens are whitelisted against the resolved form definition.
+
 ## 6. Events and listeners
 
-```php
-use BonyadAlavi\FormEngine\Events\SubmissionCreated;
+Canonical registry event keys currently include:
 
+```text
+submission.created
+submission.draft_saved
+submission.submitted
+submission.updated
+submission.status_changed
+submission.locked
+submission.unlocked
+edit_request.created
+edit_request.approved
+edit_request.rejected
+submission.trashed
+submission.restored
+```
+
+The original typed `SubmissionCreated` / `SubmissionUpdated` events remain dispatched for compatibility. New action definitions and integrations should prefer canonical string keys.
+
+```php
 add_action('afe_register_events', function ($events) {
-    $events->listen(SubmissionCreated::class, function (SubmissionCreated $event) {
+    $events->listen('submission.submitted', function (int $submissionId, string $formSlug, array $data, array $row) {
         // Listener logic.
     });
 });
 ```
 
-Every dispatched event is also bridged to a WordPress action named from its class.
+Canonical string events are bridged to WordPress hooks such as `afe_event_submission_submitted`.
 
 ## 7. Custom storage
 
