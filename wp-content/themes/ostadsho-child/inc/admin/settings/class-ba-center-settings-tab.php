@@ -170,21 +170,28 @@ final class BA_Center_Settings_Tab {
 	 * @return void
 	 */
 	public static function render_system_card_repeater_fields( $index, array $item, $context ) {
-		$item = wp_parse_args( $item, array( 'icon_id' => 0, 'title' => '', 'url' => '' ) );
-		$name = (string) $context;
+		$item  = wp_parse_args( $item, array( 'media_type' => 'image', 'image_id' => 0, 'svg_id' => 0, 'icon_id' => 0, 'title' => '', 'url' => '' ) );
+		$name  = (string) $context;
+		$media = BA_Center_Settings_Service::normalize_system_card_media( $item );
+
+		self::render_repeater_media_switcher(
+			$name,
+			'system_cards',
+			$index,
+			$media,
+			array(
+				'image_label'  => 'تصویر',
+				'image_button' => 'انتخاب تصویر',
+				'svg_label'    => 'آیکون / SVG',
+				'svg_button'   => 'انتخاب SVG',
+			)
+		);
 		?>
 		<div class="ba-center-settings__grid">
 			<?php self::render_repeater_text_field( $name, 'system_cards', $index, 'title', 'عنوان', $item['title'] ); ?>
 			<?php self::render_repeater_url_field( $name, 'system_cards', $index, 'url', 'لینک', $item['url'] ); ?>
 		</div>
 		<?php
-		self::render_media_control(
-			BA_Admin_Repeater_Component::field_name( $name, 'system_cards', $index, 'icon_id' ),
-			'آیکون (تصویر یا SVG)',
-			absint( $item['icon_id'] ),
-			'image',
-			'انتخاب آیکون'
-		);
 	}
 
 	/**
@@ -198,41 +205,60 @@ final class BA_Center_Settings_Tab {
 	public static function render_partner_repeater_fields( $index, array $item, $context ) {
 		$item = wp_parse_args( $item, array( 'media_type' => 'image', 'image_id' => 0, 'svg_id' => 0, 'title' => '', 'url' => '' ) );
 		$name = (string) $context;
-		$type = 'svg' === $item['media_type'] ? 'svg' : 'image';
-		$media_type_name = BA_Admin_Repeater_Component::field_name( $name, 'partners', $index, 'media_type' );
+
+		self::render_repeater_media_switcher(
+			$name,
+			'partners',
+			$index,
+			$item,
+			array(
+				'image_label'  => 'تصویر لوگو',
+				'image_button' => 'انتخاب تصویر',
+				'svg_label'    => 'فایل SVG / آیکون',
+				'svg_button'   => 'انتخاب SVG',
+			)
+		);
 		?>
-		<div class="ba-center-settings__partner" data-ba-partner-row>
+		<div class="ba-center-settings__grid">
+			<?php self::render_repeater_text_field( $name, 'partners', $index, 'title', 'عنوان (اختیاری)', $item['title'] ); ?>
+			<?php self::render_repeater_url_field( $name, 'partners', $index, 'url', 'لینک (اختیاری)', $item['url'] ); ?>
+		</div>
+		<?php
+	}
+
+	/**
+	 * انتخاب انحصاری تصویر یا SVG را برای Repeaterهای مدیریت رندر می‌کند.
+	 * این Helper بین کارت‌های سامانه و همراهان مشترک است تا رفتار Switcher تکرار نشود.
+	 *
+	 * @param string     $name       نام option والد.
+	 * @param string     $collection کلید مجموعه Repeater.
+	 * @param string|int $index      اندیس ردیف.
+	 * @param array      $item       داده رسانه ردیف.
+	 * @param array      $labels     برچسب‌ها و متن دکمه‌ها.
+	 * @return void
+	 */
+	private static function render_repeater_media_switcher( $name, $collection, $index, array $item, array $labels = array() ) {
+		$labels = wp_parse_args( $labels, array(
+			'image_label'  => 'تصویر',
+			'image_button' => 'انتخاب تصویر',
+			'svg_label'    => 'آیکون / SVG',
+			'svg_button'   => 'انتخاب SVG',
+		) );
+		$type = 'svg' === ( $item['media_type'] ?? 'image' ) ? 'svg' : 'image';
+		$media_type_name = BA_Admin_Repeater_Component::field_name( $name, $collection, $index, 'media_type' );
+		?>
+		<div class="ba-center-settings__media-switch-row" data-ba-media-switch-row>
 			<div class="ba-center-settings__switcher">
 				<span>تصویر</span>
 				<label><input type="checkbox" data-ba-media-type-switch <?php checked( 'svg', $type ); ?>><span></span></label>
-				<span>SVG / آیکون</span>
+				<span>آیکون / SVG</span>
 				<input type="hidden" data-ba-media-type-value name="<?php echo esc_attr( $media_type_name ); ?>" value="<?php echo esc_attr( $type ); ?>">
 			</div>
 			<div data-ba-media-mode="image" <?php echo 'image' === $type ? '' : 'hidden'; ?>>
-				<?php
-				self::render_media_control(
-					BA_Admin_Repeater_Component::field_name( $name, 'partners', $index, 'image_id' ),
-					'تصویر لوگو',
-					absint( $item['image_id'] ),
-					'image',
-					'انتخاب تصویر'
-				);
-				?>
+				<?php self::render_media_control( BA_Admin_Repeater_Component::field_name( $name, $collection, $index, 'image_id' ), $labels['image_label'], absint( $item['image_id'] ?? 0 ), 'image', $labels['image_button'] ); ?>
 			</div>
 			<div data-ba-media-mode="svg" <?php echo 'svg' === $type ? '' : 'hidden'; ?>>
-				<?php
-				self::render_media_control(
-					BA_Admin_Repeater_Component::field_name( $name, 'partners', $index, 'svg_id' ),
-					'فایل SVG / آیکون',
-					absint( $item['svg_id'] ),
-					'image/svg+xml',
-					'انتخاب SVG'
-				);
-				?>
-			</div>
-			<div class="ba-center-settings__grid">
-				<?php self::render_repeater_text_field( $name, 'partners', $index, 'title', 'عنوان (اختیاری)', $item['title'] ); ?>
-				<?php self::render_repeater_url_field( $name, 'partners', $index, 'url', 'لینک (اختیاری)', $item['url'] ); ?>
+				<?php self::render_media_control( BA_Admin_Repeater_Component::field_name( $name, $collection, $index, 'svg_id' ), $labels['svg_label'], absint( $item['svg_id'] ?? 0 ), 'image/svg+xml', $labels['svg_button'] ); ?>
 			</div>
 		</div>
 		<?php

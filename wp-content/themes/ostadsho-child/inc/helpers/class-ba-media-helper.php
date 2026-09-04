@@ -70,6 +70,68 @@ final class BA_Media_Helper {
 		);
 	}
 
+
+	/**
+	 * محتوای یک Attachment از نوع SVG را به‌صورت Inline و با Allowlist امن برمی‌گرداند.
+	 * این خروجی برای آیکون‌هایی استفاده می‌شود که باید با CSS و currentColor قابل کنترل باشند.
+	 *
+	 * @param int $attachment_id شناسه فایل SVG.
+	 * @return string
+	 */
+	public static function get_inline_svg_attachment( $attachment_id ) {
+		$attachment_id = absint( $attachment_id );
+		if ( ! $attachment_id || 'image/svg+xml' !== get_post_mime_type( $attachment_id ) ) {
+			return '';
+		}
+
+		$file = get_attached_file( $attachment_id );
+		if ( ! $file || ! is_readable( $file ) ) {
+			return '';
+		}
+
+		$svg = file_get_contents( $file ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+		if ( ! is_string( $svg ) || '' === trim( $svg ) ) {
+			return '';
+		}
+
+		$svg = preg_replace( '/<\?xml[^>]*\?>/i', '', $svg );
+		$svg = preg_replace( '/<!DOCTYPE[^>]*>/i', '', $svg );
+		$svg = preg_replace( '/<svg\b([^>]*)>/i', '<svg$1 aria-hidden="true" focusable="false">', $svg, 1 );
+
+		$common = array(
+			'class' => true,
+			'id' => true,
+			'fill' => true,
+			'stroke' => true,
+			'stroke-width' => true,
+			'stroke-linecap' => true,
+			'stroke-linejoin' => true,
+			'opacity' => true,
+			'transform' => true,
+		);
+		$allowed = array(
+			'svg' => array_merge( $common, array( 'xmlns' => true, 'viewbox' => true, 'width' => true, 'height' => true, 'preserveaspectratio' => true, 'role' => true, 'aria-hidden' => true, 'focusable' => true ) ),
+			'g' => array_merge( $common, array( 'clip-path' => true, 'mask' => true ) ),
+			'path' => array_merge( $common, array( 'd' => true, 'fill-rule' => true, 'clip-rule' => true, 'clip-path' => true, 'mask' => true ) ),
+			'circle' => array_merge( $common, array( 'cx' => true, 'cy' => true, 'r' => true, 'clip-path' => true ) ),
+			'ellipse' => array_merge( $common, array( 'cx' => true, 'cy' => true, 'rx' => true, 'ry' => true ) ),
+			'rect' => array_merge( $common, array( 'x' => true, 'y' => true, 'rx' => true, 'ry' => true, 'width' => true, 'height' => true, 'clip-path' => true ) ),
+			'line' => array_merge( $common, array( 'x1' => true, 'y1' => true, 'x2' => true, 'y2' => true ) ),
+			'polyline' => array_merge( $common, array( 'points' => true ) ),
+			'polygon' => array_merge( $common, array( 'points' => true ) ),
+			'defs' => array(),
+			'clippath' => array( 'id' => true ),
+			'mask' => array_merge( $common, array( 'x' => true, 'y' => true, 'width' => true, 'height' => true ) ),
+			'lineargradient' => array( 'id' => true, 'x1' => true, 'y1' => true, 'x2' => true, 'y2' => true, 'gradientunits' => true, 'gradienttransform' => true ),
+			'radialgradient' => array( 'id' => true, 'cx' => true, 'cy' => true, 'r' => true, 'fx' => true, 'fy' => true, 'gradientunits' => true, 'gradienttransform' => true ),
+			'stop' => array( 'offset' => true, 'stop-color' => true, 'stop-opacity' => true ),
+			'title' => array(),
+			'desc' => array(),
+		);
+
+		return wp_kses( $svg, $allowed );
+	}
+
 	/**
 	 * آیکون Chevron مشترک کنترل‌های قبلی/بعدی را بر اساس جهت برمی‌گرداند.
 	 *

@@ -151,12 +151,12 @@ final class Bonyad_Alavi_Jihadi_Center_Widget extends Widget_Base {
 		$this->add_control( 'intro_title', array( 'label' => 'عنوان', 'type' => Controls_Manager::TEXT, 'default' => 'مرکز هماهنگی حرکت‌های مردمی و جهادی' ) );
 		$this->add_control( 'intro_description', array( 'label' => 'توضیحات', 'type' => Controls_Manager::WYSIWYG, 'default' => BA_Center_Settings_Service::get_defaults()['intro_description'] ) );
 		$repeater = new Repeater();
-		$repeater->add_control( 'icon', array( 'label' => 'آیکون', 'type' => Controls_Manager::ICONS, 'label_block' => false ) );
+		$this->add_repeater_media_choice_controls( $repeater, 'تصویر', 'آیکون / SVG' );
 		$repeater->add_control( 'title', array( 'label' => 'عنوان', 'type' => Controls_Manager::TEXT ) );
 		$repeater->add_control( 'url', array( 'label' => 'لینک', 'type' => Controls_Manager::URL, 'options' => array( 'url', 'is_external', 'nofollow' ) ) );
 		$default_cards = array();
 		foreach ( BA_Center_Settings_Service::get_defaults()['system_cards'] as $card ) {
-			$default_cards[] = array( 'title' => $card['title'], 'icon' => array(), 'url' => array() );
+			$default_cards[] = array( 'title' => $card['title'], 'use_svg' => '', 'image' => array(), 'icon' => array(), 'url' => array() );
 		}
 		$this->add_control( 'system_cards', array( 'label' => 'کارت‌های بخش‌های مرکز', 'type' => Controls_Manager::REPEATER, 'fields' => $repeater->get_controls(), 'title_field' => '{{{ title || "کارت مرکز" }}}', 'default' => $default_cards ) );
 		$this->end_controls_section();
@@ -253,31 +253,7 @@ final class Bonyad_Alavi_Jihadi_Center_Widget extends Widget_Base {
 		$this->add_control( 'partners_subtitle', array( 'label' => 'زیرعنوان', 'type' => Controls_Manager::TEXTAREA, 'default' => 'نهادها و مجموعه‌هایی که در مسیر برنامه‌های مرکز همراه هستند.' ) );
 
 		$repeater = new Repeater();
-		$repeater->add_control(
-			'use_svg',
-			array(
-				'label'        => 'استفاده از آیکون/SVG',
-				'type'         => Controls_Manager::SWITCHER,
-				'return_value' => 'yes',
-				'default'      => '',
-			)
-		);
-		$repeater->add_control(
-			'image',
-			array(
-				'label'     => 'تصویر',
-				'type'      => Controls_Manager::MEDIA,
-				'condition' => array( 'use_svg!' => 'yes' ),
-			)
-		);
-		$repeater->add_control(
-			'icon',
-			array(
-				'label'     => 'آیکون / SVG',
-				'type'      => Controls_Manager::ICONS,
-				'condition' => array( 'use_svg' => 'yes' ),
-			)
-		);
+		$this->add_repeater_media_choice_controls( $repeater, 'تصویر', 'آیکون / SVG' );
 		$repeater->add_control( 'title', array( 'label' => 'عنوان (اختیاری)', 'type' => Controls_Manager::TEXT ) );
 		$repeater->add_control( 'url', array( 'label' => 'لینک (اختیاری)', 'type' => Controls_Manager::URL, 'options' => array( 'url', 'is_external', 'nofollow' ) ) );
 
@@ -293,6 +269,43 @@ final class Bonyad_Alavi_Jihadi_Center_Widget extends Widget_Base {
 		);
 
 		$this->end_controls_section();
+	}
+
+	/**
+	 * کنترل‌های مشترک انتخاب انحصاری تصویر یا Icon/SVG را به یک Repeater اضافه می‌کند.
+	 * این قرارداد بین کارت‌های سامانه و همراهان مرکز مشترک است.
+	 *
+	 * @param Repeater $repeater    نمونه Repeater Elementor.
+	 * @param string   $image_label برچسب حالت تصویر.
+	 * @param string   $icon_label  برچسب حالت آیکون.
+	 * @return void
+	 */
+	private function add_repeater_media_choice_controls( Repeater $repeater, $image_label, $icon_label ) {
+		$repeater->add_control(
+			'use_svg',
+			array(
+				'label'        => 'استفاده از آیکون/SVG',
+				'type'         => Controls_Manager::SWITCHER,
+				'return_value' => 'yes',
+				'default'      => '',
+			)
+		);
+		$repeater->add_control(
+			'image',
+			array(
+				'label'     => $image_label,
+				'type'      => Controls_Manager::MEDIA,
+				'condition' => array( 'use_svg!' => 'yes' ),
+			)
+		);
+		$repeater->add_control(
+			'icon',
+			array(
+				'label'     => $icon_label,
+				'type'      => Controls_Manager::ICONS,
+				'condition' => array( 'use_svg' => 'yes' ),
+			)
+		);
 	}
 
 	/**
@@ -814,7 +827,7 @@ final class Bonyad_Alavi_Jihadi_Center_Widget extends Widget_Base {
 		if ( ! is_array( $card ) ) {
 			return false;
 		}
-		$has_media = ! empty( $card['icon_id'] ) || ! empty( $card['icon']['value'] ) || ! empty( $card['icon']['url'] );
+		$has_media = ! empty( $card['image_id'] ) || ! empty( $card['svg_id'] ) || ! empty( $card['image']['url'] ) || ! empty( $card['icon']['value'] );
 		$has_url   = ! empty( $card['url'] ) && ( is_string( $card['url'] ) || ! empty( $card['url']['url'] ) );
 		return $has_media || ! empty( $card['title'] ) || $has_url;
 	}
@@ -844,25 +857,62 @@ final class Bonyad_Alavi_Jihadi_Center_Widget extends Widget_Base {
 	 * @return void
 	 */
 	private function render_system_card_icon( array $card ) {
-		if ( ! empty( $card['icon_id'] ) ) {
-			$image = wp_get_attachment_image( absint( $card['icon_id'] ), 'thumbnail', false, array( 'loading' => 'lazy' ) );
-			if ( $image ) {
-				echo '<span class="ba-jihadi-center__system-icon">' . $image . '</span>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+		$media_type = 'svg' === ( $card['media_type'] ?? 'image' ) ? 'svg' : 'image';
+
+		if ( 'image' === $media_type ) {
+			$image_id = absint( $card['image_id'] ?? 0 );
+			if ( $image_id ) {
+				$image = wp_get_attachment_image( $image_id, 'thumbnail', false, array( 'loading' => 'lazy', 'alt' => BA_Media_Helper::get_attachment_alt( $image_id ) ) );
+				if ( $image ) {
+					echo '<span class="ba-jihadi-center__system-icon ba-jihadi-center__system-icon--image">' . $image . '</span>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+				}
+				return;
+			}
+
+			if ( ! empty( $card['image']['url'] ) ) {
+				printf( '<span class="ba-jihadi-center__system-icon ba-jihadi-center__system-icon--image"><img src="%s" alt="" loading="lazy"></span>', esc_url( $card['image']['url'] ) );
+			}
+			return;
+		}
+
+		$svg_id = absint( $card['svg_id'] ?? 0 );
+		if ( $svg_id ) {
+			$svg = BA_Media_Helper::get_inline_svg_attachment( $svg_id );
+			if ( $svg ) {
+				echo '<span class="ba-jihadi-center__system-icon ba-jihadi-center__system-icon--svg">' . $svg . '</span>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 			}
 			return;
 		}
 
 		$icon = is_array( $card['icon'] ?? null ) ? $card['icon'] : array();
 		if ( ! empty( $icon['value'] ) ) {
-			echo '<span class="ba-jihadi-center__system-icon">';
-			Icons_Manager::render_icon( $icon, array( 'aria-hidden' => 'true' ) );
+			echo '<span class="ba-jihadi-center__system-icon ba-jihadi-center__system-icon--svg">';
+			$this->render_elementor_system_icon( $icon );
 			echo '</span>';
-			return;
+		}
+	}
+
+	/**
+	 * آیکون Elementor کارت سامانه را رندر می‌کند و برای SVG آپلودی خروجی Inline تولید می‌کند.
+	 * آیکون‌های کتابخانه‌ای Elementor برای سازگاری از Icons Manager عبور می‌کنند.
+	 *
+	 * @param array $icon تنظیم Icon Control Elementor.
+	 * @return void
+	 */
+	private function render_elementor_system_icon( array $icon ) {
+		$value = $icon['value'] ?? null;
+		if ( 'svg' === ( $icon['library'] ?? '' ) && is_array( $value ) ) {
+			$attachment_id = absint( $value['id'] ?? 0 );
+			if ( $attachment_id ) {
+				$svg = BA_Media_Helper::get_inline_svg_attachment( $attachment_id );
+				if ( $svg ) {
+					echo $svg; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+					return;
+				}
+			}
 		}
 
-		if ( ! empty( $icon['url'] ) ) {
-			printf( '<span class="ba-jihadi-center__system-icon"><img src="%s" alt="" loading="lazy"></span>', esc_url( $icon['url'] ) );
-		}
+		Icons_Manager::render_icon( $icon, array( 'aria-hidden' => 'true' ) );
 	}
 
 	/**

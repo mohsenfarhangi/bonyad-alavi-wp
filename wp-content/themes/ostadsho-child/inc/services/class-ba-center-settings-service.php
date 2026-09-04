@@ -15,7 +15,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 final class BA_Center_Settings_Service {
 
 	const OPTION_NAME = 'ba_jihadi_center_settings';
-	const SCHEMA_VERSION = '0.4.0';
+	const SCHEMA_VERSION = '0.5.1';
 
 	/**
 	 * تنظیمات پیش‌فرض مرکز را برمی‌گرداند.
@@ -112,9 +112,9 @@ final class BA_Center_Settings_Service {
 	 */
 	private static function get_default_system_cards() {
 		return array(
-			array( 'icon_id' => 0, 'title' => 'خانه نوآوری جهادی', 'url' => '' ),
-			array( 'icon_id' => 0, 'title' => 'اردوهای توانمندساز', 'url' => '' ),
-			array( 'icon_id' => 0, 'title' => 'پویش‌ها', 'url' => '' ),
+			array( 'media_type' => 'image', 'image_id' => 0, 'svg_id' => 0, 'title' => 'خانه نوآوری جهادی', 'url' => '' ),
+			array( 'media_type' => 'image', 'image_id' => 0, 'svg_id' => 0, 'title' => 'اردوهای توانمندساز', 'url' => '' ),
+			array( 'media_type' => 'image', 'image_id' => 0, 'svg_id' => 0, 'title' => 'پویش‌ها', 'url' => '' ),
 		);
 	}
 
@@ -214,12 +214,13 @@ final class BA_Center_Settings_Service {
 	 * @return array
 	 */
 	private static function resolve_system_cards( array $elementor_cards, array $saved, array $settings ) {
-		if ( ! array_key_exists( 'system_cards', $saved ) ) {
-			return $elementor_cards ? $elementor_cards : (array) $settings['system_cards'];
-		}
-
-		$dashboard_cards = array_values( (array) $settings['system_cards'] );
+		$has_dashboard_cards = array_key_exists( 'system_cards', $saved );
+		$dashboard_cards = $has_dashboard_cards ? array_values( (array) $settings['system_cards'] ) : array();
 		$elementor_cards = array_values( $elementor_cards );
+
+		if ( ! $dashboard_cards && ! $elementor_cards ) {
+			$dashboard_cards = array_values( (array) $settings['system_cards'] );
+		}
 		$count            = max( count( $dashboard_cards ), count( $elementor_cards ) );
 		$resolved         = array();
 
@@ -229,17 +230,29 @@ final class BA_Center_Settings_Service {
 
 			$dashboard_title = trim( (string) ( $dashboard['title'] ?? '' ) );
 			$dashboard_url   = trim( (string) ( $dashboard['url'] ?? '' ) );
-			$dashboard_icon  = absint( $dashboard['icon_id'] ?? 0 );
+			$dashboard_media = self::normalize_system_card_media( $dashboard );
+			$has_dashboard_media = $dashboard_media['image_id'] || $dashboard_media['svg_id'];
 			$elementor_link  = is_array( $elementor['url'] ?? null ) ? $elementor['url'] : self::normalize_link( (string) ( $elementor['url'] ?? '' ) );
+			$elementor_icon  = is_array( $elementor['icon'] ?? null ) ? $elementor['icon'] : array();
+			$elementor_image = is_array( $elementor['image'] ?? null ) ? $elementor['image'] : array();
+			$legacy_media    = empty( $elementor_image['url'] ) && empty( $elementor_icon['value'] ) && ! empty( $elementor_icon['url'] ) ? $elementor_icon : array();
+			$elementor_uses_icon = 'yes' === ( $elementor['use_svg'] ?? '' ) || ! empty( $elementor_icon['value'] );
+
+			if ( $legacy_media ) {
+				$elementor_image = $legacy_media;
+			}
 
 			$row = array(
-				'title'   => '' !== $dashboard_title ? $dashboard_title : (string) ( $elementor['title'] ?? '' ),
-				'url'     => '' !== $dashboard_url ? self::normalize_link( $dashboard_url ) : $elementor_link,
-				'icon_id' => $dashboard_icon,
-				'icon'    => $dashboard_icon ? array() : ( is_array( $elementor['icon'] ?? null ) ? $elementor['icon'] : array() ),
+				'title'      => '' !== $dashboard_title ? $dashboard_title : (string) ( $elementor['title'] ?? '' ),
+				'url'        => '' !== $dashboard_url ? self::normalize_link( $dashboard_url ) : $elementor_link,
+				'media_type' => $has_dashboard_media ? $dashboard_media['media_type'] : ( $elementor_uses_icon ? 'svg' : 'image' ),
+				'image_id'   => $has_dashboard_media ? $dashboard_media['image_id'] : 0,
+				'svg_id'     => $has_dashboard_media ? $dashboard_media['svg_id'] : 0,
+				'image'      => $has_dashboard_media ? array() : $elementor_image,
+				'icon'       => $has_dashboard_media ? array() : $elementor_icon,
 			);
 
-			if ( '' !== trim( $row['title'] ) || ! empty( $row['url']['url'] ) || $row['icon_id'] || ! empty( $row['icon']['value'] ) || ! empty( $row['icon']['url'] ) ) {
+			if ( '' !== trim( $row['title'] ) || ! empty( $row['url']['url'] ) || $row['image_id'] || $row['svg_id'] || ! empty( $row['image']['url'] ) || ! empty( $row['icon']['value'] ) ) {
 				$resolved[] = $row;
 			}
 		}
@@ -494,17 +507,50 @@ final class BA_Center_Settings_Service {
 	private static function sanitize_system_cards( $items ) {
 		$clean = array();
 		foreach ( is_array( $items ) ? $items : array() as $item ) {
-			$item = is_array( $item ) ? $item : array();
+			$item  = is_array( $item ) ? $item : array();
+			$media = self::normalize_system_card_media( $item );
 			$row = array(
-				'icon_id' => absint( self::array_value( $item, 'icon_id', 0 ) ),
-				'title' => sanitize_text_field( self::array_value( $item, 'title' ) ),
-				'url' => esc_url_raw( self::array_value( $item, 'url' ) ),
+				'media_type' => $media['media_type'],
+				'image_id'   => $media['image_id'],
+				'svg_id'     => $media['svg_id'],
+				'title'      => sanitize_text_field( self::array_value( $item, 'title' ) ),
+				'url'        => esc_url_raw( self::array_value( $item, 'url' ) ),
 			);
-			if ( $row['icon_id'] || $row['title'] || $row['url'] ) {
+			if ( $row['image_id'] || $row['svg_id'] || $row['title'] || $row['url'] ) {
 				$clean[] = $row;
 			}
 		}
 		return $clean;
+	}
+
+	/**
+	 * رسانه کارت سامانه را به ساختار انحصاری تصویر یا SVG نرمال می‌کند.
+	 * داده قدیمی icon_id نیز بر اساس MIME فایل به ساختار جدید مهاجرت می‌شود.
+	 *
+	 * @param array $card داده کارت سامانه.
+	 * @return array{media_type:string,image_id:int,svg_id:int}
+	 */
+	public static function normalize_system_card_media( array $card ) {
+		$media_type = 'svg' === self::array_value( $card, 'media_type' ) ? 'svg' : 'image';
+		$image_id   = absint( self::array_value( $card, 'image_id', 0 ) );
+		$svg_id     = absint( self::array_value( $card, 'svg_id', 0 ) );
+		$legacy_id  = absint( self::array_value( $card, 'icon_id', 0 ) );
+
+		if ( ! $image_id && ! $svg_id && $legacy_id ) {
+			if ( 'image/svg+xml' === get_post_mime_type( $legacy_id ) ) {
+				$media_type = 'svg';
+				$svg_id     = $legacy_id;
+			} else {
+				$media_type = 'image';
+				$image_id   = $legacy_id;
+			}
+		}
+
+		if ( 'svg' === $media_type ) {
+			return array( 'media_type' => 'svg', 'image_id' => 0, 'svg_id' => $svg_id );
+		}
+
+		return array( 'media_type' => 'image', 'image_id' => $image_id, 'svg_id' => 0 );
 	}
 
 	/**

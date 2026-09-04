@@ -1,60 +1,42 @@
-# Patch Manifest — v0.5.0
+# Patch v0.5.1 — کارت‌های سامانه با رسانه دوحالته
 
 ## مبدا و مقصد
 
-- نسخه مبدا: `v0.4.1`
-- نسخه مقصد: `v0.5.0`
-- نوع تغییر: Minor / Feature
+- مبدا: `ostadsho-child v0.5.0`
+- مقصد: `ostadsho-child v0.5.1`
+- نوع نسخه: PATCH
 
 ## هدف
 
-بهبود UX صفحه «تنظیمات بنیاد علوی» با ذخیره AJAX بدون Refresh و افزودن نوار ذخیره شناور در پایین Viewport برای تمام تب‌های قابل ذخیره.
-
-## تغییرات
-
-- افزودن `BA_Settings_Ajax_Controller` به‌عنوان Endpoint مشترک ذخیره تب‌ها.
-- بررسی nonce AJAX، nonce فرم Settings API و Capability اختصاصی هر تب پیش از ذخیره.
-- حفظ Sanitize Callbackهای ثبت‌شده در Settings API و جلوگیری از منطق ذخیره تکراری.
-- افزودن `BA_Settings_Access_Service` برای اشتراک منطق ذخیره Role Capability بین AJAX و fallback کلاسیک.
-- افزودن Block BEM جدید `ba-settings-savebar` با وضعیت‌های pristine، dirty، saving، success و error.
-- حذف دکمه‌های ذخیره انتهای فرم و اتصال یک دکمه شناور مشترک به فرم فعال.
-- حفظ `options.php` و `admin-post.php` به‌عنوان Progressive Enhancement در صورت غیرفعال بودن JavaScript.
-- افزودن تشخیص تغییرات فرم، TinyMCE، Repeater عمومی و Media Picker.
-- جلوگیری از ازبین‌رفتن فرمت نمایشی اعداد هنگام ذخیره AJAX.
-- به‌روزرسانی Handoff و مستند نسخه.
+افزودن انتخاب انحصاری «تصویر» یا «آیکون/SVG» برای `ba-jihadi-center__system-icon` در تنظیمات بنیاد علوی و Elementor، با خروجی `<img>` برای تصویر و Inline `<svg>` برای فایل SVG.
 
 ## فایل‌های تغییرکرده
 
-- `ostadsho-child/assets/css/ba-admin-settings.css`
-- `ostadsho-child/assets/js/ba-admin-settings.js`
-- `ostadsho-child/assets/js/ba-center-settings.js`
-- `ostadsho-child/docs/handoff.md`
-- `ostadsho-child/functions.php`
-- `ostadsho-child/inc/admin/settings/class-ba-center-settings-tab.php`
-- `ostadsho-child/inc/admin/settings/class-ba-settings-page.php`
-- `ostadsho-child/inc/admin/settings/tab-access-management.php`
-- `ostadsho-child/inc/admin/settings/tab-participation.php`
-
-## فایل‌های جدید
-
-- `ostadsho-child/docs/versions/v0.5.0.md`
-- `ostadsho-child/inc/admin/settings/class-ba-settings-access-service.php`
-- `ostadsho-child/inc/admin/settings/class-ba-settings-ajax-controller.php`
+- `assets/css/ba-center-settings.css`
+- `assets/css/bonyad-alavi-jihadi-center-widget.css`
+- `assets/js/ba-center-settings.js`
+- `docs/handoff.md`
+- `docs/versions/v0.5.1.md`
+- `inc/admin/settings/class-ba-center-settings-tab.php`
+- `inc/elementor/widgets/class-bonyad-alavi-jihadi-center-widget.php`
+- `inc/helpers/class-ba-media-helper.php`
+- `inc/services/class-ba-center-settings-service.php`
 
 ## فایل حذف‌شده
 
-ندارد. فایل `DELETED-FILES.txt` خالی است.
+ندارد. `DELETED-FILES.txt` عمداً خالی است.
 
-## روش اعمال Patch
+## نکات اعمال Patch
 
-محتویات پوشه `ostadsho-child` داخل Patch را روی پوشه قالب Child موجود در نسخه `v0.4.1` کپی/جایگزین کنید. فایل جدیدی نیاز به Migration دیتابیس ندارد.
+محتویات پوشه `ostadsho-child` را روی قالب فرزند نسخه `v0.5.0` جایگزین کنید. ساختار مسیرها حفظ شده است.
 
-## تست‌ها
+داده قدیمی `icon_id` نیاز به Migration دستی ندارد و هنگام خواندن بر اساس MIME فایل به ساختار جدید `image_id/svg_id` تبدیل می‌شود.
 
-- PHP lint روی تمام ۲۵ فایل PHP قالب.
-- JavaScript syntax check روی تمام ۹ فایل JS قالب.
-- بررسی nonce و Capability در Endpoint AJAX.
-- بررسی مسیر Settings API و Callback اختصاصی مدیریت دسترسی.
-- بررسی حذف Submitهای انتهای فرم و وجود یک Save Bar مشترک.
-- بررسی حفظ Form Action کلاسیک برای fallback بدون JavaScript.
-- بررسی سلامت ZIP کامل و Patch.
+## تست‌های انجام‌شده
+
+- Syntax تمام PHPها با `php -l`.
+- Syntax تمام JavaScriptها با `node --check`.
+- تست Resolver برای Icon/SVG خام Elementor بدون override داشبورد.
+- تست Migration `icon_id` قدیمی برای SVG و تصویر Raster.
+- بررسی ساختار BEM و Modifierهای `system-icon--image` و `system-icon--svg`.
+- تست سلامت ZIP کامل و Patch با `unzip -t`.

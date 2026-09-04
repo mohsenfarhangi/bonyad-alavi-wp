@@ -18,7 +18,12 @@
             var accept = String($field.data('accept') || '');
 
             if (accept === 'image/svg+xml' && attachment.mime !== 'image/svg+xml') {
-                window.alert('برای این فیلد یک فایل SVG انتخاب کنید.');
+                window.alert('برای حالت آیکون یک فایل SVG انتخاب کنید.');
+                return;
+            }
+
+            if (accept === 'image' && (String(attachment.mime || '').indexOf('image/') !== 0 || attachment.mime === 'image/svg+xml')) {
+                window.alert('برای حالت تصویر، یک فایل تصویری غیر SVG انتخاب کنید.');
                 return;
             }
 
@@ -42,7 +47,7 @@
     });
 
     $(document).on('change', '[data-ba-media-type-switch]', function () {
-        var $row = $(this).closest('[data-ba-partner-row]');
+        var $row = $(this).closest('[data-ba-media-switch-row]');
         var type = this.checked ? 'svg' : 'image';
         $row.find('[data-ba-media-type-value]').val(type).trigger('change');
         $row.find('[data-ba-media-mode]').prop('hidden', true);
