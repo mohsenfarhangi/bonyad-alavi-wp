@@ -213,9 +213,9 @@ final class Plugin
     private function registerAssets(): void
     {
         add_action('wp_enqueue_scripts', static function(): void {
-            // Third-party browser assets are deliberately self-hosted. The package
-            // itself does not bundle JalaliDatePicker; site owners place the two
-            // official dist files in assets/vendor/jalalidatepicker/.
+            // Third-party browser assets are deliberately self-hosted. The pinned
+            // JalaliDatePicker dist files are bundled under assets/vendor so public
+            // form rendering never depends on a runtime CDN request.
             $jdpBase = AFE_URL.'assets/vendor/jalalidatepicker/';
             wp_register_style('afe-jalali-datepicker', $jdpBase.'jalalidatepicker.min.css', [], '1.0.0');
             wp_register_script('afe-jalali-datepicker', $jdpBase.'jalalidatepicker.min.js', [], '1.0.0', true);

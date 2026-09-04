@@ -1,75 +1,51 @@
-# Alavi Form Engine — Handoff Update (Field / Date / Validator Checkpoint)
+# Alavi Form Engine — Handoff Update (Acceptance Candidate)
 
 ## وضعیت checkpoint
 
-- **مبنای پایدار:** 1.0.27
+- **مبنای پایدار:** `1.0.27`
 - **نسخه توسعه:** `1.0.28-dev`
 - **DB checkpoint:** `1.0.5-dev.2`
-- **Production-ready:** خیر
-- **Stable tag:** عمداً `1.0.27`
+- **Production-ready:** هنوز خیر؛ فقط live browser acceptance باقی مانده است.
+- **Stable tag:** فعلاً `1.0.27`
+- **تست واقعی ملی‌پیامک:** PASS گزارش‌شده توسط مدیر پروژه در 2026-09-04
 
 ## انجام‌شده در این ادامه
 
-### Field Ordering / Layout
+### SMS پیش‌فرض فرم جهادی
 
-- ترتیب آیتم‌های هر Step در تب «فیلدها و چیدمان» با Drag & Drop قابل Override است.
-- `HtmlBlock`ها نیز در همان لیست مرتب می‌شوند.
-- جابه‌جایی بین Stepها عمداً پشتیبانی نمی‌شود.
-- Child Fieldهای هر Repeater فقط داخل همان Repeater مرتب می‌شوند؛ nested Repeater نیز path مستقل دارد.
-- ترتیب در `overrides_json.order.steps` و `overrides_json.order.repeaters` ذخیره و در `SubmissionService::resolvedForm()` روی UI واقعی فرم اعمال می‌شود.
-- اگر در نسخه بعدی کد Field جدیدی اضافه شود که در Override قدیمی نبوده، به انتهای همان scope افزوده می‌شود و حذف نمی‌شود.
+برای `jihadi-group-registration` در Code Definition یک Template اکشن SMS اضافه شد:
 
-### DateField
+- `action_key`: `notify_leader_sms_on_submit`
+- Event: `submission.submitted` / «ثبت نهایی فرم»
+- Recipient source: Field
+- Recipient field: `leader_mobile`
+- Execution policy: `once_per_submission`
+- `on_error`: `continue`
+- `enabled`: `false` در تعریف پیش‌فرض
+- Body/Pattern: عمداً خالی و بدون hard-code
 
-- `DateField` سه mode دارد: `combined`، `picker` و `manual`؛ پیش‌فرض `combined` است.
-- Jalali mask: `YYYY/MM/DD`؛ Gregorian mask: `YYYY-MM-DD`.
-- `manual` جلالی DatePicker را فعال نمی‌کند؛ `picker` ورود مستقیم کاربر را در frontend محدود می‌کند.
-- backend مستقل از mode، تاریخ را براساس calendar واقعی validate می‌کند.
-- DateFieldهای فرم جهادی همچنان `jalali` هستند و چون mode صریح ندارند روی `combined` باقی می‌مانند.
+مدیر متن آزاد یا Pattern نهایی را در Action Builder تعیین و سپس اکشن را فعال می‌کند. اگر سایت قبلاً Override مدیریتی Actions داشته باشد، Override ذخیره‌شده همچنان روی Code Definition اولویت دارد.
 
-### Character / Length Overrides
+### Acceptance خودکار
 
-- `character_mode`: `normal` / `digits` / `persian` / `english` / `alnum`.
-- `allowed_extra` و `forbidden_extra` مستقل هستند.
-- `min_length` / `max_length` / `exact_length` اضافه شده‌اند؛ exact اولویت دارد.
-- برای digits mode در TextField نوع input به `number` تغییر نمی‌کند؛ Renderer فقط `inputmode=numeric` و constraintهای UX را اعمال می‌کند.
-- طول Unicode بدون وابستگی اجباری به `mbstring` محاسبه می‌شود.
+- تست Elementor Widget/Dynamic Tag با constructor بومی Elementor اضافه شد؛ constructor DI اضافه نشده است.
+- تست حضور local/pinned JalaliDatePicker و نبود ثبت CDN برای Runtime تقویم اضافه شد.
+- مستندات قدیمی نصب دستی JalaliDatePicker با وضعیت واقعی ZIP همگام شد؛ فایل‌ها داخل بسته موجودند.
+- کل regression مستقل، PHP lint و JS syntax در checkpoint جدید دوباره اجرا می‌شوند.
+- ماتریس دقیق acceptance واقعی در `docs/ACCEPTANCE-1.0.28.md` اضافه شده است.
 
-### Validator Registry / UI
+## مرحله بعد / Release gate
 
-- فایل‌های جدید: `src/Validation/ValidatorDefinition.php` و `src/Validation/ValidatorRegistry.php`.
-- Hook توسعه‌دهنده: `afe_register_validator_definitions`.
-- Core validatorها: national_id، mobile، iban، email، url، postal_code، bank_card، landline، date، custom_regex.
-- UI هر Field بر اساس type فقط Validatorهای قابل استفاده را به شکل multi-select نشان می‌دهد و برای هرکدام پیام خطای سفارشی دارد.
-- Ruleهای legacy فرم‌ها همچنان اجرا می‌شوند تا backward compatibility شکسته نشود.
-- Custom Regex فقط برای کاربر دارای `afe_manage_settings` قابل ایجاد/تغییر است.
-- Regex حداکثر 500 کاراکتر، Flagهای محدود `i/m/s/u/x`، compile-test قبل از Save و PCRE `LIMIT_MATCH`/`LIMIT_RECURSION` دارد.
-- Frontend Custom Regex صرفاً UX است؛ اگر syntax PCRE در JavaScript قابل اجرا نباشد frontend آن را skip می‌کند و PHP مرجع نهایی می‌ماند.
+1. همین checkpoint روی staging واقعی WordPress + MySQL/MariaDB + Elementor نصب شود.
+2. ماتریس `docs/ACCEPTANCE-1.0.28.md` برای submit/draft/edit/lock/duplicate/actions/ordering/date/validators/admin UX اجرا شود.
+3. متن/Pattern تأییدشده SMS متقاضی در Action Builder وارد و اکشن فعال شود؛ connectivity ملی‌پیامک قبلاً PASS شده است.
+4. فقط بعد از PASS کامل live acceptance:
+   - Plugin version: `1.0.28`
+   - DB version: `1.0.5`
+   - Stable tag: `1.0.28`
+   - changelog/docs نهایی و Production ZIP ساخته شود.
 
-### SMS / ملی‌پیامک
-
-- طبق تصمیم مدیر پروژه، Provider در این مرحله تغییر نکرده است.
-- تست integration واقعی توسط مدیر انجام می‌شود؛ در صورت گزارش ایراد مشخص اصلاح شود.
-
-### QA
-
-- PHP lint روی `src/` و `tests/`: **PASS — 122 files**
-- `admin.js` syntax: **PASS**
-- `frontend.js` syntax: **PASS**
-- کل `tests/*.php`: **PASS — 28 test scripts**
-- تست‌های جدید این مرحله:
-  - `tests/validator-registry.php`
-  - `tests/field-validation-overrides.php`
-  - `tests/date-field-modes.php`
-  - `tests/field-ordering.php`
-
-## اولویت ادامه توسعه
-
-1. مدیر پروژه تست واقعی ملی‌پیامک را انجام دهد؛ فقط در صورت ایراد مشخص Provider/SmsAction اصلاح شود.
-2. پس از تعیین متن/Pattern نهایی، Action پیش‌فرض فرم جهادی روی `leader_mobile` و `once_per_submission` از UI/definition نهایی شود.
-3. live acceptance روی WordPress + MySQL/MariaDB + Elementor: submit/draft/edit/lock/duplicate/actions/field ordering/date modes/validators.
-4. بررسی UX نهایی Admin روی فرم جهادی با تعداد زیاد Field و Repeater و اصلاح CSS جزئی در صورت نیاز.
-5. regression نهایی، docs نهایی، bump Plugin به `1.0.28`، DB به `1.0.5` و Stable tag به `1.0.28` فقط بعد از acceptance.
+**قاعده:** تا قبل از live acceptance، checkpoint را با برچسب Production منتشر نکن.
 
 ---
 

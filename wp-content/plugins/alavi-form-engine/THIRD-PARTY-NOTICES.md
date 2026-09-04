@@ -22,4 +22,4 @@ Jalali date fields use `majidh1/JalaliDatePicker`:
 - Repository: `https://github.com/majidh1/JalaliDatePicker`
 - Package: `@majidh1/jalalidatepicker` version `1.0.0`
 - License: MIT
-- Front-end assets are loaded from the version-pinned unpkg distribution.
+- The pinned front-end dist assets are bundled locally under `assets/vendor/jalalidatepicker/`; no runtime CDN request is required.

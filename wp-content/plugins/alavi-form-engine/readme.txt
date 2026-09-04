@@ -19,14 +19,12 @@ The package includes the "ثبت نام گروه‌های مردمی و جهاد
 1. Upload and activate the plugin.
 2. Open Forms > Database and verify database health.
 3. Optionally update the Iran geography dataset.
-4. Download JalaliDatePicker assets and place them locally in:
-   assets/vendor/jalalidatepicker/jalalidatepicker.min.js
-   assets/vendor/jalalidatepicker/jalalidatepicker.min.css
+4. JalaliDatePicker assets are bundled locally in assets/vendor/jalalidatepicker/; verify they remain present after deployment.
 5. Use [alavi_form id="jihadi-group-registration"].
 
 == Changelog ==
 
-= Unreleased / 1.0.28-dev field/date/validator checkpoint =
+= Unreleased / 1.0.28-dev acceptance candidate checkpoint =
 * Added registry-driven Action Builder with Persian Event labels, stable action keys, multiple actions, same-event drag/drop ordering, enable/disable controls, conditional logic and execution/error policies.
 * Added ActionRuntime / ActionRunResult for chain outputs, first-wins redirect and follow-up events without mutating submitted form data.
 * Added Redirect, Create/Login/Update User, Assign Role, Update User Meta, Change Submission Status, Internal Note, Generate PDF, Email PDF and Create/Update/Upsert Post/CPT actions.
@@ -36,7 +34,7 @@ The package includes the "ثبت نام گروه‌های مردمی و جهاد
 * Wired canonical submission, lock, status, edit-request, trash and restore events to the runtime Action Engine.
 * Added atomic once-per-submission guards and execution logs; Action failure no longer rolls back a successful Submission.
 * Refactored Email and Webhook actions to use the shared TokenResolver.
-* Added SmsAction and MeliPayamak adapters for legacy username/password and console API-token modes, including free-text and pattern/shared sends; live-account testing remains an administrator acceptance step.
+* Added SmsAction and MeliPayamak adapters for legacy username/password and console API-token modes, including free-text and pattern/shared sends; live-account SMS acceptance was reported PASS by the project administrator.
 * Added encrypted global storage for SMS password/API token plus per-action recipient/body/pattern configuration.
 * Added DuplicatePolicy integration for frontend, REST, admin edits, trash and restore, including active Draft matching and current-Submission exclusion during edits.
 * Added block, secure-reference, custom-message and allow+mark duplicate behaviors with is_duplicate / duplicate_of_submission_id metadata.
@@ -50,8 +48,10 @@ The package includes the "ثبت نام گروه‌های مردمی و جهاد
 * Custom Regex requires afe_manage_settings, is compile-tested before save, uses restricted flags/length and runtime PCRE match/recursion limits; frontend regex checking is UX-only.
 * Added Unicode-safe length validation without requiring mbstring.
 * Added regression coverage for Validator Registry, field constraint overrides, DateField modes and ordering behavior.
+* Added a disabled, content-free default Jihadi SMS Action template for submission.submitted -> leader_mobile with once_per_submission; final message/Pattern remains an admin setting and is not hard-coded in PHP.
+* Added Elementor native-constructor registration and local runtime-asset regression coverage.
 * DB development checkpoint remains 1.0.5-dev.2.
-* This checkpoint is still not production-ready; live MeliPayamak acceptance, final Jihadi SMS action selection, live WordPress/MySQL/Elementor acceptance and the production version/stable-tag bump are pending.
+* This checkpoint is still not production-ready; browser-driven WordPress/MySQL/Elementor acceptance and the final production version/DB/stable-tag bump are pending.
 
 = 1.0.27 =
 * Added a shared Template Registry/Resolver for all editable AFE HTML templates.

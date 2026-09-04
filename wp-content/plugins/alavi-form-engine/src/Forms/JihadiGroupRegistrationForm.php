@@ -289,6 +289,26 @@ final class JihadiGroupRegistrationForm
                         'body'=>'ثبت جدیدی در فرم گروه‌های مردمی و جهادی ایجاد شد. کد رهگیری: {{tracking_code}}',
                     ],
                 ],
+                [
+                    // Template-only default: the manager selects the final free-text/Pattern
+                    // content in the Action Builder and then enables this action. Keeping the
+                    // body empty here avoids hard-coding production message content in PHP.
+                    'action_key'=>'notify_leader_sms_on_submit',
+                    'type'=>'sms',
+                    'enabled'=>false,
+                    'on'=>['submission.submitted'],
+                    'execution_policy'=>'once_per_submission',
+                    'on_error'=>'continue',
+                    'config'=>[
+                        'recipient_source'=>'field',
+                        'recipient_field'=>'leader_mobile',
+                        'mode'=>'free',
+                        'sender'=>'',
+                        'body'=>'',
+                        'pattern_code'=>'',
+                        'pattern_values'=>[],
+                    ],
+                ],
             ]);
     }
 }

@@ -1,68 +1,47 @@
-# Build / QA Report — Alavi Form Engine 1.0.28-dev Field / Date / Validator Checkpoint
+# Build / QA Report — Alavi Form Engine 1.0.28-dev Acceptance Candidate Checkpoint
 
 ## Status
 
-**Development checkpoint / not production-ready.** Stable production baseline remains **1.0.27**. Plugin version remains **1.0.28-dev**, Stable tag remains **1.0.27**, and the DB development checkpoint remains **1.0.5-dev.2**. No new database migration was required in this checkpoint.
+**Acceptance candidate, not yet production-tagged.** Stable production baseline remains **1.0.27**. Plugin version remains **1.0.28-dev**, Stable tag remains **1.0.27**, and DB development checkpoint remains **1.0.5-dev.2**.
 
-## Implemented in this checkpoint
+The project administrator reported the real MeliPayamak account test **PASS** on 2026-09-04. The remaining release gate is browser-driven acceptance on a real WordPress + MySQL/MariaDB + Elementor staging environment.
 
-### Field ordering
+## Changes in this checkpoint
 
-- Admin drag/drop ordering for every item inside the same Step, including `HtmlBlock`.
-- Repeater child ordering is scoped to the same Repeater; no cross-Step move is stored or resolved.
-- Runtime order is applied to the resolved form definition, so renderer, validation, preview and downstream consumers see the same ordered schema.
-- Missing/new code-defined items are appended safely when an older order override does not know about them.
+- Added the built-in Jihadi applicant SMS Action template with stable `action_key=notify_leader_sms_on_submit`.
+- Default SMS event is `submission.submitted`, recipient source is form Field `leader_mobile`, execution policy is `once_per_submission`, and error behavior is `continue`.
+- The SMS template is intentionally **disabled** and contains no hard-coded free-text or Pattern content; the manager selects the approved content in Action Builder before enabling it. Existing saved Action overrides continue to take precedence over the code definition.
+- Kept the existing admin notification Email Action unchanged.
+- Added Elementor registration regression coverage using an Elementor-native constructor stub; no Widget constructor DI was introduced.
+- Added runtime asset regression proving the pinned JalaliDatePicker files are present locally and the frontend registration is not CDN-based.
+- Corrected stale documentation that said JalaliDatePicker must be downloaded separately; this ZIP already contains the pinned local assets.
+- Reviewed the extended Action Registry and confirmed the Post/CPT operation schema contains a single `operation` setting.
 
-### Date input modes
-
-- `DateField::inputMode()` with `combined`, `picker`, and `manual`, plus fluent helpers `combined()`, `pickerOnly()`, and `manualOnly()`.
-- Default remains `combined` for compatibility.
-- Jalali UX mask `YYYY/MM/DD`; Gregorian UX mask `YYYY-MM-DD`.
-- Jalali manual-only fields do not activate/load the Jalali picker when no picker-enabled Jalali field exists.
-- PHP calendar validation remains authoritative regardless of input mode.
-
-### Character / length overrides
-
-- Admin override modes: normal, digits-only, Persian letters, English letters, letters+digits.
-- Independent additional-allowed and additional-forbidden character strings.
-- Minimum, maximum, and exact length; exact length has validation priority.
-- Digits-only identifiers remain text controls; renderer only applies numeric input hints and constraint metadata.
-- Unicode-safe server-side length counting works with or without `mbstring`.
-
-### Validator Registry / UI
-
-- Added `Validation\ValidatorDefinition` and `Validation\ValidatorRegistry`.
-- Added `afe_register_validator_definitions` extension point and composition-root registration.
-- Core validators: Iranian National ID, mobile, IBAN, email, URL, 10-digit postal code, 16-digit bank card checksum, Iranian landline, calendar-aware date, and Custom Regex.
-- Admin validator multi-select is filtered by Field type; each selected validator can define a custom error message.
-- Existing legacy `rules` validation remains active for backward compatibility.
-- Custom Regex requires `afe_manage_settings`, message is mandatory, pattern length/flags are restricted, save performs compile-test, and runtime PCRE adds `LIMIT_MATCH` / `LIMIT_RECURSION`.
-- Frontend custom-regex validation is UX-only and gracefully skips PCRE syntax unsupported by JavaScript; PHP is final authority.
-
-### Preserved earlier 1.0.28-dev work
+## Preserved 1.0.28-dev feature set
 
 - Registry-driven Event/Action Builder, TokenResolver/Palette, ActionRuntime, once guards, Action logs/retry, Redirect/User/Status/Note/PDF/Post actions.
-- SMS/MeliPayamak legacy + console API implementations remain unchanged pending the project administrator's live account test.
-- Duplicate Policy and transaction-safe fingerprint owner promotion remain active.
+- MeliPayamak legacy and console API-token modes, free-text and Pattern sends.
+- Duplicate Policy with Draft matching, trash exclusion, current-submission exclusion, allow+mark and transaction-safe owner promotion.
+- Per-Step/Repeater field ordering, Date input modes, character/length overrides, Validator Registry/UI and safe Custom Regex.
 
 ## QA performed
 
-- Full standalone regression suite under `tests/*.php`: **PASS (28 test scripts)**.
-- PHP syntax lint across `src/` and `tests/`: **PASS (122 PHP files)**.
+- Full standalone `tests/*.php` regression suite: **PASS (31 test scripts)**.
+- PHP syntax lint across `src/` and `tests/`: **PASS (125 PHP files)**.
 - `assets/js/admin.js`: **PASS**.
 - `assets/js/frontend.js`: **PASS**.
 - `composer.json` parse validation: **PASS**.
-- New coverage: `validator-registry.php`, `field-validation-overrides.php`, `date-field-modes.php`, `field-ordering.php`.
-- Existing Action/Retry, SMS, Duplicate, upload ownership, form-access, locale-date, templates, style-isolation and Jihadi schema regressions remain green.
+- Local JalaliDatePicker JS/CSS presence: **PASS**.
+- New tests in this checkpoint:
+  - `tests/jihadi-default-sms-action.php`
+  - `tests/elementor-registration.php`
+  - `tests/runtime-assets.php`
 
-## Deliberately deferred
+## Release blocker / live acceptance
 
-- Administrator live MeliPayamak integration result and any provider correction based on that concrete result.
-- Final default Jihadi SMS Action text/pattern selection.
-- Browser-driven acceptance against a real WordPress + MySQL/MariaDB + Elementor environment, including admin drag/drop UX and datepicker behavior.
-- Final production version / DB / Stable tag bump.
+This build environment has no complete WordPress + MySQL/MariaDB + browser + Elementor runtime, so genuine end-to-end clicks cannot be represented as completed here. The exact live acceptance matrix is in `docs/ACCEPTANCE-1.0.28.md`.
 
-Prepared for PHP 8.3+ / WordPress 6.4+.
+Do **not** bump to `1.0.28` / DB `1.0.5` / Stable tag `1.0.28` until that live matrix passes.
 
 ## Automated checks performed for this package
 

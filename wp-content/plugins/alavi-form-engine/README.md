@@ -1,26 +1,17 @@
-## وضعیت توسعه 1.0.28-dev (Field / Date / Validator Checkpoint)
+## وضعیت توسعه 1.0.28-dev (Acceptance Candidate Checkpoint)
 
-> این بسته هنوز Production-ready نیست. مبنای پایدار `1.0.27` است و `Stable tag` عمداً روی `1.0.27` باقی مانده است. DB checkpoint فعلی `1.0.5-dev.2` است.
+> این بسته هنوز تا اجرای acceptance مرورگری روی یک WordPress + MySQL/MariaDB + Elementor واقعی Production-ready اعلام نمی‌شود. مبنای پایدار `1.0.27` است، `Stable tag` فعلاً روی `1.0.27` مانده و DB checkpoint برابر `1.0.5-dev.2` است.
 
-در این checkpoint علاوه بر Event/Action/Duplicate و Extended Actions مراحل Field UI نیز پیاده شده‌اند:
+وضعیت این checkpoint:
 
-- Field Ordering واقعی در سطح هر Step اضافه شده است؛ `HtmlBlock` نیز همراه فیلدها Drag & Drop می‌شود و Field بین Stepها منتقل نمی‌شود.
-- Child Fieldهای هر Repeater فقط داخل همان Repeater قابل مرتب‌سازی‌اند. ترتیب Override در runtime روی `resolvedForm` اعمال می‌شود و آیتم‌های جدیدی که بعداً در تعریف PHP اضافه شوند بدون حذف‌شدن به انتهای همان scope افزوده می‌شوند.
-- `DateField` سه mode رسمی دارد: `combined` (انتخاب + ورود دستی، پیش‌فرض)، `picker` (فقط انتخاب) و `manual` (فقط ورود دستی).
-- mask تاریخ در frontend برای Jalali برابر `YYYY/MM/DD` و برای Gregorian برابر `YYYY-MM-DD` است؛ اعتبارسنجی واقعی همچنان سمت PHP انجام می‌شود.
-- Jalali DateField در حالت `manual` دیگر JalaliDatePicker را لود/فعال نمی‌کند؛ فرم جهادی طبق تعریف کد همچنان Jalali و با mode پیش‌فرض `combined` باقی مانده است.
-- Field Override برای Character/Input Mode شامل Normal، فقط اعداد، فقط حروف فارسی، فقط حروف انگلیسی و حروف+اعداد است؛ allowed-extra و forbidden-extra مستقل نیز اضافه شده‌اند.
-- حداقل طول، حداکثر طول و طول دقیق به Override اضافه شده‌اند؛ طول دقیق اولویت دارد و backend بدون وابستگی اجباری به `mbstring` طول Unicode را درست محاسبه می‌کند.
-- `ValidatorDefinition` / `ValidatorRegistry` اضافه شده و از hook توسعه‌دهنده `afe_register_validator_definitions` پشتیبانی می‌کند.
-- Validatorهای Core: کد ملی ایران، موبایل ایران، شبا، Email، URL، کد پستی ۱۰ رقمی، کارت بانکی ۱۶ رقمی با checksum، تلفن ثابت ایران، Date validation و Custom Regex.
-- UI Validation به صورت انتخاب چندگانه و پیام خطای سفارشی برای هر Validator در Override فیلد قرار دارد.
-- Custom Regex فقط با `afe_manage_settings` قابل تعریف/تغییر است، حداکثر طول و Flag whitelist دارد، قبل از Save compile-test می‌شود و در PHP با PCRE match/recursion limits اجرا می‌شود. Frontend فقط UX validation است و PHP منبع نهایی است.
-- Ruleهای legacy فرم‌ها (`national_id`, `mobile`, `iban_digits`, ...) برای backward compatibility حفظ شده‌اند.
-- Event/Action/Retry/SMS/Duplicate قابلیت‌های checkpoint قبلی بدون حذف باقی مانده‌اند. تست واقعی ملی‌پیامک همچنان توسط مدیر پروژه انجام می‌شود.
+- تست واقعی ملی‌پیامک توسط مدیر پروژه **PASS** گزارش شده است؛ Provider/SmsAction در این مرحله تغییر نکرد.
+- برای فرم `jihadi-group-registration` یک Action پیش‌فرض SMS با `action_key=notify_leader_sms_on_submit` اضافه شده است: Event=`submission.submitted`، گیرنده=`leader_mobile` و policy=`once_per_submission`. این Template عمداً غیرفعال و بدون متن/Pattern hard-code شده است تا مدیر متن یا Pattern نهایی را در Action Builder تعیین و سپس Action را فعال کند.
+- Action پیش‌فرض Email مدیر بدون تغییر باقی مانده است.
+- تست ثبت Elementor Widget/Dynamic Tag با constructor بومی Elementor اضافه و پاس شده است؛ DI داخل constructor ویجت اضافه نشده است.
+- JalaliDatePicker همراه همین ZIP به‌صورت local/pinned در `assets/vendor/jalalidatepicker/` موجود است و Runtime فرم به CDN آن وابسته نیست.
+- QA خودکار این checkpoint شامل Action/SMS/Duplicate/Field Ordering/Date/Validator/Elementor registration/runtime assets است؛ جزئیات در `BUILD-REPORT.md` و `docs/ACCEPTANCE-1.0.28.md` آمده است.
 
-QA این checkpoint: کل `tests/*.php` برابر **28 test scripts** پاس شده، PHP lint روی **122 فایل** `src/` و `tests/` پاس شده و syntax فایل‌های `admin.js` و `frontend.js` نیز سالم است.
-
-هنوز تکمیل نشده: نتیجه integration واقعی ملی‌پیامک، تنظیم Action نهایی SMS فرم جهادی بر اساس نتیجه تست مدیر، live WordPress/MySQL/Elementor acceptance و bump نهایی Production به `1.0.28`. تولید مستقیم PDF به وجود `Dompdf\Dompdf` در autoload سایت وابسته است؛ Dompdf داخل این ZIP باندل نشده است.
+موارد باقی‌مانده پیش از bump نهایی: acceptance مرورگری روی سایت واقعی برای submit/draft/edit/lock/duplicate/actions/field ordering/date modes/validators و بررسی UX ادمین روی فرم جهادی. پس از PASS این ماتریس، نسخه Plugin به `1.0.28`، DB version به `1.0.5` و Stable tag به `1.0.28` bump می‌شود.
 
 # Alavi Form Engine
 
@@ -189,16 +180,16 @@ The admin field override screen can switch each select between Custom and Native
 - داده‌های قدیمی `target_province`, `target_county`, `target_district`, `target_area_type`, `target_area_detail` به اولین ردیف Repeater جدید نگاشت می‌شوند تا سازگاری Submissionهای قبلی حفظ شود.
 - پیام‌های Validation مرورگر برای موبایل، کد ملی و شبا دقیق‌تر و فارسی شدند و همان محدودیت‌ها در سمت PHP نیز enforce می‌شوند.
 
-### نصب لوکال JalaliDatePicker
+### JalaliDatePicker لوکال
 
-دو فایل رسمی `dist` را از مخزن `majidh1/JalaliDatePicker` دریافت و در مسیرهای زیر قرار دهید:
+نسخه pinned فایل‌های `dist` همراه بسته افزونه در مسیرهای زیر قرار دارد:
 
 ```text
 wp-content/plugins/alavi-form-engine/assets/vendor/jalalidatepicker/jalalidatepicker.min.js
 wp-content/plugins/alavi-form-engine/assets/vendor/jalalidatepicker/jalalidatepicker.min.css
 ```
 
-AFE هیچ‌کدام از این دو فایل را از CDN در Runtime درخواست نمی‌کند.
+AFE هیچ‌کدام از این دو فایل را از CDN در Runtime درخواست نمی‌کند. اگر deployment ناقص باشد و فایل‌ها حذف شده باشند، پنل مدیریت هشدار می‌دهد.
 
 ## تغییرات 1.0.24 — نشان اختصاصی هر فرم
 
