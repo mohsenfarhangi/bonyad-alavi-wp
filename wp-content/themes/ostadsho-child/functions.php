@@ -112,7 +112,10 @@ require_once get_stylesheet_directory() . '/inc/admin/settings/class-ba-center-s
 
 // تنظیمات مدیریتی بنیاد علوی: صفحه تب‌دار، مشارکت مردمی و مدیریت دسترسی.
 require_once get_stylesheet_directory() . '/inc/admin/settings/tab-participation.php';
+require_once get_stylesheet_directory() . '/inc/admin/settings/class-ba-settings-access-service.php';
 require_once get_stylesheet_directory() . '/inc/admin/settings/tab-access-management.php';
 require_once get_stylesheet_directory() . '/inc/admin/settings/class-ba-settings-page.php';
+require_once get_stylesheet_directory() . '/inc/admin/settings/class-ba-settings-ajax-controller.php';
 BA_Settings_Page::init();
+BA_Settings_Ajax_Controller::init();
 

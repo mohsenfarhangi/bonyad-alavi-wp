@@ -1,36 +1,45 @@
-# Patch Manifest — v0.4.1
+# Patch Manifest — v0.5.0
 
 ## مبدا و مقصد
 
-- نسخه مبدا: `v0.4.0`
-- نسخه مقصد: `v0.4.1`
-- نوع تغییر: Patch / Bug Fix
+- نسخه مبدا: `v0.4.1`
+- نسخه مقصد: `v0.5.0`
+- نوع تغییر: Minor / Feature
 
 ## هدف
 
-رفع مشکل اعمال‌نشدن لینک و نمایش‌ندادن آیکون‌های Elementor در کارت‌های سامانه بخش معرفی صفحه «مرکز هماهنگی حرکت‌های مردمی و جهادی».
+بهبود UX صفحه «تنظیمات بنیاد علوی» با ذخیره AJAX بدون Refresh و افزودن نوار ذخیره شناور در پایین Viewport برای تمام تب‌های قابل ذخیره.
 
 ## تغییرات
 
-- اصلاح Resolve کارت‌های `system_cards` از حالت Override کامل Repeater به اولویت فیلدبه‌فیلد.
-- لینک معتبر داشبورد همچنان اولویت دارد؛ اگر لینک داشبورد خالی باشد، لینک Elementor استفاده می‌شود.
-- آیکون معتبر داشبورد همچنان اولویت دارد؛ اگر آیکون داشبورد خالی باشد، آیکون Elementor استفاده می‌شود.
-- تغییر کنترل آیکون Elementor از `MEDIA` به `ICONS`.
-- رندر آیکون‌های Font/SVG با `Elementor\Icons_Manager`.
-- حفظ fallback برای داده‌های قدیمی Media در Elementor.
-- افزودن کنترل اندازه خود آیکون و رنگ آیکون در تب Style.
+- افزودن `BA_Settings_Ajax_Controller` به‌عنوان Endpoint مشترک ذخیره تب‌ها.
+- بررسی nonce AJAX، nonce فرم Settings API و Capability اختصاصی هر تب پیش از ذخیره.
+- حفظ Sanitize Callbackهای ثبت‌شده در Settings API و جلوگیری از منطق ذخیره تکراری.
+- افزودن `BA_Settings_Access_Service` برای اشتراک منطق ذخیره Role Capability بین AJAX و fallback کلاسیک.
+- افزودن Block BEM جدید `ba-settings-savebar` با وضعیت‌های pristine، dirty، saving، success و error.
+- حذف دکمه‌های ذخیره انتهای فرم و اتصال یک دکمه شناور مشترک به فرم فعال.
+- حفظ `options.php` و `admin-post.php` به‌عنوان Progressive Enhancement در صورت غیرفعال بودن JavaScript.
+- افزودن تشخیص تغییرات فرم، TinyMCE، Repeater عمومی و Media Picker.
+- جلوگیری از ازبین‌رفتن فرمت نمایشی اعداد هنگام ذخیره AJAX.
 - به‌روزرسانی Handoff و مستند نسخه.
 
 ## فایل‌های تغییرکرده
 
-- `ostadsho-child/assets/css/bonyad-alavi-jihadi-center-widget.css`
+- `ostadsho-child/assets/css/ba-admin-settings.css`
+- `ostadsho-child/assets/js/ba-admin-settings.js`
+- `ostadsho-child/assets/js/ba-center-settings.js`
 - `ostadsho-child/docs/handoff.md`
-- `ostadsho-child/inc/elementor/widgets/class-bonyad-alavi-jihadi-center-widget.php`
-- `ostadsho-child/inc/services/class-ba-center-settings-service.php`
+- `ostadsho-child/functions.php`
+- `ostadsho-child/inc/admin/settings/class-ba-center-settings-tab.php`
+- `ostadsho-child/inc/admin/settings/class-ba-settings-page.php`
+- `ostadsho-child/inc/admin/settings/tab-access-management.php`
+- `ostadsho-child/inc/admin/settings/tab-participation.php`
 
-## فایل جدید
+## فایل‌های جدید
 
-- `ostadsho-child/docs/versions/v0.4.1.md`
+- `ostadsho-child/docs/versions/v0.5.0.md`
+- `ostadsho-child/inc/admin/settings/class-ba-settings-access-service.php`
+- `ostadsho-child/inc/admin/settings/class-ba-settings-ajax-controller.php`
 
 ## فایل حذف‌شده
 
@@ -38,12 +47,14 @@
 
 ## روش اعمال Patch
 
-محتویات پوشه `ostadsho-child` داخل Patch را روی پوشه قالب Child موجود جایگزین/کپی کنید. این Patch برای مبدا `v0.4.0` تهیه شده است.
+محتویات پوشه `ostadsho-child` داخل Patch را روی پوشه قالب Child موجود در نسخه `v0.4.1` کپی/جایگزین کنید. فایل جدیدی نیاز به Migration دیتابیس ندارد.
 
 ## تست‌ها
 
-- PHP lint روی تمام ۲۳ فایل PHP قالب.
+- PHP lint روی تمام ۲۵ فایل PHP قالب.
 - JavaScript syntax check روی تمام ۹ فایل JS قالب.
-- تست Resolver برای fallback لینک و آیکون Elementor.
-- تست اولویت لینک و آیکون معتبر داشبورد.
-- تست سلامت آرشیو ZIP کامل و Patch.
+- بررسی nonce و Capability در Endpoint AJAX.
+- بررسی مسیر Settings API و Callback اختصاصی مدیریت دسترسی.
+- بررسی حذف Submitهای انتهای فرم و وجود یک Save Bar مشترک.
+- بررسی حفظ Form Action کلاسیک برای fallback بدون JavaScript.
+- بررسی سلامت ZIP کامل و Patch.

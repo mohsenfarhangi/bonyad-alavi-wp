@@ -197,3 +197,144 @@
 .ba-access-table__checkbox input[type="checkbox"]:disabled {
     opacity: .7;
 }
+
+/* Floating AJAX save bar */
+.ba-settings-wrap {
+    padding-bottom: 104px;
+}
+
+.ba-settings-savebar {
+    position: fixed;
+    z-index: 100000;
+    bottom: 20px;
+    left: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 18px;
+    width: min(520px, calc(100vw - 48px));
+    padding: 12px 14px 12px 12px;
+    background: rgba(255, 255, 255, .96);
+    border: 1px solid #c3c4c7;
+    border-radius: 12px;
+    box-shadow: 0 12px 36px rgba(0, 0, 0, .16);
+    backdrop-filter: blur(8px);
+}
+
+.ba-settings-savebar__status {
+    display: flex;
+    align-items: center;
+    min-width: 0;
+    gap: 8px;
+    color: #50575e;
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+.ba-settings-savebar__status-icon {
+    flex: 0 0 auto;
+    width: 20px;
+    height: 20px;
+    font-size: 20px;
+}
+
+.ba-settings-savebar__status-text {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.ba-settings-savebar__button.button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+    min-height: 38px;
+    padding-inline: 18px;
+    gap: 8px;
+}
+
+.ba-settings-savebar__spinner {
+    display: none;
+    width: 15px;
+    height: 15px;
+    border: 2px solid currentColor;
+    border-top-color: transparent;
+    border-radius: 50%;
+}
+
+.ba-settings-savebar--dirty {
+    border-color: #dba617;
+}
+
+.ba-settings-savebar--dirty .ba-settings-savebar__status,
+.ba-settings-savebar--error .ba-settings-savebar__status {
+    color: #8a5a00;
+}
+
+.ba-settings-savebar--success {
+    border-color: #00a32a;
+}
+
+.ba-settings-savebar--success .ba-settings-savebar__status {
+    color: #008a20;
+}
+
+.ba-settings-savebar--error {
+    border-color: #d63638;
+}
+
+.ba-settings-savebar--error .ba-settings-savebar__status {
+    color: #b32d2e;
+}
+
+.ba-settings-savebar--saving .ba-settings-savebar__spinner {
+    display: inline-block;
+    animation: ba-settings-savebar-spin .7s linear infinite;
+}
+
+.ba-settings-savebar--saving .ba-settings-savebar__status-icon {
+    animation: ba-settings-savebar-spin .9s linear infinite;
+}
+
+@keyframes ba-settings-savebar-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .ba-settings-savebar--saving .ba-settings-savebar__spinner,
+    .ba-settings-savebar--saving .ba-settings-savebar__status-icon {
+        animation: none;
+    }
+}
+
+@media (max-width: 782px) {
+    .ba-settings-wrap {
+        padding-bottom: 126px;
+    }
+
+    .ba-settings-savebar {
+        right: 12px;
+        bottom: 12px;
+        left: 12px;
+        width: auto;
+    }
+
+    .ba-settings-savebar__status-text {
+        white-space: normal;
+    }
+}
+
+@media (max-width: 480px) {
+    .ba-settings-savebar {
+        align-items: stretch;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .ba-settings-savebar__button.button {
+        width: 100%;
+    }
+}

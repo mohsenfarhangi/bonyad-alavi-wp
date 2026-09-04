@@ -23,6 +23,7 @@ function ba_register_participation_settings_tab( $tabs ) {
 		'option_name'       => 'ba_participation_settings',
 		'page_slug'         => 'ba-settings-participation',
 		'register_callback' => 'ba_register_participation_settings_fields',
+		'save_label'        => 'ذخیره تنظیمات مشارکت',
 	);
 
 	return $tabs;

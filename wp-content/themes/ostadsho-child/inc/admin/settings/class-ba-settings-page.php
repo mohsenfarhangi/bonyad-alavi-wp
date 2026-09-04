@@ -231,6 +231,16 @@ if ( ! class_exists( 'BA_Settings_Page' ) ) {
 					'mediaButton'     => 'استفاده از تصاویر انتخاب‌شده',
 					'removeImage'     => 'حذف تصویر',
 					'emptyGallery'    => 'هنوز تصویری برای اسلایدر انتخاب نشده است.',
+					'ajaxUrl'         => admin_url( 'admin-ajax.php' ),
+					'ajaxAction'      => BA_Settings_Ajax_Controller::AJAX_ACTION,
+					'ajaxNonce'       => wp_create_nonce( BA_Settings_Ajax_Controller::NONCE_ACTION ),
+					'i18n'            => array(
+						'pristine' => 'همه تغییرات ذخیره شده‌اند.',
+						'dirty'    => 'تغییرات ذخیره‌نشده دارید.',
+						'saving'   => 'در حال ذخیره تنظیمات…',
+						'success'  => 'تنظیمات با موفقیت ذخیره شد.',
+						'error'    => 'ذخیره تنظیمات انجام نشد. دوباره تلاش کنید.',
+					),
 				)
 			);
 		}
@@ -249,6 +259,43 @@ if ( ! class_exists( 'BA_Settings_Page' ) ) {
 			}
 
 			return (string) array_key_first( $tabs );
+		}
+
+		/**
+		 * مشخص می‌کند تب جاری قابلیت ذخیره از نوار مشترک را دارد یا خیر.
+		 *
+		 * @param array $tab پیکربندی تب.
+		 * @return bool
+		 */
+		private static function is_saveable_tab( array $tab ) {
+			return ( ! empty( $tab['option_name'] ) && ! empty( $tab['option_group'] ) )
+				|| ( ! empty( $tab['ajax_save_callback'] ) && is_callable( $tab['ajax_save_callback'] ) );
+		}
+
+		/**
+		 * نوار شناور ذخیره را برای فرم تب فعال رندر می‌کند.
+		 *
+		 * @param array $tab پیکربندی تب فعال.
+		 * @return void
+		 */
+		private static function render_save_bar( array $tab ) {
+			if ( empty( $tab['form_id'] ) || ! self::is_saveable_tab( $tab ) ) {
+				return;
+			}
+
+			$label = ! empty( $tab['save_label'] ) ? $tab['save_label'] : 'ذخیره تنظیمات';
+			?>
+			<div class="ba-settings-savebar" data-ba-settings-savebar>
+				<div class="ba-settings-savebar__status" data-ba-settings-save-status aria-live="polite">
+					<span class="ba-settings-savebar__status-icon dashicons dashicons-saved" aria-hidden="true"></span>
+					<span class="ba-settings-savebar__status-text" data-ba-settings-save-status-text>همه تغییرات ذخیره شده‌اند.</span>
+				</div>
+				<button type="submit" form="<?php echo esc_attr( $tab['form_id'] ); ?>" class="button button-primary ba-settings-savebar__button" data-ba-settings-save-button>
+					<span class="ba-settings-savebar__spinner" aria-hidden="true"></span>
+					<span class="ba-settings-savebar__button-text"><?php echo esc_html( $label ); ?></span>
+				</button>
+			</div>
+			<?php
 		}
 
 		/**
@@ -272,8 +319,10 @@ if ( ! class_exists( 'BA_Settings_Page' ) ) {
 				return;
 			}
 
-			$active_tab = self::get_active_tab( $tabs );
-			$tab        = $tabs[ $active_tab ];
+			$active_tab     = self::get_active_tab( $tabs );
+			$tab            = $tabs[ $active_tab ];
+			$tab['id']      = $active_tab;
+			$tab['form_id'] = 'ba-settings-form-' . sanitize_html_class( $active_tab );
 			?>
 			<div class="wrap ba-settings-wrap">
 				<h1 class="ba-settings-title">تنظیمات بنیاد علوی</h1>
@@ -301,15 +350,17 @@ if ( ! class_exists( 'BA_Settings_Page' ) ) {
 					<?php if ( ! empty( $tab['render_callback'] ) && is_callable( $tab['render_callback'] ) ) : ?>
 						<?php call_user_func( $tab['render_callback'], $tab ); ?>
 					<?php else : ?>
-						<form method="post" action="options.php">
+						<form id="<?php echo esc_attr( $tab['form_id'] ); ?>" class="ba-settings-form" method="post" action="options.php" data-ba-settings-form>
+							<input type="hidden" name="ba_settings_tab" value="<?php echo esc_attr( $active_tab ); ?>" />
 							<?php
 							settings_fields( $tab['option_group'] );
 							do_settings_sections( $tab['page_slug'] );
-							submit_button( 'ذخیره تنظیمات' );
 							?>
 						</form>
 					<?php endif; ?>
 				</div>
+
+				<?php self::render_save_bar( $tab ); ?>
 			</div>
 			<?php
 		}

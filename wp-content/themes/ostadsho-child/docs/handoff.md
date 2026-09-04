@@ -113,6 +113,25 @@ Block عمومی BEM:
 - [v0.3.1 — کامپوننت عمومی Repeater مدیریت](versions/v0.3.1.md)
 - [v0.4.0 — تنظیمات دو منبع و کنترل نمایش سکشن‌های مرکز](versions/v0.4.0.md)
 - [v0.4.1 — اصلاح لینک و آیکون کارت‌های سامانه](versions/v0.4.1.md)
+- [v0.5.0 — ذخیره AJAX و نوار شناور تنظیمات بنیاد علوی](versions/v0.5.0.md)
+
+## معماری ذخیره تنظیمات بنیاد علوی
+
+از نسخه `v0.5.0` ذخیره تب‌های صفحه «تنظیمات بنیاد علوی» از یک مسیر AJAX مشترک انجام می‌شود. کنترلر این جریان `BA_Settings_Ajax_Controller` است و تب‌ها نباید JavaScript یا Endpoint AJAX مستقل برای ذخیره تنظیمات عمومی خود بسازند.
+
+قرارداد ثابت:
+
+- تب استاندارد دارای `option_name` و `option_group` به‌صورت خودکار با Settings API و همان Sanitize Callback ثبت‌شده ذخیره می‌شود.
+- تب دارای منطق Persist اختصاصی باید `ajax_save_callback` را در Registry تعریف کند و Callback فقط `true` یا `WP_Error` برگرداند.
+- Capability هر تب قبل از Persist توسط کنترلر مشترک بررسی می‌شود.
+- فرم‌ها باید مسیر کلاسیک `options.php` یا `admin-post.php` را برای Progressive Enhancement حفظ کنند.
+- UI ذخیره فقط از Block عمومی `ba-settings-savebar` استفاده می‌کند؛ Featureها نباید دکمه ذخیره جدا در انتهای فرم ایجاد کنند.
+- متن دکمه هر تب در صورت نیاز از `save_label` تأمین می‌شود.
+- Repeater، Media Picker و Editor باید تغییر خود را به فرم منتقل کنند تا dirty-state نوار ذخیره دقیق بماند.
+
+مدیریت دسترسی Roleها از `BA_Settings_Access_Service` استفاده می‌کند تا منطق اعمال Capability بین AJAX و fallback کلاسیک تکرار نشود.
+
+جزئیات کامل این قرارداد در [مستند نسخه v0.5.0](versions/v0.5.0.md) ثبت شده است.
 
 ## معماری صفحه مرکز حرکت‌های مردمی و جهادی
 

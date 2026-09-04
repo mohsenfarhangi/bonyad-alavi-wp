@@ -22,7 +22,7 @@
                 return;
             }
 
-            $field.find('[data-ba-media-input]').val(attachment.id);
+            $field.find('[data-ba-media-input]').val(attachment.id).trigger('change');
             $field.find('[data-ba-media-preview]').html('<img src="' + attachment.url + '" alt="">');
             $field.find('[data-ba-media-remove]').prop('hidden', false);
         });
@@ -36,7 +36,7 @@
 
     $(document).on('click', '[data-ba-media-remove]', function () {
         var $field = $(this).closest('[data-ba-media-field]');
-        $field.find('[data-ba-media-input]').val('');
+        $field.find('[data-ba-media-input]').val('').trigger('change');
         $field.find('[data-ba-media-preview]').empty();
         $(this).prop('hidden', true);
     });
@@ -44,7 +44,7 @@
     $(document).on('change', '[data-ba-media-type-switch]', function () {
         var $row = $(this).closest('[data-ba-partner-row]');
         var type = this.checked ? 'svg' : 'image';
-        $row.find('[data-ba-media-type-value]').val(type);
+        $row.find('[data-ba-media-type-value]').val(type).trigger('change');
         $row.find('[data-ba-media-mode]').prop('hidden', true);
         $row.find('[data-ba-media-mode="' + type + '"]').prop('hidden', false);
     });

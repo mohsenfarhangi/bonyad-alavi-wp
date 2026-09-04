@@ -42,6 +42,7 @@ final class BA_Center_Settings_Tab {
 			'page_slug'         => 'ba-settings-jihadi-center',
 			'register_callback' => array( __CLASS__, 'register_setting' ),
 			'render_callback'   => array( __CLASS__, 'render' ),
+			'save_label'        => 'ذخیره تنظیمات مرکز',
 		);
 
 		return $tabs;
@@ -122,7 +123,8 @@ final class BA_Center_Settings_Tab {
 		$settings = BA_Center_Settings_Service::get_settings();
 		$name     = $tab['option_name'];
 		?>
-		<form method="post" action="options.php" class="ba-center-settings">
+		<form id="<?php echo esc_attr( $tab['form_id'] ); ?>" method="post" action="options.php" class="ba-center-settings ba-settings-form" data-ba-settings-form>
+			<input type="hidden" name="ba_settings_tab" value="<?php echo esc_attr( $tab['id'] ); ?>" />
 			<?php settings_fields( $tab['option_group'] ); ?>
 			<p class="ba-center-settings__lead">محتوای ثابت صفحه مرکز از این تب مدیریت می‌شود. در بخش‌هایی که کنترل متناظر Elementor وجود دارد، مقدار معتبر این صفحه اولویت دارد.</p>
 
@@ -135,7 +137,6 @@ final class BA_Center_Settings_Tab {
 			<?php self::render_partners_section( $name, $settings ); ?>
 			<?php self::render_faq_section( $name, $settings ); ?>
 
-			<?php submit_button( 'ذخیره تنظیمات مرکز' ); ?>
 		</form>
 		<?php
 	}
