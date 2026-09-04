@@ -9,6 +9,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 require_once get_stylesheet_directory() . '/inc/helpers/class-ba-media-helper.php';
 require_once get_stylesheet_directory() . '/inc/services/class-ba-product-media-service.php';
+require_once get_stylesheet_directory() . '/inc/services/class-ba-content-query-service.php';
 
 /**
  * مسئول ثبت فایل‌های CSS و JavaScript ویجت‌های اختصاصی المنتور.
@@ -47,6 +48,11 @@ final class BA_Elementor_Assets {
 			'bonyad-alavi-product-gallery-widget',
 			'assets/css/bonyad-alavi-product-gallery-widget.css'
 		);
+
+		$this->register_style(
+			'bonyad-alavi-jihadi-center-widget',
+			'assets/css/bonyad-alavi-jihadi-center-widget.css'
+		);
 	}
 
 	/**
@@ -69,6 +75,12 @@ final class BA_Elementor_Assets {
 			'bonyad-alavi-product-gallery-widget',
 			'assets/js/bonyad-alavi-product-gallery-widget.js',
 			array( 'elementor-frontend', 'ba-product-carousel-core' )
+		);
+
+		$this->register_script(
+			'bonyad-alavi-jihadi-center-widget',
+			'assets/js/bonyad-alavi-jihadi-center-widget.js',
+			array( 'elementor-frontend' )
 		);
 	}
 
@@ -162,9 +174,11 @@ final class BA_Elementor_Widgets_Registrar {
 	public function register_widgets( $widgets_manager ) {
 		require_once get_stylesheet_directory() . '/inc/elementor/widgets/class-bonyad-alavi-participation-widget.php';
 		require_once get_stylesheet_directory() . '/inc/elementor/widgets/class-bonyad-alavi-product-gallery-widget.php';
+		require_once get_stylesheet_directory() . '/inc/elementor/widgets/class-bonyad-alavi-jihadi-center-widget.php';
 
 		$widgets_manager->register( new \Bonyad_Alavi_Participation_Widget() );
 		$widgets_manager->register( new \Bonyad_Alavi_Product_Gallery_Widget() );
+		$widgets_manager->register( new \Bonyad_Alavi_Jihadi_Center_Widget() );
 	}
 }
 

@@ -54,15 +54,6 @@ function my_theme_enqueue_styles()
         );
     }
 
-    if ( function_exists( 'is_checkout' ) && is_checkout() && ! is_order_received_page() ) {
-        wp_enqueue_style(
-            'ba-participation-checkout',
-            get_stylesheet_directory_uri() . '/assets/css/ba-participation-checkout.css',
-            array( 'child-style' ),
-            wp_get_theme()->get('Version')
-        );
-    }
-
     if ( function_exists( 'is_order_received_page' ) && is_order_received_page() ) {
         wp_enqueue_style(
             'ba-participation-thankyou',
@@ -111,6 +102,10 @@ require_once get_stylesheet_directory() . '/inc/elementor/dynamic-tags.php';
 
 //افزودن به سبد خرید مشارکت مردمی
 require_once get_stylesheet_directory() . '/inc/woocommerce/class-ba-woocommerce-participation.php';
+
+// سرویس و تب تنظیمات مرکز حرکت‌های مردمی و جهادی.
+require_once get_stylesheet_directory() . '/inc/services/class-ba-center-settings-service.php';
+require_once get_stylesheet_directory() . '/inc/admin/settings/class-ba-center-settings-tab.php';
 
 // تنظیمات مدیریتی بنیاد علوی: صفحه تب‌دار، مشارکت مردمی و مدیریت دسترسی.
 require_once get_stylesheet_directory() . '/inc/admin/settings/tab-participation.php';
