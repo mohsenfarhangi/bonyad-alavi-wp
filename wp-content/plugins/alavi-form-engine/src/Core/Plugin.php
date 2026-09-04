@@ -9,6 +9,7 @@ use BonyadAlavi\FormEngine\Actions\ActionExecutionRepository;
 use BonyadAlavi\FormEngine\Actions\Tokens\TokenRegistry;
 use BonyadAlavi\FormEngine\Actions\Tokens\TokenResolver;
 use BonyadAlavi\FormEngine\Actions\Sms\MeliPayamakProvider;
+use BonyadAlavi\FormEngine\Actions\Pdf\PdfGenerator;
 use BonyadAlavi\FormEngine\Admin\DatabasePage;
 use BonyadAlavi\FormEngine\Admin\FormsPage;
 use BonyadAlavi\FormEngine\Admin\Menu;
@@ -100,6 +101,8 @@ final class Plugin
         $smsProvider = new MeliPayamakProvider($smsSettings);
         $actionRegistry = new ActionRegistry();
         $actionRegistry->registerCore($tokenResolver);
+        $pdfGenerator = new PdfGenerator();
+        $actionRegistry->registerExtended($tokenResolver, $submissionRepo, $pdfGenerator);
         $actionRegistry->registerSms($tokenResolver, $smsProvider);
         $actionExecutions = new ActionExecutionRepository();
         $actions = new ActionManager($actionRegistry, $actionExecutions);
@@ -122,7 +125,7 @@ final class Plugin
         $service = new SubmissionService(
             $registry, $formRepo, $submissionRepo, $security, $validator,
             $fileUploader, $actions, $events, $dedicated, $formAccess,
-            $duplicatePolicy, $duplicateRepo
+            $duplicatePolicy, $duplicateRepo, $actionExecutions
         );
         $previewPresenter = new FormDataPresenter($sources, $dates);
         $previewRenderer = new PreviewRenderer($previewPresenter, $submissionRepo, $templates);
@@ -185,7 +188,7 @@ final class Plugin
 
         if (is_admin()) {
             $formsPage = new FormsPage($registry,$formRepo,$service,$formAccess,$templates,$eventRegistry,$actionRegistry,$tokenRegistry,$duplicatePolicy);
-            $submissionsPage = new SubmissionsPage($registry,$submissionRepo,$service,$sources,$formAccess,$dates);
+            $submissionsPage = new SubmissionsPage($registry,$submissionRepo,$service,$sources,$formAccess,$dates,$actionExecutions,$actionRegistry,$eventRegistry);
             $reportsPage = new ReportsPage($registry,$submissionRepo,$formAccess,$dates);
             $databasePage = new DatabasePage(new Migrator(),$registry,$dedicated,$dates);
             $settingsPage = new SettingsPage($registry,$formAccess,$secretStore);

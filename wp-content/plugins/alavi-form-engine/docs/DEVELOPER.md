@@ -144,7 +144,7 @@ SelectField::make('district')
 
 ## 5. Custom action
 
-AFE 1.0.28-dev introduces `ActionRegistry` / `ActionDefinition`. New developer actions should register both their handler and UI metadata so the future Action Builder can render the action without hard-coded `FormsPage` logic.
+AFE 1.0.28-dev introduces `ActionRegistry` / `ActionDefinition`. New developer actions should register both their handler and UI metadata so the Action Builder can render the action without hard-coded `FormsPage` logic.
 
 ```php
 use BonyadAlavi\FormEngine\Actions\ActionDefinition;
@@ -180,6 +180,8 @@ add_action('afe_register_action_definitions', function ($registry) {
     );
 });
 ```
+
+Actions executed by the manager receive an `ActionRuntime` in their context. Core actions use this runtime for chain-scoped outputs such as resolved/created `user_id`, `post_id`, updated status and first-wins redirect. A developer action may read or write runtime values through `$context->runtime`; do not rewrite `$context->data` to pass transient values between actions. Failed registered actions are logged and can participate in the administrative retry workflow unless their `ActionDefinition` sets `supportsRetry` to `false`.
 
 The older runtime-only hook remains compatible:
 

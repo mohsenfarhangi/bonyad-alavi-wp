@@ -423,6 +423,8 @@ final class FormsPage
         $fields=$this->fieldLabels($form);
         foreach($definition->settingsSchema as $key=>$schema){
             if(!is_array($schema)) continue;
+            $capability=(string)($schema['capability']??'');
+            if($capability!=='' && !current_user_can($capability)) continue;
             $type=sanitize_key((string)($schema['type']??'text'));
             $value=$config[$key]??($schema['default']??'');
             $showWhen=(array)($schema['show_when']??[]);
@@ -460,6 +462,32 @@ final class FormsPage
             }elseif($type==='user'){
                 $dropdown=wp_dropdown_users(['name'=>$name,'selected'=>(int)$value,'show_option_none'=>'انتخاب کاربر…','option_none_value'=>'0','echo'=>0]);
                 echo is_string($dropdown)?$dropdown:'<input type="number" min="0" name="'.esc_attr($name).'" value="'.esc_attr((string)$value).'">';
+            }elseif($type==='boolean'){
+                echo '<input type="hidden" name="'.esc_attr($name).'" value="0"><span class="afe-action-inline-check"><input type="checkbox" name="'.esc_attr($name).'" value="1" '.checked(!empty($value),true,false).' data-afe-config-field-key="'.esc_attr((string)$key).'"> فعال</span>';
+            }elseif($type==='role_select'){
+                echo '<select name="'.esc_attr($name).'" data-afe-config-field-key="'.esc_attr((string)$key).'"><option value="">انتخاب نقش…</option>';
+                foreach(wp_roles()->roles as $roleKey=>$roleData){
+                    if($roleKey==='administrator' && !current_user_can(Capabilities::MANAGE_SETTINGS)) continue;
+                    echo '<option value="'.esc_attr((string)$roleKey).'" '.selected((string)$value,(string)$roleKey,false).'>'.esc_html((string)($roleData['name']??$roleKey)).'</option>';
+                }
+                echo '</select>';
+            }elseif($type==='workflow_select'){
+                echo '<select name="'.esc_attr($name).'" data-afe-config-field-key="'.esc_attr((string)$key).'"><option value="">انتخاب وضعیت…</option>';
+                foreach((array)($form['workflow']??[]) as $statusKey=>$statusLabel) echo '<option value="'.esc_attr((string)$statusKey).'" '.selected((string)$value,(string)$statusKey,false).'>'.esc_html((string)$statusLabel).'</option>';
+                echo '</select>';
+            }elseif($type==='post_type_select'){
+                echo '<select name="'.esc_attr($name).'" data-afe-config-field-key="'.esc_attr((string)$key).'">';
+                $postTypes=get_post_types(['show_ui'=>true],'objects');
+                foreach($postTypes as $postTypeKey=>$postTypeObject){
+                    if(in_array((string)$postTypeKey,['attachment','revision','nav_menu_item'],true)) continue;
+                    $label=(string)($postTypeObject->labels->singular_name??$postTypeObject->label??$postTypeKey);
+                    echo '<option value="'.esc_attr((string)$postTypeKey).'" '.selected((string)$value,(string)$postTypeKey,false).'>'.esc_html($label).' — '.esc_html((string)$postTypeKey).'</option>';
+                }
+                echo '</select>';
+            }elseif($type==='post_status_select'){
+                echo '<select name="'.esc_attr($name).'" data-afe-config-field-key="'.esc_attr((string)$key).'">';
+                foreach(['draft'=>'پیش‌نویس','pending'=>'در انتظار بررسی','private'=>'خصوصی','publish'=>'منتشرشده'] as $statusKey=>$statusLabel) echo '<option value="'.esc_attr($statusKey).'" '.selected((string)$value,$statusKey,false).'>'.esc_html($statusLabel).'</option>';
+                echo '</select>';
             }else{
                 $inputType=$type==='url'?'url':'text';
                 echo '<input type="'.esc_attr($inputType).'" name="'.esc_attr($name).'" value="'.esc_attr((string)$value).'" data-afe-config-field-key="'.esc_attr((string)$key).'">';
@@ -630,9 +658,11 @@ final class FormsPage
             'message'=>sanitize_textarea_field(wp_unslash($_POST['duplicate_message']??'')),
         ];
         if(!empty($_POST['actions_override_enabled'])){
+            $actionForm=$codeForm;
+            $actionForm['workflow']=$workflowClean!==[]?$workflowClean:(array)($codeForm['workflow']??[]);
             $settings['actions']=(new ActionConfigSanitizer($this->actions,$this->events))->sanitizeGroups(
                 (array)($_POST['action_groups']??[]),
-                $codeForm
+                $actionForm
             );
         }
         $previewSubmitted=wp_kses_post(wp_unslash($_POST['preview_template']??''));

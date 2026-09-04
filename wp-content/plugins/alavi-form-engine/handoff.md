@@ -1,4 +1,4 @@
-# Alavi Form Engine — Handoff Update (Action / SMS / Duplicate Checkpoint)
+# Alavi Form Engine — Handoff Update (Extended Actions / Retry Checkpoint)
 
 ## وضعیت checkpoint
 
@@ -14,57 +14,67 @@
 
 - `ActionDefinition` و `ActionRegistry` به runtime و Container وصل‌اند.
 - ActionManager از `action_key` پایدار، Conditional Logic، `always`، `once_per_submission`، `first_in_cycle` و `continue/stop` پشتیبانی می‌کند.
+- `ActionRuntime` / `ActionRunResult` خروجی زنجیره، اولین Redirect و follow-up Eventها را نگه می‌دارند؛ API قدیمی `ActionManager::run()` برای سازگاری حفظ شده است.
 - Action Log و once-guard اتمیک فعال است؛ failure اکشن Submission موفق را rollback نمی‌کند.
 - Eventهای canonical frontend/REST/admin برای create/draft/submit/update/status/lock/unlock/edit-request/trash/restore emit می‌شوند.
-- Email و Webhook از TokenResolver مشترک استفاده می‌کنند.
+- Email و Webhook از TokenResolver مشترک استفاده می‌کنند؛ `{{status}}` وضعیت runtime جدید را در همان chain می‌بیند.
 - Token Palette UI با Tokenهای واقعی هر فرم و click-to-copy ساخته شده است.
 - تب «رویدادها و اکشن‌ها» Registry-based است؛ Event label فارسی، چند Action، Drag & Drop داخل همان Event، enable/disable، schema config و Conditional Logic دارد.
 
+### Actionهای Extended
+
+- Redirect: ابتدا تمام Actionهای server-side اجرا می‌شوند؛ URL در Ajax response برمی‌گردد و frontend redirect می‌کند؛ اولین Redirect مؤثر برنده است. External URL فقط با تنظیم صریح و Capability مدیریتی.
+- Create User: mapping فیلدهای استاندارد و user_meta؛ رفتار conflict برابر fail/use/update/skip.
+- Login User: user target runtime/submission/current/manual؛ Retry برای این Action غیرفعال است تا session مدیر هنگام Retry تغییر نکند.
+- Update User، Assign Role، Update User Meta. Assign نقش Administrator بدون allow صریح مجاز نیست.
+- Change Submission Status: target باید در Workflow همان فرم باشد؛ `submission.status_changed` فقط در تغییر واقعی emit می‌شود.
+- Add Internal Note.
+- Generate PDF و Email PDF: به `Dompdf\Dompdf` موجود در autoload سایت وابسته‌اند و Dompdf داخل ZIP باندل نشده است.
+- Save Post/CPT: create/update/upsert، post meta و author؛ publish مستقیم نیازمند allow صریح و Capability مدیریتی است.
+
+### Retry مدیریتی Action Log
+
+- جزئیات Submission لاگ‌های اخیر Action را با Event/Action فارسی، status، attempts، action_key، error و timestamp نمایش می‌دهد.
+- failed Actionهای retryable برای کاربر مجاز دکمه Retry دارند.
+- Retry Action فعلی را با همان `action_key` پیدا می‌کند و enabled/event/condition را دوباره validate می‌کند؛ بعد guard once را آزاد می‌کند.
+- follow-up Eventهای حاصل از Retry نیز از Action Engine عبور می‌کنند.
+
 ### SMS / ملی‌پیامک
 
-- `SmsAction` ثبت شده است.
-- Legacy username/password:
-  - Free SMS
-  - Pattern با BaseServiceNumber
-- Console/API token:
-  - simple send
-  - shared/pattern send
-- گیرنده SMS: Field فرم، شماره دستی، WordPress User/Admin یا Token.
+- `SmsAction` و هر دو مسیر Legacy username/password و Console/API token موجودند.
+- Free SMS و Pattern/Shared پشتیبانی می‌شوند.
+- گیرنده: Field فرم، شماره دستی، WordPress User/Admin یا Token.
 - Credentialهای password/API token با `SecretStore` رمز می‌شوند.
-- endpointهای Provider از UI قابل تغییر نیستند و host validation دارند.
-- regression mock برای هر چهار مسیر Free/Pattern × Legacy/Console پاس است.
-- **قبل از Production هنوز تست integration روی حساب واقعی لازم است.**
+- regression mock پاس است.
+- **تست integration واقعی ملی‌پیامک بر عهده مدیر پروژه است؛ در این مرحله Provider تغییر داده نشود مگر نتیجه تست واقعی ایراد مشخصی نشان دهد.**
 
 ### Duplicate Policy
 
-- DuplicatePolicy به frontend submit، REST submit، admin edit، trash و restore وصل شد.
+- DuplicatePolicy به frontend submit، REST submit، admin edit، trash و restore وصل است.
 - Draft فعال Duplicate محسوب می‌شود؛ Submission جاری هنگام edit exclude می‌شود؛ Trash در matching نیست.
 - رفتارها: block / reference امن / custom message / allow+mark.
 - allow-mode با `is_duplicate` و `duplicate_of_submission_id` ذخیره می‌شود.
-- `afe_submission_fingerprints` نقش canonical fingerprint guard را دارد.
-- edge case مهم allow-mode اصلاح شد: اگر canonical owner ویرایش یا Trash شود، یک Duplicate فعال در همان transaction promote می‌شود و dependants فعال به owner جدید retarget می‌شوند تا fingerprint فعال از matching ناپدید نشود.
-- UI تب «جلوگیری از تکرار» با انتخاب چند Field، رفتار، پیام و validation حداقل یک Field پیاده شده است.
-- `DuplicateFingerprint` در نبود mbstring fallback دارد.
+- canonical owner promotion و dependant retarget داخل transaction انجام می‌شوند تا fingerprint فعال گم نشود.
 
 ### QA
 
 - PHP lint روی `src/` و `tests/`: PASS
 - JavaScript syntax check: PASS
-- کل `tests/*.php`: PASS
-- تست‌های جدید:
-  - `tests/duplicate-policy.php`
-  - `tests/duplicate-repository.php`
+- کل `tests/*.php`: PASS — 24 test scripts
+- تست‌های جدید این مرحله:
+  - `tests/action-manager-retry.php`
+  - `tests/extended-action-registry.php`
+  - `tests/redirect-action.php`
+  - `tests/sensitive-action-config.php`
 
 ## اولویت ادامه توسعه
 
-1. Actionهای باقی‌مانده: Redirect، Create/Login/Update User، Assign Role، User Meta، Submission Status، Note، PDF/Email PDF، Post/CPT.
-2. Retry مدیریتی Action Log.
-3. Field ordering واقعی داخل Step و Repeater + renderer support.
-4. Date input modes و mask.
-5. Character/Input Mode + allowed/forbidden chars + min/max/exact length.
-6. Validator Registry/UI + Custom Regex امن.
-7. SMS پیش‌فرض فرم جهادی روی `leader_mobile` فقط یک بار، پس از تعیین متن/Pattern از UI و تست حساب واقعی.
-8. regression نهایی، docs نهایی و bump Production به `1.0.28` / DB نهایی `1.0.5` / Stable tag `1.0.28`.
+1. Field ordering واقعی داخل همان Step + Repeater child ordering و renderer support.
+2. Date input modes: انتخاب+دستی / فقط انتخاب / فقط دستی + mask Jalali/Gregorian.
+3. Character/Input Mode + allowed/forbidden chars + min/max/exact length.
+4. Validator Registry/UI + Multi Select + پیام سفارشی + Custom Regex امن.
+5. پس از نتیجه تست واقعی ملی‌پیامک: تنظیم Action پیش‌فرض فرم جهادی روی `leader_mobile` با `once_per_submission` و متن/Pattern انتخاب‌شده از UI.
+6. regression نهایی، docs نهایی و bump Production به `1.0.28` / DB نهایی `1.0.5` / Stable tag `1.0.28`.
 
 ---
 

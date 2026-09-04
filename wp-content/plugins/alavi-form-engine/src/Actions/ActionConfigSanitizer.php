@@ -58,7 +58,7 @@ final class ActionConfigSanitizer
                     'enabled'=>!empty($rawAction['enabled']),
                     'execution_policy'=>$policy,
                     'on_error'=>$onError,
-                    'config'=>$this->sanitizeConfig((array)($rawAction['config'] ?? []), $definition, $fieldKeys),
+                    'config'=>$this->sanitizeConfig((array)($rawAction['config'] ?? []), $definition, $fieldKeys, $form),
                 ];
 
                 if ($definition->supportsConditionalLogic) {
@@ -78,7 +78,7 @@ final class ActionConfigSanitizer
     }
 
     /** @param list<string> $fieldKeys */
-    private function sanitizeConfig(array $raw, ActionDefinition $definition, array $fieldKeys): array
+    private function sanitizeConfig(array $raw, ActionDefinition $definition, array $fieldKeys, array $form): array
     {
         $clean = [];
         foreach ($definition->settingsSchema as $key => $schema) {
@@ -87,6 +87,10 @@ final class ActionConfigSanitizer
             if ($key === '') continue;
             $type = sanitize_key((string)($schema['type'] ?? 'text'));
             $value = $raw[$key] ?? ($schema['default'] ?? null);
+            $capability = (string)($schema['capability'] ?? '');
+            if ($capability !== '' && (!function_exists('current_user_can') || !current_user_can($capability))) {
+                $value = $schema['default'] ?? false;
+            }
 
             $clean[$key] = match ($type) {
                 'textarea' => sanitize_textarea_field(wp_unslash((string)$value)),
@@ -94,6 +98,11 @@ final class ActionConfigSanitizer
                 'select' => $this->sanitizeSelect($value, (array)($schema['options'] ?? [])),
                 'field_select' => in_array((string)$value, $fieldKeys, true) ? (string)$value : '',
                 'user' => max(0, (int)$value),
+                'boolean' => !empty($value),
+                'role_select' => $this->sanitizeRole($value),
+                'workflow_select' => $this->sanitizeWorkflowStatus($value, $form),
+                'post_type_select' => $this->sanitizePostType($value),
+                'post_status_select' => $this->sanitizePostStatus($value),
                 'json' => $this->sanitizeJson($value),
                 'key_value' => $this->sanitizeKeyValue($value),
                 'repeater_text' => $this->sanitizeTextList($value),
@@ -101,6 +110,38 @@ final class ActionConfigSanitizer
             };
         }
         return $clean;
+    }
+
+
+    private function sanitizeRole(mixed $value): string
+    {
+        $role = sanitize_key((string)$value);
+        if ($role === '') return '';
+        if (function_exists('wp_roles')) {
+            $roles = wp_roles()->roles;
+            if (!isset($roles[$role])) return '';
+        }
+        return $role;
+    }
+
+    private function sanitizeWorkflowStatus(mixed $value, array $form): string
+    {
+        $status = sanitize_key((string)$value);
+        return $status !== '' && array_key_exists($status, (array)($form['workflow'] ?? [])) ? $status : '';
+    }
+
+    private function sanitizePostType(mixed $value): string
+    {
+        $postType = sanitize_key((string)$value);
+        if ($postType === '' || in_array($postType, ['attachment','revision','nav_menu_item'], true)) return '';
+        if (function_exists('post_type_exists') && !post_type_exists($postType)) return '';
+        return $postType;
+    }
+
+    private function sanitizePostStatus(mixed $value): string
+    {
+        $status = sanitize_key((string)$value);
+        return in_array($status, ['draft','pending','private','publish'], true) ? $status : 'draft';
     }
 
     private function sanitizeSelect(mixed $value, array $options): string

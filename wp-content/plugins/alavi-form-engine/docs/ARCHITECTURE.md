@@ -40,11 +40,20 @@ Shared tables:
 - `wp_afe_files`
 - `wp_afe_notes`
 - `wp_afe_audit_log`
+- `wp_afe_action_log`
+- `wp_afe_action_once`
+- `wp_afe_submission_fingerprints`
 - `wp_afe_geo_provinces`
 - `wp_afe_geo_counties`
 - `wp_afe_geo_districts`
 
 Forms can opt into a dedicated mirror table named `wp_afe_form_{slug}` while shared tables remain authoritative for workflow, audit and cross-form reporting.
+
+## Action runtime and retry
+
+`ActionManager` executes a configured Event chain with one `ActionRuntime`. Runtime values are transient chain outputs rather than submitted field data: they carry values such as the effective `user_id`, `post_id`, status, first effective redirect and follow-up canonical Events. This allows Actions to compose without adding ad-hoc coupling to `SubmissionService`.
+
+Action execution is persisted separately in `afe_action_log`, while `afe_action_once` is the atomic guard for once-per-submission policies. Administrative retry resolves the **current** Action definition/configuration by stable `action_key`, rechecks the Event and Conditional Logic, and only then releases a once guard. Follow-up Events are processed through the same Action Engine with cycle bounds.
 
 ## Override resolution
 

@@ -1,4 +1,4 @@
-# Build / QA Report — Alavi Form Engine 1.0.28-dev Action / SMS / Duplicate Checkpoint
+# Build / QA Report — Alavi Form Engine 1.0.28-dev Extended Actions / Retry Checkpoint
 
 ## Status
 
@@ -11,9 +11,27 @@
 - Registry-driven `ActionDefinition` / `ActionRegistry` with reusable configuration schemas.
 - Stable `action_key`, canonical Event keys, Conditional Logic, `always`, `once_per_submission`, `first_in_cycle`, and `on_error=continue|stop`.
 - `ActionExecutionRepository` connected to runtime success/failure logging and atomic once guards.
+- `ActionRuntime` / `ActionRunResult` added so a chain can safely expose runtime values, first-wins redirect and follow-up lifecycle events without mutating submitted form data.
 - Canonical lifecycle emission from frontend, REST and admin mutation paths.
 - `EmailAction` and `WebhookAction` use shared `TokenResolver`; field tokens are schema-whitelisted.
 - Registry-driven admin Action Builder with Persian Event labels, multiple Actions, same-Event drag/drop ordering and Token Palette.
+
+### Extended Actions
+
+- Redirect with server-actions-first semantics; first effective Redirect wins and frontend follows the returned Ajax redirect URL. External URLs require an explicit protected setting.
+- Create/Login/Update WordPress User, Assign Role and Update User Meta with runtime user targeting and conflict policies for existing username/email.
+- Change Submission Status with workflow whitelist and follow-up `submission.status_changed` emission only when the status actually changes.
+- Add internal Submission Note.
+- Generate PDF and Email PDF; direct generation uses Dompdf only when `Dompdf\Dompdf` is available in the site's autoload environment.
+- Create/Update/Upsert Post/CPT with token-resolved title/content/meta and protected direct-publish behavior.
+- Sensitive safeguards: login action is not retryable, Administrator assignment requires explicit privileged-role permission, and publish/external redirect flags are capability-protected.
+
+### Administrative Action Retry
+
+- Submission detail now shows recent Action logs with Persian Event/Action labels, status, attempts, action key, error and timestamp.
+- Failed retryable Actions can be retried by an authorized editor.
+- Retry re-resolves the current Action by stable `action_key`, verifies enabled state, Event match and current Conditional Logic before releasing once guards.
+- Follow-up Events emitted by a retried Action are processed through the same Action Engine.
 
 ### SMS / MeliPayamak
 
@@ -23,44 +41,39 @@
 - Recipients can be resolved from form Field, manual number, WordPress User/Admin or dynamic Token.
 - Password/API token are encrypted at rest through `SecretStore`; endpoint hosts are fixed/validated rather than user-configurable.
 - Provider/action tests cover the four legacy/console + free/pattern paths using deterministic mock HTTP responses.
-- **Live account integration is still required before production release.**
+- **Live account integration is intentionally left to the project administrator and remains required before production release.**
 
 ### Duplicate Policy
 
-- Added `DuplicatePolicy` / `DuplicateDecision` and connected fingerprint checks to frontend submit, REST submit, admin data edit, trash and restore.
-- Fingerprints support multi-field combinations, Persian/Arabic digit normalization, whitespace normalization and nested Repeater child paths.
+- `DuplicatePolicy` / `DuplicateDecision` connected to frontend submit, REST submit, admin data edit, trash and restore.
+- Multi-field fingerprints support Persian/Arabic digit normalization, whitespace normalization and nested Repeater child paths.
 - Active Drafts participate; the current Submission is excluded during edit; trashed submissions do not participate.
-- Behaviors: block, secure reference to prior Submission, custom message, and allow+mark.
-- Allow-mode stores `is_duplicate` and `duplicate_of_submission_id` metadata.
-- Added transaction-safe owner promotion: when a canonical fingerprint owner is edited or trashed, one active allow-mode duplicate is promoted and remaining dependants are retargeted, preventing an active combination from becoming invisible.
-- Added admin Duplicate tab with field selection, behavior/message configuration and minimum-one-field validation.
-- Added mbstring-independent lowercase fallback to avoid introducing a new hard PHP extension dependency.
+- Behaviors: block, secure reference, custom message, and allow+mark.
+- Allow-mode stores `is_duplicate` and `duplicate_of_submission_id`; transaction-safe owner promotion prevents active fingerprints from becoming invisible.
+- Admin Duplicate tab supports multi-field selection, behavior/message configuration and minimum-one-field validation.
 
 ## QA performed
 
 - PHP syntax lint across `src/` and `tests/`: **PASS**.
 - JavaScript syntax check across `assets/js/*.js`: **PASS**.
-- Full standalone regression suite under `tests/*.php`: **PASS**.
-- New Duplicate tests:
-  - `tests/duplicate-policy.php`: configuration whitelist, nested Repeater fields, normalization and combination changes.
-  - `tests/duplicate-repository.php`: canonical promotion, active dependant retargeting and trashed dependant exclusion.
-- Existing Action, SMS, SecretStore, access, file ownership, dates, templates and validators regression tests remain green.
+- Full standalone regression suite under `tests/*.php`: **PASS (24 test scripts)**.
+- New/extended coverage includes `action-manager-retry.php`, `extended-action-registry.php`, `redirect-action.php`, `sensitive-action-config.php`, Duplicate Policy/Repository, SMS Provider/Action and SecretStore.
+- Existing access, upload ownership, locale-date, template, style-isolation and validator regressions remain green.
 
 ## Deliberately deferred
 
-- Admin Retry UI/workflow for failed Action executions.
-- Redirect, WordPress User, Status, Note, PDF and Post/CPT Actions.
-- Field ordering/renderer override work.
+- Field ordering/renderer override work inside Step and Repeater.
 - Date input modes and masks.
-- Character/input-mode and length overrides.
+- Character/input-mode, allowed/forbidden character and min/max/exact-length overrides.
 - Validator Registry/UI and safe Custom Regex workflow.
+- Default Jihadi SMS action finalization after the administrator's live MeliPayamak test and final text/pattern selection.
 - Final production version/stable-tag bump and live WordPress/MySQL/Elementor acceptance testing.
 
 Prepared for PHP 8.3+ / WordPress 6.4+.
 
 ## Automated checks performed for this package
 
-- PHP syntax lint across `src/` and `tests/`: PASS (97 PHP files at this checkpoint; code target remains PHP >= 8.3).
+- PHP syntax lint across `src/` and `tests/`: PASS (116 PHP files across src/tests at this checkpoint; code target remains PHP >= 8.3).
 - Built-in validator tests: PASS (Iran IBAN checksum, National ID valid/invalid checksum, Persian mobile digits, digit normalization).
 - Built-in Jihadi Group Registration form construction: PASS (13 steps, 62 top-level non-HTML items, 3 repeaters, 5 file fields).
 - JavaScript syntax check for front-end/admin assets: PASS.

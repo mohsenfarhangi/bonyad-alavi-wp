@@ -5,6 +5,8 @@ namespace BonyadAlavi\FormEngine\Submission;
 
 use BonyadAlavi\FormEngine\Actions\ActionContext;
 use BonyadAlavi\FormEngine\Actions\ActionManager;
+use BonyadAlavi\FormEngine\Actions\ActionExecutionRepository;
+use BonyadAlavi\FormEngine\Actions\ActionRuntime;
 use BonyadAlavi\FormEngine\Database\DedicatedStorage;
 use BonyadAlavi\FormEngine\Duplicate\DuplicateDecision;
 use BonyadAlavi\FormEngine\Duplicate\DuplicatePolicy;
@@ -35,7 +37,8 @@ final class SubmissionService
         private readonly DedicatedStorage $dedicated,
         private readonly FormAccess $formAccess,
         private readonly DuplicatePolicy $duplicatePolicy,
-        private readonly DuplicateRepository $duplicateRepository
+        private readonly DuplicateRepository $duplicateRepository,
+        private readonly ActionExecutionRepository $actionExecutions
     ) {}
 
     public function handleHttp(): array|WP_Error
@@ -145,28 +148,29 @@ final class SubmissionService
 
         $row = $this->submissions->find($id) ?: [];
         $actionErrors = [];
+        $actionRedirect = '';
 
         // Keep the original typed events for backward compatibility, while all
         // new Action Engine execution uses the canonical registry event keys.
         if ($wasExisting) {
             $this->events->dispatch(new SubmissionUpdated($id,$slug,$data,$status));
-            $this->emitActionEvent('submission.updated', $form, $id, $data, $row, $actionErrors);
+            $this->rememberRedirect($actionRedirect, $this->emitActionEvent('submission.updated', $form, $id, $data, $row, $actionErrors));
         } else {
             $this->events->dispatch(new SubmissionCreated($id,$slug,$data));
-            $this->emitActionEvent('submission.created', $form, $id, $data, $row, $actionErrors);
+            $this->rememberRedirect($actionRedirect, $this->emitActionEvent('submission.created', $form, $id, $data, $row, $actionErrors));
         }
 
-        $this->emitActionEvent(
+        $this->rememberRedirect($actionRedirect, $this->emitActionEvent(
             $draft ? 'submission.draft_saved' : 'submission.submitted',
             $form,
             $id,
             $data,
             $row,
             $actionErrors
-        );
+        ));
 
         if (!$draft && !empty($row['is_locked']) && !$wasLocked) {
-            $this->emitActionEvent('submission.locked', $form, $id, $data, $row, $actionErrors);
+            $this->rememberRedirect($actionRedirect, $this->emitActionEvent('submission.locked', $form, $id, $data, $row, $actionErrors));
         }
 
         $base = wp_get_referer() ?: home_url('/');
@@ -194,6 +198,7 @@ final class SubmissionService
             'uploaded'=>$uploaded,
             'files'=>$this->publicFiles($id),
             'action_errors'=>$actionErrors,
+            'redirect_url'=>$actionRedirect,
             'is_duplicate'=>$duplicate->isDuplicate() && $duplicate->allowsDuplicate(),
             'duplicate_of_submission_id'=>$duplicate->isDuplicate() && $duplicate->allowsDuplicate() ? (int)$duplicate->duplicateSubmissionId : 0,
             'locked'=>(!$draft && !empty($form['settings']['lock_after_submit'])),
@@ -273,17 +278,18 @@ final class SubmissionService
         $this->events->dispatch(new SubmissionCreated($id,$slug,$data));
         $row = $this->submissions->find($id) ?: [];
         $actionErrors = [];
-        $this->emitActionEvent('submission.created', $form, $id, $data, $row, $actionErrors);
-        $this->emitActionEvent(
+        $actionRedirect = '';
+        $this->rememberRedirect($actionRedirect, $this->emitActionEvent('submission.created', $form, $id, $data, $row, $actionErrors));
+        $this->rememberRedirect($actionRedirect, $this->emitActionEvent(
             $draft ? 'submission.draft_saved' : 'submission.submitted',
             $form,
             $id,
             $data,
             $row,
             $actionErrors
-        );
+        ));
         if (!$draft && !empty($row['is_locked'])) {
-            $this->emitActionEvent('submission.locked', $form, $id, $data, $row, $actionErrors);
+            $this->rememberRedirect($actionRedirect, $this->emitActionEvent('submission.locked', $form, $id, $data, $row, $actionErrors));
         }
 
         return [
@@ -294,6 +300,7 @@ final class SubmissionService
             'uploaded'=>$uploaded,
             'files'=>$this->publicFiles($id),
             'action_errors'=>$actionErrors,
+            'redirect_url'=>$actionRedirect,
             'is_duplicate'=>$duplicate->isDuplicate() && $duplicate->allowsDuplicate(),
             'duplicate_of_submission_id'=>$duplicate->isDuplicate() && $duplicate->allowsDuplicate() ? (int)$duplicate->duplicateSubmissionId : 0,
             'locked'=>(!$draft && !empty($form['settings']['lock_after_submit'])),
@@ -412,24 +419,58 @@ final class SubmissionService
         return $errors;
     }
 
-    private function emitActionEvent(string $eventKey, array $form, int $submissionId, array $data, array $row, array &$errors): void
+    private function emitActionEvent(string $eventKey, array $form, int $submissionId, array $data, array $row, array &$errors): string
     {
-        $this->events->dispatch($eventKey, $submissionId, (string)$form['slug'], $data, $row);
-        $eventErrors = $this->actions->run(
-            (array)($form['actions'] ?? []),
-            new ActionContext(
-                $submissionId,
-                (string)$form['slug'],
-                $data,
-                $row,
-                $eventKey,
-                (string)($form['title'] ?? ''),
-                $this->fieldKeys($form)
-            )
-        );
-        foreach ($eventErrors as $actionKey => $message) {
-            $errors[$eventKey . ':' . $actionKey] = $message;
+        $runtime = new ActionRuntime();
+        $queue = [$eventKey];
+        $processed = [];
+        $redirect = '';
+        $iterations = 0;
+
+        while ($queue !== [] && $iterations < 12) {
+            $currentEvent = array_shift($queue);
+            if (!is_string($currentEvent) || $currentEvent === '' || isset($processed[$currentEvent])) continue;
+            $processed[$currentEvent] = true;
+            $iterations++;
+
+            if ($currentEvent !== $eventKey) {
+                $fresh = $this->submissions->find($submissionId, true);
+                if (is_array($fresh)) {
+                    $row = $fresh;
+                    $data = $this->rowData($fresh);
+                }
+            }
+
+            $this->events->dispatch($currentEvent, $submissionId, (string)$form['slug'], $data, $row);
+            $result = $this->actions->runWithResult(
+                (array)($form['actions'] ?? []),
+                new ActionContext(
+                    $submissionId,
+                    (string)$form['slug'],
+                    $data,
+                    $row,
+                    $currentEvent,
+                    (string)($form['title'] ?? ''),
+                    $this->fieldKeys($form),
+                    $form,
+                    $runtime
+                )
+            );
+            foreach ($result->errors as $actionKey => $message) {
+                $errors[$currentEvent . ':' . $actionKey] = $message;
+            }
+            if ($redirect === '' && $result->redirectUrl() !== '') $redirect = $result->redirectUrl();
+            foreach ($result->emittedEvents() as $followUp) {
+                if (!isset($processed[$followUp]) && !in_array($followUp, $queue, true)) $queue[] = $followUp;
+            }
         }
+
+        return $redirect;
+    }
+
+    private function rememberRedirect(string &$current, string $candidate): void
+    {
+        if ($current === '' && $candidate !== '') $current = $candidate;
     }
 
     /** @return list<string> */
@@ -633,6 +674,61 @@ final class SubmissionService
         $this->submissions->audit($submissionId,(string)$row['form_slug'],'submission.restored');
         $this->emitSubmissionEvent('submission.restored',$submissionId);
         return true;
+    }
+
+    public function retryActionLog(int $logId): array|WP_Error
+    {
+        $log = $this->actionExecutions->find($logId);
+        if (!$log) return new WP_Error('action_log_not_found','Action Log پیدا نشد.');
+        if ((string)($log['status'] ?? '') !== 'failed') return new WP_Error('action_not_failed','فقط Action ناموفق قابل Retry است.');
+
+        $submissionId = (int)($log['submission_id'] ?? 0);
+        $row = $this->submissions->find($submissionId, true);
+        if (!$row || !empty($row['trashed_at'])) return new WP_Error('submission_unavailable','Submission فعال برای Retry در دسترس نیست.');
+        $slug = (string)($row['form_slug'] ?? '');
+        if (!$this->registry->has($slug)) return new WP_Error('form_unavailable','تعریف فرم برای Retry در دسترس نیست.');
+        $form = $this->resolvedForm($slug);
+        $data = $this->rowData($row);
+
+        try {
+            $result = $this->actions->retry(
+                (array)($form['actions'] ?? []),
+                new ActionContext(
+                    $submissionId,
+                    $slug,
+                    $data,
+                    $row,
+                    (string)($log['event_key'] ?? ''),
+                    (string)($form['title'] ?? ''),
+                    $this->fieldKeys($form),
+                    $form
+                ),
+                (string)($log['action_key'] ?? '')
+            );
+        } catch (\Throwable $e) {
+            return new WP_Error('action_retry_rejected',$e->getMessage());
+        }
+
+        if ($result->errors !== []) {
+            return new WP_Error('action_retry_failed', implode(' | ', array_values($result->errors)));
+        }
+
+        $followUpErrors = [];
+        foreach ($result->emittedEvents() as $followUp) {
+            $this->emitActionEvent($followUp, $form, $submissionId, $data, $row, $followUpErrors);
+        }
+        $this->submissions->audit($submissionId, $slug, 'action.retried', [
+            'log_id'=>$logId,
+            'action_key'=>(string)($log['action_key'] ?? ''),
+            'event_key'=>(string)($log['event_key'] ?? ''),
+            'follow_up_errors'=>$followUpErrors,
+        ]);
+
+        return [
+            'message'=>'Action با موفقیت دوباره اجرا شد.',
+            'redirect_url'=>$result->redirectUrl(),
+            'follow_up_errors'=>$followUpErrors,
+        ];
     }
 
     private function rowData(array $row): array

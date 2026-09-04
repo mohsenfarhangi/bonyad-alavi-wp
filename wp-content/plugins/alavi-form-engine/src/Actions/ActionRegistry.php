@@ -6,6 +6,17 @@ namespace BonyadAlavi\FormEngine\Actions;
 use BonyadAlavi\FormEngine\Actions\Tokens\TokenResolver;
 use BonyadAlavi\FormEngine\Actions\Sms\SmsAction;
 use BonyadAlavi\FormEngine\Actions\Sms\SmsProviderInterface;
+use BonyadAlavi\FormEngine\Actions\User\UserTargetResolver;
+use BonyadAlavi\FormEngine\Actions\User\CreateUserAction;
+use BonyadAlavi\FormEngine\Actions\User\LoginUserAction;
+use BonyadAlavi\FormEngine\Actions\User\UpdateUserAction;
+use BonyadAlavi\FormEngine\Actions\User\AssignRoleAction;
+use BonyadAlavi\FormEngine\Actions\User\UpdateUserMetaAction;
+use BonyadAlavi\FormEngine\Actions\Pdf\PdfGenerator;
+use BonyadAlavi\FormEngine\Actions\Pdf\GeneratePdfAction;
+use BonyadAlavi\FormEngine\Actions\Pdf\EmailPdfAction;
+use BonyadAlavi\FormEngine\Actions\Post\SavePostAction;
+use BonyadAlavi\FormEngine\Repository\SubmissionRepository;
 
 final class ActionRegistry
 {
@@ -62,6 +73,166 @@ final class ActionRegistry
                 'body' => ['type'=>'textarea','label'=>'Body خام','required'=>false,'tokens'=>true],
             ]
         ), new WebhookAction($tokens));
+    }
+
+    public function registerExtended(TokenResolver $tokens, SubmissionRepository $submissions, PdfGenerator $pdf): void
+    {
+        $userTargets = new UserTargetResolver($tokens);
+
+        $this->register(new ActionDefinition(
+            'redirect',
+            'هدایت کاربر',
+            'URL پس از اجرای همه Actionهای سمت سرور در پاسخ Ajax برگردانده می‌شود؛ اولین Redirect مؤثر برنده است.',
+            'response',
+            [
+                'url'=>['type'=>'text','label'=>'URL مقصد','required'=>true,'tokens'=>true],
+                'allow_external'=>['type'=>'boolean','label'=>'اجازه Redirect به دامنه خارجی','required'=>false,'default'=>false,'capability'=>'afe_manage_settings'],
+            ],
+            true,
+            true,
+            false
+        ), new RedirectAction($tokens));
+
+        $this->register(new ActionDefinition(
+            'create_user',
+            'ایجاد کاربر وردپرس',
+            'ایجاد کاربر با mapping داده‌های فرم؛ نقش کاربر در Action جداگانه Assign Role تعیین می‌شود.',
+            'wordpress_user',
+            [
+                'user_login'=>['type'=>'text','label'=>'user_login','required'=>true,'tokens'=>true],
+                'user_email'=>['type'=>'text','label'=>'user_email','required'=>false,'tokens'=>true],
+                'display_name'=>['type'=>'text','label'=>'display_name','required'=>false,'tokens'=>true],
+                'first_name'=>['type'=>'text','label'=>'first_name','required'=>false,'tokens'=>true],
+                'last_name'=>['type'=>'text','label'=>'last_name','required'=>false,'tokens'=>true],
+                'password'=>['type'=>'text','label'=>'رمز عبور (اختیاری؛ خالی = تولید امن)','required'=>false,'tokens'=>true],
+                'user_meta'=>['type'=>'key_value','label'=>'User Meta','required'=>false,'tokens'=>true],
+                'on_existing'=>['type'=>'select','label'=>'اگر username/email موجود بود','required'=>true,'default'=>'fail','options'=>[
+                    'fail'=>'Fail action','use'=>'Use existing user','update'=>'Update existing user','skip'=>'Skip create / use existing target',
+                ]],
+            ]
+        ), new CreateUserAction($tokens));
+
+        $userSourceSchema = [
+            'user_source'=>['type'=>'select','label'=>'کاربر هدف','required'=>true,'default'=>'runtime','options'=>[
+                'runtime'=>'کاربر ساخته/انتخاب‌شده در زنجیره','submission'=>'کاربر مالک Submission','current'=>'کاربر فعلی وردپرس','manual'=>'User ID / Token',
+            ]],
+            'user_id'=>['type'=>'text','label'=>'User ID / Token','required'=>false,'tokens'=>true,'show_when'=>['user_source'=>'manual']],
+        ];
+
+        $this->register(new ActionDefinition(
+            'login_user',
+            'ورود کاربر',
+            'Session وردپرس را برای کاربر هدف ایجاد می‌کند. برای جلوگیری از تغییر Session مدیر، Retry مدیریتی ندارد.',
+            'wordpress_user',
+            $userSourceSchema + [
+                'remember'=>['type'=>'boolean','label'=>'مرا به خاطر بسپار','required'=>false,'default'=>false],
+            ],
+            true,
+            true,
+            false
+        ), new LoginUserAction($userTargets));
+
+        $this->register(new ActionDefinition(
+            'update_user',
+            'بروزرسانی کاربر',
+            'فیلدهای اصلی پروفایل کاربر هدف را با Tokenها بروزرسانی می‌کند.',
+            'wordpress_user',
+            $userSourceSchema + [
+                'user_email'=>['type'=>'text','label'=>'user_email','required'=>false,'tokens'=>true],
+                'display_name'=>['type'=>'text','label'=>'display_name','required'=>false,'tokens'=>true],
+                'first_name'=>['type'=>'text','label'=>'first_name','required'=>false,'tokens'=>true],
+                'last_name'=>['type'=>'text','label'=>'last_name','required'=>false,'tokens'=>true],
+            ]
+        ), new UpdateUserAction($userTargets, $tokens));
+
+        $this->register(new ActionDefinition(
+            'assign_role',
+            'اختصاص نقش کاربر',
+            'نقش WordPress کاربر هدف را تغییر می‌دهد. نقش administrator نیازمند مجوز صریح تنظیمات است.',
+            'wordpress_user',
+            $userSourceSchema + [
+                'role'=>['type'=>'role_select','label'=>'نقش','required'=>true],
+                'allow_privileged_role'=>['type'=>'boolean','label'=>'اجازه اختصاص نقش administrator','required'=>false,'default'=>false,'capability'=>'afe_manage_settings'],
+            ]
+        ), new AssignRoleAction($userTargets));
+
+        $this->register(new ActionDefinition(
+            'update_user_meta',
+            'بروزرسانی User Meta',
+            'یک یا چند meta key را برای کاربر هدف بروزرسانی می‌کند.',
+            'wordpress_user',
+            $userSourceSchema + [
+                'meta'=>['type'=>'key_value','label'=>'User Meta','required'=>true,'tokens'=>true],
+            ]
+        ), new UpdateUserMetaAction($userTargets, $tokens));
+
+        $this->register(new ActionDefinition(
+            'change_status',
+            'تغییر وضعیت Submission',
+            'وضعیت Submission را به یکی از وضعیت‌های Workflow فرم تغییر می‌دهد و Event تغییر وضعیت را ایجاد می‌کند.',
+            'submission',
+            [
+                'status'=>['type'=>'workflow_select','label'=>'وضعیت مقصد','required'=>true],
+            ]
+        ), new ChangeStatusAction($submissions));
+
+        $this->register(new ActionDefinition(
+            'add_note',
+            'افزودن یادداشت داخلی',
+            'یک یادداشت مدیریتی روی Submission ثبت می‌کند.',
+            'submission',
+            [
+                'note'=>['type'=>'textarea','label'=>'متن یادداشت','required'=>true,'tokens'=>true],
+                'user_id'=>['type'=>'user','label'=>'نویسنده یادداشت (اختیاری)','required'=>false,'default'=>0],
+            ]
+        ), new AddNoteAction($submissions, $tokens));
+
+        $this->register(new ActionDefinition(
+            'generate_pdf',
+            'تولید PDF',
+            'PDF سمت سرور تولید می‌کند و مسیر آن را برای Actionهای بعدی همان زنجیره در Runtime قرار می‌دهد. نیازمند Dompdf است.',
+            'document',
+            [
+                'filename'=>['type'=>'text','label'=>'نام فایل (اختیاری)','required'=>false,'tokens'=>true],
+            ]
+        ), new GeneratePdfAction($pdf, $tokens));
+
+        $this->register(new ActionDefinition(
+            'email_pdf',
+            'ارسال PDF با Email',
+            'PDF تولیدشده در Runtime را استفاده می‌کند یا در صورت نیاز PDF جدید می‌سازد و به Email پیوست می‌کند.',
+            'document',
+            [
+                'to'=>['type'=>'text','label'=>'گیرنده','required'=>true,'tokens'=>true],
+                'subject'=>['type'=>'text','label'=>'موضوع','required'=>true,'tokens'=>true],
+                'body'=>['type'=>'textarea','label'=>'متن Email','required'=>true,'tokens'=>true],
+                'reuse_generated'=>['type'=>'boolean','label'=>'در صورت وجود از PDF تولیدشده قبلی در همین زنجیره استفاده شود','required'=>false,'default'=>true],
+                'filename'=>['type'=>'text','label'=>'نام فایل در صورت تولید جدید','required'=>false,'tokens'=>true],
+            ]
+        ), new EmailPdfAction($pdf, $tokens));
+
+        $this->register(new ActionDefinition(
+            'save_post',
+            'ایجاد/بروزرسانی Post/CPT',
+            'یک نوشته یا CPT را ایجاد، بروزرسانی یا Upsert می‌کند و post_id را در Runtime قرار می‌دهد.',
+            'wordpress_content',
+            [
+                'operation'=>['type'=>'select','label'=>'عملیات','required'=>true,'default'=>'create','options'=>['create'=>'ایجاد','update'=>'بروزرسانی','upsert'=>'Upsert']],
+                'post_type'=>['type'=>'post_type_select','label'=>'Post Type','required'=>true,'default'=>'post'],
+                'post_id'=>['type'=>'text','label'=>'post_id برای Update/Upsert','required'=>false,'tokens'=>true],
+                'post_status'=>['type'=>'post_status_select','label'=>'وضعیت نوشته','required'=>true,'default'=>'draft'],
+                'allow_publish'=>['type'=>'boolean','label'=>'اجازه انتشار مستقیم (publish)','required'=>false,'default'=>false,'capability'=>'afe_manage_settings'],
+                'post_title'=>['type'=>'text','label'=>'عنوان','required'=>false,'tokens'=>true],
+                'post_content'=>['type'=>'textarea','label'=>'محتوا','required'=>false,'tokens'=>true],
+                'post_excerpt'=>['type'=>'textarea','label'=>'خلاصه','required'=>false,'tokens'=>true],
+                'post_name'=>['type'=>'text','label'=>'Slug','required'=>false,'tokens'=>true],
+                'author_source'=>['type'=>'select','label'=>'نویسنده','required'=>false,'default'=>'none','options'=>[
+                    'none'=>'بدون Override','runtime'=>'کاربر Runtime','submission'=>'مالک Submission','current'=>'کاربر فعلی','manual'=>'User ID / Token',
+                ]],
+                'author_user_id'=>['type'=>'text','label'=>'Author User ID / Token','required'=>false,'tokens'=>true,'show_when'=>['author_source'=>'manual']],
+                'post_meta'=>['type'=>'key_value','label'=>'Post Meta','required'=>false,'tokens'=>true],
+            ]
+        ), new SavePostAction($tokens));
     }
 
     public function registerSms(TokenResolver $tokens, SmsProviderInterface $provider): void

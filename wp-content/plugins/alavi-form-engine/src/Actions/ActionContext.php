@@ -13,6 +13,23 @@ final readonly class ActionContext
         public array $submission,
         public string $event = 'submission.submitted',
         public string $formTitle = '',
-        public array $fieldKeys = []
+        public array $fieldKeys = [],
+        public array $form = [],
+        public ?ActionRuntime $runtime = null
     ) {}
+
+    public function withRuntime(ActionRuntime $runtime): self
+    {
+        return new self(
+            $this->submissionId,
+            $this->formSlug,
+            $this->data,
+            $this->submission,
+            $this->event,
+            $this->formTitle,
+            $this->fieldKeys,
+            $this->form,
+            $runtime
+        );
+    }
 }

@@ -1451,6 +1451,13 @@
       }
       ensureEditFields(form, json.data);
       syncUploadFilesFromServer(form, json.data.files || []);
+      // Redirect Action is resolved on the server only after all server-side Actions
+      // have finished. The first effective Redirect wins and takes precedence over
+      // the default lock/edit navigation below.
+      if (json.data.redirect_url) {
+        window.location.assign(new URL(json.data.redirect_url, window.location.href).toString());
+        return true;
+      }
       // A lock-after-submit response must immediately enter the persisted locked view.
       // Leaving the live preview DOM mounted would incorrectly keep the "back/edit" button
       // visible and the edit-request panel would not exist until a manual refresh.

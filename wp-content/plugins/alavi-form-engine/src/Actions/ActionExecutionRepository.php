@@ -5,6 +5,30 @@ namespace BonyadAlavi\FormEngine\Actions;
 
 final class ActionExecutionRepository
 {
+
+    public function find(int $id): ?array
+    {
+        global $wpdb;
+        $row = $wpdb->get_row($wpdb->prepare(
+            "SELECT * FROM {$wpdb->prefix}afe_action_log WHERE id=%d",
+            $id
+        ), ARRAY_A);
+        return is_array($row) ? $row : null;
+    }
+
+    /** @return list<array<string,mixed>> */
+    public function forSubmission(int $submissionId, int $limit = 50): array
+    {
+        global $wpdb;
+        $limit = max(1, min(200, $limit));
+        $rows = $wpdb->get_results($wpdb->prepare(
+            "SELECT * FROM {$wpdb->prefix}afe_action_log WHERE submission_id=%d ORDER BY id DESC LIMIT %d",
+            $submissionId,
+            $limit
+        ), ARRAY_A);
+        return is_array($rows) ? $rows : [];
+    }
+
     public function hasSucceeded(int $submissionId, string $eventKey, string $actionKey): bool
     {
         global $wpdb;

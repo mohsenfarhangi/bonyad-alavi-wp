@@ -10,6 +10,9 @@ use BonyadAlavi\FormEngine\Form\FormRegistry;
 use BonyadAlavi\FormEngine\Localization\LocaleDateService;
 use BonyadAlavi\FormEngine\Repository\SubmissionRepository;
 use BonyadAlavi\FormEngine\Submission\SubmissionService;
+use BonyadAlavi\FormEngine\Actions\ActionExecutionRepository;
+use BonyadAlavi\FormEngine\Actions\ActionRegistry;
+use BonyadAlavi\FormEngine\Events\EventRegistry;
 
 final class SubmissionsPage
 {
@@ -23,7 +26,10 @@ final class SubmissionsPage
         private readonly SubmissionService $service,
         DataSourceManager $sources,
         private readonly FormAccess $access,
-        private readonly LocaleDateService $dates
+        private readonly LocaleDateService $dates,
+        private readonly ActionExecutionRepository $actionExecutions,
+        private readonly ActionRegistry $actions,
+        private readonly EventRegistry $events
     ) {
         $this->presenter=new FormDataPresenter($sources,$dates);
     }
@@ -127,6 +133,7 @@ final class SubmissionsPage
 
         echo '<div class="wrap afe-admin-wrap">';
         if (!empty($_GET['updated'])) echo '<div class="notice notice-success is-dismissible"><p>تغییرات ذخیره شد.</p></div>';
+        if (!empty($_GET['action_retried'])) echo '<div class="notice notice-success is-dismissible"><p>Action ناموفق با موفقیت Retry شد.</p></div>';
         if ($trashed) echo '<div class="notice notice-warning"><p><strong>این ثبت در زباله‌دان است.</strong> تا زمان بازیابی، در فرم عمومی و گزارش‌های فعال نمایش داده نمی‌شود.</p></div>';
         if (!empty($row['is_duplicate'])) echo '<div class="notice notice-info"><p><strong>این ثبت به عنوان Duplicate علامت‌گذاری شده است.</strong> ثبت مرجع: #'.(int)($row['duplicate_of_submission_id']??0).'</p></div>';
         echo '<p><a href="'.esc_url(admin_url('admin.php?page=alavi-form-engine-submissions'.($trashed?'&view=trash':''))).'">← بازگشت به فهرست</a></p>';
@@ -232,6 +239,7 @@ final class SubmissionsPage
             }
             echo '</div>';
         }
+        if($this->access->can($formSlug,FormAccess::MANAGE)) $this->renderActionLogs($id);
         echo '</aside></div></div>';
     }
 
@@ -286,6 +294,14 @@ final class SubmissionsPage
                 $this->repo->audit((int)$row['id'],$row['form_slug'],'note.created');
                 $changed=true;
             }
+        } elseif($action==='retry_action' && $this->access->can($formSlug,FormAccess::MANAGE) && current_user_can(Capabilities::EDIT_SUBMISSIONS)) {
+            $logId=absint($_POST['action_log_id']??0);
+            $retried=$logId>0?$this->service->retryActionLog($logId):null;
+            if(!$retried || is_wp_error($retried)) {
+                $message=is_wp_error($retried)?$retried->get_error_message():'Action Log معتبر نیست.';
+                wp_die(esc_html($message));
+            }
+            wp_safe_redirect(add_query_arg('action_retried','1',$this->detailUrl((int)$row['id']))); exit;
         } elseif($action==='edit_data' && $this->access->can($formSlug,FormAccess::EDIT)) {
             $input=is_array($_POST['afe_admin_data']??null)?(array)$_POST['afe_admin_data']:[];
             $clean=$this->presenter->sanitizeSubmitted($form,$input,(array)$row['data']);
@@ -294,6 +310,34 @@ final class SubmissionsPage
             $changed=$updated;
         }
         wp_safe_redirect(add_query_arg('updated',$changed?'1':'0',$this->detailUrl((int)$row['id']))); exit;
+    }
+
+    private function renderActionLogs(int $submissionId): void
+    {
+        $logs=$this->actionExecutions->forSubmission($submissionId,50);
+        echo '<div class="afe-admin-card afe-action-log-card"><h2>سوابق اجرای Actionها</h2>';
+        if(!$logs){ echo '<p class="description">هنوز Actionی برای این Submission اجرا نشده است.</p></div>'; return; }
+        echo '<div class="afe-action-log-list">';
+        foreach($logs as $log){
+            $status=(string)($log['status']??'');
+            $type=(string)($log['action_type']??'');
+            $definition=$this->actions->get($type);
+            $eventKey=(string)($log['event_key']??'');
+            $eventLabel=$this->events->get($eventKey)?->label??$eventKey;
+            $statusLabel=['success'=>'موفق','failed'=>'ناموفق','running'=>'در حال اجرا','skipped'=>'رد شده'][$status]??$status;
+            echo '<article class="afe-action-log afe-action-log--'.esc_attr($status).'">';
+            echo '<div class="afe-action-log__head"><div><strong>'.esc_html($definition?->label??$type).'</strong><small>'.esc_html($eventLabel).' · تلاش '.(int)($log['attempts']??1).'</small></div><span>'.esc_html($statusLabel).'</span></div>';
+            echo '<code>'.esc_html((string)($log['action_key']??'')).'</code>';
+            if(!empty($log['error_message'])) echo '<p class="afe-action-log__error">'.nl2br(esc_html((string)$log['error_message'])).'</p>';
+            echo '<small>'.esc_html($this->dates->formatUtc((string)($log['updated_at']??$log['created_at']??''),true)).'</small>';
+            if($status==='failed' && $definition?->supportsRetry && current_user_can(Capabilities::EDIT_SUBMISSIONS)){
+                echo '<form method="post" class="afe-inline-action">';
+                wp_nonce_field('afe_submission_edit_'.$submissionId,'afe_submission_nonce');
+                echo '<input type="hidden" name="afe_detail_action" value="retry_action"><input type="hidden" name="action_log_id" value="'.(int)$log['id'].'"><button type="submit" class="button button-small">Retry Action</button></form>';
+            }
+            echo '</article>';
+        }
+        echo '</div></div>';
     }
 
     private function canDelete(string $formSlug): bool

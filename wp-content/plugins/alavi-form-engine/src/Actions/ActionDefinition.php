@@ -15,7 +15,8 @@ final readonly class ActionDefinition
         public string $group = 'communication',
         public array $settingsSchema = [],
         public bool $supportsConditionalLogic = true,
-        public bool $supportsExecutionPolicy = true
+        public bool $supportsExecutionPolicy = true,
+        public bool $supportsRetry = true
     ) {}
 
     public function toArray(): array
@@ -28,6 +29,7 @@ final readonly class ActionDefinition
             'settings_schema' => $this->settingsSchema,
             'supports_conditional_logic' => $this->supportsConditionalLogic,
             'supports_execution_policy' => $this->supportsExecutionPolicy,
+            'supports_retry' => $this->supportsRetry,
         ];
     }
 }

@@ -15,7 +15,7 @@ final class TokenResolver
             '{{submission_id}}' => (string)$context->submissionId,
             '{{form_title}}' => $context->formTitle,
             '{{form_slug}}' => $context->formSlug,
-            '{{status}}' => (string)($submission['status'] ?? ''),
+            '{{status}}' => (string)($context->runtime?->get('status', $submission['status'] ?? '') ?? ($submission['status'] ?? '')),
         ];
 
         $resolved = strtr($template, $replacements);
