@@ -7,6 +7,7 @@ use BonyadAlavi\FormEngine\Actions\Tokens\TokenResolver;
 use BonyadAlavi\FormEngine\Actions\Sms\SmsAction;
 use BonyadAlavi\FormEngine\Actions\Sms\SmsProviderInterface;
 use BonyadAlavi\FormEngine\Actions\User\UserTargetResolver;
+use BonyadAlavi\FormEngine\Actions\User\UserActionGuard;
 use BonyadAlavi\FormEngine\Actions\User\CreateUserAction;
 use BonyadAlavi\FormEngine\Actions\User\LoginUserAction;
 use BonyadAlavi\FormEngine\Actions\User\UpdateUserAction;
@@ -78,6 +79,7 @@ final class ActionRegistry
     public function registerExtended(TokenResolver $tokens, SubmissionRepository $submissions, PdfGenerator $pdf): void
     {
         $userTargets = new UserTargetResolver($tokens);
+        $userGuard = new UserActionGuard();
 
         $this->register(new ActionDefinition(
             'redirect',
@@ -109,14 +111,16 @@ final class ActionRegistry
                 'on_existing'=>['type'=>'select','label'=>'اگر username/email موجود بود','required'=>true,'default'=>'fail','options'=>[
                     'fail'=>'Fail action','use'=>'Use existing user','update'=>'Update existing user','skip'=>'Skip create / use existing target',
                 ]],
+                'allow_privileged_existing'=>['type'=>'boolean','label'=>'اجازه استفاده/ویرایش کاربر مدیریتی موجود','required'=>false,'default'=>false,'capability'=>'afe_manage_settings'],
             ]
-        ), new CreateUserAction($tokens));
+        ), new CreateUserAction($tokens, $userGuard));
 
         $userSourceSchema = [
             'user_source'=>['type'=>'select','label'=>'کاربر هدف','required'=>true,'default'=>'runtime','options'=>[
                 'runtime'=>'کاربر ساخته/انتخاب‌شده در زنجیره','submission'=>'کاربر مالک Submission','current'=>'کاربر فعلی وردپرس','manual'=>'User ID / Token',
             ]],
             'user_id'=>['type'=>'text','label'=>'User ID / Token','required'=>false,'tokens'=>true,'show_when'=>['user_source'=>'manual']],
+            'allow_privileged_user'=>['type'=>'boolean','label'=>'اجازه عملیات روی کاربر دارای دسترسی مدیریتی','required'=>false,'default'=>false,'capability'=>'afe_manage_settings'],
         ];
 
         $this->register(new ActionDefinition(
@@ -130,7 +134,7 @@ final class ActionRegistry
             true,
             true,
             false
-        ), new LoginUserAction($userTargets));
+        ), new LoginUserAction($userTargets, $userGuard));
 
         $this->register(new ActionDefinition(
             'update_user',
@@ -143,7 +147,7 @@ final class ActionRegistry
                 'first_name'=>['type'=>'text','label'=>'first_name','required'=>false,'tokens'=>true],
                 'last_name'=>['type'=>'text','label'=>'last_name','required'=>false,'tokens'=>true],
             ]
-        ), new UpdateUserAction($userTargets, $tokens));
+        ), new UpdateUserAction($userTargets, $tokens, $userGuard));
 
         $this->register(new ActionDefinition(
             'assign_role',
@@ -152,9 +156,9 @@ final class ActionRegistry
             'wordpress_user',
             $userSourceSchema + [
                 'role'=>['type'=>'role_select','label'=>'نقش','required'=>true],
-                'allow_privileged_role'=>['type'=>'boolean','label'=>'اجازه اختصاص نقش administrator','required'=>false,'default'=>false,'capability'=>'afe_manage_settings'],
+                'allow_privileged_role'=>['type'=>'boolean','label'=>'اجازه اختصاص نقش مدیریتی (Administrator / manage_options)','required'=>false,'default'=>false,'capability'=>'afe_manage_settings'],
             ]
-        ), new AssignRoleAction($userTargets));
+        ), new AssignRoleAction($userTargets, $userGuard));
 
         $this->register(new ActionDefinition(
             'update_user_meta',
@@ -164,7 +168,7 @@ final class ActionRegistry
             $userSourceSchema + [
                 'meta'=>['type'=>'key_value','label'=>'User Meta','required'=>true,'tokens'=>true],
             ]
-        ), new UpdateUserMetaAction($userTargets, $tokens));
+        ), new UpdateUserMetaAction($userTargets, $tokens, $userGuard));
 
         $this->register(new ActionDefinition(
             'change_status',

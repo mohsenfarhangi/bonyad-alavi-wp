@@ -213,6 +213,10 @@ In the form definition, use a stable `action_key` and canonical event key:
 
 Execution policies currently supported by the backend are `always`, `once_per_submission`, and `first_in_cycle`. Conditional operators are `=`, `!=`, `>`, `>=`, `<`, `<=`, `in`, `contains`, `empty`, and `not_empty`.
 
+`ActionDefinition::supportsExecutionPolicy=false` is honored by the admin builder: UI-saved definitions are forced to `always`. Trusted code definitions may still be authored explicitly in PHP.
+
+Core WordPress User actions contain an additional runtime privilege boundary. Login/update/role/meta operations targeting an Administrator or any account with `manage_options` require the protected opt-in saved by a user with `afe_manage_settings`. Capability/session/application-password user-meta keys are rejected even if a request bypasses the admin UI. If a developer genuinely needs to manipulate those internals, implement a reviewed code-level custom action rather than exposing them through Action Builder.
+
 Text actions should use the shared TokenResolver. Core tokens include `{{tracking_code}}`, `{{submission_id}}`, `{{form_title}}`, `{{form_slug}}`, `{{status}}`, and concrete `{{field:field_name}}` tokens. Field tokens are whitelisted against the resolved form definition.
 
 ## 6. Events and listeners

@@ -55,6 +55,8 @@ Forms can opt into a dedicated mirror table named `wp_afe_form_{slug}` while sha
 
 Action execution is persisted separately in `afe_action_log`, while `afe_action_once` is the atomic guard for once-per-submission policies. Administrative retry resolves the **current** Action definition/configuration by stable `action_key`, rechecks the Event and Conditional Logic, and only then releases a once guard. Follow-up Events are processed through the same Action Engine with cycle bounds.
 
+WordPress User actions pass through `Actions\User\UserActionGuard` before privileged mutations. The guard is intentionally enforced at Runtime because per-form configuration can be delegated: protected account targets require an explicit `afe_manage_settings`-controlled opt-in, and WordPress capability/session/application-password meta keys are never writable from Action Builder. Meta mappings are validated as a complete set before writes to reduce partial side effects.
+
 ## Override resolution
 
 Runtime definition:

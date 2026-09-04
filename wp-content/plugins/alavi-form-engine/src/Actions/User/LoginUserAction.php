@@ -9,7 +9,10 @@ use RuntimeException;
 
 final class LoginUserAction implements ActionInterface
 {
-    public function __construct(private readonly UserTargetResolver $users) {}
+    public function __construct(
+        private readonly UserTargetResolver $users,
+        private readonly UserActionGuard $guard
+    ) {}
 
     public function handle(ActionContext $context, array $config = []): void
     {
@@ -17,6 +20,7 @@ final class LoginUserAction implements ActionInterface
             throw new RuntimeException('Login User از صفحه مدیریت Retry نمی‌شود تا Session مدیر تغییر نکند.');
         }
         $userId = $this->users->resolve($context, $config);
+        $this->guard->assertTargetAllowed($userId, $config, 'ورود به حساب کاربری');
         wp_set_current_user($userId);
         wp_set_auth_cookie($userId, !empty($config['remember']), is_ssl());
         $context->runtime?->set('user_id', $userId);

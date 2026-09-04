@@ -12,12 +12,14 @@ final class UpdateUserAction implements ActionInterface
 {
     public function __construct(
         private readonly UserTargetResolver $users,
-        private readonly TokenResolver $tokens
+        private readonly TokenResolver $tokens,
+        private readonly UserActionGuard $guard
     ) {}
 
     public function handle(ActionContext $context, array $config = []): void
     {
         $userId = $this->users->resolve($context, $config);
+        $this->guard->assertTargetAllowed($userId, $config, 'بروزرسانی کاربر');
         $userdata = ['ID'=>$userId];
         foreach (['user_email','display_name','first_name','last_name'] as $key) {
             $value = trim($this->tokens->resolve((string)($config[$key] ?? ''), $context));

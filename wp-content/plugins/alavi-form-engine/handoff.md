@@ -1,51 +1,59 @@
-# Alavi Form Engine — Handoff Update (Acceptance Candidate)
+# Alavi Form Engine — Handoff Update (Feature-complete / Pre-acceptance)
 
 ## وضعیت checkpoint
 
 - **مبنای پایدار:** `1.0.27`
 - **نسخه توسعه:** `1.0.28-dev`
 - **DB checkpoint:** `1.0.5-dev.2`
-- **Production-ready:** هنوز خیر؛ فقط live browser acceptance باقی مانده است.
+- **Feature status:** تمام آیتم‌های برنامه‌ریزی‌شده handoff نسخه 1.0.28 در سورس پیاده شده‌اند.
+- **Production-ready:** هنوز خیر؛ acceptance عملی WordPress/MySQL/Elementor طبق تصمیم مدیر پروژه در انتهای توسعه انجام می‌شود.
 - **Stable tag:** فعلاً `1.0.27`
 - **تست واقعی ملی‌پیامک:** PASS گزارش‌شده توسط مدیر پروژه در 2026-09-04
 
-## انجام‌شده در این ادامه
+## انجام‌شده در checkpoint جدید
 
-### SMS پیش‌فرض فرم جهادی
+### Release hardening اکشن‌های WordPress User
 
-برای `jihadi-group-registration` در Code Definition یک Template اکشن SMS اضافه شد:
+- `UserActionGuard` اضافه شد.
+- Login / Update / Assign Role / Update User Meta برای Administrator یا هر کاربر دارای `manage_options` بدون opt-in صریح محافظت‌شده اجرا نمی‌شوند.
+- opt-in فقط از تنظیم دارای capability=`afe_manage_settings` قابل ذخیره است و Runtime نیز آن را enforce می‌کند.
+- شاخه existing در Create User (`use/update/skip`) نیز برای حساب مدیریتی همین guard را دارد.
+- meta keyهای امنیتی `*_capabilities`, `*_user_level`, `session_tokens`, `_application_passwords` از Action Builder قابل نوشتن نیستند.
+- تمام User Metaها قبل از ایجاد/ویرایش کاربر یا اولین write اعتبارسنجی می‌شوند تا failure نیمه‌کاره باقی نماند.
+- Assign Role نقش سفارشی دارای `manage_options` را نیز privileged می‌شناسد.
 
-- `action_key`: `notify_leader_sms_on_submit`
-- Event: `submission.submitted` / «ثبت نهایی فرم»
-- Recipient source: Field
-- Recipient field: `leader_mobile`
-- Execution policy: `once_per_submission`
-- `on_error`: `continue`
-- `enabled`: `false` در تعریف پیش‌فرض
-- Body/Pattern: عمداً خالی و بدون hard-code
+### Action schema / URL / Date QA
 
-مدیر متن آزاد یا Pattern نهایی را در Action Builder تعیین و سپس اکشن را فعال می‌کند. اگر سایت قبلاً Override مدیریتی Actions داشته باشد، Override ذخیره‌شده همچنان روی Code Definition اولویت دارد.
+- URLهای Token‌دار در sanitizer با placeholder امن پردازش می‌شوند تا `{{field:*}}` و Tokenهای معتبر هنگام Save از بین نروند؛ URL resolve‌شده همچنان در Runtime sanitize می‌شود.
+- `supportsExecutionPolicy=false` در `ActionDefinition` اکنون توسط UI و sanitizer رعایت می‌شود.
+- تست Renderer واقعی برای Jalali/Gregorian و هر سه mode `combined/picker/manual` اضافه شد.
+- `tools/qa.sh` برای اجرای یک‌جای regression/lint/JS/composer/assets/no-CDN/version-consistency اضافه شد.
+- `docs/FEATURE-COMPLETENESS-1.0.28.md` وضعیت یک‌به‌یک فیچرهای handoff را ثبت می‌کند.
 
-### Acceptance خودکار
+## QA این checkpoint
 
-- تست Elementor Widget/Dynamic Tag با constructor بومی Elementor اضافه شد؛ constructor DI اضافه نشده است.
-- تست حضور local/pinned JalaliDatePicker و نبود ثبت CDN برای Runtime تقویم اضافه شد.
-- مستندات قدیمی نصب دستی JalaliDatePicker با وضعیت واقعی ZIP همگام شد؛ فایل‌ها داخل بسته موجودند.
-- کل regression مستقل، PHP lint و JS syntax در checkpoint جدید دوباره اجرا می‌شوند.
-- ماتریس دقیق acceptance واقعی در `docs/ACCEPTANCE-1.0.28.md` اضافه شده است.
+- `tools/qa.sh`: PASS
+- Regression: **35/35 PASS**
+- PHP lint: **132 فایل PASS**
+- JavaScript syntax: PASS
+- composer.json: PASS
+- local JalaliDatePicker: PASS
+- runtime external CDN registration: PASS
+- Version consistency: PASS (`1.0.28-dev`)
 
 ## مرحله بعد / Release gate
 
-1. همین checkpoint روی staging واقعی WordPress + MySQL/MariaDB + Elementor نصب شود.
-2. ماتریس `docs/ACCEPTANCE-1.0.28.md` برای submit/draft/edit/lock/duplicate/actions/ordering/date/validators/admin UX اجرا شود.
-3. متن/Pattern تأییدشده SMS متقاضی در Action Builder وارد و اکشن فعال شود؛ connectivity ملی‌پیامک قبلاً PASS شده است.
-4. فقط بعد از PASS کامل live acceptance:
+از فهرست فیچرهای اصلی 1.0.28 مورد برنامه‌ریزی‌شده دیگری باقی نمانده است. طبق تصمیم مدیر پروژه، تست‌های عملی پس از اتمام همه فیچرها انجام می‌شوند.
+
+1. checkpoint نهایی dev روی staging واقعی نصب شود.
+2. ماتریس `docs/ACCEPTANCE-1.0.28.md` کامل اجرا شود.
+3. پس از PASS کامل:
    - Plugin version: `1.0.28`
    - DB version: `1.0.5`
    - Stable tag: `1.0.28`
    - changelog/docs نهایی و Production ZIP ساخته شود.
 
-**قاعده:** تا قبل از live acceptance، checkpoint را با برچسب Production منتشر نکن.
+**قاعده:** تا قبل از live acceptance، نسخه با برچسب Production منتشر نشود.
 
 ---
 

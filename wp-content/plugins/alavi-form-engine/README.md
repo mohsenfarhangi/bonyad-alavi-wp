@@ -1,17 +1,20 @@
-## وضعیت توسعه 1.0.28-dev (Acceptance Candidate Checkpoint)
+## وضعیت توسعه 1.0.28-dev (Feature-complete / Pre-acceptance Checkpoint)
 
-> این بسته هنوز تا اجرای acceptance مرورگری روی یک WordPress + MySQL/MariaDB + Elementor واقعی Production-ready اعلام نمی‌شود. مبنای پایدار `1.0.27` است، `Stable tag` فعلاً روی `1.0.27` مانده و DB checkpoint برابر `1.0.5-dev.2` است.
+> فیچرهای برنامه‌ریزی‌شده handoff نسخه 1.0.28 در سورس پیاده شده‌اند. طبق تصمیم مدیر پروژه، acceptance عملی WordPress/Elementor پس از پایان افزودن فیچرها انجام می‌شود؛ بنابراین تا آن زمان این بسته Production-tagged نیست. مبنای پایدار `1.0.27`، Stable tag=`1.0.27` و DB checkpoint=`1.0.5-dev.2` باقی مانده‌اند.
 
 وضعیت این checkpoint:
 
-- تست واقعی ملی‌پیامک توسط مدیر پروژه **PASS** گزارش شده است؛ Provider/SmsAction در این مرحله تغییر نکرد.
-- برای فرم `jihadi-group-registration` یک Action پیش‌فرض SMS با `action_key=notify_leader_sms_on_submit` اضافه شده است: Event=`submission.submitted`، گیرنده=`leader_mobile` و policy=`once_per_submission`. این Template عمداً غیرفعال و بدون متن/Pattern hard-code شده است تا مدیر متن یا Pattern نهایی را در Action Builder تعیین و سپس Action را فعال کند.
-- Action پیش‌فرض Email مدیر بدون تغییر باقی مانده است.
-- تست ثبت Elementor Widget/Dynamic Tag با constructor بومی Elementor اضافه و پاس شده است؛ DI داخل constructor ویجت اضافه نشده است.
-- JalaliDatePicker همراه همین ZIP به‌صورت local/pinned در `assets/vendor/jalalidatepicker/` موجود است و Runtime فرم به CDN آن وابسته نیست.
-- QA خودکار این checkpoint شامل Action/SMS/Duplicate/Field Ordering/Date/Validator/Elementor registration/runtime assets است؛ جزئیات در `BUILD-REPORT.md` و `docs/ACCEPTANCE-1.0.28.md` آمده است.
+- تست واقعی ملی‌پیامک توسط مدیر پروژه **PASS** گزارش شده است.
+- Template پیش‌فرض SMS فرم `jihadi-group-registration` همچنان `submission.submitted -> leader_mobile -> once_per_submission` است و عمداً بدون متن/Pattern hard-code و غیرفعال باقی مانده تا محتوای تأییدشده از Action Builder تنظیم شود.
+- Release hardening روی WordPress User Actions اضافه شده است: هدف‌های Administrator/`manage_options` بدون opt-in سطح `afe_manage_settings` قابل Login/Update/Role/Meta نیستند و metaهای امنیتی capability/session/application-password در Runtime مسدودند.
+- Assign Role نقش‌های سفارشی دارای `manage_options` را نیز privileged در نظر می‌گیرد.
+- URLهای Token‌دار Action schema هنگام ذخیره Tokenهای `{{...}}` را حفظ می‌کنند و URL نهایی همچنان در Runtime sanitize می‌شود.
+- metadata رجیستری `supportsExecutionPolicy=false` اکنون واقعاً در sanitizer/UI enforce می‌شود.
+- پوشش Renderer برای هر سه mode تاریخ در هر دو تقویم اضافه شده است.
+- `tools/qa.sh` یک preflight یک‌دست برای regression، PHP lint، JS syntax، composer، local assets، no-runtime-CDN و consistency نسخه فراهم می‌کند.
+- ماتریس کامل وضعیت در `docs/FEATURE-COMPLETENESS-1.0.28.md` و acceptance دستی در `docs/ACCEPTANCE-1.0.28.md` است.
 
-موارد باقی‌مانده پیش از bump نهایی: acceptance مرورگری روی سایت واقعی برای submit/draft/edit/lock/duplicate/actions/field ordering/date modes/validators و بررسی UX ادمین روی فرم جهادی. پس از PASS این ماتریس، نسخه Plugin به `1.0.28`، DB version به `1.0.5` و Stable tag به `1.0.28` bump می‌شود.
+موارد باقی‌مانده پیش از bump نهایی فقط acceptance عملی روی WordPress + MySQL/MariaDB + Elementor و سپس release finalization است. بعد از PASS، Plugin به `1.0.28`، DB به `1.0.5` و Stable tag به `1.0.28` تغییر خواهد کرد.
 
 # Alavi Form Engine
 

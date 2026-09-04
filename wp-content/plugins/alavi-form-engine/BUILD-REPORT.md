@@ -1,21 +1,45 @@
-# Build / QA Report — Alavi Form Engine 1.0.28-dev Acceptance Candidate Checkpoint
+# Build / QA Report — Alavi Form Engine 1.0.28-dev Feature-complete Pre-acceptance Checkpoint
 
 ## Status
 
-**Acceptance candidate, not yet production-tagged.** Stable production baseline remains **1.0.27**. Plugin version remains **1.0.28-dev**, Stable tag remains **1.0.27**, and DB development checkpoint remains **1.0.5-dev.2**.
+**Feature-complete against the 1.0.28 handoff, not yet production-tagged.** Stable production baseline remains **1.0.27**. Plugin version remains **1.0.28-dev**, Stable tag remains **1.0.27**, and DB development checkpoint remains **1.0.5-dev.2**.
 
-The project administrator reported the real MeliPayamak account test **PASS** on 2026-09-04. The remaining release gate is browser-driven acceptance on a real WordPress + MySQL/MariaDB + Elementor staging environment.
+The project administrator reported the real MeliPayamak account test **PASS** on 2026-09-04. Per project direction, browser-driven acceptance will be run after feature work is complete. No production version/stable-tag bump is performed before that acceptance.
 
 ## Changes in this checkpoint
 
-- Added the built-in Jihadi applicant SMS Action template with stable `action_key=notify_leader_sms_on_submit`.
-- Default SMS event is `submission.submitted`, recipient source is form Field `leader_mobile`, execution policy is `once_per_submission`, and error behavior is `continue`.
-- The SMS template is intentionally **disabled** and contains no hard-coded free-text or Pattern content; the manager selects the approved content in Action Builder before enabling it. Existing saved Action overrides continue to take precedence over the code definition.
-- Kept the existing admin notification Email Action unchanged.
-- Added Elementor registration regression coverage using an Elementor-native constructor stub; no Widget constructor DI was introduced.
-- Added runtime asset regression proving the pinned JalaliDatePicker files are present locally and the frontend registration is not CDN-based.
-- Corrected stale documentation that said JalaliDatePicker must be downloaded separately; this ZIP already contains the pinned local assets.
-- Reviewed the extended Action Registry and confirmed the Post/CPT operation schema contains a single `operation` setting.
+- Added `UserActionGuard` and runtime privileged-target checks for Login/Update/Assign Role/Update User Meta and existing-user branches of Create User. Administrator accounts and custom accounts with `manage_options` require an explicit protected opt-in controlled by `afe_manage_settings`.
+- Blocked WordPress capability/session/application-password meta keys (`*_capabilities`, `*_user_level`, `session_tokens`, `_application_passwords`) from Create User mappings and Update User Meta at runtime.
+- Prevalidates the complete User Meta mapping before user creation/update or the first meta write, preventing rejected protected keys from leaving partial user side effects.
+- Assign Role now treats custom roles that grant `manage_options` as privileged, not just the literal `administrator` role.
+- Tokenized URL settings now preserve valid `{{...}}` templates through admin sanitization; runtime Webhook/URL consumers still sanitize the fully-resolved URL.
+- `ActionDefinition::supportsExecutionPolicy=false` is now honored by the Action Builder save path and UI.
+- Added renderer-level regression proving Jalali/Gregorian `combined`, `picker`, and `manual` output modes.
+- Added `tools/qa.sh` as a unified preflight for PHP version, all regression tests, PHP lint, JS syntax, composer JSON, local Jalali assets, external runtime asset registration, and plugin version consistency.
+- Added `docs/FEATURE-COMPLETENESS-1.0.28.md` mapping the handoff feature set to implementation/test coverage.
+
+## QA performed
+
+- Unified `tools/qa.sh`: **PASS**.
+- Standalone regression suite: **PASS (35 test scripts)**.
+- PHP syntax lint across `src/`, `tests/`, plugin bootstrap and uninstall: **PASS (132 PHP files)**.
+- `assets/js/admin.js` and `assets/js/frontend.js`: **PASS**.
+- `composer.json`: **PASS**.
+- Local JalaliDatePicker JS/CSS presence: **PASS**.
+- Runtime JS/CSS external-CDN registration check: **PASS**.
+- Plugin header / `AFE_VERSION` consistency: **PASS (`1.0.28-dev`)**.
+- New/expanded hardening tests include:
+  - `tests/user-action-security.php`
+  - `tests/user-meta-preflight.php`
+  - `tests/date-renderer-modes.php`
+  - `tests/action-execution-policy-metadata.php`
+  - tokenized URL coverage in `tests/action-config-sanitizer.php`
+
+## Release blocker / live acceptance
+
+This build environment has no complete WordPress + MySQL/MariaDB + browser + Elementor runtime. The project owner will run the practical acceptance after all features are in place. The exact matrix remains in `docs/ACCEPTANCE-1.0.28.md`.
+
+Do **not** bump to `1.0.28` / DB `1.0.5` / Stable tag `1.0.28` until that live matrix passes.
 
 ## Preserved 1.0.28-dev feature set
 
@@ -24,28 +48,9 @@ The project administrator reported the real MeliPayamak account test **PASS** on
 - Duplicate Policy with Draft matching, trash exclusion, current-submission exclusion, allow+mark and transaction-safe owner promotion.
 - Per-Step/Repeater field ordering, Date input modes, character/length overrides, Validator Registry/UI and safe Custom Regex.
 
-## QA performed
-
-- Full standalone `tests/*.php` regression suite: **PASS (31 test scripts)**.
-- PHP syntax lint across `src/` and `tests/`: **PASS (125 PHP files)**.
-- `assets/js/admin.js`: **PASS**.
-- `assets/js/frontend.js`: **PASS**.
-- `composer.json` parse validation: **PASS**.
-- Local JalaliDatePicker JS/CSS presence: **PASS**.
-- New tests in this checkpoint:
-  - `tests/jihadi-default-sms-action.php`
-  - `tests/elementor-registration.php`
-  - `tests/runtime-assets.php`
-
-## Release blocker / live acceptance
-
-This build environment has no complete WordPress + MySQL/MariaDB + browser + Elementor runtime, so genuine end-to-end clicks cannot be represented as completed here. The exact live acceptance matrix is in `docs/ACCEPTANCE-1.0.28.md`.
-
-Do **not** bump to `1.0.28` / DB `1.0.5` / Stable tag `1.0.28` until that live matrix passes.
-
 ## Automated checks performed for this package
 
-- PHP syntax lint across `src/` and `tests/`: PASS (122 PHP files across src/tests at this checkpoint; code target remains PHP >= 8.3).
+- PHP syntax lint across `src/` and `tests/`: PASS (132 PHP files across src/tests plus bootstrap/uninstall at this checkpoint; code target remains PHP >= 8.3).
 - Built-in validator tests: PASS (Iran IBAN checksum, National ID valid/invalid checksum, Persian mobile digits, digit normalization).
 - Built-in Jihadi Group Registration form construction: PASS (13 steps, 62 top-level non-HTML items, 3 repeaters, 5 file fields).
 - JavaScript syntax check for front-end/admin assets: PASS.

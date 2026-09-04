@@ -47,8 +47,11 @@ final class ActionConfigSanitizer
                 }
                 $actionKey = substr($actionKey, 0, 80);
 
-                $policy = sanitize_key((string)($rawAction['execution_policy'] ?? 'always'));
-                if (!in_array($policy, self::POLICIES, true)) $policy = 'always';
+                $policy = 'always';
+                if ($definition->supportsExecutionPolicy) {
+                    $policy = sanitize_key((string)($rawAction['execution_policy'] ?? 'always'));
+                    if (!in_array($policy, self::POLICIES, true)) $policy = 'always';
+                }
                 $onError = sanitize_key((string)($rawAction['on_error'] ?? 'continue'));
                 if (!in_array($onError, self::ERROR_BEHAVIORS, true)) $onError = 'continue';
 
@@ -94,7 +97,7 @@ final class ActionConfigSanitizer
 
             $clean[$key] = match ($type) {
                 'textarea' => sanitize_textarea_field(wp_unslash((string)$value)),
-                'url' => esc_url_raw(wp_unslash((string)$value)),
+                'url' => $this->sanitizeUrlTemplate($value, !empty($schema['tokens'])),
                 'select' => $this->sanitizeSelect($value, (array)($schema['options'] ?? [])),
                 'field_select' => in_array((string)$value, $fieldKeys, true) ? (string)$value : '',
                 'user' => max(0, (int)$value),
@@ -112,6 +115,30 @@ final class ActionConfigSanitizer
         return $clean;
     }
 
+
+
+    private function sanitizeUrlTemplate(mixed $value, bool $allowTokens): string
+    {
+        $raw = trim(wp_unslash((string)$value));
+        if ($raw === '') return '';
+        if (!$allowTokens || !str_contains($raw, '{{')) return esc_url_raw($raw);
+
+        $restore = [];
+        $masked = preg_replace_callback(
+            '/\{\{[A-Za-z0-9_.:-]+\}\}/',
+            static function(array $match) use (&$restore): string {
+                $placeholder = 'AFE_TOKEN_' . count($restore);
+                $restore[$placeholder] = $match[0];
+                return $placeholder;
+            },
+            $raw
+        );
+        if (!is_string($masked)) return '';
+
+        $clean = esc_url_raw($masked);
+        if ($clean === '') return '';
+        return strtr($clean, $restore);
+    }
 
     private function sanitizeRole(mixed $value): string
     {

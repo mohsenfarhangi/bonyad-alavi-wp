@@ -30,6 +30,7 @@ $registry->register(new ActionDefinition('demo','دمو','', 'developer',[
     'payload'=>['type'=>'json'],
     'headers'=>['type'=>'key_value'],
     'args'=>['type'=>'repeater_text'],
+    'url'=>['type'=>'url','tokens'=>true],
 ]), static function(ActionContext $context,array $config): void {});
 $events=new EventRegistry();
 $sanitizer=new ActionConfigSanitizer($registry,$events);
@@ -52,6 +53,7 @@ $raw=[[
             'payload'=>'{"mobile":"{{field:leader_mobile}}"}',
             'headers'=>"X-Test|{{tracking_code}}\nBadLine",
             'args'=>"{{field:leader_mobile}}\n{{tracking_code}}",
+            'url'=>'https://example.test/hooks/{{field:leader_mobile}}?track={{tracking_code}}',
             'ignored'=>'should-not-save',
         ],
         'when'=>[[
@@ -72,6 +74,7 @@ $checks=[
     'json'=>($action['config']['payload']['mobile']??'')==='{{field:leader_mobile}}',
     'headers'=>($action['config']['headers']['X-Test']??'')==='{{tracking_code}}',
     'args'=>($action['config']['args']??[])===['{{field:leader_mobile}}','{{tracking_code}}'],
+    'url-template-preserved'=>($action['config']['url']??'')==='https://example.test/hooks/{{field:leader_mobile}}?track={{tracking_code}}',
     'condition-in'=>($action['when'][0]['value']??[])===['0912','0935'],
 ];
 $failed=false;

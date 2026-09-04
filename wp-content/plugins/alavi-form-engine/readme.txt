@@ -24,7 +24,7 @@ The package includes the "ثبت نام گروه‌های مردمی و جهاد
 
 == Changelog ==
 
-= Unreleased / 1.0.28-dev acceptance candidate checkpoint =
+= Unreleased / 1.0.28-dev feature-complete pre-acceptance checkpoint =
 * Added registry-driven Action Builder with Persian Event labels, stable action keys, multiple actions, same-event drag/drop ordering, enable/disable controls, conditional logic and execution/error policies.
 * Added ActionRuntime / ActionRunResult for chain outputs, first-wins redirect and follow-up events without mutating submitted form data.
 * Added Redirect, Create/Login/Update User, Assign Role, Update User Meta, Change Submission Status, Internal Note, Generate PDF, Email PDF and Create/Update/Upsert Post/CPT actions.
@@ -50,6 +50,12 @@ The package includes the "ثبت نام گروه‌های مردمی و جهاد
 * Added regression coverage for Validator Registry, field constraint overrides, DateField modes and ordering behavior.
 * Added a disabled, content-free default Jihadi SMS Action template for submission.submitted -> leader_mobile with once_per_submission; final message/Pattern remains an admin setting and is not hard-coded in PHP.
 * Added Elementor native-constructor registration and local runtime-asset regression coverage.
+* Added pre-acceptance security hardening for WordPress User Actions: privileged Administrator/manage_options targets require explicit afe_manage_settings opt-in, and capability/session/application-password user meta keys are blocked at runtime.
+* User meta mappings are fully prevalidated before Create User / Update User Meta writes to avoid partial side effects on rejected protected keys.
+* Assign Role now treats custom roles with manage_options as privileged in addition to the administrator role.
+* Tokenized URL settings preserve valid {{...}} templates during admin sanitization while runtime actions still validate the resolved URL.
+* ActionDefinition supportsExecutionPolicy metadata is now enforced by the Action Builder sanitizer/UI.
+* Added renderer-level regression for Jalali/Gregorian combined/picker/manual date modes and a unified tools/qa.sh preflight.
 * DB development checkpoint remains 1.0.5-dev.2.
 * This checkpoint is still not production-ready; browser-driven WordPress/MySQL/Elementor acceptance and the final production version/DB/stable-tag bump are pending.
 

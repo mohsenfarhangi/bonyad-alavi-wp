@@ -19,11 +19,12 @@
 | Action runtime/retry | `tests/action-manager.php`, `tests/action-manager-retry.php`, `tests/extended-action-registry.php`, `tests/redirect-action.php` | execution policies, runtime outputs, retry, redirect and extended actions |
 | Duplicate policy | `tests/duplicate-policy.php`, `tests/duplicate-repository.php` | normalization, owner promotion, trash/restore safety |
 | Field ordering | `tests/field-ordering.php` | same-scope reordering and safe append of newly code-defined fields |
-| Date modes | `tests/date-field-modes.php` | combined/picker/manual definitions and calendars |
+| Date modes | `tests/date-field-modes.php`, `tests/date-renderer-modes.php` | combined/picker/manual definitions plus actual Jalali/Gregorian renderer output |
 | Validation | `tests/validator-registry.php`, `tests/field-validation-overrides.php`, `tests/validators.php` | registry, overrides, safe regex and Iranian validators |
 | Elementor registration | `tests/elementor-registration.php` | Widget/Dynamic Tag instantiate through Elementor-native constructor contract |
 | Runtime assets | `tests/runtime-assets.php` | local JalaliDatePicker/frontend assets and no Jalali runtime CDN registration |
-| Access/security/upload | existing form-access, file ownership, sensitive action and secret-store tests | capability boundaries, file ownership, protected config and encrypted secrets |
+| Action metadata / URL templates | `tests/action-execution-policy-metadata.php`, `tests/action-config-sanitizer.php` | supportsExecutionPolicy enforcement and token-preserving URL sanitization |
+| Access/security/upload | form-access/file ownership/sensitive config tests + `tests/user-action-security.php`, `tests/user-meta-preflight.php` | capability boundaries, privileged-user guards, protected meta preflight, file ownership and encrypted secrets |
 
 ## Required live WordPress/Elementor acceptance before release
 

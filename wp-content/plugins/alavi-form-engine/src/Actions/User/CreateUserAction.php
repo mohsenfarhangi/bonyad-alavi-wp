@@ -10,7 +10,10 @@ use RuntimeException;
 
 final class CreateUserAction implements ActionInterface
 {
-    public function __construct(private readonly TokenResolver $tokens) {}
+    public function __construct(
+        private readonly TokenResolver $tokens,
+        private readonly UserActionGuard $guard
+    ) {}
 
     public function handle(ActionContext $context, array $config = []): void
     {
@@ -18,6 +21,11 @@ final class CreateUserAction implements ActionInterface
         $login = sanitize_user($this->tokens->resolve((string)($config['user_login'] ?? ''), $context), true);
         $email = sanitize_email($this->tokens->resolve((string)($config['user_email'] ?? ''), $context));
         if ($login === '') throw new RuntimeException('user_login پس از Resolve کردن Tokenها خالی یا نامعتبر است.');
+
+        // Validate and resolve every meta key before any WordPress user mutation.
+        // This prevents a protected key later in the mapping from leaving behind
+        // a partially-created/updated user while the Action is logged as failed.
+        $resolvedMeta = $this->prepareMeta((array)($config['user_meta'] ?? []), $context);
 
         $loginId = username_exists($login);
         $emailId = $email !== '' ? email_exists($email) : false;
@@ -39,11 +47,12 @@ final class CreateUserAction implements ActionInterface
 
         if ($existingId > 0) {
             if ($behavior === 'fail') throw new RuntimeException('کاربری با این نام کاربری یا ایمیل از قبل وجود دارد.');
+            $this->guard->assertTargetAllowed($existingId, $config, 'استفاده یا بروزرسانی کاربر موجود');
             if ($behavior === 'update') {
                 $userdata['ID'] = $existingId;
                 $result = wp_update_user($userdata);
                 if (is_wp_error($result)) throw new RuntimeException('بروزرسانی کاربر موجود ناموفق بود: '.$result->get_error_message());
-                $this->updateMeta($existingId, (array)($config['user_meta'] ?? []), $context);
+                $this->updateMeta($existingId, $resolvedMeta);
             }
             $context->runtime->set('user_id', $existingId);
             $context->runtime->set('created_user_id', 0);
@@ -57,18 +66,30 @@ final class CreateUserAction implements ActionInterface
         $result = wp_insert_user($userdata);
         if (is_wp_error($result)) throw new RuntimeException('ایجاد کاربر ناموفق بود: '.$result->get_error_message());
         $userId = (int)$result;
-        $this->updateMeta($userId, (array)($config['user_meta'] ?? []), $context);
+        $this->updateMeta($userId, $resolvedMeta);
         $context->runtime->set('user_id', $userId);
         $context->runtime->set('created_user_id', $userId);
         $context->runtime->set('user_was_existing', false);
     }
 
-    private function updateMeta(int $userId, array $meta, ActionContext $context): void
+    /** @return array<string,mixed> */
+    private function prepareMeta(array $meta, ActionContext $context): array
     {
         $resolved = $this->tokens->resolveValue($meta, $context);
+        $clean = [];
         foreach ((array)$resolved as $key=>$value) {
             $key = sanitize_key((string)$key);
             if ($key === '') continue;
+            $this->guard->assertMetaKeyAllowed($key);
+            $clean[$key] = $value;
+        }
+        return $clean;
+    }
+
+    /** @param array<string,mixed> $meta */
+    private function updateMeta(int $userId, array $meta): void
+    {
+        foreach ($meta as $key=>$value) {
             update_user_meta($userId, $key, is_scalar($value) || $value === null ? (string)$value : $value);
         }
     }

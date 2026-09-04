@@ -415,7 +415,11 @@ final class FormsPage
         echo '<label><span>نوع Action</span><select name="'.esc_attr($prefix.'[type]').'" data-afe-action-type>';
         foreach($definitions as $key=>$one) echo '<option value="'.esc_attr($key).'" '.selected($type,$key,false).'>'.esc_html($one->label).'</option>';
         echo '</select></label>';
-        echo '<label><span>سیاست اجرا</span><select name="'.esc_attr($prefix.'[execution_policy]').'"><option value="always" '.selected($policy,'always',false).'>هر بار Event</option><option value="once_per_submission" '.selected($policy,'once_per_submission',false).'>فقط یک بار برای Submission</option><option value="first_in_cycle" '.selected($policy,'first_in_cycle',false).'>فقط اولین بار در چرخه Event</option></select></label>';
+        if($definition->supportsExecutionPolicy){
+            echo '<label><span>سیاست اجرا</span><select name="'.esc_attr($prefix.'[execution_policy]').'"><option value="always" '.selected($policy,'always',false).'>هر بار Event</option><option value="once_per_submission" '.selected($policy,'once_per_submission',false).'>فقط یک بار برای Submission</option><option value="first_in_cycle" '.selected($policy,'first_in_cycle',false).'>فقط اولین بار در چرخه Event</option></select></label>';
+        }else{
+            echo '<input type="hidden" name="'.esc_attr($prefix.'[execution_policy]').'" value="always"><div class="afe-action-meta-note"><span>سیاست اجرا</span><strong>هر بار Event</strong></div>';
+        }
         echo '<label><span>رفتار در خطا</span><select name="'.esc_attr($prefix.'[on_error]').'"><option value="continue" '.selected($onError,'continue',false).'>ادامه Actionهای بعدی</option><option value="stop" '.selected($onError,'stop',false).'>توقف زنجیره</option></select></label>';
         echo '<label class="afe-action-enabled"><input type="checkbox" name="'.esc_attr($prefix.'[enabled]').'" value="1" '.checked($enabled,true,false).'> فعال</label>';
         echo '</div>';
@@ -483,7 +487,9 @@ final class FormsPage
             }elseif($type==='role_select'){
                 echo '<select name="'.esc_attr($name).'" data-afe-config-field-key="'.esc_attr((string)$key).'"><option value="">انتخاب نقش…</option>';
                 foreach(wp_roles()->roles as $roleKey=>$roleData){
-                    if($roleKey==='administrator' && !current_user_can(Capabilities::MANAGE_SETTINGS)) continue;
+                    $roleCaps=is_array($roleData['capabilities']??null)?$roleData['capabilities']:[];
+                    $privilegedRole=$roleKey==='administrator'||!empty($roleCaps['manage_options']);
+                    if($privilegedRole && !current_user_can(Capabilities::MANAGE_SETTINGS)) continue;
                     echo '<option value="'.esc_attr((string)$roleKey).'" '.selected((string)$value,(string)$roleKey,false).'>'.esc_html((string)($roleData['name']??$roleKey)).'</option>';
                 }
                 echo '</select>';
