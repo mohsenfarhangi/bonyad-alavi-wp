@@ -115,6 +115,7 @@ Block عمومی BEM:
 - [v0.4.1 — اصلاح لینک و آیکون کارت‌های سامانه](versions/v0.4.1.md)
 - [v0.5.0 — ذخیره AJAX و نوار شناور تنظیمات بنیاد علوی](versions/v0.5.0.md)
 - [v0.5.1 — انتخاب دوحالته رسانه کارت‌های سامانه](versions/v0.5.1.md)
+- [v0.5.2 — اصلاح Hover آیکون و چیدمان معرفی مرکز](versions/v0.5.2.md)
 
 ## معماری ذخیره تنظیمات بنیاد علوی
 
@@ -154,6 +155,7 @@ Block عمومی BEM:
 - از نسخه `v0.5.1` رسانه هر System Card دوحالت انحصاری دارد: `image` یا `svg`. ساختار داشبورد با `media_type + image_id + svg_id` ذخیره می‌شود و `icon_id` فقط برای Migration نسخه‌های قدیمی خوانده می‌شود.
 - System Card در Elementor نیز باید Switcher مشترک Image/Icon داشته باشد؛ حالت Image از `Controls_Manager::MEDIA` و حالت Icon/SVG از `Controls_Manager::ICONS` استفاده می‌کند. کنترل‌های تکراری Repeater باید از Helper مشترک ویجت ساخته شوند.
 - فایل SVG داشبورد در `ba-jihadi-center__system-icon` باید Inline رندر شود و خواندن/پاک‌سازی آن فقط از `BA_Media_Helper::get_inline_svg_attachment()` عبور کند. تصویر معمولی باید با عنصر `<img>` خروجی داده شود. داده Legacy از نوع Media همچنان به‌عنوان fallback سازگاری خوانده می‌شود.
+- از نسخه `v0.5.2` روی selector پایه‌ی `.ba-jihadi-center__system-icon svg` هیچ `fill` اجباری تعریف نمی‌شود؛ کنترل رنگ عادی و Hover فقط از `color` استفاده می‌کند تا SVGهای مبتنی بر `currentColor` رفتار استاندارد داشته باشند. رنگ Hover آیکون باید کنترل مستقل Elementor داشته باشد و با Hover/Focus کارت تغییر کند.
 
 آیتم Partner فقط وقتی معتبر است که حداقل تصویر، SVG/Icon یا عنوان داشته باشد. URL به‌تنهایی نباید یک کارت خالی ایجاد کند.
 
