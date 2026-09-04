@@ -21,8 +21,8 @@ The project administrator reported the real MeliPayamak account test **PASS** on
 ## QA performed
 
 - Unified `tools/qa.sh`: **PASS**.
-- Standalone regression suite: **PASS (35 test scripts)**.
-- PHP syntax lint across `src/`, `tests/`, plugin bootstrap and uninstall: **PASS (132 PHP files)**.
+- Standalone regression suite: **PASS (41 test scripts)**.
+- PHP syntax lint across `src/`, `tests/`, plugin bootstrap and uninstall: **PASS (141 PHP files)**.
 - `assets/js/admin.js` and `assets/js/frontend.js`: **PASS**.
 - `composer.json`: **PASS**.
 - Local JalaliDatePicker JS/CSS presence: **PASS**.
@@ -34,12 +34,29 @@ The project administrator reported the real MeliPayamak account test **PASS** on
   - `tests/date-renderer-modes.php`
   - `tests/action-execution-policy-metadata.php`
   - tokenized URL coverage in `tests/action-config-sanitizer.php`
+  - `tests/input-mask-registry.php`
+  - `tests/input-mask-renderer.php`
+  - `tests/input-mask-submission-normalization.php`
+  - `tests/input-mask-admin-presenter.php`
 
 ## Release blocker / live acceptance
 
 This build environment has no complete WordPress + MySQL/MariaDB + browser + Elementor runtime. The project owner will run the practical acceptance after all features are in place. The exact matrix remains in `docs/ACCEPTANCE-1.0.28.md`.
 
 Do **not** bump to `1.0.28` / DB `1.0.5` / Stable tag `1.0.28` until that live matrix passes.
+
+
+## Input Mask checkpoint
+
+- Added `InputMaskDefinition`, `InputMaskRegistry` and non-executable `InputMaskPattern`.
+- Core presets: Iranian mobile, landline, national ID, postal code, bank card and 24-digit IBAN.
+- Added Field Override UI with inherit / none / preset / custom modes.
+- Custom syntax: `9` digit, `A` letter, `*` alphanumeric, backslash escape; no raw JS/regex/PHP execution.
+- Renderer applies mask metadata and validates normalized legacy HTML pattern/length constraints rather than formatted string length.
+- Submission normalization removes mask literals before validation, duplicate fingerprints, Actions/Tokens/SMS and persistence.
+- Admin Submission detail/edit/export presentation and dynamically-added admin Repeater rows render the same masks; admin saves normalize values again in PHP.
+- Jihadi source defaults now apply appropriate masks to mobile, landline, national-ID and legal-IBAN fields; admin overrides can replace/disable them.
+- Regression coverage added for registry/pattern behavior, Renderer integration and Submission normalization.
 
 ## Preserved 1.0.28-dev feature set
 
@@ -50,7 +67,7 @@ Do **not** bump to `1.0.28` / DB `1.0.5` / Stable tag `1.0.28` until that live m
 
 ## Automated checks performed for this package
 
-- PHP syntax lint across `src/` and `tests/`: PASS (132 PHP files across src/tests plus bootstrap/uninstall at this checkpoint; code target remains PHP >= 8.3).
+- PHP syntax lint across `src/` and `tests/`: PASS (141 PHP files including bootstrap/uninstall at this checkpoint; code target remains PHP >= 8.3).
 - Built-in validator tests: PASS (Iran IBAN checksum, National ID valid/invalid checksum, Persian mobile digits, digit normalization).
 - Built-in Jihadi Group Registration form construction: PASS (13 steps, 62 top-level non-HTML items, 3 repeaters, 5 file fields).
 - JavaScript syntax check for front-end/admin assets: PASS.
@@ -245,3 +262,18 @@ Browser print / Save as PDF is always available from a submission. Direct server
 - Added `afe_register_templates` for future template definitions.
 - Added `tests/template-registry.php` regression coverage.
 
+
+
+## 1.0.28-dev deployment preflight patch
+
+- Investigated staging fatal: `DuplicateRepository` class not found during plugin boot.
+- Verified the class file, namespace and Composer PSR-4 mapping are correct in the checkpoint package.
+- Added bootstrap preflight for 12 boot-critical classes/files so incomplete deployments stop safely with an admin notice and error-log diagnostic instead of a raw fatal.
+- Added package autoload regression coverage and an incomplete-deployment simulation.
+- Upgrade requirement: replace/install the complete plugin package; do not copy only changed files between checkpoints.
+
+### QA
+
+- 37 regression tests: PASS.
+- 134 PHP files linted: PASS.
+- JavaScript syntax, composer.json, local JalaliDatePicker, no-runtime-CDN and version consistency: PASS.

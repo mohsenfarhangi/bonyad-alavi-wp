@@ -17,6 +17,8 @@ use BonyadAlavi\FormEngine\Events\SubmissionCreated;
 use BonyadAlavi\FormEngine\Events\SubmissionUpdated;
 use BonyadAlavi\FormEngine\Form\FormRegistry;
 use BonyadAlavi\FormEngine\Form\Validator;
+use BonyadAlavi\FormEngine\InputMask\InputMaskPattern;
+use BonyadAlavi\FormEngine\InputMask\InputMaskRegistry;
 use BonyadAlavi\FormEngine\Repository\FormRepository;
 use BonyadAlavi\FormEngine\Repository\SubmissionRepository;
 use BonyadAlavi\FormEngine\Security\SecurityManager;
@@ -38,7 +40,8 @@ final class SubmissionService
         private readonly FormAccess $formAccess,
         private readonly DuplicatePolicy $duplicatePolicy,
         private readonly DuplicateRepository $duplicateRepository,
-        private readonly ActionExecutionRepository $actionExecutions
+        private readonly ActionExecutionRepository $actionExecutions,
+        private readonly InputMaskRegistry $inputMasks
     ) {}
 
     public function handleHttp(): array|WP_Error
@@ -344,7 +347,51 @@ final class SubmissionService
         if (array_key_exists('actions', $adminSettings) && is_array($adminSettings['actions'])) {
             $form['actions'] = $adminSettings['actions'];
         }
+        $this->resolveInputMasks($form);
         return $form;
+    }
+
+    private function resolveInputMasks(array &$form): void
+    {
+        if (!isset($form['steps']) || !is_array($form['steps'])) return;
+        foreach ($form['steps'] as &$step) {
+            if (!isset($step['items']) || !is_array($step['items'])) continue;
+            foreach ($step['items'] as &$field) $this->resolveFieldInputMask($field);
+            unset($field);
+        }
+        unset($step);
+    }
+
+    private function resolveFieldInputMask(array &$field): void
+    {
+        if (($field['type'] ?? '') === 'repeater' && isset($field['fields']) && is_array($field['fields'])) {
+            foreach ($field['fields'] as &$child) $this->resolveFieldInputMask($child);
+            unset($child);
+        }
+        if (!in_array((string)($field['type'] ?? ''), ['text','tel'], true)) {
+            unset($field['input_mask']);
+            return;
+        }
+        $config = $field['input_mask'] ?? null;
+        if (is_string($config)) $config = ['key'=>$config];
+        if (!is_array($config)) { unset($field['input_mask']); return; }
+        $key = preg_replace('/[^a-z0-9_\-]/','',strtolower((string)($config['key'] ?? ''))) ?? '';
+        if ($key === '' || $key === 'none') { unset($field['input_mask']); return; }
+        if ($key === 'custom') {
+            $pattern = trim((string)($config['pattern'] ?? ''));
+            if (!InputMaskPattern::isValid($pattern)) { unset($field['input_mask']); return; }
+            $field['input_mask'] = ['key'=>'custom','label'=>'Mask سفارشی','pattern'=>$pattern,'inputmode'=>InputMaskPattern::suggestedInputMode($pattern)];
+            return;
+        }
+        $definition = $this->inputMasks->get($key);
+        if (!$definition || !$definition->supports((string)($field['type'] ?? ''))) { unset($field['input_mask']); return; }
+        $field['input_mask'] = [
+            'key'=>$definition->key,
+            'label'=>$definition->label,
+            'pattern'=>$definition->pattern,
+            'example'=>$definition->example,
+            'inputmode'=>$definition->inputMode,
+        ];
     }
 
     private function applyOrderOverrides(array &$form,array $order): void
@@ -400,7 +447,7 @@ final class SubmissionService
         $path = $prefix === '' ? (string)$field['name'] : $prefix . '.' . $field['name'];
         $override = $overrides[$path] ?? ($prefix === '' ? ($overrides[$field['name']] ?? null) : null);
         if (is_array($override)) {
-            $allowed = ['label','description','placeholder','required','options','max_files','max_size_mb','accept','calendar','date_input_mode','select_mode','searchable','search_threshold','character_mode','allowed_extra','forbidden_extra','min_length','max_length','exact_length','validators'];
+            $allowed = ['label','description','placeholder','required','options','max_files','max_size_mb','accept','calendar','date_input_mode','select_mode','searchable','search_threshold','character_mode','allowed_extra','forbidden_extra','min_length','max_length','exact_length','validators','input_mask'];
             foreach ($allowed as $key) {
                 if (array_key_exists($key,$override)) $field[$key]=$override[$key];
             }
@@ -857,6 +904,10 @@ final class SubmissionService
     {
         if (is_array($value)) return array_map('sanitize_text_field',$value);
         $value = Validators::latinDigits((string)$value);
+        $mask = $field['input_mask'] ?? null;
+        if (is_array($mask) && InputMaskPattern::isValid((string)($mask['pattern'] ?? ''))) {
+            $value = InputMaskPattern::normalize($value, (string)$mask['pattern']);
+        }
         $normalizePrefix=trim((string)($field['normalize_input_prefix']??''));
         if ($normalizePrefix !== '' && str_starts_with(strtoupper($value),strtoupper($normalizePrefix))) {
             $value=substr($value,strlen($normalizePrefix));

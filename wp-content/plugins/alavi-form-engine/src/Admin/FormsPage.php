@@ -17,6 +17,8 @@ use BonyadAlavi\FormEngine\Actions\ActionConfigSanitizer;
 use BonyadAlavi\FormEngine\Actions\Tokens\TokenRegistry;
 use BonyadAlavi\FormEngine\Duplicate\DuplicatePolicy;
 use BonyadAlavi\FormEngine\Validation\ValidatorRegistry;
+use BonyadAlavi\FormEngine\InputMask\InputMaskPattern;
+use BonyadAlavi\FormEngine\InputMask\InputMaskRegistry;
 
 final class FormsPage
 {
@@ -30,7 +32,8 @@ final class FormsPage
         private readonly ActionRegistry $actions,
         private readonly TokenRegistry $tokens,
         private readonly DuplicatePolicy $duplicatePolicy,
-        private readonly ValidatorRegistry $validators
+        private readonly ValidatorRegistry $validators,
+        private readonly InputMaskRegistry $inputMasks
     ) {}
 
     public function render(): void
@@ -172,6 +175,30 @@ final class FormsPage
                     echo '<label><span>تقویم</span><select name="field_override['.esc_attr($path).'][calendar]"><option value="inherit" '.selected($calendar,'inherit',false).'>ارث‌بری ('.esc_html((string)($field['calendar']??'gregorian')).')</option><option value="jalali" '.selected($calendar,'jalali',false).'>جلالی</option><option value="gregorian" '.selected($calendar,'gregorian',false).'>میلادی</option></select></label>';
                     $dateMode=(string)($ov['date_input_mode']??'inherit');
                     echo '<label><span>روش ورود تاریخ</span><select name="field_override['.esc_attr($path).'][date_input_mode]"><option value="inherit" '.selected($dateMode,'inherit',false).'>ارث‌بری ('.esc_html((string)($field['date_input_mode']??'combined')).')</option><option value="combined" '.selected($dateMode,'combined',false).'>انتخاب + ورود دستی</option><option value="picker" '.selected($dateMode,'picker',false).'>فقط انتخاب از تقویم</option><option value="manual" '.selected($dateMode,'manual',false).'>فقط ورود دستی</option></select></label>';
+                }
+                if (in_array((string)($field['type']??''),['text','tel'],true)) {
+                    $maskOverride=$ov['input_mask']??null;
+                    if (is_string($maskOverride)) $maskOverride=['key'=>$maskOverride];
+                    $maskKey=is_array($maskOverride)?sanitize_key((string)($maskOverride['key']??'')):'inherit';
+                    if ($maskKey==='') $maskKey='inherit';
+                    $sourceMask=$field['input_mask']??null;
+                    if (is_string($sourceMask)) $sourceMask=['key'=>$sourceMask];
+                    $sourceMaskKey=is_array($sourceMask)?sanitize_key((string)($sourceMask['key']??'')):'';
+                    $inheritLabel='ارث‌بری'.($sourceMaskKey!==''?' ('.($this->inputMasks->get($sourceMaskKey)?->label??$sourceMaskKey).')':' (بدون Mask)');
+                    echo '<div class="afe-override-span-2 afe-input-mask-override" data-afe-input-mask-override><label><span>Input Mask</span><select name="field_override['.esc_attr($path).'][input_mask_key]" data-afe-input-mask-select>';
+                    echo '<option value="inherit" '.selected($maskKey,'inherit',false).'>'.esc_html($inheritLabel).'</option>';
+                    echo '<option value="none" '.selected($maskKey,'none',false).'>بدون Mask</option>';
+                    foreach ($this->inputMasks->forFieldType((string)($field['type']??'')) as $maskDefinition) {
+                        $label=$maskDefinition->label.($maskDefinition->example!==''?' — '.$maskDefinition->example:'');
+                        echo '<option value="'.esc_attr($maskDefinition->key).'" '.selected($maskKey,$maskDefinition->key,false).'>'.esc_html($label).'</option>';
+                    }
+                    echo '<option value="custom" '.selected($maskKey,'custom',false).'>Mask سفارشی</option></select></label>';
+                    $customPattern=is_array($maskOverride)?(string)($maskOverride['pattern']??''):'';
+                    echo '<label data-afe-custom-mask-row'.($maskKey==='custom'?'':' hidden').'><span>الگوی Mask سفارشی</span><input dir="ltr" maxlength="'.esc_attr((string)InputMaskPattern::MAX_PATTERN_LENGTH).'" name="field_override['.esc_attr($path).'][input_mask_pattern]" value="'.esc_attr($customPattern).'" placeholder="9999 999 9999"><small>9 = رقم، A = حرف، * = حرف یا رقم. جداکننده‌ها مثل فاصله، / و - فقط نمایشی هستند. برای نوشتن خود 9/A/* به‌صورت literal از \ استفاده کنید.</small></label>';
+                    echo '<p class="description afe-input-mask-help">Mask فقط UX ورودی است؛ مقدار قبل از Validation، Duplicate، Token، SMS و ذخیره‌سازی بدون جداکننده‌های Mask نرمال می‌شود.</p></div>';
+                }
+                if (($field['type']??'')==='date') {
+                    echo '<p class="afe-override-span-2 description">Input Mask تاریخ به‌صورت خودکار از تقویم تعیین می‌شود: جلالی <code>YYYY/MM/DD</code> و میلادی <code>YYYY-MM-DD</code>.</p>';
                 }
                 if (in_array((string)($field['type']??''),['text','textarea','tel','email','url'],true)) {
                     $characterMode=(string)($ov['character_mode']??'inherit');
@@ -781,6 +808,21 @@ final class FormsPage
             if (($fieldDef['type']??'')==='date') {
                 $dateMode=sanitize_key((string)($values['date_input_mode']??'inherit'));
                 if (in_array($dateMode,['combined','picker','manual'],true)) $one['date_input_mode']=$dateMode;
+            }
+            if (in_array((string)($fieldDef['type']??''),['text','tel'],true)) {
+                $maskKey=sanitize_key((string)($values['input_mask_key']??'inherit'));
+                if ($maskKey==='none') {
+                    $one['input_mask']=['key'=>'none'];
+                } elseif ($maskKey==='custom') {
+                    $pattern=trim(wp_unslash((string)($values['input_mask_pattern']??'')));
+                    if (!InputMaskPattern::isValid($pattern)) {
+                        wp_die('Input Mask سفارشی فیلد «'.esc_html((string)($fieldDef['label']??$fieldDef['name']??'')).'» معتبر نیست. Syntax مجاز: 9 برای رقم، A برای حرف و * برای حرف یا رقم.','Input Mask نامعتبر',['response'=>400,'back_link'=>true]);
+                    }
+                    $one['input_mask']=['key'=>'custom','pattern'=>$pattern];
+                } elseif ($maskKey!=='inherit') {
+                    $maskDefinition=$this->inputMasks->get($maskKey);
+                    if ($maskDefinition && $maskDefinition->supports((string)($fieldDef['type']??''))) $one['input_mask']=['key'=>$maskDefinition->key];
+                }
             }
             if (in_array((string)($fieldDef['type']??''),['text','textarea','tel','email','url'],true)) {
                 $characterMode=sanitize_key((string)($values['character_mode']??'inherit'));

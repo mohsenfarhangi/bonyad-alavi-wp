@@ -241,6 +241,90 @@
   }
 
 
+  const adminLatinDigits = value => String(value ?? '')
+    .replace(/[۰-۹]/g, d => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d))
+    .replace(/[٠-٩]/g, d => '٠١٢٣٤٥٦٧٨٩'.indexOf(d));
+
+  const adminMaskCache = new Map();
+  const adminMaskNodes = pattern => {
+    pattern = String(pattern || '').trim();
+    if (adminMaskCache.has(pattern)) return adminMaskCache.get(pattern);
+    const nodes = [];
+    let escaped = false;
+    Array.from(pattern).forEach(char => {
+      if (escaped) { nodes.push({type:'literal', value:char}); escaped = false; return; }
+      if (char === '\\') { escaped = true; return; }
+      nodes.push(['9','A','*'].includes(char) ? {type:'slot', value:char} : {type:'literal', value:char});
+    });
+    if (escaped) nodes.length = 0;
+    adminMaskCache.set(pattern, nodes);
+    return nodes;
+  };
+
+  const adminMaskMatches = (char, token) => {
+    if (token === '9') return /^[0-9]$/.test(char);
+    try {
+      if (token === 'A') return /^\p{L}$/u.test(char);
+      if (token === '*') return /^(?:\p{L}|[0-9])$/u.test(char);
+    } catch (_) {
+      if (token === 'A') return /^[A-Za-z\u0621-\u06FC]$/.test(char);
+      if (token === '*') return /^[A-Za-z0-9\u0621-\u06FC]$/.test(char);
+    }
+    return false;
+  };
+
+  const adminUnmaskValue = (value, pattern) => {
+    const nodes = adminMaskNodes(pattern);
+    if (!nodes.length) return adminLatinDigits(value);
+    const chars = Array.from(adminLatinDigits(value));
+    let index = 0;
+    let out = '';
+    nodes.forEach(node => {
+      if (node.type === 'literal') {
+        if (chars[index] === node.value) index += 1;
+        return;
+      }
+      while (index < chars.length) {
+        const char = chars[index++];
+        if (adminMaskMatches(char, node.value)) { out += char; break; }
+      }
+    });
+    return out;
+  };
+
+  const adminFormatMask = (value, pattern) => {
+    const nodes = adminMaskNodes(pattern);
+    if (!nodes.length) return value;
+    const clean = Array.from(adminUnmaskValue(value, pattern));
+    const total = nodes.filter(node => node.type === 'slot').length;
+    let slot = 0;
+    let out = '';
+    for (const node of nodes) {
+      if (node.type === 'slot') {
+        if (clean[slot] === undefined) break;
+        out += clean[slot++];
+      } else if (slot > 0 && slot < total && clean[slot] !== undefined) {
+        out += node.value;
+      }
+    }
+    return out;
+  };
+
+  const initAdminInputMasks = root => {
+    root.querySelectorAll?.('input[data-afe-input-mask]').forEach(input => {
+      if (input.dataset.afeAdminMaskReady === '1') return;
+      input.dataset.afeAdminMaskReady = '1';
+      const apply = () => {
+        const pattern = input.dataset.afeInputMask || '';
+        const formatted = adminFormatMask(input.value, pattern);
+        if (input.value !== formatted) input.value = formatted;
+      };
+      input.addEventListener('input', apply);
+      input.addEventListener('blur', apply);
+      apply();
+    });
+  };
+
   const initAdminRepeaters = root => {
     root.querySelectorAll('[data-afe-admin-repeater]').forEach(repeater => {
       if (repeater.dataset.afeAdminReady === '1') return;
@@ -262,7 +346,10 @@
         const html = (template?.innerHTML || '').replaceAll('__INDEX__', String(index));
         const holder = document.createElement('div');
         holder.innerHTML = html.trim();
-        if (holder.firstElementChild) rows.appendChild(holder.firstElementChild);
+        if (holder.firstElementChild) {
+          rows.appendChild(holder.firstElementChild);
+          initAdminInputMasks(holder.firstElementChild);
+        }
         refresh();
       });
       repeater.addEventListener('click', event => {
@@ -740,6 +827,20 @@
     });
   };
 
+  const initInputMaskOverrides = () => {
+    document.querySelectorAll('[data-afe-input-mask-override]').forEach(root => {
+      const select = qs(root, '[data-afe-input-mask-select]');
+      const custom = qs(root, '[data-afe-custom-mask-row]');
+      if (!select || select.dataset.afeInputMaskReady === '1') return;
+      select.dataset.afeInputMaskReady = '1';
+      const sync = () => {
+        if (custom) custom.hidden = select.value !== 'custom';
+      };
+      select.addEventListener('change', sync);
+      sync();
+    });
+  };
+
   const initValidatorOverrides = () => {
     document.querySelectorAll('[data-afe-validator-override]').forEach(root => {
       const select = qs(root, '[data-afe-validator-select]');
@@ -795,6 +896,7 @@
 
     document.querySelectorAll('[data-afe-geo-chunk-uploader]').forEach(root => new GeoChunkUploader(root));
     initAdminRepeaters(document);
+    initAdminInputMasks(document);
     initBrandMarkSettings();
     initTemplateEditors();
     initFormTabs();
@@ -803,6 +905,7 @@
     initDuplicateSettings();
     initFieldOrdering();
     initValidatorOverrides();
+    initInputMaskOverrides();
     initAdminDatePickers();
   });
 })();

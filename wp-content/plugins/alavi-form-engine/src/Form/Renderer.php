@@ -7,6 +7,7 @@ use BonyadAlavi\FormEngine\DataSource\DataSourceManager;
 use BonyadAlavi\FormEngine\Repository\FormRepository;
 use BonyadAlavi\FormEngine\Repository\SubmissionRepository;
 use BonyadAlavi\FormEngine\Localization\LocaleDateService;
+use BonyadAlavi\FormEngine\InputMask\InputMaskPattern;
 use BonyadAlavi\FormEngine\Security\SecurityManager;
 use BonyadAlavi\FormEngine\Submission\SubmissionService;
 use BonyadAlavi\FormEngine\Style\StyleIsolationManager;
@@ -260,6 +261,10 @@ final class Renderer
             $raw=(string)$value;
             if (str_starts_with(strtoupper($raw),strtoupper($normalizePrefix))) $value=substr($raw,strlen($normalizePrefix));
         }
+        $mask=$field['input_mask']??null;
+        if (is_array($mask) && is_scalar($value) && InputMaskPattern::isValid((string)($mask['pattern']??''))) {
+            $value=InputMaskPattern::format((string)$value,(string)$mask['pattern']);
+        }
         $id = 'afe_' . sanitize_html_class(str_replace(['[',']'],'_',$name));
         $required = !empty($field['required']) && empty($field['conditions']) ? ' required' : '';
         $placeholder = !empty($field['placeholder']) ? ' placeholder="'.esc_attr((string)$field['placeholder']).'"' : '';
@@ -300,7 +305,30 @@ final class Renderer
         $exact=max(0,(int)($field['exact_length']??0));
         $min=max(0,(int)($field['min_length']??0));
         $max=max(0,(int)($field['max_length']??0));
-        if ($exact>0) { $attributes['minlength']=$exact; $attributes['maxlength']=$exact; }
+        $attributeMin=max(0,(int)($attributes['minlength']??0));
+        $attributeMax=max(0,(int)($attributes['maxlength']??0));
+        if ($exact===0 && $min===0 && $attributeMin>0) $min=$attributeMin;
+        if ($exact===0 && $max===0 && $attributeMax>0) $max=$attributeMax;
+        if ($exact===0 && $min>0 && $min===$max) { $exact=$min; $min=0; $max=0; }
+        $mask=$field['input_mask']??null;
+        $maskPattern=is_array($mask)?trim((string)($mask['pattern']??'')):'';
+        if ($maskPattern!=='' && InputMaskPattern::isValid($maskPattern)) {
+            $attributes['data-afe-input-mask']=$maskPattern;
+            $attributes['data-afe-input-mask-key']=(string)($mask['key']??'custom');
+            if (!empty($mask['example'])) $attributes['data-afe-input-mask-example']=(string)$mask['example'];
+            if (!empty($mask['inputmode']) && empty($attributes['inputmode'])) $attributes['inputmode']=(string)$mask['inputmode'];
+            if ($exact>0) $attributes['data-afe-value-exact-length']=$exact;
+            else {
+                if ($min>0) $attributes['data-afe-value-min-length']=$min;
+                if ($max>0) $attributes['data-afe-value-max-length']=$max;
+            }
+            $attributes['maxlength']=InputMaskPattern::displayLength($maskPattern);
+            unset($attributes['minlength']);
+            if (!empty($attributes['pattern'])) {
+                $attributes['data-afe-normalized-pattern']=(string)$attributes['pattern'];
+                unset($attributes['pattern']);
+            }
+        } elseif ($exact>0) { $attributes['minlength']=$exact; $attributes['maxlength']=$exact; }
         else {
             if ($min>0) $attributes['minlength']=$min;
             if ($max>0) $attributes['maxlength']=$max;

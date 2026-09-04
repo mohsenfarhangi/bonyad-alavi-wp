@@ -124,7 +124,7 @@ The engine can therefore be extended by a site plugin or theme without editing t
 
 The runtime form now resolves structural order before property overrides:
 
-`Code Definition -> Scoped Order Override -> Field Property/Validator Override -> Step/Admin Settings -> Runtime Form`
+`Code Definition -> Scoped Order Override -> Field Property/Validator/InputMask Override -> Step/Admin Settings -> Runtime Form`
 
 Order overrides contain only names that already belong to the original scope. The resolver never moves a Field across Steps and never creates a Field from admin input. Unknown/missing names are ignored and new code-defined items are appended, preserving the code definition as the source of truth.
 
@@ -134,5 +134,7 @@ Validation has two compatible layers:
 2. registry-driven `validators` selected through the admin Field Override UI.
 
 `ValidatorRegistry` owns reusable definitions and type compatibility. `Form\Validator` is the server-side authority and evaluates field activity/required state, length/character constraints, legacy rules, then registered validators. Frontend masks, HTML attributes, character filtering and Custom Regex checks are UX only.
+
+`InputMaskRegistry` owns non-executable mask presets. `SubmissionService` resolves the selected preset/custom pattern into the runtime field, then normalizes masked text/tel values before validation, duplicate detection, Action/Token execution and storage. Renderer/Frontend and the admin `FormDataPresenter` control formatting/caret; both public and admin persistence paths normalize the value again in PHP.
 
 Custom Regex is capability-gated and constrained before persistence; runtime PCRE applies explicit match/recursion limits. Raw PHP/callback code is never accepted from admin UI.

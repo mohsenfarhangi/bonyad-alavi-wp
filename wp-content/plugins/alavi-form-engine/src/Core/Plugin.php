@@ -33,6 +33,7 @@ use BonyadAlavi\FormEngine\Form\PreviewRenderer;
 use BonyadAlavi\FormEngine\Form\Validator;
 use BonyadAlavi\FormEngine\Forms\JihadiGroupRegistrationForm;
 use BonyadAlavi\FormEngine\Localization\LocaleDateService;
+use BonyadAlavi\FormEngine\InputMask\InputMaskRegistry;
 use BonyadAlavi\FormEngine\Repository\FormRepository;
 use BonyadAlavi\FormEngine\Repository\SubmissionRepository;
 use BonyadAlavi\FormEngine\Rest\ApiController;
@@ -92,6 +93,8 @@ final class Plugin
         $security = new SecurityManager();
         $validatorRegistry = new ValidatorRegistry();
         do_action('afe_register_validator_definitions', $validatorRegistry);
+        $inputMaskRegistry = new InputMaskRegistry();
+        do_action('afe_register_input_mask_definitions', $inputMaskRegistry);
         $validator = new Validator($validatorRegistry);
         $fileUploader = new FileUploader();
         $tokenRegistry = new TokenRegistry();
@@ -128,7 +131,7 @@ final class Plugin
         $service = new SubmissionService(
             $registry, $formRepo, $submissionRepo, $security, $validator,
             $fileUploader, $actions, $events, $dedicated, $formAccess,
-            $duplicatePolicy, $duplicateRepo, $actionExecutions
+            $duplicatePolicy, $duplicateRepo, $actionExecutions, $inputMaskRegistry
         );
         $previewPresenter = new FormDataPresenter($sources, $dates);
         $previewRenderer = new PreviewRenderer($previewPresenter, $submissionRepo, $templates);
@@ -161,6 +164,7 @@ final class Plugin
         $this->container->set(SecurityManager::class,$security);
         $this->container->set(TokenRegistry::class,$tokenRegistry);
         $this->container->set(ValidatorRegistry::class,$validatorRegistry);
+        $this->container->set(InputMaskRegistry::class,$inputMaskRegistry);
         $this->container->set(TokenResolver::class,$tokenResolver);
         $this->container->set(SecretStore::class,$secretStore);
         $this->container->set(ActionRegistry::class,$actionRegistry);
@@ -191,7 +195,7 @@ final class Plugin
         add_action('wp_ajax_afe_geo_import_chunk', [$this,'ajaxGeoImportChunk']);
 
         if (is_admin()) {
-            $formsPage = new FormsPage($registry,$formRepo,$service,$formAccess,$templates,$eventRegistry,$actionRegistry,$tokenRegistry,$duplicatePolicy,$validatorRegistry);
+            $formsPage = new FormsPage($registry,$formRepo,$service,$formAccess,$templates,$eventRegistry,$actionRegistry,$tokenRegistry,$duplicatePolicy,$validatorRegistry,$inputMaskRegistry);
             $submissionsPage = new SubmissionsPage($registry,$submissionRepo,$service,$sources,$formAccess,$dates,$actionExecutions,$actionRegistry,$eventRegistry);
             $reportsPage = new ReportsPage($registry,$submissionRepo,$formAccess,$dates);
             $databasePage = new DatabasePage(new Migrator(),$registry,$dedicated,$dates);

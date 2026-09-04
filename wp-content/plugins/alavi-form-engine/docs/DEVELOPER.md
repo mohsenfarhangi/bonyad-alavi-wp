@@ -458,6 +458,58 @@ Masks are UX hints:
 
 Server-side validation is always authoritative. Do not rely on `pattern`, input masks, or the datepicker as a security boundary.
 
+## Input Mask Registry
+
+Input masks are Registry-based and apply to `text` / `tel` fields. The value shown to the applicant may contain separators, but `SubmissionService` normalizes it before validators, duplicate fingerprints, tokens/actions and persistence. Therefore a mobile displayed as `0912 345 6789` is stored as `09123456789`.
+
+Code-defined presets:
+
+```php
+TelField::make('mobile')->inputMask('mobile_ir');
+TextField::make('national_id')->inputMask('national_id_ir');
+TextField::make('card')->inputMask('bank_card_ir');
+TextField::make('custom_code')->customInputMask('AA-9999');
+```
+
+Core keys:
+
+```text
+mobile_ir
+landline_ir
+national_id_ir
+postal_code_ir
+bank_card_ir
+iban_digits_ir
+```
+
+Custom mask syntax is deliberately non-executable:
+
+- `9` = digit
+- `A` = Unicode letter
+- `*` = Unicode letter or digit
+- all other characters are display literals/separators
+- `\` escapes the next token character when a literal `9`, `A` or `*` is needed
+
+Developers can register presets without editing `FormsPage`:
+
+```php
+use BonyadAlavi\FormEngine\InputMask\InputMaskDefinition;
+
+add_action('afe_register_input_mask_definitions', function ($masks) {
+    $masks->register(new InputMaskDefinition(
+        'organization_code',
+        'کد سازمانی',
+        'AA-999999',
+        ['text'],
+        'AB-123456',
+        'نمایش کد سازمانی',
+        'text'
+    ));
+});
+```
+
+Mask is not a validator. Use `ValidatorRegistry`, legacy rules and/or length settings for correctness. Frontend and wp-admin submission editing display the same mask, while both applicant and admin save paths normalize again in PHP. The frontend mirrors normalized length/pattern checks for UX, but PHP remains authoritative. Date fields keep their dedicated `YYYY/MM/DD` / `YYYY-MM-DD` handling and are not routed through generic input masks.
+
 ## Validator Registry
 
 Register a developer validator through `afe_register_validator_definitions`; do not hard-code new validator branches into `FormsPage`.

@@ -21,6 +21,7 @@
 | Field ordering | `tests/field-ordering.php` | same-scope reordering and safe append of newly code-defined fields |
 | Date modes | `tests/date-field-modes.php`, `tests/date-renderer-modes.php` | combined/picker/manual definitions plus actual Jalali/Gregorian renderer output |
 | Validation | `tests/validator-registry.php`, `tests/field-validation-overrides.php`, `tests/validators.php` | registry, overrides, safe regex and Iranian validators |
+| Input masks | `tests/input-mask-registry.php`, `tests/input-mask-renderer.php`, `tests/input-mask-submission-normalization.php` | presets/custom syntax, masked renderer constraints and server-side clean persistence |
 | Elementor registration | `tests/elementor-registration.php` | Widget/Dynamic Tag instantiate through Elementor-native constructor contract |
 | Runtime assets | `tests/runtime-assets.php` | local JalaliDatePicker/frontend assets and no Jalali runtime CDN registration |
 | Action metadata / URL templates | `tests/action-execution-policy-metadata.php`, `tests/action-config-sanitizer.php` | supportsExecutionPolicy enforcement and token-preserving URL sanitization |
@@ -81,18 +82,27 @@ Run on a staging clone using the same PHP/WordPress/Elementor major versions int
    - Confirm picker-only prevents direct typing UX, manual-only does not open the picker, and backend rejects invalid calendar dates.
    - Confirm bundled JalaliDatePicker assets load locally without CDN requests.
 
-10. **Field constraints / validators**
+10. **Input Mask**
+    - روی موبایل preset «شماره موبایل ایران» را بررسی کنید؛ مقدار باید هنگام تایپ مانند `0912 345 6789` نمایش داده شود.
+    - Submit/Edit را انجام دهید و تأیید کنید Token/SMS/ذخیره‌سازی مقدار تمیز `09123456789` را دریافت می‌کنند.
+    - همان Submission را از wp-admin ویرایش کنید؛ Mask باید در فیلد مدیریت نیز دیده شود و ذخیره مجدد مقدار تمیز را حفظ کند.
+    - کد ملی، کارت بانکی و شبای ۲۴ رقمی را با presetهای خود بررسی کنید.
+    - یک Mask سفارشی مثل `AA-9999` بسازید و نمایش/ویرایش/ذخیره مجدد را تست کنید.
+    - Override را روی «بدون Mask» بگذارید و تأیید کنید preset کدنویسی‌شده همان فیلد غیرفعال می‌شود.
+    - تاریخ را جداگانه بررسی کنید؛ DateField باید همچنان از mask خودکار calendar استفاده کند.
+
+11. **Field constraints / validators**
     - Test digits, Persian letters, English letters, alnum, allowed-extra and forbidden-extra modes.
     - Test min/max/exact length including Persian Unicode input.
     - Test each enabled validator and its custom message.
     - Test an invalid/expensive Custom Regex save and confirm it is rejected/limited server-side.
 
-11. **Admin UX**
+12. **Admin UX**
     - Open the Jihadi form with all Steps/Repeaters and inspect tabs at common desktop widths.
     - Verify Action Builder, Token Palette, Duplicate tab and Field Ordering do not overflow or become unusable.
     - Check drag handles, select controls and save feedback.
 
-12. **Release gate**
+13. **Release gate**
     - Browser console: no uncaught JS errors during the above flows.
     - PHP error log: no new warnings/notices/fatals from AFE under `WP_DEBUG` staging.
     - After all live cases PASS, bump plugin version to `1.0.28`, DB version to `1.0.5`, Stable tag to `1.0.28`, update final changelog/docs, rerun all automated checks, then build the production ZIP.

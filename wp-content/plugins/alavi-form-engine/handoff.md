@@ -10,6 +10,19 @@
 - **Stable tag:** فعلاً `1.0.27`
 - **تست واقعی ملی‌پیامک:** PASS گزارش‌شده توسط مدیر پروژه در 2026-09-04
 
+## افزوده‌شده پس از feature-complete اولیه: Input Mask عمومی
+
+- `InputMaskDefinition`, `InputMaskRegistry`, `InputMaskPattern` اضافه شدند.
+- presetهای Core: موبایل ایران، تلفن ثابت، کد ملی، کد پستی، کارت بانکی و شبای ۲۴ رقمی.
+- UI هر Field متنی/تلفن: ارث‌بری، بدون Mask، preset و Custom Mask.
+- Syntax Custom: `9` رقم، `A` حرف، `*` حرف/رقم و escape با `\`.
+- Mask فقط لایه UX است؛ `SubmissionService` قبل از Validation، Duplicate، Token/Action/SMS و Storage مقدار را normalize می‌کند.
+- Renderer محدودیت‌های length/pattern قدیمی را روی مقدار normalize‌شده اعمال می‌کند تا separatorهای Mask باعث validation اشتباه نشوند.
+- نمایش/ویرایش Submission در wp-admin و ردیف‌های جدید Repeater مدیریتی نیز همان Mask را نمایش می‌دهند و هنگام Save دوباره سمت PHP normalize می‌شوند.
+- DateField از generic mask جدا می‌ماند و mask آن بر اساس calendar همان `YYYY/MM/DD` یا `YYYY-MM-DD` است.
+- فرم جهادی برای موبایل‌ها، تلفن ثابت گروه، کدهای ملی و شبای حقوقی preset پیش‌فرض دارد؛ Admin Override همچنان اولویت دارد.
+- Hook توسعه‌دهنده: `afe_register_input_mask_definitions`.
+
 ## انجام‌شده در checkpoint جدید
 
 ### Release hardening اکشن‌های WordPress User
@@ -33,13 +46,21 @@
 ## QA این checkpoint
 
 - `tools/qa.sh`: PASS
-- Regression: **35/35 PASS**
-- PHP lint: **132 فایل PASS**
+- Regression: **41/41 PASS**
+- PHP lint: **141 فایل PASS**
 - JavaScript syntax: PASS
 - composer.json: PASS
 - local JalaliDatePicker: PASS
 - runtime external CDN registration: PASS
 - Version consistency: PASS (`1.0.28-dev`)
+
+## Patch استقرار / Bootstrap preflight
+
+- گزارش staging در 2026-09-04 نشان داد اگر فایل‌های جدید checkpoint به‌صورت ناقص روی نسخه قدیمی کپی شوند، `DuplicateRepository` می‌تواند هنگام boot با `Class not found` متوقف شود.
+- فایل `DuplicateRepository.php` و PSR-4 صحیح داخل بسته موجود بودند؛ ریشه خطا deployment ناقص/ناخوانا تشخیص داده شد.
+- bootstrap اکنون ۱۴ کلاس حیاتی boot را قبل از ثبت hook اصلی بررسی می‌کند و در نصب ناقص به‌جای Fatal خام، Admin Notice + error log واضح ثبت می‌کند.
+- تست‌های `bootstrap-autoload.php` و `bootstrap-preflight.php` اضافه شدند تا هم autoload بسته و هم رفتار امن در نصب ناقص regression داشته باشند.
+- برای ارتقا بین checkpointها باید **کل پوشه افزونه** جایگزین شود؛ کپی انتخابی فایل‌های تغییرکرده پشتیبانی نمی‌شود.
 
 ## مرحله بعد / Release gate
 

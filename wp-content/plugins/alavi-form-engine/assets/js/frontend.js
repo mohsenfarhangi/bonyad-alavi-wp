@@ -1065,8 +1065,97 @@
     return `${digits.slice(0, 4)}${separator}${digits.slice(4, 6)}${separator}${digits.slice(6)}`;
   }
 
+  const inputMaskPatternCache = new Map();
+
+  function inputMaskNodes(pattern) {
+    pattern = String(pattern || '').trim();
+    if (!pattern) return [];
+    if (inputMaskPatternCache.has(pattern)) return inputMaskPatternCache.get(pattern);
+    const nodes = [];
+    let escaped = false;
+    Array.from(pattern).forEach(char => {
+      if (escaped) { nodes.push({type:'literal', value:char}); escaped = false; return; }
+      if (char === '\\') { escaped = true; return; }
+      nodes.push(['9','A','*'].includes(char) ? {type:'slot', value:char} : {type:'literal', value:char});
+    });
+    if (escaped) nodes.length = 0;
+    inputMaskPatternCache.set(pattern, nodes);
+    return nodes;
+  }
+
+  function inputMaskCharMatches(char, token) {
+    if (token === '9') return /^[0-9]$/.test(char);
+    try {
+      if (token === 'A') return /^\p{L}$/u.test(char);
+      if (token === '*') return /^(?:\p{L}|[0-9])$/u.test(char);
+    } catch (_) {
+      if (token === 'A') return /^[A-Za-z\u0621-\u06FC]$/.test(char);
+      if (token === '*') return /^[A-Za-z0-9\u0621-\u06FC]$/.test(char);
+    }
+    return false;
+  }
+
+  function unmaskInputValue(value, pattern) {
+    const nodes = inputMaskNodes(pattern);
+    if (!nodes.length) return latinDigits(value);
+    const chars = Array.from(latinDigits(value));
+    let index = 0;
+    let out = '';
+    nodes.forEach(node => {
+      if (node.type === 'literal') {
+        if (chars[index] === node.value) index += 1;
+        return;
+      }
+      while (index < chars.length) {
+        const char = chars[index++];
+        if (inputMaskCharMatches(char, node.value)) { out += char; break; }
+      }
+    });
+    return out;
+  }
+
+  function formatInputMask(value, pattern) {
+    const nodes = inputMaskNodes(pattern);
+    if (!nodes.length) return value;
+    const clean = Array.from(unmaskInputValue(value, pattern));
+    const totalSlots = nodes.filter(node => node.type === 'slot').length;
+    let slot = 0;
+    let out = '';
+    for (const node of nodes) {
+      if (node.type === 'slot') {
+        if (clean[slot] === undefined) break;
+        out += clean[slot++];
+      } else if (slot > 0 && slot < totalSlots && clean[slot] !== undefined) {
+        out += node.value;
+      }
+    }
+    return out;
+  }
+
+  function inputMaskCaretForSlots(pattern, slotCount) {
+    if (slotCount <= 0) return 0;
+    const nodes = inputMaskNodes(pattern);
+    let slots = 0;
+    let position = 0;
+    for (const node of nodes) {
+      position += String(node.value).length;
+      if (node.type === 'slot') slots += 1;
+      if (slots >= slotCount) break;
+    }
+    return position;
+  }
+
+  function normalizedControlValue(control) {
+    const pattern = String(control.dataset.afeInputMask || '');
+    return pattern ? unmaskInputValue(control.value, pattern) : latinDigits(control.value);
+  }
+
   function normalizeConstrainedInput(control, initialize = false) {
     if (!(control instanceof HTMLInputElement || control instanceof HTMLTextAreaElement)) return;
+    const inputMask = String(control.dataset.afeInputMask || '');
+    const activeCaret = inputMask && control === document.activeElement && control instanceof HTMLInputElement
+      ? unmaskInputValue(control.value.slice(0, Number(control.selectionStart ?? control.value.length)), inputMask).length
+      : null;
     let value = latinDigits(control.value);
     const mode = String(control.dataset.afeCharacterMode || 'normal');
     const allowedExtra = escapeRegexClass(control.dataset.afeAllowedExtra || '');
@@ -1093,20 +1182,57 @@
 
     if (forbiddenExtra) value = value.replace(new RegExp(`[${forbiddenExtra}]`, 'gu'), '');
     value = normalizeDateMask(control, value);
+    if (inputMask) value = formatInputMask(value, inputMask);
 
     const maxLength = Number(control.getAttribute('maxlength') || 0);
     if (maxLength > 0 && value.length > maxLength) value = value.slice(0, maxLength);
     if (control.value !== value || (initialize && !control.value && prefix)) control.value = value || prefix;
+    if (activeCaret !== null && control instanceof HTMLInputElement) {
+      const caret = Math.min(control.value.length, inputMaskCaretForSlots(inputMask, activeCaret));
+      try { control.setSelectionRange(caret, caret); } catch (_) {}
+    }
   }
 
-  function validateCustomRegex(control) {
+  function validateConstrainedControl(control) {
     if (!(control instanceof HTMLInputElement || control instanceof HTMLTextAreaElement)) return;
-    const pattern = String(control.dataset.afeCustomRegex || '');
-    if (!pattern || !control.value) { control.setCustomValidity(''); return; }
+    control.setCustomValidity('');
+    const value = normalizedControlValue(control);
+    if (!value) return;
+
+    const exact = Number(control.dataset.afeValueExactLength || 0);
+    const min = Number(control.dataset.afeValueMinLength || 0);
+    const max = Number(control.dataset.afeValueMaxLength || 0);
+    const length = Array.from(value).length;
+    if (exact > 0 && length !== exact) {
+      control.setCustomValidity(`طول مقدار باید دقیقاً ${exact} کاراکتر باشد.`);
+      return;
+    }
+    if (min > 0 && length < min) {
+      control.setCustomValidity(`حداقل طول مقدار ${min} کاراکتر است.`);
+      return;
+    }
+    if (max > 0 && length > max) {
+      control.setCustomValidity(`حداکثر طول مقدار ${max} کاراکتر است.`);
+      return;
+    }
+
+    const normalizedPattern = String(control.dataset.afeNormalizedPattern || '');
+    if (normalizedPattern) {
+      try {
+        const regex = new RegExp(`^(?:${normalizedPattern})$`, 'u');
+        if (!regex.test(value)) {
+          control.setCustomValidity(String(control.dataset.afeInvalidMessage || 'مقدار واردشده با قالب مورد انتظار مطابقت ندارد.'));
+          return;
+        }
+      } catch (_) {}
+    }
+
+    const customPattern = String(control.dataset.afeCustomRegex || '');
+    if (!customPattern) return;
     try {
       const flags = String(control.dataset.afeCustomRegexFlags || 'u').replace(/[^imsu]/g, '');
-      const regex = new RegExp(pattern, flags);
-      control.setCustomValidity(regex.test(control.value) ? '' : String(control.dataset.afeCustomRegexMessage || 'مقدار واردشده معتبر نیست.'));
+      const regex = new RegExp(customPattern, flags);
+      if (!regex.test(value)) control.setCustomValidity(String(control.dataset.afeCustomRegexMessage || 'مقدار واردشده معتبر نیست.'));
     } catch (error) {
       // PHP is the source of truth. Unsupported PCRE syntax in JS simply skips UX validation.
       control.setCustomValidity('');
@@ -1114,13 +1240,13 @@
   }
 
   function initConstrainedInputs(root) {
-    qsa(root, 'input[data-afe-digits-only="1"],input[data-afe-fixed-prefix],input[data-afe-character-mode],textarea[data-afe-character-mode],input[data-afe-date-mask],input[data-afe-custom-regex],textarea[data-afe-custom-regex]').forEach(control => {
+    qsa(root, 'input[data-afe-digits-only="1"],input[data-afe-fixed-prefix],input[data-afe-character-mode],textarea[data-afe-character-mode],input[data-afe-date-mask],input[data-afe-custom-regex],textarea[data-afe-custom-regex],input[data-afe-input-mask]').forEach(control => {
       if (control.dataset.afeConstraintReady === '1') return;
       control.dataset.afeConstraintReady = '1';
       normalizeConstrainedInput(control, true);
-      validateCustomRegex(control);
-      control.addEventListener('input', () => { normalizeConstrainedInput(control); validateCustomRegex(control); });
-      control.addEventListener('blur', () => { normalizeConstrainedInput(control); validateCustomRegex(control); });
+      validateConstrainedControl(control);
+      control.addEventListener('input', () => { normalizeConstrainedInput(control); validateConstrainedControl(control); });
+      control.addEventListener('blur', () => { normalizeConstrainedInput(control); validateConstrainedControl(control); });
       control.addEventListener('keydown', event => {
         if (control.dataset.afeDatePickerOnly === '1' && !['Tab','Enter','Escape'].includes(event.key)) {
           event.preventDefault();

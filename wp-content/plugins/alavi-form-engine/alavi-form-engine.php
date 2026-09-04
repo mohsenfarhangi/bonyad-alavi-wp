@@ -45,20 +45,45 @@ if (is_readable($vendor)) {
 }
 
 // Fail early with a useful WordPress error instead of an opaque class-not-found
-// fatal if a deployment is incomplete.
-$criticalFiles = [
-    AFE_PATH . 'src/Core/Plugin.php',
-    AFE_PATH . 'src/Database/Migrator.php',
+// fatal if a deployment is incomplete. These are the classes instantiated during
+// the initial boot path before extension hooks can meaningfully recover anything.
+$criticalBootstrapClasses = [
+    'BonyadAlavi\\FormEngine\\Core\\Plugin' => 'src/Core/Plugin.php',
+    'BonyadAlavi\\FormEngine\\Database\\Migrator' => 'src/Database/Migrator.php',
+    'BonyadAlavi\\FormEngine\\Duplicate\\DuplicateRepository' => 'src/Duplicate/DuplicateRepository.php',
+    'BonyadAlavi\\FormEngine\\Duplicate\\DuplicatePolicy' => 'src/Duplicate/DuplicatePolicy.php',
+    'BonyadAlavi\\FormEngine\\Duplicate\\DuplicateFingerprint' => 'src/Duplicate/DuplicateFingerprint.php',
+    'BonyadAlavi\\FormEngine\\Actions\\ActionRegistry' => 'src/Actions/ActionRegistry.php',
+    'BonyadAlavi\\FormEngine\\Actions\\ActionManager' => 'src/Actions/ActionManager.php',
+    'BonyadAlavi\\FormEngine\\Actions\\ActionExecutionRepository' => 'src/Actions/ActionExecutionRepository.php',
+    'BonyadAlavi\\FormEngine\\Actions\\Tokens\\TokenRegistry' => 'src/Actions/Tokens/TokenRegistry.php',
+    'BonyadAlavi\\FormEngine\\Actions\\Tokens\\TokenResolver' => 'src/Actions/Tokens/TokenResolver.php',
+    'BonyadAlavi\\FormEngine\\Validation\\ValidatorRegistry' => 'src/Validation/ValidatorRegistry.php',
+    'BonyadAlavi\\FormEngine\\InputMask\\InputMaskRegistry' => 'src/InputMask/InputMaskRegistry.php',
+    'BonyadAlavi\\FormEngine\\InputMask\\InputMaskPattern' => 'src/InputMask/InputMaskPattern.php',
+    'BonyadAlavi\\FormEngine\\Submission\\SubmissionService' => 'src/Submission/SubmissionService.php',
 ];
-foreach ($criticalFiles as $criticalFile) {
-    if (!is_readable($criticalFile)) {
-        add_action('admin_notices', static function () use ($criticalFile): void {
-            echo '<div class="notice notice-error"><p>' . esc_html(
-                sprintf('Alavi Form Engine: required file is missing or unreadable: %s', $criticalFile)
-            ) . '</p></div>';
-        });
-        return;
+$bootstrapErrors = [];
+foreach ($criticalBootstrapClasses as $criticalClass => $relativeFile) {
+    $absoluteFile = AFE_PATH . $relativeFile;
+    if (!is_readable($absoluteFile)) {
+        $bootstrapErrors[] = sprintf('missing or unreadable: %s', $relativeFile);
+        continue;
     }
+    if (!class_exists($criticalClass)) {
+        $bootstrapErrors[] = sprintf('class is not autoloadable: %s (%s)', $criticalClass, $relativeFile);
+    }
+}
+
+if ($bootstrapErrors !== []) {
+    $message = 'Alavi Form Engine bootstrap preflight failed. The plugin installation is incomplete or unreadable. '
+        . implode('; ', $bootstrapErrors)
+        . '. Reinstall the complete plugin package instead of copying only changed files.';
+    error_log($message);
+    add_action('admin_notices', static function () use ($message): void {
+        echo '<div class="notice notice-error"><p>' . esc_html($message) . '</p></div>';
+    });
+    return;
 }
 
 

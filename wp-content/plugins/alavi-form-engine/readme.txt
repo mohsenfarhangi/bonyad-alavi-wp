@@ -43,6 +43,7 @@ The package includes the "ثبت نام گروه‌های مردمی و جهاد
 * Added regression coverage for Action Runtime/Retry, extended Registry, Redirect/config safeguards, Duplicate normalization/promotion, SMS provider/action and encrypted credential storage.
 * Added real per-Step field ordering including HtmlBlock items, plus child-field ordering inside each Repeater; cross-Step moves are not supported.
 * Added DateField combined/picker/manual input modes with Jalali YYYY/MM/DD and Gregorian YYYY-MM-DD UX masks while keeping PHP date validation authoritative.
+* Added Registry-based Input Masks for text/tel fields with Iranian mobile, landline, national ID, postal code, bank card and 24-digit IBAN presets plus safe custom masks; masked values are normalized server-side before validation, duplicate checks, actions/tokens and storage.
 * Added Character/Input Mode overrides, independent allowed/forbidden extra characters, and min/max/exact length controls.
 * Added extensible ValidatorDefinition/ValidatorRegistry plus per-field multi-select UI, custom validator messages, Iranian postal/card/landline validators and safe Custom Regex controls.
 * Custom Regex requires afe_manage_settings, is compile-tested before save, uses restricted flags/length and runtime PCRE match/recursion limits; frontend regex checking is UX-only.

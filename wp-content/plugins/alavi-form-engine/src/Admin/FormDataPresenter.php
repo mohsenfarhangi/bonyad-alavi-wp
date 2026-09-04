@@ -5,6 +5,7 @@ namespace BonyadAlavi\FormEngine\Admin;
 
 use BonyadAlavi\FormEngine\DataSource\DataSourceManager;
 use BonyadAlavi\FormEngine\Localization\LocaleDateService;
+use BonyadAlavi\FormEngine\InputMask\InputMaskPattern;
 
 /**
  * Turns a resolved form schema into readable/admin-editable submission output.
@@ -92,6 +93,10 @@ final class FormDataPresenter
         $options=$this->optionsFor($field,$context);
         $key=(string)$value;
         $text=isset($options[$key]) ? (string)$options[$key] : $key;
+        $mask=$field['input_mask']??null;
+        if (is_array($mask) && InputMaskPattern::isValid((string)($mask['pattern']??''))) {
+            $text=InputMaskPattern::format($text,(string)$mask['pattern']);
+        }
         $prefix=trim((string)($field['display_prefix']??''));
         if ($prefix !== '' && !str_starts_with(strtoupper($text),strtoupper($prefix))) $text=$prefix.$text;
         return $text;
@@ -242,8 +247,18 @@ final class FormDataPresenter
             $raw=(string)$value;
             if (str_starts_with(strtoupper($raw),strtoupper($normalizePrefix))) $value=substr($raw,strlen($normalizePrefix));
         }
+        $mask=$field['input_mask']??null;
+        $maskPattern=is_array($mask)?trim((string)($mask['pattern']??'')):'';
+        if ($maskPattern!=='' && is_scalar($value) && InputMaskPattern::isValid($maskPattern)) {
+            $value=InputMaskPattern::format((string)$value,$maskPattern);
+        }
         $type=(string)($field['type']??'text');
         $attrs=' name="'.esc_attr($inputName).'" class="afe-admin-control"';
+        if ($maskPattern!=='' && InputMaskPattern::isValid($maskPattern) && in_array($type,['text','tel'],true)) {
+            $attrs.=' data-afe-input-mask="'.esc_attr($maskPattern).'" maxlength="'.esc_attr((string)InputMaskPattern::displayLength($maskPattern)).'"';
+            $inputMode=(string)($mask['inputmode']??InputMaskPattern::suggestedInputMode($maskPattern));
+            if ($inputMode!=='') $attrs.=' inputmode="'.esc_attr($inputMode).'"';
+        }
         if ($type==='textarea') {
             return '<textarea'.$attrs.' rows="4">'.esc_textarea((string)$value).'</textarea>';
         }
@@ -307,6 +322,10 @@ final class FormDataPresenter
     {
         if (is_array($value)) return array_values(array_map(static fn($v)=>sanitize_text_field(wp_unslash((string)$v)),$value));
         $value=wp_unslash((string)$value);
+        $mask=$field['input_mask']??null;
+        if (is_array($mask) && InputMaskPattern::isValid((string)($mask['pattern']??''))) {
+            $value=InputMaskPattern::normalize($value,(string)$mask['pattern']);
+        }
         $normalizePrefix=trim((string)($field['normalize_input_prefix']??''));
         if ($normalizePrefix !== '' && str_starts_with(strtoupper($value),strtoupper($normalizePrefix))) {
             $value=substr($value,strlen($normalizePrefix));

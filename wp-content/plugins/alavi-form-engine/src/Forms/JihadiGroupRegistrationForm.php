@@ -114,20 +114,10 @@ final class JihadiGroupRegistrationForm
                     $county()->width(4),
                     $district()->width(4),
                     TextField::make('village_neighborhood')->label('روستا / محله')->placeholder('نام روستا یا محله را تایپ کنید')->required()->width(12),
-                    TelField::make('group_mobile')->label('تلفن همراه گروه')->default('09')->rule('mobile_09')->required()->width(6)
+                    TelField::make('group_mobile')->label('تلفن همراه گروه')->default('09')->rule('mobile_09')->inputMask('mobile_ir')->required()->width(6)
                         ->attributes(['maxlength'=>11,'minlength'=>11,'pattern'=>'09[0-9]{9}','inputmode'=>'numeric','autocomplete'=>'tel','data-afe-digits-only'=>'1','data-afe-fixed-prefix'=>'09','data-afe-invalid-message'=>'شماره همراه باید دقیقاً ۱۱ رقم و با ۰۹ شروع شود.']),
-                    TelField::make('group_landline')
-                            ->label('تلفن ثابت گروه')
-                            ->width(6)
-	                    ->attributes(
-							['maxlength'=>11,
-							 'minlength'=>11,
-							 'inputmode'=>'numeric',
-							 'autocomplete'=>'phone',
-							 'data-afe-digits-only'=>'1',
-							 'data-afe-invalid-message'=>'شماره همراه باید دقیقاً ۱۱ رقم و با ۰۹ شروع شود.'
-							]),
-	                    TextField::make('legal_iban')->label('شماره شبای حقوقی')->placeholder('۲۴ رقم شماره شبا')->rule('iban_digits')->width(12)
+                    TelField::make('group_landline')->label('تلفن ثابت گروه')->inputMask('landline_ir')->width(6),
+                    TextField::make('legal_iban')->label('شماره شبای حقوقی')->placeholder('۲۴ رقم شماره شبا')->rule('iban_digits')->inputMask('iban_digits_ir')->width(12)
                         ->attributes(['maxlength'=>24,'minlength'=>24,'pattern'=>'[0-9]{24}','inputmode'=>'numeric','dir'=>'ltr','autocomplete'=>'off','data-afe-digits-only'=>'1','data-afe-invalid-message'=>'شماره شبا باید دقیقاً ۲۴ رقم باشد.'])
                         ->meta('input_prefix','IR')->meta('display_prefix','IR')->meta('normalize_input_prefix','IR'),
                 ]),
@@ -135,32 +125,24 @@ final class JihadiGroupRegistrationForm
                 Step::make('officials', '۲. مسئولین')->fields([
                     HtmlBlock::make('<div class="afe-inline-title">مسئول گروه</div>'),
                     TextField::make('leader_full_name')->label('نام و نام خانوادگی مسئول گروه')->required()->width(6),
-                    TextField::make('leader_national_id')
-                             ->label('کد ملی مسئول گروه')
-                             ->rule('national_id')
-                             ->required()
-                             ->width(6)
+                    TextField::make('leader_national_id')->label('کد ملی مسئول گروه')->rule('national_id')->inputMask('national_id_ir')->required()->width(6)
                         ->attributes(['maxlength'=>10,'minlength'=>10,'pattern'=>'[0-9]{10}','inputmode'=>'numeric','autocomplete'=>'off','data-afe-digits-only'=>'1','data-afe-invalid-message'=>'کد ملی باید دقیقاً ۱۰ رقم باشد.']),
                     DateField::make('leader_birth_date')->jalali()->label('تاریخ تولد مسئول گروه')->required()->width(6),
-                    TelField::make('leader_mobile')->label('تلفن همراه مسئول گروه')->rule('mobile')->required()->width(6),
+                    TelField::make('leader_mobile')->label('تلفن همراه مسئول گروه')->rule('mobile')->inputMask('mobile_ir')->required()->width(6),
                     FileField::make('leader_photo')->label('عکس پرسنلی مسئول گروه')->required()->multiple(false)->maxFiles(1)->maxSizeMb(5)
                         ->accept(['image/jpeg','image/png','image/webp'])->width(12),
                     HtmlBlock::make('<div class="afe-inline-title">جانشین گروه</div>'),
                     TextField::make('deputy_full_name')->label('نام و نام خانوادگی جانشین')->required()->width(6),
-                    TextField::make('deputy_national_id')
-                             ->label('کد ملی جانشین')
-                             ->rule('national_id')
-                             ->required()
-                             ->width(6)
+                    TextField::make('deputy_national_id')->label('کد ملی جانشین')->rule('national_id')->inputMask('national_id_ir')->required()->width(6)
                         ->attributes(['maxlength'=>10,'minlength'=>10,'pattern'=>'[0-9]{10}','inputmode'=>'numeric','autocomplete'=>'off','data-afe-digits-only'=>'1','data-afe-invalid-message'=>'کد ملی باید دقیقاً ۱۰ رقم باشد.']),
                     DateField::make('deputy_birth_date')->jalali()->label('تاریخ تولد جانشین')->required()->width(6),
-                    TelField::make('deputy_mobile')->label('تلفن همراه جانشین')->rule('mobile')->required()->width(6),
+                    TelField::make('deputy_mobile')->label('تلفن همراه جانشین')->rule('mobile')->inputMask('mobile_ir')->required()->width(6),
                     FileField::make('deputy_photo')->label('عکس پرسنلی جانشین')->multiple(false)->maxFiles(1)->maxSizeMb(5)
                         ->accept(['image/jpeg','image/png','image/webp'])->width(12),
                     RepeaterField::make('central_council')->label('اعضای شورای مرکزی (هسته اصلی)')->required()->min(1)->max(30)->addButton('افزودن عضو شورای مرکزی')
                         ->fields([
                             TextField::make('full_name')->label('نام و نام خانوادگی')->required()->width(6),
-                            TelField::make('mobile')->label('شماره تماس')->rule('mobile')->required()->width(6),
+                            TelField::make('mobile')->label('شماره تماس')->rule('mobile')->inputMask('mobile_ir')->required()->width(6),
                         ]),
                 ]),
 
@@ -179,7 +161,7 @@ final class JihadiGroupRegistrationForm
                     RepeaterField::make('members')->label('اعضای گروه')->required()->min(1)->max(300)->addButton('افزودن عضو')
                         ->fields([
                             TextField::make('full_name')->label('نام و نام خانوادگی')->required()->width(6),
-                            TelField::make('mobile')->label('شماره تماس')->rule('mobile')->width(6),
+                            TelField::make('mobile')->label('شماره تماس')->rule('mobile')->inputMask('mobile_ir')->width(6),
                             DateField::make('birth_date')->jalali()->label('تاریخ تولد')->required()->width(4),
                             RadioField::make('gender')->label('جنسیت')->options(['male'=>'مرد','female'=>'زن'])->required()->width(4),
                             SelectField::make('education')->label('تحصیلات')->options($education)->required()->width(4),
@@ -253,7 +235,7 @@ final class JihadiGroupRegistrationForm
                 Step::make('media', '۱۲. رسانه و ارتباطات')->fields([
                     TextareaField::make('social_networks')->label('شبکه‌های اجتماعی')->placeholder('نام شبکه و نشانی/شناسه صفحه را وارد کنید.')->width(12),
                     TextField::make('media_manager')->label('مسئول رسانه')->width(6),
-                    TelField::make('media_manager_mobile')->label('شماره تماس مسئول رسانه')->rule('mobile')->width(6),
+                    TelField::make('media_manager_mobile')->label('شماره تماس مسئول رسانه')->rule('mobile')->inputMask('mobile_ir')->width(6),
                     UrlField::make('website')->label('وب‌سایت')->placeholder('https://example.ir')->width(6),
                     TextareaField::make('messenger_ids')->label('آی‌دی پیام‌رسان‌ها')->placeholder('ایتا، بله، روبیکا، تلگرام و ...')->width(6),
                 ]),
@@ -278,7 +260,7 @@ final class JihadiGroupRegistrationForm
             ])
             ->settings([
                 'wizard'=>true,
-                'header_slogan'=>'هر گروه یک نقطه‌ی آغاز، هر حرکت یک قدم به سوی آینده (خانه نوآوری جهادی)',
+                'header_slogan'=>'هر گروه یک نقطه‌ی آغاز و هر حرکت یک قدم به سوی آینده. (خانه نوآوری جهاد)',
                 'save_draft'=>true,
                 'show_progress'=>true,
                 'editing_enabled'=>true,

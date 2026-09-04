@@ -42,6 +42,8 @@ abstract class AbstractField
         return $this;
     }
     public function uniqueGroup(string $group): static { $this->config['unique_group'] = $group; return $this; }
+    public function inputMask(string $key): static { $this->config['input_mask'] = ['key' => strtolower(trim($key))]; return $this; }
+    public function customInputMask(string $pattern): static { $this->config['input_mask'] = ['key' => 'custom', 'pattern' => trim($pattern)]; return $this; }
     public function meta(string $key, mixed $value): static { $this->config[$key] = $value; return $this; }
 
     public function name(): string { return $this->name; }

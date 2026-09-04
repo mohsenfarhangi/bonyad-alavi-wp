@@ -1,5 +1,8 @@
 ## وضعیت توسعه 1.0.28-dev (Feature-complete / Pre-acceptance Checkpoint)
 
+> **نکته ارتقا بین checkpointهای توسعه:** بسته را به‌صورت کامل نصب/جایگزین کنید. کپی‌کردن فقط فایل‌های تغییرکرده می‌تواند پوشه‌ها/کلاس‌های جدید را جا بیندازد و از checkpoint 6.1 به بعد bootstrap این وضعیت را قبل از boot تشخیص می‌دهد.
+
+
 > فیچرهای برنامه‌ریزی‌شده handoff نسخه 1.0.28 در سورس پیاده شده‌اند. طبق تصمیم مدیر پروژه، acceptance عملی WordPress/Elementor پس از پایان افزودن فیچرها انجام می‌شود؛ بنابراین تا آن زمان این بسته Production-tagged نیست. مبنای پایدار `1.0.27`، Stable tag=`1.0.27` و DB checkpoint=`1.0.5-dev.2` باقی مانده‌اند.
 
 وضعیت این checkpoint:
@@ -45,6 +48,7 @@
 - Template Registry مشترک برای Form / Preview / Step با Default HTML واقعی و Tokenهای پویا
 - نمایش قالب پیش‌فرض داخل Editor، وضعیت Default/Custom و بازگردانی یک‌کلیکی به Default
 - Field Override مدیریتی بدون تغییر Source Definition
+- Input Mask Registry عمومی برای text/tel با presetهای موبایل، تلفن ثابت، کد ملی، کد پستی، کارت بانکی، شبا و Mask سفارشی
 - Conditional Logic با show/hide/required/optional
 - Data Source: static, callback, database, posts, taxonomy, users, JSON, REST, geography, custom
 - Action Pipeline و Event Dispatcher
@@ -169,7 +173,7 @@ The admin field override screen can switch each select between Custom and Native
 ## تغییرات 1.0.23 — دارایی‌های لوکال، اصلاحات تقویم و فرم جهادی
 
 - تمام JavaScript/CSSهای مرورگری AFE به مسیرهای لوکال افزونه منتقل شدند و وابستگی Runtime به CDN برای JalaliDatePicker حذف شد.
-- JalaliDatePicker دیگر داخل بسته افزونه باندل نمی‌شود؛ مدیر سایت باید فایل‌های رسمی `jalalidatepicker.min.js` و `jalalidatepicker.min.css` را در `assets/vendor/jalalidatepicker/` قرار دهد. اگر فایل‌ها وجود نداشته باشند، پنل مدیریت هشدار نمایش می‌دهد.
+- JalaliDatePicker به‌صورت pinned و self-hosted داخل `assets/vendor/jalalidatepicker/` بسته قرار دارد؛ Runtime هیچ وابستگی CDN ندارد.
 - Google reCAPTCHA خارجی از Runtime فرم حذف شد؛ در تنظیمات قدیمی Google، کپچای داخلی Server-side AFE به‌عنوان fallback استفاده می‌شود.
 - موقعیت JalaliDatePicker در دسکتاپ بر اساس مختصات واقعی input بازتنظیم می‌شود و هنگام `scroll` و `resize` دوباره همگام می‌شود تا داخل Elementor/قالب با فاصله از فیلد نمایش داده نشود.
 - محدودیت `overflow` کادر اصلی فرم برای Dropdownها و کنترل‌های بازشونده اصلاح شد تا محتوای مرحله ۴ بریده نشود.
