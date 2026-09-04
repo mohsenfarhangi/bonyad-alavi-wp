@@ -175,6 +175,10 @@ final class BA_Center_Settings_Service {
 		$used_dashboard = array();
 
 		foreach ( array_keys( self::get_defaults() ) as $key ) {
+			if ( 'system_cards' === $key ) {
+				continue;
+			}
+
 			if ( self::should_use_dashboard_value( $key, $saved, $settings ) ) {
 				$effective[ $key ] = $settings[ $key ];
 				$used_dashboard[ $key ] = true;
@@ -183,6 +187,12 @@ final class BA_Center_Settings_Service {
 			}
 		}
 
+		$effective['system_cards'] = self::resolve_system_cards(
+			(array) ( $elementor['system_cards'] ?? array() ),
+			$saved,
+			$settings
+		);
+
 		foreach ( array( 'hero_button_url', 'news_all_url', 'media_all_url' ) as $link_key ) {
 			if ( ! empty( $used_dashboard[ $link_key ] ) ) {
 				$effective[ $link_key ] = self::normalize_link( $settings[ $link_key ] );
@@ -190,6 +200,51 @@ final class BA_Center_Settings_Service {
 		}
 
 		return $effective;
+	}
+
+	/**
+	 * کارت‌های سامانه را به‌صورت فیلدبه‌فیلد بین داشبورد و Elementor Resolve می‌کند.
+	 * مقدار معتبر داشبورد اولویت دارد و فیلد خالی داشبورد اجازه می‌دهد مقدار Elementor استفاده شود.
+	 * این رفتار باعث می‌شود عنوان‌های سازمانی داشبورد حفظ شوند، اما لینک و آیکون خالی آن‌ها
+	 * مانع استفاده از تنظیمات متناظر Elementor نشوند.
+	 *
+	 * @param array $elementor_cards کارت‌های Elementor.
+	 * @param array $saved            داده خام ذخیره‌شده داشبورد.
+	 * @param array $settings         تنظیمات نهایی داشبورد همراه با پیش‌فرض‌ها.
+	 * @return array
+	 */
+	private static function resolve_system_cards( array $elementor_cards, array $saved, array $settings ) {
+		if ( ! array_key_exists( 'system_cards', $saved ) ) {
+			return $elementor_cards ? $elementor_cards : (array) $settings['system_cards'];
+		}
+
+		$dashboard_cards = array_values( (array) $settings['system_cards'] );
+		$elementor_cards = array_values( $elementor_cards );
+		$count            = max( count( $dashboard_cards ), count( $elementor_cards ) );
+		$resolved         = array();
+
+		for ( $index = 0; $index < $count; $index++ ) {
+			$dashboard = isset( $dashboard_cards[ $index ] ) && is_array( $dashboard_cards[ $index ] ) ? $dashboard_cards[ $index ] : array();
+			$elementor = isset( $elementor_cards[ $index ] ) && is_array( $elementor_cards[ $index ] ) ? $elementor_cards[ $index ] : array();
+
+			$dashboard_title = trim( (string) ( $dashboard['title'] ?? '' ) );
+			$dashboard_url   = trim( (string) ( $dashboard['url'] ?? '' ) );
+			$dashboard_icon  = absint( $dashboard['icon_id'] ?? 0 );
+			$elementor_link  = is_array( $elementor['url'] ?? null ) ? $elementor['url'] : self::normalize_link( (string) ( $elementor['url'] ?? '' ) );
+
+			$row = array(
+				'title'   => '' !== $dashboard_title ? $dashboard_title : (string) ( $elementor['title'] ?? '' ),
+				'url'     => '' !== $dashboard_url ? self::normalize_link( $dashboard_url ) : $elementor_link,
+				'icon_id' => $dashboard_icon,
+				'icon'    => $dashboard_icon ? array() : ( is_array( $elementor['icon'] ?? null ) ? $elementor['icon'] : array() ),
+			);
+
+			if ( '' !== trim( $row['title'] ) || ! empty( $row['url']['url'] ) || $row['icon_id'] || ! empty( $row['icon']['value'] ) || ! empty( $row['icon']['url'] ) ) {
+				$resolved[] = $row;
+			}
+		}
+
+		return $resolved;
 	}
 
 	/**

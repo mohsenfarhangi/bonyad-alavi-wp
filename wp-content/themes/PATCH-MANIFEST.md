@@ -1,61 +1,49 @@
-# Patch Manifest — ostadsho-child v0.4.0
+# Patch Manifest — v0.4.1
 
 ## مبدا و مقصد
 
-- نسخه مبدا: `v0.3.1`
-- نسخه مقصد: `v0.4.0`
-- نوع نسخه: `MINOR`
+- نسخه مبدا: `v0.4.0`
+- نسخه مقصد: `v0.4.1`
+- نوع تغییر: Patch / Bug Fix
 
 ## هدف
 
-یکسان‌سازی تنظیمات محتوایی، داده‌ای و Query صفحه «مرکز هماهنگی حرکت‌های مردمی و جهادی» بین تنظیمات بنیاد علوی و Elementor، با اولویت قطعی داشبورد پس از ذخیره Schema جدید، و افزودن امکان فعال/غیرفعال‌کردن تمام سکشن‌های اصلی در هر دو منبع.
+رفع مشکل اعمال‌نشدن لینک و نمایش‌ندادن آیکون‌های Elementor در کارت‌های سامانه بخش معرفی صفحه «مرکز هماهنگی حرکت‌های مردمی و جهادی».
 
-## فایل جدید
+## تغییرات
 
-- `ostadsho-child/docs/versions/v0.4.0.md`
+- اصلاح Resolve کارت‌های `system_cards` از حالت Override کامل Repeater به اولویت فیلدبه‌فیلد.
+- لینک معتبر داشبورد همچنان اولویت دارد؛ اگر لینک داشبورد خالی باشد، لینک Elementor استفاده می‌شود.
+- آیکون معتبر داشبورد همچنان اولویت دارد؛ اگر آیکون داشبورد خالی باشد، آیکون Elementor استفاده می‌شود.
+- تغییر کنترل آیکون Elementor از `MEDIA` به `ICONS`.
+- رندر آیکون‌های Font/SVG با `Elementor\Icons_Manager`.
+- حفظ fallback برای داده‌های قدیمی Media در Elementor.
+- افزودن کنترل اندازه خود آیکون و رنگ آیکون در تب Style.
+- به‌روزرسانی Handoff و مستند نسخه.
 
 ## فایل‌های تغییرکرده
 
-- `ostadsho-child/inc/services/class-ba-center-settings-service.php`
-- `ostadsho-child/inc/admin/settings/class-ba-center-settings-tab.php`
-- `ostadsho-child/inc/elementor/widgets/class-bonyad-alavi-jihadi-center-widget.php`
-- `ostadsho-child/assets/css/ba-center-settings.css`
+- `ostadsho-child/assets/css/bonyad-alavi-jihadi-center-widget.css`
 - `ostadsho-child/docs/handoff.md`
+- `ostadsho-child/inc/elementor/widgets/class-bonyad-alavi-jihadi-center-widget.php`
+- `ostadsho-child/inc/services/class-ba-center-settings-service.php`
+
+## فایل جدید
+
+- `ostadsho-child/docs/versions/v0.4.1.md`
 
 ## فایل حذف‌شده
 
-ندارد. فایل `DELETED-FILES.txt` عمداً خالی است.
-
-## تغییرات کلیدی
-
-- افزودن Resolver مرکزی تنظیمات با اولویت داشبورد.
-- افزودن `settings_schema_version = 0.4.0` برای سازگاری با تنظیمات Legacy.
-- افزودن Switcher نمایش برای Hero، Stats، Intro، News، Media، Partners و FAQ در داشبورد و Elementor.
-- افزودن Hero کامل به Elementor و تکمیل Hero داشبورد با Eyebrow.
-- افزودن Repeater آمار به Elementor.
-- افزودن عنوان، توضیحات و Repeater کارت‌های مرکز به Elementor.
-- افزودن تنظیمات محتوا و Query کامل اخبار به داشبورد.
-- افزودن تنظیمات محتوا و Query کامل چندرسانه‌ای به داشبورد.
-- حفظ `BA_Content_Query_Service` به‌عنوان تنها محل ساخت WP_Query اخبار و چندرسانه‌ای.
-- حفظ `BA_Admin_Repeater_Component` برای Repeaterهای سفارشی wp-admin و `Elementor\Repeater` برای Elementor.
+ندارد. فایل `DELETED-FILES.txt` خالی است.
 
 ## روش اعمال Patch
 
-1. محتوای پوشه `ostadsho-child/` داخل Patch را روی پوشه قالب فرزند `ostadsho-child/` کپی کنید.
-2. فایل‌های هم‌نام را Replace کنید.
-3. چون فایل حذفی وجود ندارد، اقدام دیگری برای حذف فایل لازم نیست.
-4. یک‌بار تب «مرکز حرکت‌های مردمی و جهادی» را بازبینی و ذخیره کنید تا Schema جدید ثبت شود.
-5. Cache سایت/Elementor را در صورت وجود پاک کنید.
+محتویات پوشه `ostadsho-child` داخل Patch را روی پوشه قالب Child موجود جایگزین/کپی کنید. این Patch برای مبدا `v0.4.0` تهیه شده است.
 
-## نکته اولویت
+## تست‌ها
 
-بعد از اولین ذخیره تب مرکز با نسخه جدید، مقادیر ذخیره‌شده داشبورد مرجع فیلدهای متناظر هستند؛ حتی مقدار خالی و Switcher خاموش نیز انتخاب معتبر محسوب می‌شوند. کنترل‌های Style همچنان توسط Elementor مدیریت می‌شوند.
-
-## تست‌های انجام‌شده
-
-- `php -l` روی تمام ۲۳ فایل PHP قالب.
-- `node --check` روی تمام ۹ فایل JavaScript قالب.
-- تست واحد سبک Resolver و Sanitize تنظیمات با داده Stub.
-- بررسی وجود هفت Switcher سکشن در داشبورد و هفت Switcher متناظر در Elementor.
-- بررسی عدم ساخت `WP_Query` خارج از `BA_Content_Query_Service` برای قابلیت مرکز.
-- بررسی سلامت ZIP کامل و Patch با `unzip -t`.
+- PHP lint روی تمام ۲۳ فایل PHP قالب.
+- JavaScript syntax check روی تمام ۹ فایل JS قالب.
+- تست Resolver برای fallback لینک و آیکون Elementor.
+- تست اولویت لینک و آیکون معتبر داشبورد.
+- تست سلامت آرشیو ZIP کامل و Patch.

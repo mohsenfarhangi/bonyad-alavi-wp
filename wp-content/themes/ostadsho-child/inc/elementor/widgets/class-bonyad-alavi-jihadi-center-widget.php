@@ -146,12 +146,12 @@ final class Bonyad_Alavi_Jihadi_Center_Widget extends Widget_Base {
 	private function register_intro_controls() {
 		$this->start_controls_section( 'content_intro', array( 'label' => 'معرفی مرکز', 'tab' => Controls_Manager::TAB_CONTENT ) );
 		$this->add_control( 'intro_enabled', array( 'label' => 'نمایش سکشن', 'type' => Controls_Manager::SWITCHER, 'return_value' => 'yes', 'default' => 'yes' ) );
-		$this->add_control( 'intro_note', array( 'type' => Controls_Manager::RAW_HTML, 'raw' => 'مقادیر ذخیره‌شده معرفی و کارت‌ها در داشبورد بر این کنترل‌ها اولویت دارند.', 'content_classes' => 'elementor-panel-alert elementor-panel-alert-info' ) );
+		$this->add_control( 'intro_note', array( 'type' => Controls_Manager::RAW_HTML, 'raw' => 'مقادیر معتبر ذخیره‌شده کارت‌ها در داشبورد بر فیلد متناظر Elementor اولویت دارند؛ فیلد خالی از Elementor استفاده می‌کند.', 'content_classes' => 'elementor-panel-alert elementor-panel-alert-info' ) );
 		$this->add_control( 'intro_kicker', array( 'label' => 'Kicker', 'type' => Controls_Manager::TEXT, 'default' => 'معرفی مرکز' ) );
 		$this->add_control( 'intro_title', array( 'label' => 'عنوان', 'type' => Controls_Manager::TEXT, 'default' => 'مرکز هماهنگی حرکت‌های مردمی و جهادی' ) );
 		$this->add_control( 'intro_description', array( 'label' => 'توضیحات', 'type' => Controls_Manager::WYSIWYG, 'default' => BA_Center_Settings_Service::get_defaults()['intro_description'] ) );
 		$repeater = new Repeater();
-		$repeater->add_control( 'icon', array( 'label' => 'آیکون (تصویر یا SVG)', 'type' => Controls_Manager::MEDIA ) );
+		$repeater->add_control( 'icon', array( 'label' => 'آیکون', 'type' => Controls_Manager::ICONS, 'label_block' => false ) );
 		$repeater->add_control( 'title', array( 'label' => 'عنوان', 'type' => Controls_Manager::TEXT ) );
 		$repeater->add_control( 'url', array( 'label' => 'لینک', 'type' => Controls_Manager::URL, 'options' => array( 'url', 'is_external', 'nofollow' ) ) );
 		$default_cards = array();
@@ -494,8 +494,10 @@ final class Bonyad_Alavi_Jihadi_Center_Widget extends Widget_Base {
 		$this->add_control( 'system_card_radius', array( 'label' => 'گردی کارت', 'type' => Controls_Manager::SLIDER, 'range' => array( 'px' => array( 'min' => 0, 'max' => 40 ) ), 'default' => array( 'size' => 13 ), 'selectors' => array( '{{WRAPPER}} .ba-jihadi-center__system-card' => 'border-radius: {{SIZE}}{{UNIT}};' ) ) );
 		$this->add_responsive_control( 'system_card_min_height', array( 'label' => 'حداقل ارتفاع کارت', 'type' => Controls_Manager::SLIDER, 'range' => array( 'px' => array( 'min' => 100, 'max' => 420 ) ), 'default' => array( 'size' => 205 ), 'selectors' => array( '{{WRAPPER}} .ba-jihadi-center__system-card' => 'min-height: {{SIZE}}{{UNIT}};' ) ) );
 		$this->add_control( 'system_card_hover_bg', array( 'label' => 'پس‌زمینه Hover', 'type' => Controls_Manager::COLOR, 'default' => '#fbfefc', 'selectors' => array( '{{WRAPPER}} .ba-jihadi-center__system-card[href]:hover, {{WRAPPER}} .ba-jihadi-center__system-card[href]:focus-visible' => 'background: {{VALUE}};' ) ) );
-		$this->add_responsive_control( 'system_icon_size', array( 'label' => 'اندازه آیکون', 'type' => Controls_Manager::SLIDER, 'range' => array( 'px' => array( 'min' => 24, 'max' => 100 ) ), 'default' => array( 'size' => 54 ), 'selectors' => array( '{{WRAPPER}} .ba-jihadi-center__system-icon' => 'width: {{SIZE}}{{UNIT}}; height: {{SIZE}}{{UNIT}};', '{{WRAPPER}} .ba-jihadi-center__system-icon img' => 'max-width: calc({{SIZE}}{{UNIT}} * .58); max-height: calc({{SIZE}}{{UNIT}} * .58);' ) ) );
+		$this->add_responsive_control( 'system_icon_size', array( 'label' => 'اندازه باکس آیکون', 'type' => Controls_Manager::SLIDER, 'range' => array( 'px' => array( 'min' => 24, 'max' => 100 ) ), 'default' => array( 'size' => 54 ), 'selectors' => array( '{{WRAPPER}} .ba-jihadi-center__system-icon' => 'width: {{SIZE}}{{UNIT}}; height: {{SIZE}}{{UNIT}};' ) ) );
+		$this->add_responsive_control( 'system_icon_glyph_size', array( 'label' => 'اندازه خود آیکون', 'type' => Controls_Manager::SLIDER, 'range' => array( 'px' => array( 'min' => 12, 'max' => 72 ) ), 'default' => array( 'size' => 30 ), 'selectors' => array( '{{WRAPPER}} .ba-jihadi-center__system-icon img' => 'max-width: {{SIZE}}{{UNIT}}; max-height: {{SIZE}}{{UNIT}};', '{{WRAPPER}} .ba-jihadi-center__system-icon i' => 'font-size: {{SIZE}}{{UNIT}};', '{{WRAPPER}} .ba-jihadi-center__system-icon svg' => 'width: {{SIZE}}{{UNIT}}; height: {{SIZE}}{{UNIT}};' ) ) );
 		$this->add_control( 'system_icon_bg', array( 'label' => 'پس‌زمینه آیکون', 'type' => Controls_Manager::COLOR, 'default' => '#eaf7ef', 'selectors' => array( '{{WRAPPER}} .ba-jihadi-center__system-icon' => 'background: {{VALUE}};' ) ) );
+		$this->add_control( 'system_icon_color', array( 'label' => 'رنگ آیکون', 'type' => Controls_Manager::COLOR, 'default' => '#069043', 'selectors' => array( '{{WRAPPER}} .ba-jihadi-center__system-icon i' => 'color: {{VALUE}};', '{{WRAPPER}} .ba-jihadi-center__system-icon svg' => 'fill: {{VALUE}}; color: {{VALUE}};' ) ) );
 		$this->add_control( 'system_icon_radius', array( 'label' => 'گردی باکس آیکون', 'type' => Controls_Manager::SLIDER, 'range' => array( 'px' => array( 'min' => 0, 'max' => 50 ) ), 'default' => array( 'size' => 12 ), 'selectors' => array( '{{WRAPPER}} .ba-jihadi-center__system-icon' => 'border-radius: {{SIZE}}{{UNIT}};' ) ) );
 		$this->add_group_control( Group_Control_Typography::get_type(), array( 'name' => 'system_title_typography', 'label' => 'تایپوگرافی عنوان کارت', 'selector' => '{{WRAPPER}} .ba-jihadi-center__system-title' ) );
 		$this->add_control( 'system_title_color', array( 'label' => 'رنگ عنوان کارت', 'type' => Controls_Manager::COLOR, 'default' => '#243028', 'selectors' => array( '{{WRAPPER}} .ba-jihadi-center__system-title' => 'color: {{VALUE}};' ) ) );
@@ -787,7 +789,6 @@ final class Bonyad_Alavi_Jihadi_Center_Widget extends Widget_Base {
 	 * @return void
 	 */
 	private function render_intro( array $settings ) {
-		$from_dashboard = BA_Center_Settings_Service::has_dashboard_override( 'system_cards' );
 		$cards = array_values( array_filter( (array) ( $settings['system_cards'] ?? array() ), array( $this, 'has_system_card_content' ) ) );
 		?>
 		<section class="ba-jihadi-center__intro-section" id="ba-jihadi-center-systems">
@@ -797,7 +798,7 @@ final class Bonyad_Alavi_Jihadi_Center_Widget extends Widget_Base {
 					<?php if ( ! empty( $settings['intro_title'] ) ) : ?><h2 class="ba-jihadi-center__intro-title"><?php echo esc_html( $settings['intro_title'] ); ?></h2><?php endif; ?>
 					<?php if ( ! empty( $settings['intro_description'] ) ) : ?><div class="ba-jihadi-center__intro-description"><?php echo wp_kses_post( wpautop( $settings['intro_description'] ) ); ?></div><?php endif; ?>
 				</div>
-				<?php if ( $cards ) : ?><div class="ba-jihadi-center__systems-grid"><?php foreach ( $cards as $card ) { $this->render_system_card( $card, $from_dashboard ); } ?></div><?php endif; ?>
+				<?php if ( $cards ) : ?><div class="ba-jihadi-center__systems-grid"><?php foreach ( $cards as $card ) { $this->render_system_card( $card ); } ?></div><?php endif; ?>
 			</div>
 		</section>
 		<?php
@@ -813,7 +814,7 @@ final class Bonyad_Alavi_Jihadi_Center_Widget extends Widget_Base {
 		if ( ! is_array( $card ) ) {
 			return false;
 		}
-		$has_media = ! empty( $card['icon_id'] ) || ! empty( $card['icon']['url'] );
+		$has_media = ! empty( $card['icon_id'] ) || ! empty( $card['icon']['value'] ) || ! empty( $card['icon']['url'] );
 		$has_url   = ! empty( $card['url'] ) && ( is_string( $card['url'] ) || ! empty( $card['url']['url'] ) );
 		return $has_media || ! empty( $card['title'] ) || $has_url;
 	}
@@ -821,23 +822,47 @@ final class Bonyad_Alavi_Jihadi_Center_Widget extends Widget_Base {
 	/**
 	 * یک کارت سامانه را با Tag مناسب لینک یا div رندر می‌کند.
 	 *
-	 * @param array $card           داده کارت.
-	 * @param bool  $from_dashboard آیا ساختار کارت از داشبورد آمده است.
+	 * @param array $card داده مؤثر کارت پس از Resolve داشبورد و Elementor.
 	 * @return void
 	 */
-	private function render_system_card( array $card, $from_dashboard ) {
-		$link = $from_dashboard ? array( 'url' => (string) ( $card['url'] ?? '' ) ) : ( is_array( $card['url'] ?? null ) ? $card['url'] : array( 'url' => (string) ( $card['url'] ?? '' ) ) );
+	private function render_system_card( array $card ) {
+		$link = is_array( $card['url'] ?? null ) ? $card['url'] : array( 'url' => (string) ( $card['url'] ?? '' ) );
 		$tag  = ! empty( $link['url'] ) ? 'a' : 'div';
 		?>
 		<<?php echo esc_attr( $tag ); ?> class="ba-jihadi-center__system-card"<?php echo 'a' === $tag ? $this->build_elementor_link_attributes( $link ) : ''; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
-			<?php if ( $from_dashboard && ! empty( $card['icon_id'] ) ) : ?>
-				<span class="ba-jihadi-center__system-icon"><?php echo wp_get_attachment_image( absint( $card['icon_id'] ), 'thumbnail', false, array( 'loading' => 'lazy' ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></span>
-			<?php elseif ( ! $from_dashboard && ! empty( $card['icon']['url'] ) ) : ?>
-				<span class="ba-jihadi-center__system-icon"><img src="<?php echo esc_url( $card['icon']['url'] ); ?>" alt="" loading="lazy"></span>
-			<?php endif; ?>
+			<?php $this->render_system_card_icon( $card ); ?>
 			<?php if ( ! empty( $card['title'] ) ) : ?><h3 class="ba-jihadi-center__system-title"><?php echo esc_html( $card['title'] ); ?></h3><?php endif; ?>
 		</<?php echo esc_attr( $tag ); ?>>
 		<?php
+	}
+
+	/**
+	 * آیکون کارت سامانه را از رسانه داشبورد یا Icon Control استاندارد Elementor رندر می‌کند.
+	 * برای داده‌های قدیمی MEDIA در Elementor نیز fallback تصویری حفظ شده است.
+	 *
+	 * @param array $card داده کارت.
+	 * @return void
+	 */
+	private function render_system_card_icon( array $card ) {
+		if ( ! empty( $card['icon_id'] ) ) {
+			$image = wp_get_attachment_image( absint( $card['icon_id'] ), 'thumbnail', false, array( 'loading' => 'lazy' ) );
+			if ( $image ) {
+				echo '<span class="ba-jihadi-center__system-icon">' . $image . '</span>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+			}
+			return;
+		}
+
+		$icon = is_array( $card['icon'] ?? null ) ? $card['icon'] : array();
+		if ( ! empty( $icon['value'] ) ) {
+			echo '<span class="ba-jihadi-center__system-icon">';
+			Icons_Manager::render_icon( $icon, array( 'aria-hidden' => 'true' ) );
+			echo '</span>';
+			return;
+		}
+
+		if ( ! empty( $icon['url'] ) ) {
+			printf( '<span class="ba-jihadi-center__system-icon"><img src="%s" alt="" loading="lazy"></span>', esc_url( $icon['url'] ) );
+		}
 	}
 
 	/**
