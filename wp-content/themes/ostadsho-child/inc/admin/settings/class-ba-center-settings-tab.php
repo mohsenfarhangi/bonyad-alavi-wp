@@ -24,7 +24,6 @@ final class BA_Center_Settings_Tab {
 	 */
 	public static function register_hooks() {
 		add_filter( 'ba_settings_tabs', array( __CLASS__, 'register_tab' ) );
-		add_action( 'admin_enqueue_scripts', array( __CLASS__, 'enqueue_assets' ) );
 	}
 
 	/**
@@ -42,6 +41,7 @@ final class BA_Center_Settings_Tab {
 			'page_slug'         => 'ba-settings-jihadi-center',
 			'register_callback' => array( __CLASS__, 'register_setting' ),
 			'render_callback'   => array( __CLASS__, 'render' ),
+			'assets_callback'   => array( __CLASS__, 'enqueue_assets' ),
 			'save_label'        => 'ذخیره تنظیمات مرکز',
 		);
 
@@ -67,18 +67,16 @@ final class BA_Center_Settings_Tab {
 	}
 
 	/**
-	 * Assetهای اختصاصی تب مرکز و Repeater عمومی را فقط در همان تب بارگذاری می‌کند.
+	 * Assetهای اختصاصی تب مرکز و Repeater عمومی را برای تب فعال بارگذاری می‌کند.
 	 *
+	 * این متد از طریق assets_callback رجیستری تنظیمات فراخوانی می‌شود و نباید
+	 * وضعیت تب را مستقیماً از پارامترهای URL تشخیص دهد.
+	 *
+	 * @param array  $tab         پیکربندی تب فعال از Registry تنظیمات.
+	 * @param string $hook_suffix شناسه صفحه جاری مدیریت وردپرس.
 	 * @return void
 	 */
-	public static function enqueue_assets() {
-		$page = isset( $_GET['page'] ) ? sanitize_key( wp_unslash( $_GET['page'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-		$tab  = isset( $_GET['tab'] ) ? sanitize_key( wp_unslash( $_GET['tab'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-
-		if ( 'ba-settings' !== $page || self::TAB_ID !== $tab ) {
-			return;
-		}
-
+	public static function enqueue_assets( $tab = array(), $hook_suffix = '' ) {
 		BA_Admin_Repeater_Component::enqueue_assets();
 		wp_enqueue_media();
 

@@ -42,6 +42,7 @@ if ( ! class_exists( 'BA_Settings_Page' ) ) {
 		 * - page_slug
 		 * - register_callback (optional callable)
 		 * - render_callback (optional callable for custom tab UI)
+		 * - assets_callback (optional callable for assets of the resolved active tab)
 		 *
 		 * @return array
 		 */
@@ -176,9 +177,12 @@ if ( ! class_exists( 'BA_Settings_Page' ) ) {
 		}
 
 		/**
-		 * Load settings page assets.
+		 * Assetهای عمومی صفحه تنظیمات و Assetهای اختصاصی تب فعال را بارگذاری می‌کند.
 		 *
-		 * @param string $hook_suffix Current admin hook suffix.
+		 * تب فعال از میان تب‌های قابل دسترس کاربر Resolve می‌شود تا بارگذاری Asset
+		 * به وجود پارامتر tab در URL وابسته نباشد.
+		 *
+		 * @param string $hook_suffix شناسه صفحه جاری مدیریت وردپرس.
 		 * @return void
 		 */
 		public static function enqueue_assets( $hook_suffix ) {
@@ -186,11 +190,13 @@ if ( ! class_exists( 'BA_Settings_Page' ) ) {
 				return;
 			}
 
+			$tabs = self::get_accessible_tabs();
+
 			/*
 			 * Users without a settings-tab capability can still open the page and see
 			 * the no-access notice. They do not need media/sortable JavaScript.
 			 */
-			if ( empty( self::get_accessible_tabs() ) ) {
+			if ( empty( $tabs ) ) {
 				$version = wp_get_theme()->get( 'Version' );
 
 				wp_enqueue_style(
@@ -202,6 +208,8 @@ if ( ! class_exists( 'BA_Settings_Page' ) ) {
 
 				return;
 			}
+
+			$active_tab = self::get_active_tab( $tabs );
 
 			wp_enqueue_media();
 			wp_enqueue_script( 'jquery-ui-sortable' );
@@ -243,6 +251,14 @@ if ( ! class_exists( 'BA_Settings_Page' ) ) {
 					),
 				)
 			);
+
+
+			if (
+				isset( $tabs[ $active_tab ]['assets_callback'] )
+				&& is_callable( $tabs[ $active_tab ]['assets_callback'] )
+			) {
+				call_user_func( $tabs[ $active_tab ]['assets_callback'], $tabs[ $active_tab ], $hook_suffix );
+			}
 		}
 
 		/**
