@@ -16,6 +16,7 @@ use BonyadAlavi\FormEngine\Actions\ActionDefinition;
 use BonyadAlavi\FormEngine\Actions\ActionConfigSanitizer;
 use BonyadAlavi\FormEngine\Actions\Tokens\TokenRegistry;
 use BonyadAlavi\FormEngine\Duplicate\DuplicatePolicy;
+use BonyadAlavi\FormEngine\Validation\ValidatorRegistry;
 
 final class FormsPage
 {
@@ -28,7 +29,8 @@ final class FormsPage
         private readonly EventRegistry $events,
         private readonly ActionRegistry $actions,
         private readonly TokenRegistry $tokens,
-        private readonly DuplicatePolicy $duplicatePolicy
+        private readonly DuplicatePolicy $duplicatePolicy,
+        private readonly ValidatorRegistry $validators
     ) {}
 
     public function render(): void
@@ -52,6 +54,7 @@ final class FormsPage
 
         echo '<div class="wrap afe-admin-wrap"><h1>مدیریت فرم‌ها</h1>';
         if (!empty($_GET['updated'])) echo '<div class="notice notice-success is-dismissible"><p>تنظیمات فرم ذخیره شد.</p></div>';
+        if (!empty($_GET['afe_error'])) echo '<div class="notice notice-error is-dismissible"><p>'.esc_html(sanitize_text_field(wp_unslash((string)$_GET['afe_error']))).'</p></div>';
         echo '<div class="afe-admin-layout"><aside class="afe-admin-side"><h3>فرم‌های کدنویسی‌شده</h3>';
         foreach ($all as $key=>$obj) {
             $active=$key===$slug?' is-active':'';
@@ -133,6 +136,7 @@ final class FormsPage
         echo '</section>';
 
         echo '<section class="afe-form-tab-panel" data-afe-form-tab-panel="fields" hidden>';
+        $this->renderFieldOrdering($form);
         echo '<div class="afe-admin-card afe-overrides-card"><div class="afe-admin-card-title"><div><h2>Override فیلدها</h2><p>فیلدها بر اساس مرحله گروه‌بندی شده‌اند. عنوان اصلی فیلد درشت نمایش داده می‌شود و کلید فنی فقط به‌عنوان مرجع ثانویه باقی می‌ماند.</p></div></div>';
         echo '<div class="afe-override-steps">';
         foreach ($this->registry->get($slug)->toArray()['steps'] as $stepDef) {
@@ -166,7 +170,19 @@ final class FormsPage
                 if (($field['type']??'')==='date') {
                     $calendar=(string)($ov['calendar']??'inherit');
                     echo '<label><span>تقویم</span><select name="field_override['.esc_attr($path).'][calendar]"><option value="inherit" '.selected($calendar,'inherit',false).'>ارث‌بری ('.esc_html((string)($field['calendar']??'gregorian')).')</option><option value="jalali" '.selected($calendar,'jalali',false).'>جلالی</option><option value="gregorian" '.selected($calendar,'gregorian',false).'>میلادی</option></select></label>';
+                    $dateMode=(string)($ov['date_input_mode']??'inherit');
+                    echo '<label><span>روش ورود تاریخ</span><select name="field_override['.esc_attr($path).'][date_input_mode]"><option value="inherit" '.selected($dateMode,'inherit',false).'>ارث‌بری ('.esc_html((string)($field['date_input_mode']??'combined')).')</option><option value="combined" '.selected($dateMode,'combined',false).'>انتخاب + ورود دستی</option><option value="picker" '.selected($dateMode,'picker',false).'>فقط انتخاب از تقویم</option><option value="manual" '.selected($dateMode,'manual',false).'>فقط ورود دستی</option></select></label>';
                 }
+                if (in_array((string)($field['type']??''),['text','textarea','tel','email','url'],true)) {
+                    $characterMode=(string)($ov['character_mode']??'inherit');
+                    echo '<label><span>نوع کاراکتر</span><select name="field_override['.esc_attr($path).'][character_mode]"><option value="inherit" '.selected($characterMode,'inherit',false).'>ارث‌بری / Normal</option><option value="normal" '.selected($characterMode,'normal',false).'>Normal</option><option value="digits" '.selected($characterMode,'digits',false).'>فقط اعداد</option><option value="persian" '.selected($characterMode,'persian',false).'>فقط حروف فارسی</option><option value="english" '.selected($characterMode,'english',false).'>فقط حروف انگلیسی</option><option value="alnum" '.selected($characterMode,'alnum',false).'>حروف و اعداد</option></select></label>';
+                    echo '<label><span>کاراکترهای مجاز اضافی</span><input name="field_override['.esc_attr($path).'][allowed_extra]" value="'.esc_attr((string)($ov['allowed_extra']??'')).'" maxlength="50" placeholder="مثلاً -_/"></label>';
+                    echo '<label><span>کاراکترهای ممنوع اضافی</span><input name="field_override['.esc_attr($path).'][forbidden_extra]" value="'.esc_attr((string)($ov['forbidden_extra']??'')).'" maxlength="50"></label>';
+                    echo '<label><span>حداقل طول</span><input type="number" min="1" max="10000" name="field_override['.esc_attr($path).'][min_length]" value="'.esc_attr((string)($ov['min_length']??'')).'"></label>';
+                    echo '<label><span>حداکثر طول</span><input type="number" min="1" max="10000" name="field_override['.esc_attr($path).'][max_length]" value="'.esc_attr((string)($ov['max_length']??'')).'"></label>';
+                    echo '<label><span>طول دقیق</span><input type="number" min="1" max="10000" name="field_override['.esc_attr($path).'][exact_length]" value="'.esc_attr((string)($ov['exact_length']??'')).'" placeholder="در صورت تنظیم، اولویت دارد"></label>';
+                }
+                $this->renderValidatorOverride($path,$field,$ov);
                 if (($field['type']??'')==='file') {
                     echo '<label><span>حداکثر تعداد فایل</span><input type="number" min="1" name="field_override['.esc_attr($path).'][max_files]" value="'.esc_attr((string)($ov['max_files']??'')).'" placeholder="'.esc_attr((string)($field['max_files']??1)).'"></label>';
                     echo '<label><span>حداکثر حجم هر فایل (MB)</span><input type="number" min="1" name="field_override['.esc_attr($path).'][max_size_mb]" value="'.esc_attr((string)($ov['max_size_mb']??'')).'" placeholder="'.esc_attr((string)($field['max_size_mb']??5)).'"></label>';
@@ -571,11 +587,162 @@ final class FormsPage
         if(($field['type']??'')==='repeater') foreach((array)($field['fields']??[]) as $child) $this->collectFieldLabel((array)$child,$path,$labels);
     }
 
+    private function renderFieldOrdering(array $form): void
+    {
+        echo '<div class="afe-admin-card afe-field-order-card" data-afe-field-ordering><div class="afe-admin-card-title"><div><h2>چیدمان فیلدها</h2><p>Drag & Drop فقط داخل همان Step مجاز است. HtmlBlockها نیز قابل جابه‌جایی هستند و فیلدهای داخل Repeater فقط در همان Repeater مرتب می‌شوند.</p></div></div>';
+        foreach ((array)($form['steps']??[]) as $step) {
+            $stepKey=(string)($step['key']??'');
+            echo '<details class="afe-field-order-step" open><summary><strong>'.esc_html((string)($step['title']??$stepKey)).'</strong><code>'.esc_html($stepKey).'</code></summary>';
+            echo '<ol class="afe-field-order-list" data-afe-field-order-list data-afe-order-scope="step">';
+            foreach ((array)($step['items']??[]) as $item) $this->renderOrderItem((array)$item,'field_order['.$stepKey.'][]','');
+            echo '</ol></details>';
+        }
+        echo '</div>';
+    }
+
+    private function renderOrderItem(array $item,string $inputName,string $prefix): void
+    {
+        $name=(string)($item['name']??'');
+        if ($name==='') return;
+        $path=$prefix===''?$name:$prefix.'.'.$name;
+        $type=(string)($item['type']??'');
+        if ($type==='html') {
+            $plain=trim(wp_strip_all_tags((string)($item['html']??'')));
+            $label=$plain!==''?(function_exists('mb_substr')?mb_substr($plain,0,72):substr($plain,0,72)):'بلوک HTML';
+        } else $label=(string)($item['label']??$name);
+        echo '<li class="afe-field-order-item" draggable="true" data-afe-field-order-item><div class="afe-field-order-item__row"><span class="afe-field-order-drag" aria-hidden="true">↕</span><strong>'.esc_html($label).'</strong><small>'.esc_html($this->fieldTypeLabel($type)).'</small><code>'.esc_html($path).'</code><input type="hidden" name="'.esc_attr($inputName).'" value="'.esc_attr($name).'"></div>';
+        if ($type==='repeater') {
+            $hash=substr(md5($path),0,12);
+            echo '<div class="afe-field-order-children"><span>ترتیب فیلدهای داخل Repeater</span><input type="hidden" name="repeater_order['.esc_attr($hash).'][path]" value="'.esc_attr($path).'">';
+            echo '<ol class="afe-field-order-list afe-field-order-list--nested" data-afe-field-order-list data-afe-order-scope="repeater">';
+            foreach ((array)($item['fields']??[]) as $child) $this->renderOrderItem((array)$child,'repeater_order['.$hash.'][items][]',$path);
+            echo '</ol></div>';
+        }
+        echo '</li>';
+    }
+
+    private function renderValidatorOverride(string $path,array $field,array $override): void
+    {
+        $definitions=$this->validators->forFieldType((string)($field['type']??''));
+        if ($definitions===[]) return;
+        $configs=[];
+        foreach ((array)($override['validators']??[]) as $config) {
+            if (is_string($config)) $config=['key'=>$config];
+            if (is_array($config) && !empty($config['key'])) $configs[(string)$config['key']]=$config;
+        }
+        $selected=array_keys($configs);
+        $canRegex=current_user_can(Capabilities::MANAGE_SETTINGS);
+        echo '<div class="afe-override-span-2 afe-validator-override" data-afe-validator-override><label><span>Validationها <small>انتخاب چندگانه</small></span><select multiple size="'.esc_attr((string)min(8,max(3,count($definitions)))).'" name="field_override['.esc_attr($path).'][validators][]" data-afe-validator-select>';
+        foreach ($definitions as $key=>$definition) {
+            $disabled=($key==='custom_regex'&&!$canRegex&&!isset($configs[$key]))?' disabled':'';
+            echo '<option value="'.esc_attr($key).'" '.selected(in_array($key,$selected,true),true,false).$disabled.'>'.esc_html($definition->label).'</option>';
+        }
+        echo '</select></label><div class="afe-validator-details">';
+        foreach ($definitions as $key=>$definition) {
+            $config=(array)($configs[$key]??[]);
+            $hidden=in_array($key,$selected,true)?'':' hidden';
+            echo '<div class="afe-validator-detail" data-afe-validator-detail="'.esc_attr($key).'"'.$hidden.'><strong>'.esc_html($definition->label).'</strong>';
+            echo '<label><span>پیام خطای سفارشی</span><input name="field_override['.esc_attr($path).'][validator_messages]['.esc_attr($key).']" value="'.esc_attr((string)($config['message']??'')).'" placeholder="'.esc_attr($definition->defaultMessage).'"></label>';
+            if ($key==='custom_regex') {
+                echo '<label><span>Regex <small>بدون delimiter، حداکثر '.esc_html((string)ValidatorRegistry::CUSTOM_REGEX_MAX_LENGTH).' کاراکتر</small></span><input class="afe-code" name="field_override['.esc_attr($path).'][custom_regex_pattern]" value="'.esc_attr((string)($config['pattern']??'')).'" '.($canRegex?'':'readonly').'></label>';
+                echo '<label><span>Flagها</span><input name="field_override['.esc_attr($path).'][custom_regex_flags]" value="'.esc_attr((string)($config['flags']??'u')).'" placeholder="imu" maxlength="5" '.($canRegex?'':'readonly').'></label>';
+                if (!$canRegex) echo '<p class="description">تعریف یا تغییر Custom Regex فقط با capability <code>'.esc_html(Capabilities::MANAGE_SETTINGS).'</code> مجاز است.</p>';
+            }
+            echo '</div>';
+        }
+        echo '</div></div>';
+    }
+
+    private function sanitizeOrderOverrides(array $codeForm): array
+    {
+        $out=['steps'=>[],'repeaters'=>[]];
+        $postedSteps=(array)($_POST['field_order']??[]);
+        foreach ((array)($codeForm['steps']??[]) as $step) {
+            $key=(string)($step['key']??'');
+            $original=array_values(array_filter(array_map(static fn($item)=>(string)($item['name']??''),(array)($step['items']??[]))));
+            $posted=array_map(static fn($value)=>sanitize_text_field(wp_unslash((string)$value)),(array)($postedSteps[$key]??[]));
+            $clean=$this->normalizedOrder($posted,$original);
+            if ($clean!==$original) $out['steps'][$key]=$clean;
+        }
+        $originalRepeaters=[];
+        foreach ((array)($codeForm['steps']??[]) as $step) foreach ((array)($step['items']??[]) as $item) $this->collectRepeaterOrders((array)$item,'',$originalRepeaters);
+        foreach ((array)($_POST['repeater_order']??[]) as $entry) {
+            if (!is_array($entry)) continue;
+            $path=sanitize_text_field(wp_unslash((string)($entry['path']??'')));
+            if ($path==='' || !isset($originalRepeaters[$path])) continue;
+            $posted=array_map(static fn($value)=>sanitize_text_field(wp_unslash((string)$value)),(array)($entry['items']??[]));
+            $clean=$this->normalizedOrder($posted,$originalRepeaters[$path]);
+            if ($clean!==$originalRepeaters[$path]) $out['repeaters'][$path]=$clean;
+        }
+        if ($out['steps']===[]) unset($out['steps']);
+        if ($out['repeaters']===[]) unset($out['repeaters']);
+        return $out;
+    }
+
+    /** @param list<string> $posted @param list<string> $allowed @return list<string> */
+    private function normalizedOrder(array $posted,array $allowed): array
+    {
+        $clean=[];
+        foreach ($posted as $name) if (in_array($name,$allowed,true) && !in_array($name,$clean,true)) $clean[]=$name;
+        foreach ($allowed as $name) if (!in_array($name,$clean,true)) $clean[]=$name;
+        return $clean;
+    }
+
+    /** @param array<string,list<string>> $out */
+    private function collectRepeaterOrders(array $field,string $prefix,array &$out): void
+    {
+        $name=(string)($field['name']??''); if ($name==='') return;
+        $path=$prefix===''?$name:$prefix.'.'.$name;
+        if (($field['type']??'')!=='repeater') return;
+        $out[$path]=array_values(array_filter(array_map(static fn($child)=>(string)($child['name']??''),(array)($field['fields']??[]))));
+        foreach ((array)($field['fields']??[]) as $child) $this->collectRepeaterOrders((array)$child,$path,$out);
+    }
+
+    /** @return list<array<string,mixed>> */
+    private function sanitizeValidatorOverrides(array $values,array $field,array $existing): array
+    {
+        $type=(string)($field['type']??'');
+        $available=$this->validators->forFieldType($type);
+        $selected=array_values(array_unique(array_map('sanitize_key',(array)($values['validators']??[]))));
+        $messages=(array)($values['validator_messages']??[]);
+        $existingConfigs=[];
+        foreach ((array)($existing['validators']??[]) as $config) {
+            if (is_string($config)) $config=['key'=>$config];
+            if (is_array($config)&&!empty($config['key'])) $existingConfigs[(string)$config['key']]=$config;
+        }
+        $out=[];
+        foreach ($selected as $key) {
+            if (!isset($available[$key])) continue;
+            if ($key==='custom_regex' && !current_user_can(Capabilities::MANAGE_SETTINGS)) {
+                if (isset($existingConfigs[$key])) $out[]=$existingConfigs[$key];
+                continue;
+            }
+            $definition=$available[$key];
+            $message=sanitize_text_field(wp_unslash((string)($messages[$key]??'')));
+            $config=['key'=>$key];
+            if ($message!=='') $config['message']=$message;
+            if ($key==='custom_regex') {
+                $pattern=trim(wp_unslash((string)($values['custom_regex_pattern']??'')));
+                $flags=ValidatorRegistry::sanitizeRegexFlags(sanitize_text_field(wp_unslash((string)($values['custom_regex_flags']??'u'))));
+                if ($pattern==='' || ValidatorRegistry::compileRegex($pattern,$flags)===null) {
+                    wp_die('Custom Regex فیلد «'.esc_html((string)($field['label']??$field['name']??'')).'» معتبر نیست. Regex را بدون delimiter وارد کنید؛ Flagهای مجاز: '.esc_html(ValidatorRegistry::CUSTOM_REGEX_FLAGS).'.','Regex نامعتبر',['response'=>400,'back_link'=>true]);
+                }
+                if ($message==='') wp_die('برای Custom Regex پیام خطای سفارشی الزامی است.','پیام خطا الزامی است',['response'=>400,'back_link'=>true]);
+                $config['pattern']=$pattern;
+                $config['flags']=$flags;
+            }
+            $out[]=$config;
+        }
+        if (!current_user_can(Capabilities::MANAGE_SETTINGS) && isset($existingConfigs['custom_regex']) && !in_array('custom_regex',$selected,true)) $out[]=$existingConfigs['custom_regex'];
+        return $out;
+    }
+
     private function save(string $slug): void
     {
         check_admin_referer('afe_save_form_'.$slug,'afe_form_nonce');
         $existing=$this->forms->overrides($slug);
         $codeForm=$this->registry->get($slug)->toArray();
+        $codeFlat=$this->flatten((array)($codeForm['steps']??[]));
         $overrides=[
             'title'=>sanitize_text_field(wp_unslash($_POST['override_title']??'')),
             'description'=>sanitize_textarea_field(wp_unslash($_POST['override_description']??'')),
@@ -583,6 +750,9 @@ final class FormsPage
         ];
         foreach ((array)($_POST['field_override']??[]) as $path=>$values) {
             $path=sanitize_text_field((string)$path);
+            if (!is_array($values) || !isset($codeFlat[$path]) || (($codeFlat[$path]['type']??'')==='html')) continue;
+            $fieldDef=(array)$codeFlat[$path];
+            $existingField=(array)($existing['fields'][$path]??[]);
             $one=[];
             $label=sanitize_text_field(wp_unslash($values['label']??''));
             $placeholder=sanitize_text_field(wp_unslash($values['placeholder']??''));
@@ -602,6 +772,26 @@ final class FormsPage
             elseif ($searchable==='no') $one['searchable']=false;
             $calendar=sanitize_key((string)($values['calendar']??'inherit'));
             if (in_array($calendar,['jalali','gregorian'],true)) $one['calendar']=$calendar;
+            if (($fieldDef['type']??'')==='date') {
+                $dateMode=sanitize_key((string)($values['date_input_mode']??'inherit'));
+                if (in_array($dateMode,['combined','picker','manual'],true)) $one['date_input_mode']=$dateMode;
+            }
+            if (in_array((string)($fieldDef['type']??''),['text','textarea','tel','email','url'],true)) {
+                $characterMode=sanitize_key((string)($values['character_mode']??'inherit'));
+                if (in_array($characterMode,['normal','digits','persian','english','alnum'],true)) $one['character_mode']=$characterMode;
+                foreach (['allowed_extra','forbidden_extra'] as $charKey) {
+                    $charValue=sanitize_text_field(wp_unslash((string)($values[$charKey]??'')));
+                    if ($charValue!=='') $one[$charKey]=function_exists('mb_substr')?mb_substr($charValue,0,50):substr($charValue,0,50);
+                }
+                foreach (['min_length','max_length','exact_length'] as $lengthKey) {
+                    if (($values[$lengthKey]??'')!=='') $one[$lengthKey]=max(1,min(10000,(int)$values[$lengthKey]));
+                }
+                if (isset($one['min_length'],$one['max_length']) && $one['min_length']>$one['max_length']) {
+                    [$one['min_length'],$one['max_length']]=[$one['max_length'],$one['min_length']];
+                }
+            }
+            $validatorOverrides=$this->sanitizeValidatorOverrides($values,$fieldDef,$existingField);
+            if ($validatorOverrides!==[]) $one['validators']=$validatorOverrides;
             if (($values['max_files']??'')!=='') $one['max_files']=max(1,(int)$values['max_files']);
             if (($values['max_size_mb']??'')!=='') $one['max_size_mb']=max(1,(int)$values['max_size_mb']);
             if (!empty($values['accept'])) {
@@ -609,6 +799,8 @@ final class FormsPage
             }
             if ($one) $overrides['fields'][$path]=$one;
         }
+        $order=$this->sanitizeOrderOverrides($codeForm);
+        if ($order!==[]) $overrides['order']=$order;
         $overrides['steps']=[];
         $codeSteps=[];
         foreach ((array)($codeForm['steps']??[]) as $stepDef) $codeSteps[(string)($stepDef['key']??'')]=$stepDef;

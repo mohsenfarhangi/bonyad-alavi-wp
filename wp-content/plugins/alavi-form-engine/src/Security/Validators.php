@@ -49,6 +49,40 @@ final class Validators
     }
 
 
+
+    public static function iranIbanFlexible(string $value): bool
+    {
+        $value = strtoupper(trim(self::latinDigits($value)));
+        if (str_starts_with($value, 'IR')) return self::iranIban($value);
+        return self::iranIbanDigits($value);
+    }
+
+    public static function iranPostalCode(string $value): bool
+    {
+        $value = trim(self::latinDigits($value));
+        return (bool)preg_match('/^\d{10}$/', $value);
+    }
+
+    public static function iranBankCard(string $value): bool
+    {
+        $value = preg_replace('/\s+/', '', self::latinDigits(trim($value)));
+        if (!preg_match('/^\d{16}$/', (string)$value)) return false;
+        $sum = 0;
+        for ($i = 0; $i < 16; $i++) {
+            $factor = ($i % 2 === 0) ? 2 : 1;
+            $product = ((int)$value[$i]) * $factor;
+            if ($product > 9) $product -= 9;
+            $sum += $product;
+        }
+        return $sum % 10 === 0;
+    }
+
+    public static function iranLandline(string $value): bool
+    {
+        $value = preg_replace('/[\s\-()]+/', '', self::latinDigits(trim($value)));
+        return (bool)preg_match('/^0(?!9)\d{9,10}$/', (string)$value);
+    }
+
     public static function gregorianDate(string $value): bool
     {
         $value = self::latinDigits(trim($value));

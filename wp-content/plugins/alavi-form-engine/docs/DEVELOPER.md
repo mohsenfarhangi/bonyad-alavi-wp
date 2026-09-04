@@ -425,3 +425,99 @@ add_action('afe_register_templates', function ($templates) {
 
 Do not execute PHP from template HTML. Dynamic values must be exposed through explicitly supported tokens.
 
+
+## Field ordering overrides (1.0.28-dev)
+
+Field ordering is an **admin override**, not a mutation of the PHP source definition. The code definition remains authoritative for membership of each Step/Repeater:
+
+- top-level Fields and `HtmlBlock` items can be reordered only inside their original Step;
+- Repeater children can be reordered only inside the same Repeater;
+- moving a Field between Steps is intentionally unsupported in this version;
+- if a later code release adds a new item that is absent from an old saved order, the resolver appends it to the end of that same scope.
+
+Do not use ordering overrides to model conditional Step membership. Put structural membership in the PHP definition and use Conditions for runtime visibility.
+
+## Date input modes
+
+`DateField` supports three input modes while `calendar()` continues to define the authoritative storage/validation calendar:
+
+```php
+DateField::make('birth_date')->jalali();                    // combined: picker + manual
+DateField::make('appointment')->gregorian()->pickerOnly();  // picker only
+DateField::make('legacy_date')->jalali()->manualOnly();     // manual only
+```
+
+Masks are UX hints:
+
+- Jalali: `YYYY/MM/DD`
+- Gregorian: `YYYY-MM-DD`
+
+Server-side validation is always authoritative. Do not rely on `pattern`, input masks, or the datepicker as a security boundary.
+
+## Validator Registry
+
+Register a developer validator through `afe_register_validator_definitions`; do not hard-code new validator branches into `FormsPage`.
+
+```php
+use BonyadAlavi\FormEngine\Validation\ValidatorDefinition;
+
+add_action('afe_register_validator_definitions', function ($validators) {
+    $validators->register(new ValidatorDefinition(
+        'organization_code',
+        'کد سازمانی',
+        ['text'],
+        'کد سازمانی معتبر نیست.',
+        static fn(string $value, array $field, array $config): bool =>
+            (bool) preg_match('/^ORG-[0-9]{6}$/', $value)
+    ));
+});
+```
+
+The Field Override UI automatically lists registered validators whose `fieldTypes` support that Field type. Each selected validator may receive a custom error message.
+
+Core validator keys are:
+
+```text
+national_id
+mobile
+iban
+email
+url
+postal_code
+bank_card
+landline
+date
+custom_regex
+```
+
+Legacy DSL rules such as `->rule('national_id')` remain supported for backwards compatibility. New reusable admin-selectable validators should use the registry.
+
+### Custom Regex safety
+
+Admin-defined Custom Regex is intentionally constrained:
+
+- requires `afe_manage_settings`;
+- pattern body is entered without delimiters;
+- maximum 500 characters;
+- flags are restricted to `i`, `m`, `s`, `u`, `x`;
+- compile-test runs before save;
+- a custom error message is mandatory;
+- server runtime uses PCRE match/recursion limits;
+- frontend regex validation is only a convenience layer and may skip patterns whose PCRE syntax is not supported by JavaScript.
+
+PHP remains the final validator.
+
+## Character and length overrides
+
+Text-like Fields can receive admin overrides for:
+
+- `normal`
+- `digits`
+- `persian`
+- `english`
+- `alnum`
+- extra allowed characters
+- extra forbidden characters
+- minimum / maximum / exact length
+
+For identifiers such as National ID, use a text Field with numeric input hints. Do **not** switch identifiers to `type=number`, because leading zeroes are meaningful data.

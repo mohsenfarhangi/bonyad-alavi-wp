@@ -26,7 +26,7 @@ The package includes the "ثبت نام گروه‌های مردمی و جهاد
 
 == Changelog ==
 
-= Unreleased / 1.0.28-dev extended-actions/retry checkpoint =
+= Unreleased / 1.0.28-dev field/date/validator checkpoint =
 * Added registry-driven Action Builder with Persian Event labels, stable action keys, multiple actions, same-event drag/drop ordering, enable/disable controls, conditional logic and execution/error policies.
 * Added ActionRuntime / ActionRunResult for chain outputs, first-wins redirect and follow-up events without mutating submitted form data.
 * Added Redirect, Create/Login/Update User, Assign Role, Update User Meta, Change Submission Status, Internal Note, Generate PDF, Email PDF and Create/Update/Upsert Post/CPT actions.
@@ -43,8 +43,15 @@ The package includes the "ثبت نام گروه‌های مردمی و جهاد
 * Added transactional duplicate-owner promotion so an active allow-mode duplicate becomes canonical when the previous fingerprint owner is edited or trashed.
 * Added Duplicate settings UI with multi-field fingerprint selection, behavior/message controls and minimum-field validation.
 * Added regression coverage for Action Runtime/Retry, extended Registry, Redirect/config safeguards, Duplicate normalization/promotion, SMS provider/action and encrypted credential storage.
+* Added real per-Step field ordering including HtmlBlock items, plus child-field ordering inside each Repeater; cross-Step moves are not supported.
+* Added DateField combined/picker/manual input modes with Jalali YYYY/MM/DD and Gregorian YYYY-MM-DD UX masks while keeping PHP date validation authoritative.
+* Added Character/Input Mode overrides, independent allowed/forbidden extra characters, and min/max/exact length controls.
+* Added extensible ValidatorDefinition/ValidatorRegistry plus per-field multi-select UI, custom validator messages, Iranian postal/card/landline validators and safe Custom Regex controls.
+* Custom Regex requires afe_manage_settings, is compile-tested before save, uses restricted flags/length and runtime PCRE match/recursion limits; frontend regex checking is UX-only.
+* Added Unicode-safe length validation without requiring mbstring.
+* Added regression coverage for Validator Registry, field constraint overrides, DateField modes and ordering behavior.
 * DB development checkpoint remains 1.0.5-dev.2.
-* This checkpoint is still not production-ready; Field ordering, Date/Input overrides, Validator Registry/UI and final live acceptance are pending.
+* This checkpoint is still not production-ready; live MeliPayamak acceptance, final Jihadi SMS action selection, live WordPress/MySQL/Elementor acceptance and the production version/stable-tag bump are pending.
 
 = 1.0.27 =
 * Added a shared Template Registry/Resolver for all editable AFE HTML templates.

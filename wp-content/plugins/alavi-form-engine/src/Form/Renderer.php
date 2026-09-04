@@ -287,9 +287,38 @@ final class Renderer
 
     private function inputAttributes(array $field): string
     {
+        $attributes=(array)($field['attributes']??[]);
+        $mode=(string)($field['character_mode']??'normal');
+        $allowedExtra=(string)($field['allowed_extra']??'');
+        $forbiddenExtra=(string)($field['forbidden_extra']??'');
+        if ($mode!=='normal' || $allowedExtra!=='' || $forbiddenExtra!=='') {
+            $attributes['data-afe-character-mode']=$mode;
+            if ($allowedExtra!=='') $attributes['data-afe-allowed-extra']=$allowedExtra;
+            if ($forbiddenExtra!=='') $attributes['data-afe-forbidden-extra']=$forbiddenExtra;
+            if ($mode==='digits') $attributes['inputmode']='numeric';
+        }
+        $exact=max(0,(int)($field['exact_length']??0));
+        $min=max(0,(int)($field['min_length']??0));
+        $max=max(0,(int)($field['max_length']??0));
+        if ($exact>0) { $attributes['minlength']=$exact; $attributes['maxlength']=$exact; }
+        else {
+            if ($min>0) $attributes['minlength']=$min;
+            if ($max>0) $attributes['maxlength']=$max;
+        }
+        foreach ((array)($field['validators']??[]) as $validator) {
+            if (is_string($validator)) $validator=['key'=>$validator];
+            if (!is_array($validator) || ($validator['key']??'')!=='custom_regex') continue;
+            $pattern=trim((string)($validator['pattern']??''));
+            if ($pattern==='') continue;
+            $attributes['data-afe-custom-regex']=$pattern;
+            $attributes['data-afe-custom-regex-flags']=preg_replace('/[^imsu]/','',(string)($validator['flags']??'u')) ?: 'u';
+            $attributes['data-afe-custom-regex-message']=(string)($validator['message']??'مقدار واردشده با الگوی تعریف‌شده مطابقت ندارد.');
+            break;
+        }
+
         $out='';
         $allowed=['maxlength','minlength','pattern','inputmode','autocomplete','dir','min','max','step','aria-label','aria-describedby'];
-        foreach ((array)($field['attributes']??[]) as $key=>$value) {
+        foreach ($attributes as $key=>$value) {
             $key=strtolower(trim((string)$key));
             if ($key==='' || str_starts_with($key,'on')) continue;
             if (!in_array($key,$allowed,true) && !str_starts_with($key,'data-afe-')) continue;
@@ -316,11 +345,19 @@ final class Renderer
     private function dateInput(array $field, mixed $value, string $common): string
     {
         $calendar=(string)($field['calendar']??'gregorian');
+        $mode=in_array((string)($field['date_input_mode']??'combined'),['combined','picker','manual'],true)
+            ? (string)($field['date_input_mode']??'combined') : 'combined';
         if ($calendar==='jalali') {
             $placeholder = empty($field['placeholder']) ? ' placeholder="1403/01/01"' : '';
-            return '<input class="afe-control afe-date afe-date-jalali" type="text" inputmode="numeric" data-jdp data-afe-calendar="jalali" autocomplete="off" pattern="[0-9۰-۹٠-٩]{4}/[0-9۰-۹٠-٩]{2}/[0-9۰-۹٠-٩]{2}"'.$common.$placeholder.' value="'.esc_attr((string)$value).'">';
+            $picker=$mode==='manual'?'':' data-jdp';
+            $pickerOnly=$mode==='picker'?' data-afe-date-picker-only="1"':'';
+            return '<input class="afe-control afe-date afe-date-jalali" type="text" inputmode="numeric"'.$picker.' data-afe-calendar="jalali" data-afe-date-mode="'.esc_attr($mode).'" data-afe-date-mask="YYYY/MM/DD" autocomplete="off" maxlength="10" pattern="[0-9۰-۹٠-٩]{4}/[0-9۰-۹٠-٩]{2}/[0-9۰-۹٠-٩]{2}"'.$pickerOnly.$common.$placeholder.' value="'.esc_attr((string)$value).'">';
         }
-        return '<input class="afe-control afe-date afe-date-gregorian" type="date" data-afe-calendar="gregorian"'.$common.' value="'.esc_attr((string)$value).'">';
+        if ($mode==='manual') {
+            $placeholder = empty($field['placeholder']) ? ' placeholder="2026-09-04"' : '';
+            return '<input class="afe-control afe-date afe-date-gregorian" type="text" inputmode="numeric" data-afe-calendar="gregorian" data-afe-date-mode="manual" data-afe-date-mask="YYYY-MM-DD" autocomplete="off" maxlength="10" pattern="[0-9۰-۹٠-٩]{4}-[0-9۰-۹٠-٩]{2}-[0-9۰-۹٠-٩]{2}"'.$common.$placeholder.' value="'.esc_attr((string)$value).'">';
+        }
+        return '<input class="afe-control afe-date afe-date-gregorian" type="date" data-afe-calendar="gregorian" data-afe-date-mode="'.esc_attr($mode).'" data-afe-date-mask="YYYY-MM-DD"'.($mode==='picker'?' data-afe-date-picker-only="1"':'').$common.' value="'.esc_attr((string)$value).'">';
     }
 
     private function usesJalaliCalendar(array $form): bool
@@ -335,7 +372,7 @@ final class Renderer
 
     private function fieldUsesJalali(array $field): bool
     {
-        if (($field['type']??'')==='date' && ($field['calendar']??'gregorian')==='jalali') return true;
+        if (($field['type']??'')==='date' && ($field['calendar']??'gregorian')==='jalali' && ($field['date_input_mode']??'combined')!=='manual') return true;
         if (($field['type']??'')==='repeater') {
             foreach ((array)($field['fields']??[]) as $child) {
                 if ($this->fieldUsesJalali((array)$child)) return true;

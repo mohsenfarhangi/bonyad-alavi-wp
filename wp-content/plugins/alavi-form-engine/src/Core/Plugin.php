@@ -43,6 +43,7 @@ use BonyadAlavi\FormEngine\Style\StyleIsolationManager;
 use BonyadAlavi\FormEngine\Template\TemplateRegistry;
 use BonyadAlavi\FormEngine\Template\TemplateResolver;
 use BonyadAlavi\FormEngine\Template\TemplateOverrideNormalizer;
+use BonyadAlavi\FormEngine\Validation\ValidatorRegistry;
 use Throwable;
 
 final class Plugin
@@ -89,7 +90,9 @@ final class Plugin
         $duplicatePolicy = new DuplicatePolicy(new DuplicateFingerprint(), $duplicateRepo);
         $sources = new DataSourceManager();
         $security = new SecurityManager();
-        $validator = new Validator();
+        $validatorRegistry = new ValidatorRegistry();
+        do_action('afe_register_validator_definitions', $validatorRegistry);
+        $validator = new Validator($validatorRegistry);
         $fileUploader = new FileUploader();
         $tokenRegistry = new TokenRegistry();
         $tokenResolver = new TokenResolver();
@@ -157,6 +160,7 @@ final class Plugin
         $this->container->set(DataSourceManager::class,$sources);
         $this->container->set(SecurityManager::class,$security);
         $this->container->set(TokenRegistry::class,$tokenRegistry);
+        $this->container->set(ValidatorRegistry::class,$validatorRegistry);
         $this->container->set(TokenResolver::class,$tokenResolver);
         $this->container->set(SecretStore::class,$secretStore);
         $this->container->set(ActionRegistry::class,$actionRegistry);
@@ -187,7 +191,7 @@ final class Plugin
         add_action('wp_ajax_afe_geo_import_chunk', [$this,'ajaxGeoImportChunk']);
 
         if (is_admin()) {
-            $formsPage = new FormsPage($registry,$formRepo,$service,$formAccess,$templates,$eventRegistry,$actionRegistry,$tokenRegistry,$duplicatePolicy);
+            $formsPage = new FormsPage($registry,$formRepo,$service,$formAccess,$templates,$eventRegistry,$actionRegistry,$tokenRegistry,$duplicatePolicy,$validatorRegistry);
             $submissionsPage = new SubmissionsPage($registry,$submissionRepo,$service,$sources,$formAccess,$dates,$actionExecutions,$actionRegistry,$eventRegistry);
             $reportsPage = new ReportsPage($registry,$submissionRepo,$formAccess,$dates);
             $databasePage = new DatabasePage(new Migrator(),$registry,$dedicated,$dates);

@@ -1,4 +1,4 @@
-# Alavi Form Engine — Handoff Update (Extended Actions / Retry Checkpoint)
+# Alavi Form Engine — Handoff Update (Field / Date / Validator Checkpoint)
 
 ## وضعیت checkpoint
 
@@ -10,71 +10,66 @@
 
 ## انجام‌شده در این ادامه
 
-### Action / Event / Token
+### Field Ordering / Layout
 
-- `ActionDefinition` و `ActionRegistry` به runtime و Container وصل‌اند.
-- ActionManager از `action_key` پایدار، Conditional Logic، `always`، `once_per_submission`، `first_in_cycle` و `continue/stop` پشتیبانی می‌کند.
-- `ActionRuntime` / `ActionRunResult` خروجی زنجیره، اولین Redirect و follow-up Eventها را نگه می‌دارند؛ API قدیمی `ActionManager::run()` برای سازگاری حفظ شده است.
-- Action Log و once-guard اتمیک فعال است؛ failure اکشن Submission موفق را rollback نمی‌کند.
-- Eventهای canonical frontend/REST/admin برای create/draft/submit/update/status/lock/unlock/edit-request/trash/restore emit می‌شوند.
-- Email و Webhook از TokenResolver مشترک استفاده می‌کنند؛ `{{status}}` وضعیت runtime جدید را در همان chain می‌بیند.
-- Token Palette UI با Tokenهای واقعی هر فرم و click-to-copy ساخته شده است.
-- تب «رویدادها و اکشن‌ها» Registry-based است؛ Event label فارسی، چند Action، Drag & Drop داخل همان Event، enable/disable، schema config و Conditional Logic دارد.
+- ترتیب آیتم‌های هر Step در تب «فیلدها و چیدمان» با Drag & Drop قابل Override است.
+- `HtmlBlock`ها نیز در همان لیست مرتب می‌شوند.
+- جابه‌جایی بین Stepها عمداً پشتیبانی نمی‌شود.
+- Child Fieldهای هر Repeater فقط داخل همان Repeater مرتب می‌شوند؛ nested Repeater نیز path مستقل دارد.
+- ترتیب در `overrides_json.order.steps` و `overrides_json.order.repeaters` ذخیره و در `SubmissionService::resolvedForm()` روی UI واقعی فرم اعمال می‌شود.
+- اگر در نسخه بعدی کد Field جدیدی اضافه شود که در Override قدیمی نبوده، به انتهای همان scope افزوده می‌شود و حذف نمی‌شود.
 
-### Actionهای Extended
+### DateField
 
-- Redirect: ابتدا تمام Actionهای server-side اجرا می‌شوند؛ URL در Ajax response برمی‌گردد و frontend redirect می‌کند؛ اولین Redirect مؤثر برنده است. External URL فقط با تنظیم صریح و Capability مدیریتی.
-- Create User: mapping فیلدهای استاندارد و user_meta؛ رفتار conflict برابر fail/use/update/skip.
-- Login User: user target runtime/submission/current/manual؛ Retry برای این Action غیرفعال است تا session مدیر هنگام Retry تغییر نکند.
-- Update User، Assign Role، Update User Meta. Assign نقش Administrator بدون allow صریح مجاز نیست.
-- Change Submission Status: target باید در Workflow همان فرم باشد؛ `submission.status_changed` فقط در تغییر واقعی emit می‌شود.
-- Add Internal Note.
-- Generate PDF و Email PDF: به `Dompdf\Dompdf` موجود در autoload سایت وابسته‌اند و Dompdf داخل ZIP باندل نشده است.
-- Save Post/CPT: create/update/upsert، post meta و author؛ publish مستقیم نیازمند allow صریح و Capability مدیریتی است.
+- `DateField` سه mode دارد: `combined`، `picker` و `manual`؛ پیش‌فرض `combined` است.
+- Jalali mask: `YYYY/MM/DD`؛ Gregorian mask: `YYYY-MM-DD`.
+- `manual` جلالی DatePicker را فعال نمی‌کند؛ `picker` ورود مستقیم کاربر را در frontend محدود می‌کند.
+- backend مستقل از mode، تاریخ را براساس calendar واقعی validate می‌کند.
+- DateFieldهای فرم جهادی همچنان `jalali` هستند و چون mode صریح ندارند روی `combined` باقی می‌مانند.
 
-### Retry مدیریتی Action Log
+### Character / Length Overrides
 
-- جزئیات Submission لاگ‌های اخیر Action را با Event/Action فارسی، status، attempts، action_key، error و timestamp نمایش می‌دهد.
-- failed Actionهای retryable برای کاربر مجاز دکمه Retry دارند.
-- Retry Action فعلی را با همان `action_key` پیدا می‌کند و enabled/event/condition را دوباره validate می‌کند؛ بعد guard once را آزاد می‌کند.
-- follow-up Eventهای حاصل از Retry نیز از Action Engine عبور می‌کنند.
+- `character_mode`: `normal` / `digits` / `persian` / `english` / `alnum`.
+- `allowed_extra` و `forbidden_extra` مستقل هستند.
+- `min_length` / `max_length` / `exact_length` اضافه شده‌اند؛ exact اولویت دارد.
+- برای digits mode در TextField نوع input به `number` تغییر نمی‌کند؛ Renderer فقط `inputmode=numeric` و constraintهای UX را اعمال می‌کند.
+- طول Unicode بدون وابستگی اجباری به `mbstring` محاسبه می‌شود.
+
+### Validator Registry / UI
+
+- فایل‌های جدید: `src/Validation/ValidatorDefinition.php` و `src/Validation/ValidatorRegistry.php`.
+- Hook توسعه‌دهنده: `afe_register_validator_definitions`.
+- Core validatorها: national_id، mobile، iban، email، url، postal_code، bank_card، landline، date، custom_regex.
+- UI هر Field بر اساس type فقط Validatorهای قابل استفاده را به شکل multi-select نشان می‌دهد و برای هرکدام پیام خطای سفارشی دارد.
+- Ruleهای legacy فرم‌ها همچنان اجرا می‌شوند تا backward compatibility شکسته نشود.
+- Custom Regex فقط برای کاربر دارای `afe_manage_settings` قابل ایجاد/تغییر است.
+- Regex حداکثر 500 کاراکتر، Flagهای محدود `i/m/s/u/x`، compile-test قبل از Save و PCRE `LIMIT_MATCH`/`LIMIT_RECURSION` دارد.
+- Frontend Custom Regex صرفاً UX است؛ اگر syntax PCRE در JavaScript قابل اجرا نباشد frontend آن را skip می‌کند و PHP مرجع نهایی می‌ماند.
 
 ### SMS / ملی‌پیامک
 
-- `SmsAction` و هر دو مسیر Legacy username/password و Console/API token موجودند.
-- Free SMS و Pattern/Shared پشتیبانی می‌شوند.
-- گیرنده: Field فرم، شماره دستی، WordPress User/Admin یا Token.
-- Credentialهای password/API token با `SecretStore` رمز می‌شوند.
-- regression mock پاس است.
-- **تست integration واقعی ملی‌پیامک بر عهده مدیر پروژه است؛ در این مرحله Provider تغییر داده نشود مگر نتیجه تست واقعی ایراد مشخصی نشان دهد.**
-
-### Duplicate Policy
-
-- DuplicatePolicy به frontend submit، REST submit، admin edit، trash و restore وصل است.
-- Draft فعال Duplicate محسوب می‌شود؛ Submission جاری هنگام edit exclude می‌شود؛ Trash در matching نیست.
-- رفتارها: block / reference امن / custom message / allow+mark.
-- allow-mode با `is_duplicate` و `duplicate_of_submission_id` ذخیره می‌شود.
-- canonical owner promotion و dependant retarget داخل transaction انجام می‌شوند تا fingerprint فعال گم نشود.
+- طبق تصمیم مدیر پروژه، Provider در این مرحله تغییر نکرده است.
+- تست integration واقعی توسط مدیر انجام می‌شود؛ در صورت گزارش ایراد مشخص اصلاح شود.
 
 ### QA
 
-- PHP lint روی `src/` و `tests/`: PASS
-- JavaScript syntax check: PASS
-- کل `tests/*.php`: PASS — 24 test scripts
+- PHP lint روی `src/` و `tests/`: **PASS — 122 files**
+- `admin.js` syntax: **PASS**
+- `frontend.js` syntax: **PASS**
+- کل `tests/*.php`: **PASS — 28 test scripts**
 - تست‌های جدید این مرحله:
-  - `tests/action-manager-retry.php`
-  - `tests/extended-action-registry.php`
-  - `tests/redirect-action.php`
-  - `tests/sensitive-action-config.php`
+  - `tests/validator-registry.php`
+  - `tests/field-validation-overrides.php`
+  - `tests/date-field-modes.php`
+  - `tests/field-ordering.php`
 
 ## اولویت ادامه توسعه
 
-1. Field ordering واقعی داخل همان Step + Repeater child ordering و renderer support.
-2. Date input modes: انتخاب+دستی / فقط انتخاب / فقط دستی + mask Jalali/Gregorian.
-3. Character/Input Mode + allowed/forbidden chars + min/max/exact length.
-4. Validator Registry/UI + Multi Select + پیام سفارشی + Custom Regex امن.
-5. پس از نتیجه تست واقعی ملی‌پیامک: تنظیم Action پیش‌فرض فرم جهادی روی `leader_mobile` با `once_per_submission` و متن/Pattern انتخاب‌شده از UI.
-6. regression نهایی، docs نهایی و bump Production به `1.0.28` / DB نهایی `1.0.5` / Stable tag `1.0.28`.
+1. مدیر پروژه تست واقعی ملی‌پیامک را انجام دهد؛ فقط در صورت ایراد مشخص Provider/SmsAction اصلاح شود.
+2. پس از تعیین متن/Pattern نهایی، Action پیش‌فرض فرم جهادی روی `leader_mobile` و `once_per_submission` از UI/definition نهایی شود.
+3. live acceptance روی WordPress + MySQL/MariaDB + Elementor: submit/draft/edit/lock/duplicate/actions/field ordering/date modes/validators.
+4. بررسی UX نهایی Admin روی فرم جهادی با تعداد زیاد Field و Repeater و اصلاح CSS جزئی در صورت نیاز.
+5. regression نهایی، docs نهایی، bump Plugin به `1.0.28`، DB به `1.0.5` و Stable tag به `1.0.28` فقط بعد از acceptance.
 
 ---
 

@@ -1051,12 +1051,30 @@
     return String(value ?? '').replace(/[۰-۹]/g, d => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d)).replace(/[٠-٩]/g, d => '٠١٢٣٤٥٦٧٨٩'.indexOf(d));
   }
 
-  function normalizeConstrainedInput(input, initialize = false) {
-    if (!(input instanceof HTMLInputElement)) return;
-    let value = latinDigits(input.value);
-    if (input.dataset.afeDigitsOnly === '1') value = value.replace(/\D+/g, '');
+  function escapeRegexClass(value) {
+    return String(value || '').replace(/[\\\]\[\-^]/g, '\\$&');
+  }
 
-    const prefix = String(input.dataset.afeFixedPrefix || '');
+  function normalizeDateMask(control, value) {
+    const mask = String(control.dataset.afeDateMask || '');
+    if (!mask || control.type === 'date') return value;
+    const digits = latinDigits(value).replace(/\D+/g, '').slice(0, 8);
+    const separator = mask.includes('/') ? '/' : '-';
+    if (digits.length <= 4) return digits;
+    if (digits.length <= 6) return `${digits.slice(0, 4)}${separator}${digits.slice(4)}`;
+    return `${digits.slice(0, 4)}${separator}${digits.slice(4, 6)}${separator}${digits.slice(6)}`;
+  }
+
+  function normalizeConstrainedInput(control, initialize = false) {
+    if (!(control instanceof HTMLInputElement || control instanceof HTMLTextAreaElement)) return;
+    let value = latinDigits(control.value);
+    const mode = String(control.dataset.afeCharacterMode || 'normal');
+    const allowedExtra = escapeRegexClass(control.dataset.afeAllowedExtra || '');
+    const forbiddenExtra = escapeRegexClass(control.dataset.afeForbiddenExtra || '');
+
+    if (control.dataset.afeDigitsOnly === '1') value = value.replace(/\D+/g, '');
+
+    const prefix = String(control.dataset.afeFixedPrefix || '');
     if (prefix) {
       if (value.startsWith(prefix)) {
         value = prefix + value.slice(prefix.length).replace(/\D+/g, '');
@@ -1068,30 +1086,60 @@
       }
     }
 
-    const maxLength = Number(input.getAttribute('maxlength') || 0);
+    if (mode === 'persian') value = value.replace(new RegExp(`[^\\u0621-\\u063A\\u0641-\\u064A\\u066E-\\u06D3\\u06FA-\\u06FC\\u200C\\s${allowedExtra}]`, 'gu'), '');
+    else if (mode === 'english') value = value.replace(new RegExp(`[^A-Za-z\\s${allowedExtra}]`, 'g'), '');
+    else if (mode === 'alnum') value = value.replace(new RegExp(`[^A-Za-z0-9\\u0621-\\u063A\\u0641-\\u064A\\u066E-\\u06D3\\u06FA-\\u06FC\\u200C\\s${allowedExtra}]`, 'gu'), '');
+    else if (mode === 'digits') value = value.replace(new RegExp(`[^0-9${allowedExtra}]`, 'g'), '');
+
+    if (forbiddenExtra) value = value.replace(new RegExp(`[${forbiddenExtra}]`, 'gu'), '');
+    value = normalizeDateMask(control, value);
+
+    const maxLength = Number(control.getAttribute('maxlength') || 0);
     if (maxLength > 0 && value.length > maxLength) value = value.slice(0, maxLength);
-    if (input.value !== value || (initialize && !input.value && prefix)) input.value = value || prefix;
+    if (control.value !== value || (initialize && !control.value && prefix)) control.value = value || prefix;
+  }
+
+  function validateCustomRegex(control) {
+    if (!(control instanceof HTMLInputElement || control instanceof HTMLTextAreaElement)) return;
+    const pattern = String(control.dataset.afeCustomRegex || '');
+    if (!pattern || !control.value) { control.setCustomValidity(''); return; }
+    try {
+      const flags = String(control.dataset.afeCustomRegexFlags || 'u').replace(/[^imsu]/g, '');
+      const regex = new RegExp(pattern, flags);
+      control.setCustomValidity(regex.test(control.value) ? '' : String(control.dataset.afeCustomRegexMessage || 'مقدار واردشده معتبر نیست.'));
+    } catch (error) {
+      // PHP is the source of truth. Unsupported PCRE syntax in JS simply skips UX validation.
+      control.setCustomValidity('');
+    }
   }
 
   function initConstrainedInputs(root) {
-    qsa(root, 'input[data-afe-digits-only="1"],input[data-afe-fixed-prefix]').forEach(input => {
-      if (input.dataset.afeConstraintReady === '1') return;
-      input.dataset.afeConstraintReady = '1';
-      normalizeConstrainedInput(input, true);
-      input.addEventListener('input', () => normalizeConstrainedInput(input));
-      input.addEventListener('blur', () => normalizeConstrainedInput(input));
-      input.addEventListener('keydown', event => {
-        const prefix = String(input.dataset.afeFixedPrefix || '');
-        if (!prefix) return;
-        const start = Number(input.selectionStart ?? 0);
+    qsa(root, 'input[data-afe-digits-only="1"],input[data-afe-fixed-prefix],input[data-afe-character-mode],textarea[data-afe-character-mode],input[data-afe-date-mask],input[data-afe-custom-regex],textarea[data-afe-custom-regex]').forEach(control => {
+      if (control.dataset.afeConstraintReady === '1') return;
+      control.dataset.afeConstraintReady = '1';
+      normalizeConstrainedInput(control, true);
+      validateCustomRegex(control);
+      control.addEventListener('input', () => { normalizeConstrainedInput(control); validateCustomRegex(control); });
+      control.addEventListener('blur', () => { normalizeConstrainedInput(control); validateCustomRegex(control); });
+      control.addEventListener('keydown', event => {
+        if (control.dataset.afeDatePickerOnly === '1' && !['Tab','Enter','Escape'].includes(event.key)) {
+          event.preventDefault();
+          return;
+        }
+        const prefix = String(control.dataset.afeFixedPrefix || '');
+        if (!prefix || !(control instanceof HTMLInputElement)) return;
+        const start = Number(control.selectionStart ?? 0);
         if ((event.key === 'Backspace' && start <= prefix.length) || (event.key === 'Delete' && start < prefix.length)) {
           event.preventDefault();
-          input.setSelectionRange(prefix.length, prefix.length);
+          control.setSelectionRange(prefix.length, prefix.length);
         }
       });
-      input.addEventListener('focus', () => {
-        const prefix = String(input.dataset.afeFixedPrefix || '');
-        if (prefix && Number(input.selectionStart ?? 0) < prefix.length) input.setSelectionRange(prefix.length, prefix.length);
+      control.addEventListener('paste', event => {
+        if (control.dataset.afeDatePickerOnly === '1') event.preventDefault();
+      });
+      control.addEventListener('focus', () => {
+        const prefix = String(control.dataset.afeFixedPrefix || '');
+        if (prefix && control instanceof HTMLInputElement && Number(control.selectionStart ?? 0) < prefix.length) control.setSelectionRange(prefix.length, prefix.length);
       });
     });
   }
@@ -1119,7 +1167,10 @@
         return hasValue && typeof el.checkValidity === 'function' && !el.checkValidity();
       });
       if (invalidControl) {
-        setError(wrapper, invalidControl.dataset.afeInvalidMessage || 'مقدار واردشده با قالب مورد انتظار مطابقت ندارد.');
+        const message = invalidControl.validity?.customError
+          ? invalidControl.validationMessage
+          : (invalidControl.dataset.afeInvalidMessage || 'مقدار واردشده با قالب مورد انتظار مطابقت ندارد.');
+        setError(wrapper, message);
         ok = false;
         return;
       }
@@ -1736,9 +1787,9 @@
   }
 
   document.addEventListener('DOMContentLoaded', () => {
-    if (window.jalaliDatepicker && qs(document, 'input[data-afe-calendar="jalali"]')) {
+    if (window.jalaliDatepicker && qs(document, 'input[data-afe-calendar="jalali"][data-jdp]')) {
       window.jalaliDatepicker.startWatch({
-        selector: 'input[data-afe-calendar="jalali"]',
+        selector: 'input[data-afe-calendar="jalali"][data-jdp]',
         persianDigits: false,
         autoReadOnlyInput: false,
         date: true,

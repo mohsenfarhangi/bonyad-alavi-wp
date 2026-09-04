@@ -708,6 +708,54 @@
     });
   };
 
+
+  const initFieldOrdering = () => {
+    document.querySelectorAll('[data-afe-field-order-list]').forEach(list => {
+      if (list.dataset.afeOrderReady === '1') return;
+      list.dataset.afeOrderReady = '1';
+      let dragged = null;
+      list.addEventListener('dragstart', event => {
+        const item = event.target.closest('[data-afe-field-order-item]');
+        if (!item || item.parentElement !== list) return;
+        dragged = item;
+        item.classList.add('is-dragging');
+        event.dataTransfer.effectAllowed = 'move';
+      });
+      list.addEventListener('dragover', event => {
+        if (!dragged) return;
+        const target = event.target.closest('[data-afe-field-order-item]');
+        if (target && target.parentElement !== list) return;
+        event.preventDefault();
+        if (!target || target === dragged) return;
+        const rect = target.getBoundingClientRect();
+        list.insertBefore(dragged, event.clientY > rect.top + rect.height / 2 ? target.nextSibling : target);
+      });
+      list.addEventListener('drop', event => {
+        if (dragged) event.preventDefault();
+      });
+      list.addEventListener('dragend', () => {
+        dragged?.classList.remove('is-dragging');
+        dragged = null;
+      });
+    });
+  };
+
+  const initValidatorOverrides = () => {
+    document.querySelectorAll('[data-afe-validator-override]').forEach(root => {
+      const select = qs(root, '[data-afe-validator-select]');
+      if (!select || select.dataset.afeValidatorReady === '1') return;
+      select.dataset.afeValidatorReady = '1';
+      const sync = () => {
+        const selected = new Set([...select.selectedOptions].map(option => option.value));
+        root.querySelectorAll('[data-afe-validator-detail]').forEach(detail => {
+          detail.hidden = !selected.has(detail.dataset.afeValidatorDetail || '');
+        });
+      };
+      select.addEventListener('change', sync);
+      sync();
+    });
+  };
+
   const initAdminDatePickers = () => {
     if (!window.afeAdmin?.isJalali || !window.jalaliDatepicker) return;
     try {
@@ -753,6 +801,8 @@
     initTokenPalettes();
     initActionBuilders();
     initDuplicateSettings();
+    initFieldOrdering();
+    initValidatorOverrides();
     initAdminDatePickers();
   });
 })();

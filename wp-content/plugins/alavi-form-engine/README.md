@@ -1,27 +1,26 @@
-## وضعیت توسعه 1.0.28-dev (Extended Actions / Retry / Duplicate Checkpoint)
+## وضعیت توسعه 1.0.28-dev (Field / Date / Validator Checkpoint)
 
 > این بسته هنوز Production-ready نیست. مبنای پایدار `1.0.27` است و `Stable tag` عمداً روی `1.0.27` باقی مانده است. DB checkpoint فعلی `1.0.5-dev.2` است.
 
-در این checkpoint، معماری Event/Action و Duplicate از scaffold عبور کرده و Action Engine گسترش یافته است:
+در این checkpoint علاوه بر Event/Action/Duplicate و Extended Actions مراحل Field UI نیز پیاده شده‌اند:
 
-- `ActionDefinition` / `ActionRegistry` با schema عمومی تنظیمات، `action_key` پایدار، Conditional Logic و سیاست‌های اجرای `always` / `once_per_submission` / `first_in_cycle`.
-- Action Log و once-guard اتمیک به اجرای واقعی متصل‌اند؛ خطای Action ثبت موفق Submission را rollback نمی‌کند.
-- Eventهای canonical با Label فارسی به create/draft/submit/update/status/lock/edit-request/trash/restore وصل شده‌اند.
-- Email، Webhook، SMS و سایر Templateهای متنی از `TokenResolver` مشترک استفاده می‌کنند و Field Tokenها فقط از schema واقعی همان فرم resolve می‌شوند.
-- تب «رویدادها و اکشن‌ها» Registry-based است و چند Action در هر Event، Drag & Drop داخل Event، فعال/غیرفعال‌سازی، Conditional Logic و Token Palette click-to-copy دارد.
-- `ActionRuntime` خروجی مشترک زنجیره را نگه می‌دارد؛ اکشن‌های بعدی می‌توانند `user_id`، `post_id`، وضعیت جدید و Redirect خروجی اکشن قبلی را مصرف کنند.
-- Actionهای Redirect، Create/Login/Update User، Assign Role، Update User Meta، تغییر Submission Status، یادداشت داخلی، تولید PDF، ارسال PDF با Email و Create/Update/Upsert Post/CPT اضافه شده‌اند.
-- Redirect پس از پایان Actionهای server-side در پاسخ Ajax برمی‌گردد؛ اولین Redirect مؤثر برنده است. Redirect خارجی فقط با تنظیم صریح و Capability مدیریتی مجاز می‌شود.
-- Retry مدیریتی Action Log در جزئیات Submission پیاده شده است؛ Retry بر اساس همان `action_key` پایدار و تنظیمات فعلی انجام می‌شود و شرط/رویداد/قابلیت Retry دوباره بررسی می‌شوند.
-- اکشن‌های حساس guard دارند: Login در Retry اجرا نمی‌شود، نقش Administrator بدون مجوز صریح assign نمی‌شود و Publish مستقیم Post/CPT بدون مجوز صریح پذیرفته نمی‌شود.
-- `SmsAction` و Provider ملی‌پیامک برای Legacy username/password و Console API token پیاده شده‌اند؛ تست واقعی حساب ملی‌پیامک توسط مدیر پروژه انجام می‌شود و نتیجه آن پیش‌نیاز Production است.
-- DuplicatePolicy به create/update/REST/admin edit/trash/restore وصل است؛ Draftهای فعال در تطبیق شرکت می‌کنند، Submission جاری هنگام edit مستثنا است و Trashها در تطبیق نیستند.
-- رفتارهای Duplicate شامل block، reference امن، پیام سفارشی و allow+mark است و owner promotion تراکنشی مانع ناپدید شدن fingerprint فعال می‌شود.
-- تب «جلوگیری از تکرار» با انتخاب چند Field، رفتار، پیام و validation حداقل یک Field پیاده شده است.
+- Field Ordering واقعی در سطح هر Step اضافه شده است؛ `HtmlBlock` نیز همراه فیلدها Drag & Drop می‌شود و Field بین Stepها منتقل نمی‌شود.
+- Child Fieldهای هر Repeater فقط داخل همان Repeater قابل مرتب‌سازی‌اند. ترتیب Override در runtime روی `resolvedForm` اعمال می‌شود و آیتم‌های جدیدی که بعداً در تعریف PHP اضافه شوند بدون حذف‌شدن به انتهای همان scope افزوده می‌شوند.
+- `DateField` سه mode رسمی دارد: `combined` (انتخاب + ورود دستی، پیش‌فرض)، `picker` (فقط انتخاب) و `manual` (فقط ورود دستی).
+- mask تاریخ در frontend برای Jalali برابر `YYYY/MM/DD` و برای Gregorian برابر `YYYY-MM-DD` است؛ اعتبارسنجی واقعی همچنان سمت PHP انجام می‌شود.
+- Jalali DateField در حالت `manual` دیگر JalaliDatePicker را لود/فعال نمی‌کند؛ فرم جهادی طبق تعریف کد همچنان Jalali و با mode پیش‌فرض `combined` باقی مانده است.
+- Field Override برای Character/Input Mode شامل Normal، فقط اعداد، فقط حروف فارسی، فقط حروف انگلیسی و حروف+اعداد است؛ allowed-extra و forbidden-extra مستقل نیز اضافه شده‌اند.
+- حداقل طول، حداکثر طول و طول دقیق به Override اضافه شده‌اند؛ طول دقیق اولویت دارد و backend بدون وابستگی اجباری به `mbstring` طول Unicode را درست محاسبه می‌کند.
+- `ValidatorDefinition` / `ValidatorRegistry` اضافه شده و از hook توسعه‌دهنده `afe_register_validator_definitions` پشتیبانی می‌کند.
+- Validatorهای Core: کد ملی ایران، موبایل ایران، شبا، Email، URL، کد پستی ۱۰ رقمی، کارت بانکی ۱۶ رقمی با checksum، تلفن ثابت ایران، Date validation و Custom Regex.
+- UI Validation به صورت انتخاب چندگانه و پیام خطای سفارشی برای هر Validator در Override فیلد قرار دارد.
+- Custom Regex فقط با `afe_manage_settings` قابل تعریف/تغییر است، حداکثر طول و Flag whitelist دارد، قبل از Save compile-test می‌شود و در PHP با PCRE match/recursion limits اجرا می‌شود. Frontend فقط UX validation است و PHP منبع نهایی است.
+- Ruleهای legacy فرم‌ها (`national_id`, `mobile`, `iban_digits`, ...) برای backward compatibility حفظ شده‌اند.
+- Event/Action/Retry/SMS/Duplicate قابلیت‌های checkpoint قبلی بدون حذف باقی مانده‌اند. تست واقعی ملی‌پیامک همچنان توسط مدیر پروژه انجام می‌شود.
 
-QA این checkpoint شامل PHP lint، JavaScript syntax check و کل regression suite است. تست‌های اختصاصی Runtime/Retry، Registry، Redirect، تنظیمات حساس Action، SMS و Duplicate نیز پاس می‌شوند.
+QA این checkpoint: کل `tests/*.php` برابر **28 test scripts** پاس شده، PHP lint روی **122 فایل** `src/` و `tests/` پاس شده و syntax فایل‌های `admin.js` و `frontend.js` نیز سالم است.
 
-هنوز تکمیل نشده: Field ordering واقعی، Date input modes، Character/Length overrides، Validator Registry/UI و Custom Regex امن. تولید مستقیم PDF به وجود `Dompdf\Dompdf` در autoload سایت وابسته است؛ Dompdf داخل این ZIP باندل نشده است.
+هنوز تکمیل نشده: نتیجه integration واقعی ملی‌پیامک، تنظیم Action نهایی SMS فرم جهادی بر اساس نتیجه تست مدیر، live WordPress/MySQL/Elementor acceptance و bump نهایی Production به `1.0.28`. تولید مستقیم PDF به وجود `Dompdf\Dompdf` در autoload سایت وابسته است؛ Dompdf داخل این ZIP باندل نشده است.
 
 # Alavi Form Engine
 

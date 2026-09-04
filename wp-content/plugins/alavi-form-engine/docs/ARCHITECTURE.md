@@ -111,8 +111,26 @@ Use the WordPress actions:
 - `afe_register_action_definitions`
 - `afe_register_actions` (legacy/runtime handler compatibility)
 - `afe_register_event_definitions`
+- `afe_register_validator_definitions`
 - `afe_register_events`
 - `afe_register_templates`
 - `afe_booted`
 
 The engine can therefore be extended by a site plugin or theme without editing the Alavi Form Engine plugin itself.
+
+## Field override ordering and validation pipeline (1.0.28-dev)
+
+The runtime form now resolves structural order before property overrides:
+
+`Code Definition -> Scoped Order Override -> Field Property/Validator Override -> Step/Admin Settings -> Runtime Form`
+
+Order overrides contain only names that already belong to the original scope. The resolver never moves a Field across Steps and never creates a Field from admin input. Unknown/missing names are ignored and new code-defined items are appended, preserving the code definition as the source of truth.
+
+Validation has two compatible layers:
+
+1. legacy code-defined `rules` used by existing forms;
+2. registry-driven `validators` selected through the admin Field Override UI.
+
+`ValidatorRegistry` owns reusable definitions and type compatibility. `Form\Validator` is the server-side authority and evaluates field activity/required state, length/character constraints, legacy rules, then registered validators. Frontend masks, HTML attributes, character filtering and Custom Regex checks are UX only.
+
+Custom Regex is capability-gated and constrained before persistence; runtime PCRE applies explicit match/recursion limits. Raw PHP/callback code is never accepted from admin UI.

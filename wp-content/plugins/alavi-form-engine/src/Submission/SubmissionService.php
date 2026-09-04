@@ -313,6 +313,9 @@ final class SubmissionService
         $overrides = $this->forms->overrides($slug);
         $adminSettings = $this->forms->adminSettings($slug);
 
+        if (!empty($overrides['order']) && is_array($overrides['order'])) {
+            $this->applyOrderOverrides($form, (array)$overrides['order']);
+        }
         if (!empty($overrides['fields']) && is_array($overrides['fields'])) {
             foreach ($form['steps'] as &$step) {
                 foreach ($step['items'] as &$field) {
@@ -344,12 +347,60 @@ final class SubmissionService
         return $form;
     }
 
+    private function applyOrderOverrides(array &$form,array $order): void
+    {
+        $stepOrders=is_array($order['steps']??null)?$order['steps']:[];
+        $repeaterOrders=is_array($order['repeaters']??null)?$order['repeaters']:[];
+        foreach ($form['steps'] as &$step) {
+            $stepKey=(string)($step['key']??'');
+            if (isset($stepOrders[$stepKey]) && is_array($stepOrders[$stepKey])) {
+                $step['items']=$this->reorderItems((array)$step['items'],(array)$stepOrders[$stepKey]);
+            }
+            foreach ($step['items'] as &$field) $this->applyRepeaterOrder($field,$repeaterOrders,'');
+            unset($field);
+        }
+        unset($step);
+    }
+
+    /** @param list<array<string,mixed>> $items @param list<string> $order */
+    private function reorderItems(array $items,array $order): array
+    {
+        $map=[];
+        foreach ($items as $item) {
+            $name=(string)($item['name']??'');
+            if ($name!=='') $map[$name]=$item;
+        }
+        $out=[];
+        foreach ($order as $name) {
+            $name=(string)$name;
+            if ($name!=='' && isset($map[$name])) { $out[]=$map[$name]; unset($map[$name]); }
+        }
+        foreach ($items as $item) {
+            $name=(string)($item['name']??'');
+            if ($name!=='' && isset($map[$name])) { $out[]=$map[$name]; unset($map[$name]); }
+        }
+        return $out;
+    }
+
+    private function applyRepeaterOrder(array &$field,array $orders,string $prefix): void
+    {
+        $name=(string)($field['name']??'');
+        if ($name==='') return;
+        $path=$prefix===''?$name:$prefix.'.'.$name;
+        if (($field['type']??'')!=='repeater') return;
+        if (isset($orders[$path]) && is_array($orders[$path])) {
+            $field['fields']=$this->reorderItems((array)($field['fields']??[]),(array)$orders[$path]);
+        }
+        foreach ($field['fields'] as &$child) $this->applyRepeaterOrder($child,$orders,$path);
+        unset($child);
+    }
+
     private function applyFieldOverrides(array &$field, array $overrides, string $prefix = ''): void
     {
         $path = $prefix === '' ? (string)$field['name'] : $prefix . '.' . $field['name'];
         $override = $overrides[$path] ?? ($prefix === '' ? ($overrides[$field['name']] ?? null) : null);
         if (is_array($override)) {
-            $allowed = ['label','description','placeholder','required','options','max_files','max_size_mb','accept','calendar','select_mode','searchable','search_threshold'];
+            $allowed = ['label','description','placeholder','required','options','max_files','max_size_mb','accept','calendar','date_input_mode','select_mode','searchable','search_threshold','character_mode','allowed_extra','forbidden_extra','min_length','max_length','exact_length','validators'];
             foreach ($allowed as $key) {
                 if (array_key_exists($key,$override)) $field[$key]=$override[$key];
             }

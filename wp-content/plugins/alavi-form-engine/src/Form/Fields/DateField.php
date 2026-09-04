@@ -29,10 +29,26 @@ final class DateField extends AbstractField
         return $this->calendar('gregorian');
     }
 
+
+    public function inputMode(string $mode): static
+    {
+        $mode = strtolower(trim($mode));
+        if (!in_array($mode, ['combined','picker','manual'], true)) {
+            throw new InvalidArgumentException('DateField input mode must be combined, picker or manual.');
+        }
+        $this->config['date_input_mode'] = $mode;
+        return $this;
+    }
+
+    public function combined(): static { return $this->inputMode('combined'); }
+    public function pickerOnly(): static { return $this->inputMode('picker'); }
+    public function manualOnly(): static { return $this->inputMode('manual'); }
+
     public function toArray(): array
     {
         return array_replace(parent::toArray(), [
             'calendar' => $this->config['calendar'] ?? 'gregorian',
+            'date_input_mode' => $this->config['date_input_mode'] ?? 'combined',
         ]);
     }
 }
