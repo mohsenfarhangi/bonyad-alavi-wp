@@ -1,35 +1,56 @@
-# Patch Manifest — v0.5.4
+# Patch Manifest — v0.5.5
 
-## مبدا و مقصد
-
-- نسخه مبدا: `v0.5.3`
-- نسخه مقصد: `v0.5.4`
-- نوع نسخه: PATCH
+مبدا Patch: `v0.5.4`  
+مقصد Patch: `v0.5.5`
 
 ## هدف
 
-اصلاح بارگذاری Assetهای اختصاصی تب‌های «تنظیمات بنیاد علوی» برای کاربران جدید یا نقش‌هایی با دسترسی محدود، به‌خصوص زمانی که صفحه بدون پارامتر `tab` باز می‌شود.
-
-## علت
-
-تب مرکز برای enqueue کردن Assetها مستقیماً `$_GET['tab']` را بررسی می‌کرد، در حالی که صفحه مرکزی می‌توانست در نبود این پارامتر، تب مرکز را بر اساس Capability کاربر به‌عنوان تب فعال Resolve و Render کند. در این حالت UI نمایش داده می‌شد ولی `ba-admin-repeater.css/js` و `ba-center-settings.css/js` لود نمی‌شدند.
+تکمیل کنترل‌های ریسپانسیو استایل برای پنل آمار و Hero ویجت «مرکز حرکت‌های مردمی و جهادی».
 
 ## فایل‌های تغییرکرده
 
-- `inc/admin/settings/class-ba-settings-page.php`
-- `inc/admin/settings/class-ba-center-settings-tab.php`
-- `docs/handoff.md`
+### `inc/elementor/widgets/class-bonyad-alavi-jihadi-center-widget.php`
 
-## فایل‌های جدید
+علت ورود به Patch:
 
-- `docs/versions/v0.5.4.md`
+- افزودن Margin چهارجهته و ریسپانسیو برای `.ba-jihadi-center__stats-wrap`.
+- تکمیل کنترل ارتفاع ریسپانسیو Hero.
+- افزودن کنترل `object-fit` ریسپانسیو تصویر Hero.
+- تبدیل موقعیت تصویر Hero به کنترل ریسپانسیو با ۹ موقعیت.
+- افزودن Opacity ریسپانسیو و CSS Filterهای استاندارد Elementor برای تصویر Hero.
+
+### `assets/css/bonyad-alavi-jihadi-center-widget.css`
+
+علت ورود به Patch:
+
+- حذف Min Height ثابت موبایل Hero که کنترل ریسپانسیو Elementor را خنثی می‌کرد.
+- تعریف fallback ریسپانسیو `--ba-jc-hero-height` برای Tablet و Mobile.
+
+### `docs/handoff.md`
+
+علت ورود به Patch:
+
+- ثبت قرارداد جدید کنترل‌های استایل Hero و آمار برای توسعه‌های آینده.
+- افزودن نسخه `v0.5.5` به تاریخچه پروژه.
+
+### `docs/versions/v0.5.5.md`
+
+علت ورود به Patch:
+
+- مستندسازی کامل تغییرات، سازگاری و تست‌های نسخه.
 
 ## فایل حذف‌شده
 
 ندارد.
 
-## نکات اعمال Patch
+## روش اعمال
 
-محتویات ZIP را در ریشه قالب `ostadsho-child` جایگزین کنید. ساختار مسیرها حفظ شده است.
+محتوای این ZIP را روی ریشه قالب `ostadsho-child` نسخه `v0.5.4` کپی و Replace کنید.
 
-از این نسخه Asset اختصاصی هر تب از طریق `assets_callback` در Registry همان تب ثبت می‌شود و `BA_Settings_Page` پس از Resolve تب فعال واقعی، Callback را اجرا می‌کند. Featureها نباید برای بارگذاری Asset به وجود `?tab=` در URL وابسته باشند.
+## بررسی‌های انجام‌شده
+
+- `php -l` برای تمام فایل‌های PHP قالب: موفق
+- `node --check` برای تمام فایل‌های JavaScript قالب: موفق
+- بررسی حذف Rule ثابت `min-height:480px` روی Hero موبایل: موفق
+- بررسی وجود کنترل‌های جدید Elementor: موفق
+- تست سلامت ZIP کامل و Patch: موفق

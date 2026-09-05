@@ -12,6 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 use Elementor\Controls_Manager;
 use Elementor\Group_Control_Border;
 use Elementor\Group_Control_Box_Shadow;
+use Elementor\Group_Control_Css_Filter;
 use Elementor\Group_Control_Typography;
 use Elementor\Icons_Manager;
 use Elementor\Repeater;
@@ -444,10 +445,76 @@ final class Bonyad_Alavi_Jihadi_Center_Widget extends Widget_Base {
 	 */
 	private function register_hero_style_controls() {
 		$this->start_controls_section( 'style_hero', array( 'label' => 'Hero', 'tab' => Controls_Manager::TAB_STYLE ) );
-		$this->add_responsive_control( 'hero_min_height', array( 'label' => 'حداقل ارتفاع', 'type' => Controls_Manager::SLIDER, 'size_units' => array( 'px', 'vh' ), 'range' => array( 'px' => array( 'min' => 300, 'max' => 900 ), 'vh' => array( 'min' => 30, 'max' => 100 ) ), 'default' => array( 'size' => 600, 'unit' => 'px' ), 'selectors' => array( '{{WRAPPER}} .ba-jihadi-center' => '--ba-jc-hero-height: {{SIZE}}{{UNIT}};' ) ) );
+		$this->add_responsive_control(
+			'hero_min_height',
+			array(
+				'label'          => 'ارتفاع Hero',
+				'type'           => Controls_Manager::SLIDER,
+				'size_units'     => array( 'px', 'vh' ),
+				'range'          => array( 'px' => array( 'min' => 260, 'max' => 1200 ), 'vh' => array( 'min' => 25, 'max' => 100 ) ),
+				'default'        => array( 'size' => 600, 'unit' => 'px' ),
+				'tablet_default' => array( 'size' => 540, 'unit' => 'px' ),
+				'mobile_default' => array( 'size' => 480, 'unit' => 'px' ),
+				'selectors'      => array( '{{WRAPPER}} .ba-jihadi-center' => '--ba-jc-hero-height: {{SIZE}}{{UNIT}};' ),
+			)
+		);
 		$this->add_responsive_control( 'hero_padding', array( 'label' => 'فاصله داخلی', 'type' => Controls_Manager::DIMENSIONS, 'size_units' => array( 'px', '%', 'em' ), 'selectors' => array( '{{WRAPPER}} .ba-jihadi-center__hero-inner' => 'padding: {{TOP}}{{UNIT}} {{RIGHT}}{{UNIT}} {{BOTTOM}}{{UNIT}} {{LEFT}}{{UNIT}};' ) ) );
 		$this->add_control( 'hero_overlay', array( 'label' => 'رنگ Overlay', 'type' => Controls_Manager::COLOR, 'default' => 'rgba(0,68,33,.78)', 'selectors' => array( '{{WRAPPER}} .ba-jihadi-center' => '--ba-jc-hero-overlay: {{VALUE}};' ) ) );
-		$this->add_control( 'hero_image_position', array( 'label' => 'موقعیت تصویر', 'type' => Controls_Manager::SELECT, 'default' => 'center', 'options' => array( 'center' => 'وسط', 'top' => 'بالا', 'bottom' => 'پایین', 'right' => 'راست', 'left' => 'چپ' ), 'selectors' => array( '{{WRAPPER}} .ba-jihadi-center__hero-image' => 'object-position: {{VALUE}};' ) ) );
+		$this->add_control( 'hero_image_heading', array( 'label' => 'تصویر Hero', 'type' => Controls_Manager::HEADING, 'separator' => 'before' ) );
+		$this->add_responsive_control(
+			'hero_image_fit',
+			array(
+				'label'     => 'نحوه نمایش تصویر',
+				'type'      => Controls_Manager::SELECT,
+				'default'   => 'cover',
+				'options'   => array(
+					'cover'      => 'Cover',
+					'contain'    => 'Contain',
+					'fill'       => 'Fill',
+					'none'       => 'None',
+					'scale-down' => 'Scale Down',
+				),
+				'selectors' => array( '{{WRAPPER}} .ba-jihadi-center__hero-image' => 'object-fit: {{VALUE}};' ),
+			)
+		);
+		$this->add_responsive_control(
+			'hero_image_position',
+			array(
+				'label'     => 'موقعیت تصویر',
+				'type'      => Controls_Manager::SELECT,
+				'default'   => 'center center',
+				'options'   => array(
+					'center center' => 'وسط',
+					'center top'    => 'بالا',
+					'center bottom' => 'پایین',
+					'right center'  => 'راست',
+					'left center'   => 'چپ',
+					'right top'     => 'بالا راست',
+					'left top'      => 'بالا چپ',
+					'right bottom'  => 'پایین راست',
+					'left bottom'   => 'پایین چپ',
+				),
+				'selectors' => array( '{{WRAPPER}} .ba-jihadi-center__hero-image' => 'object-position: {{VALUE}};' ),
+			)
+		);
+		$this->add_responsive_control(
+			'hero_image_opacity',
+			array(
+				'label'     => 'شفافیت تصویر',
+				'type'      => Controls_Manager::SLIDER,
+				'range'     => array( 'px' => array( 'min' => 0, 'max' => 1, 'step' => 0.05 ) ),
+				'default'   => array( 'size' => 1 ),
+				'selectors' => array( '{{WRAPPER}} .ba-jihadi-center__hero-image' => 'opacity: {{SIZE}};' ),
+			)
+		);
+		$this->add_group_control(
+			Group_Control_Css_Filter::get_type(),
+			array(
+				'name'     => 'hero_image_filters',
+				'label'    => 'فیلترهای تصویر',
+				'selector' => '{{WRAPPER}} .ba-jihadi-center__hero-image',
+			)
+		);
 		$this->add_group_control( Group_Control_Typography::get_type(), array( 'name' => 'hero_title_typography', 'label' => 'تایپوگرافی عنوان', 'selector' => '{{WRAPPER}} .ba-jihadi-center__hero-title' ) );
 		$this->add_control( 'hero_title_color', array( 'label' => 'رنگ عنوان', 'type' => Controls_Manager::COLOR, 'default' => '#ffffff', 'selectors' => array( '{{WRAPPER}} .ba-jihadi-center__hero-title' => 'color: {{VALUE}};' ) ) );
 		$this->add_group_control( Group_Control_Typography::get_type(), array( 'name' => 'hero_eyebrow_typography', 'label' => 'تایپوگرافی متن بالا', 'selector' => '{{WRAPPER}} .ba-jihadi-center__eyebrow' ) );
@@ -470,7 +537,17 @@ final class Bonyad_Alavi_Jihadi_Center_Widget extends Widget_Base {
 	 */
 	private function register_stats_style_controls() {
 		$this->start_controls_section( 'style_stats', array( 'label' => 'آمار مرکز', 'tab' => Controls_Manager::TAB_STYLE ) );
-		$this->add_responsive_control( 'stats_margin_top', array( 'label' => 'فاصله از بالا', 'type' => Controls_Manager::SLIDER, 'size_units' => array( 'px' ), 'range' => array( 'px' => array( 'min' => -250, 'max' => 120 ) ), 'default' => array( 'size' => -170, 'unit' => 'px' ), 'tablet_default' => array( 'size' => -70, 'unit' => 'px' ), 'mobile_default' => array( 'size' => 0, 'unit' => 'px' ), 'selectors' => array( '{{WRAPPER}} .ba-jihadi-center__stats-wrap' => 'margin-top: {{SIZE}}{{UNIT}};' ) ) );
+		$this->add_responsive_control( 'stats_margin_top', array( 'label' => 'فاصله از بالا', 'type' => Controls_Manager::SLIDER, 'size_units' => array( 'px' ), 'range' => array( 'px' => array( 'min' => -400, 'max' => 300 ) ), 'default' => array( 'size' => -170, 'unit' => 'px' ), 'tablet_default' => array( 'size' => -70, 'unit' => 'px' ), 'mobile_default' => array( 'size' => 0, 'unit' => 'px' ), 'selectors' => array( '{{WRAPPER}} .ba-jihadi-center__stats-wrap' => 'margin-top: {{SIZE}}{{UNIT}};' ) ) );
+		$this->add_responsive_control(
+			'stats_margin',
+			array(
+				'label'      => 'Margin کامل',
+				'type'       => Controls_Manager::DIMENSIONS,
+				'size_units' => array( 'px', '%', 'em', 'rem' ),
+				'selectors'  => array( '{{WRAPPER}} .ba-jihadi-center__stats-wrap' => 'margin: {{TOP}}{{UNIT}} {{RIGHT}}{{UNIT}} {{BOTTOM}}{{UNIT}} {{LEFT}}{{UNIT}};' ),
+				'description'=> 'در صورت مقداردهی، این کنترل Margin چهار جهت را تعیین می‌کند و مقدار «فاصله از بالا» را نیز جایگزین می‌کند.',
+			)
+		);
 		$this->add_control( 'stats_panel_bg', array( 'label' => 'پس‌زمینه پنل', 'type' => Controls_Manager::COLOR, 'default' => '#ffffff', 'selectors' => array( '{{WRAPPER}} .ba-jihadi-center__stats-panel' => 'background: {{VALUE}};' ) ) );
 		$this->add_control( 'stats_intro_bg', array( 'label' => 'پس‌زمینه عنوان پنل', 'type' => Controls_Manager::COLOR, 'default' => '#069043', 'selectors' => array( '{{WRAPPER}} .ba-jihadi-center__stats-intro' => 'background: {{VALUE}};' ) ) );
 		$this->add_control( 'stats_radius', array( 'label' => 'گردی پنل', 'type' => Controls_Manager::SLIDER, 'range' => array( 'px' => array( 'min' => 0, 'max' => 40 ) ), 'default' => array( 'size' => 14 ), 'selectors' => array( '{{WRAPPER}} .ba-jihadi-center__stats-panel' => 'border-radius: {{SIZE}}{{UNIT}};' ) ) );

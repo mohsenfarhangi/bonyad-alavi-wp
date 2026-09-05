@@ -118,6 +118,7 @@ Block عمومی BEM:
 - [v0.5.2 — اصلاح Hover آیکون و چیدمان معرفی مرکز](versions/v0.5.2.md)
 - [v0.5.3 — Lazy Rendering و Fade-in سکشن‌های مرکز](versions/v0.5.3.md)
 - [v0.5.4 — اصلاح بارگذاری Asset تب‌های تنظیمات بر اساس دسترسی کاربر](versions/v0.5.4.md)
+- [v0.5.5 — کنترل‌های ریسپانسیو آمار و Hero](versions/v0.5.5.md)
 
 ## معماری ذخیره تنظیمات بنیاد علوی
 
@@ -173,6 +174,7 @@ Block عمومی BEM:
 - فایل SVG داشبورد در `ba-jihadi-center__system-icon` باید Inline رندر شود و خواندن/پاک‌سازی آن فقط از `BA_Media_Helper::get_inline_svg_attachment()` عبور کند. تصویر معمولی باید با عنصر `<img>` خروجی داده شود. داده Legacy از نوع Media همچنان به‌عنوان fallback سازگاری خوانده می‌شود.
 - از نسخه `v0.5.2` روی selector پایه‌ی `.ba-jihadi-center__system-icon svg` هیچ `fill` اجباری تعریف نمی‌شود؛ کنترل رنگ عادی و Hover فقط از `color` استفاده می‌کند تا SVGهای مبتنی بر `currentColor` رفتار استاندارد داشته باشند. رنگ Hover آیکون باید کنترل مستقل Elementor داشته باشد و با Hover/Focus کارت تغییر کند.
 - از نسخه `v0.5.3` تمام بخش‌های اصلی ویجت از Behavior Hook مشترک `data-ba-jc-reveal` برای Fade-in یک‌باره استفاده می‌کنند. سکشن‌های پایین صفحه علاوه بر آن Modifier `ba-jihadi-center__viewport-section--lazy` دارند و با `content-visibility: auto` Lazy Render می‌شوند. Hero به دلیل LCP eager باقی می‌ماند. این رفتار در `prefers-reduced-motion` و Elementor Editor نباید انیمیشن/محدودیت ویرایشی ایجاد کند.
+- از نسخه `v0.5.5` کنترل Margin چهارجهته ریسپانسیو برای `.ba-jihadi-center__stats-wrap` و کنترل‌های ارتفاع، `object-fit`، `object-position`، opacity و CSS Filter برای تصویر Hero در Elementor در دسترس هستند. Min Height موبایل Hero نباید در CSS ثابت شود و باید از `--ba-jc-hero-height` پیروی کند.
 
 آیتم Partner فقط وقتی معتبر است که حداقل تصویر، SVG/Icon یا عنوان داشته باشد. URL به‌تنهایی نباید یک کارت خالی ایجاد کند.
 
