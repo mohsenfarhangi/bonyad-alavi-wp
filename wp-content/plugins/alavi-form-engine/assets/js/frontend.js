@@ -2016,24 +2016,24 @@
     if (anchor?.parentElement) anchor.insertAdjacentElement('afterend', notice);
 
     const duplicate = Boolean(payload?.duplicate);
+    if (!duplicate) {
+      clearDuplicateNotice(form);
+      return;
+    }
+
     const blocking = Boolean(payload?.blocking);
     const behavior = String(payload?.behavior || 'block');
-    let state = 'success';
-    let message = 'برای این ترکیب از اطلاعات، ثبت تکراری پیدا نشد.';
+    const state = blocking ? 'error' : 'warning';
+    const message = String(payload?.message || 'این اطلاعات قبلاً ثبت شده است.');
     let extra = '';
-
-    if (duplicate) {
-      state = blocking ? 'error' : 'warning';
-      message = String(payload?.message || 'این اطلاعات قبلاً ثبت شده است.');
-      if (behavior === 'allow') extra = '<span class="afe-duplicate-live__hint">طبق تنظیمات فرم، ایجاد ثبت جدید همچنان مجاز است.</span>';
-      if (payload?.edit_url) {
-        extra += `<a class="afe-result-link afe-duplicate-live__link" href="${escapeAttr(String(payload.edit_url))}">مشاهده یا ادامه ثبت قبلی</a>`;
-      }
+    if (behavior === 'allow') extra = '<span class="afe-duplicate-live__hint">طبق تنظیمات فرم، ایجاد ثبت جدید همچنان مجاز است.</span>';
+    if (payload?.edit_url) {
+      extra += `<a class="afe-result-link afe-duplicate-live__link" href="${escapeAttr(String(payload.edit_url))}">مشاهده یا ادامه ثبت قبلی</a>`;
     }
 
     notice.dataset.state = state;
     notice.removeAttribute('aria-busy');
-    notice.innerHTML = `<div class="afe-duplicate-live__content"><strong>${duplicate ? 'بررسی ثبت تکراری' : 'بررسی تکراری بودن انجام شد'}</strong><span>${escapeHtml(message)}</span>${extra}</div>`;
+    notice.innerHTML = `<div class="afe-duplicate-live__content"><strong>بررسی ثبت تکراری</strong><span>${escapeHtml(message)}</span>${extra}</div>`;
     notice.hidden = false;
   }
 
@@ -2091,12 +2091,10 @@
         lastSignature = signature;
       } catch (error) {
         if (error?.name === 'AbortError' || requestSequence !== sequence) return;
-        const anchor = duplicateAnchor(form, fields, preferredControl);
-        if (anchor?.parentElement) anchor.insertAdjacentElement('afterend', notice);
-        notice.dataset.state = 'warning';
-        notice.removeAttribute('aria-busy');
-        notice.innerHTML = '<div class="afe-duplicate-live__content"><strong>بررسی تکراری بودن انجام نشد</strong><span>در ثبت نهایی، اطلاعات دوباره سمت سرور بررسی می‌شوند.</span></div>';
-        notice.hidden = false;
+        // Live duplicate checking is advisory UX only. Per product behavior we
+        // stay silent unless a duplicate is actually found; final submit still
+        // performs the authoritative server-side check.
+        clearDuplicateNotice(form);
       } finally {
         if (requestSequence === sequence) inFlightSignature = '';
       }

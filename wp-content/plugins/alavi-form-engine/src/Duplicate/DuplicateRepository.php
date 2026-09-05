@@ -24,6 +24,18 @@ final class DuplicateRepository
         return $id ? (int)$id : null;
     }
 
+
+    public function clearForForm(string $formSlug): int
+    {
+        global $wpdb;
+        $result = $wpdb->delete(
+            $wpdb->prefix . 'afe_submission_fingerprints',
+            ['form_slug'=>$formSlug],
+            ['%s']
+        );
+        return $result === false ? 0 : (int)$result;
+    }
+
     public function reserve(string $formSlug, int $submissionId, string $fingerprint): bool
     {
         global $wpdb;

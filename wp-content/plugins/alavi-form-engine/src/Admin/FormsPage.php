@@ -966,7 +966,18 @@ final class FormsPage
         $template=$this->templates->normalizeOverride($template,wp_kses_post($this->templates->defaultForm($codeForm)));
         $css=wp_strip_all_tags(wp_unslash($_POST['custom_css']??''));
         $js=current_user_can(Capabilities::MANAGE_SETTINGS) ? wp_unslash($_POST['custom_js']??'') : '';
-        $this->forms->saveAdminConfig($slug,$overrides,$template,$css,$js,$settings);
+        if (!$this->forms->saveAdminConfig($slug,$overrides,$template,$css,$js,$settings)) {
+            wp_safe_redirect(admin_url('admin.php?page=alavi-form-engine-forms&form='.$slug.'&afe_error='.rawurlencode('ذخیره تنظیمات فرم انجام نشد.'))); exit;
+        }
+        try {
+            // Duplicate field selection can change the meaning of every existing
+            // fingerprint. Rebuild immediately so historical active submissions
+            // participate in both live preflight and final-submit protection.
+            $this->service->rebuildDuplicateIndex($slug);
+        } catch (\Throwable $e) {
+            if (defined('WP_DEBUG') && WP_DEBUG) error_log('[AFE duplicate rebuild] '.$e->getMessage());
+            wp_safe_redirect(admin_url('admin.php?page=alavi-form-engine-forms&form='.$slug.'&afe_error='.rawurlencode('تنظیمات ذخیره شد اما بازسازی شاخص ثبت تکراری انجام نشد. دوباره ذخیره کنید.'))); exit;
+        }
         wp_safe_redirect(admin_url('admin.php?page=alavi-form-engine-forms&form='.$slug.'&updated=1')); exit;
     }
 

@@ -346,3 +346,20 @@ Browser print / Save as PDF is always available from a submission. Direct server
 - 50 regression tests: PASS.
 - 153 PHP files linted: PASS.
 - JavaScript/composer/assets/no-runtime-CDN/version checks: PASS.
+
+## 1.0.28-dev Live duplicate index rebuild patch
+
+- Live Duplicate UI now remains silent unless a duplicate is actually found.
+- Removed the non-duplicate success state and silent-preflight errors from the public form UI.
+- Duplicate evaluation now requires every configured fingerprint field to have a meaningful value.
+- Saving Duplicate settings rebuilds fingerprints for all active historical submissions in oldest-first order.
+- Added per-form duplicate-index signatures so existing installations self-heal on the first Live/Submit check after this patch or after fingerprint configuration changes.
+- Rebuild clears stale canonical fingerprints and duplicate metadata, then reconstructs canonical owners and allow-mode duplicate references.
+- Added `tests/duplicate-index-rebuild.php` and updated Live Duplicate regression coverage.
+
+### QA
+
+- 51 regression tests: PASS.
+- 154 PHP files linted: PASS.
+- JavaScript/composer/assets/no-runtime-CDN/version checks: PASS.
+

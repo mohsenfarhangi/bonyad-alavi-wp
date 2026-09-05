@@ -243,3 +243,6 @@ The package includes the "ثبت نام گروه‌های مردمی و جهاد
 * Numeric and identifier values are LTR/left-aligned in live and locked previews, including repeater cells and row numbers.
 
 * 1.0.28-dev: بررسی زنده Duplicate پس از تکمیل همه فیلدهای Fingerprint.
+
+* 1.0.28-dev: Live Duplicate فقط در صورت تشخیص ثبت تکراری پیام نمایش می‌دهد؛ نتیجه غیرتکراری و خطای موقت preflight بی‌صدا هستند.
+* 1.0.28-dev: ایندکس Fingerprint هنگام تغییر تنظیمات Duplicate بازسازی می‌شود و ثبت‌های قدیمی با self-heal مبتنی بر signature وارد تشخیص می‌شوند.

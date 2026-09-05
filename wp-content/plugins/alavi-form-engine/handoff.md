@@ -629,3 +629,20 @@ Eventها در UI فقط با Label فارسی اصلی دیده شوند؛ slug
 4. قبل از اضافه کردن UI، Action Registry و wiring سرویس‌ها را کامل کن.
 5. Provider ملی پیامک را بدون بررسی مستندات واقعی endpoint/request contract فعال نکن.
 6. در پایان توسعه، نسخه Production باید `1.0.28` و DB version نهایی (احتمالاً `1.0.5`) شود و `Stable tag` از 1.0.27 به 1.0.28 تغییر کند.
+
+## Checkpoint 10.6 — Live Duplicate fixes
+
+- Live Duplicate فقط هنگام پیدا شدن ثبت تکراری پیام نمایش می‌دهد؛ حالت «تکراری نیست» و خطای موقت preflight در UI بی‌صدا هستند.
+- `DuplicatePolicy::evaluate()` دیگر ترکیب ناقص را Duplicate محسوب نمی‌کند؛ تمام فیلدهای Fingerprint باید مقدار معنادار داشته باشند.
+- مشکل مهم ثبت‌های قدیمی رفع شد: تغییر/فعال‌سازی فیلدهای Duplicate اکنون باعث rebuild ایندکس fingerprint تمام Submissionهای فعال همان فرم می‌شود.
+- rebuild از قدیمی‌ترین Submission شروع می‌شود تا canonical owner پایدار باشد؛ Trashها وارد ایندکس نمی‌شوند.
+- برای نصب‌های موجود یک signature per-form در option `afe_duplicate_index_signatures` نگهداری می‌شود. اگر signature وجود نداشته باشد یا enabled/fields/behavior تغییر کند، اولین Live Check یا Submit ایندکس را self-heal می‌کند.
+- در رفتار `allow`، metadataهای `is_duplicate` و `duplicate_of_submission_id` نیز هنگام rebuild بازسازی می‌شوند.
+- Save تنظیمات فرم پس از ذخیره موفق، rebuild را اجرا می‌کند؛ در صورت خطا پیام مدیریتی واضح نمایش داده می‌شود.
+- تست جدید `tests/duplicate-index-rebuild.php` اضافه و `tests/live-duplicate-check.php` به semantics جدید به‌روزرسانی شد.
+- QA این checkpoint: 51 regression PASS، 154 PHP lint PASS، JS/composer/assets/version checks PASS.
+
+### نکته acceptance
+
+پس از نصب این checkpoint، برای تست Duplicate حتماً یک ترکیب از اطلاعات یک Submission قدیمی را وارد کنید. نیازی به Submit نهایی نیست؛ پس از تکمیل تمام فیلدهای Fingerprint باید فقط در حالت تکراری پیام ظاهر شود.
+

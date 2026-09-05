@@ -200,6 +200,44 @@ final class SubmissionRepository
     }
 
 
+
+    /**
+     * Active submissions for duplicate-index rebuild, ordered from oldest to
+     * newest so the earliest submission becomes the canonical fingerprint owner.
+     *
+     * @return list<array<string,mixed>>
+     */
+    public function activeForFormAfterId(string $formSlug, int $afterId = 0, int $limit = 200): array
+    {
+        global $wpdb;
+        $rows = $wpdb->get_results($wpdb->prepare(
+            "SELECT id,form_slug,data_json,is_duplicate,duplicate_of_submission_id
+             FROM {$wpdb->prefix}afe_submissions
+             WHERE form_slug=%s AND trashed_at IS NULL AND id>%d
+             ORDER BY id ASC LIMIT %d",
+            $formSlug,
+            max(0,$afterId),
+            max(1,min(1000,$limit))
+        ), ARRAY_A) ?: [];
+        foreach ($rows as &$row) {
+            $row['data'] = json_decode((string)($row['data_json'] ?? ''), true) ?: [];
+        }
+        unset($row);
+        return $rows;
+    }
+
+    public function resetDuplicateMetadataForForm(string $formSlug): bool
+    {
+        global $wpdb;
+        $result = $wpdb->query($wpdb->prepare(
+            "UPDATE {$wpdb->prefix}afe_submissions
+             SET is_duplicate=0, duplicate_of_submission_id=0
+             WHERE form_slug=%s AND trashed_at IS NULL",
+            $formSlug
+        ));
+        return $result !== false;
+    }
+
     public function recentByUser(int $userId, string $formSlug, int $limit = 5): array
     {
         global $wpdb;

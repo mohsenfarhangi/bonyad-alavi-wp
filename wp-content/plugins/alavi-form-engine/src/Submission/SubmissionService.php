@@ -65,6 +65,7 @@ final class SubmissionService
         if (!$config['enabled'] || $config['fields'] === []) {
             return ['enabled'=>false,'ready'=>false,'duplicate'=>false,'blocking'=>false];
         }
+        $this->ensureDuplicateIndex($form);
 
         $data = $this->sanitizeBySchema($form, (array)wp_unslash($_POST['afe_data'] ?? []));
         $missing = $this->duplicatePolicy->missingFields($form, $data);
@@ -110,6 +111,7 @@ final class SubmissionService
         $slug = sanitize_key(wp_unslash($_POST['afe_form_slug'] ?? ''));
         if (!$this->registry->has($slug)) return new WP_Error('form','فرم پیدا نشد.');
         $form = $this->resolvedForm($slug);
+        $this->ensureDuplicateIndex($form);
         $intent = sanitize_key(wp_unslash($_POST['afe_intent'] ?? 'submit'));
         $draft = $intent === 'draft';
 
@@ -369,6 +371,122 @@ final class SubmissionService
             'duplicate_of_submission_id'=>$duplicate->isDuplicate() && $duplicate->allowsDuplicate() ? (int)$duplicate->duplicateSubmissionId : 0,
             'locked'=>(!$draft && !empty($form['settings']['lock_after_submit'])),
         ];
+    }
+
+    /**
+     * Rebuild the canonical duplicate fingerprint index for one form.
+     * Existing active submissions are processed oldest-first so the earliest
+     * row becomes the canonical owner for an already-existing combination.
+     *
+     * @return array{indexed:int,duplicates:int,skipped:int}
+     */
+    public function rebuildDuplicateIndex(string $slug): array
+    {
+        if (!$this->registry->has($slug)) return ['indexed'=>0,'duplicates'=>0,'skipped'=>0];
+        return $this->rebuildDuplicateIndexForForm($this->resolvedForm($slug));
+    }
+
+    private function ensureDuplicateIndex(array $form): void
+    {
+        $config = $this->duplicatePolicy->config($form);
+        $slug = sanitize_key((string)($form['slug'] ?? ''));
+        if ($slug === '') return;
+
+        $signature = $this->duplicateIndexSignature($config);
+        $stored = get_option('afe_duplicate_index_signatures', []);
+        $stored = is_array($stored) ? $stored : [];
+        if (hash_equals((string)($stored[$slug] ?? ''), $signature)) return;
+
+        $this->rebuildDuplicateIndexForForm($form);
+    }
+
+    /** @param array{enabled:bool,fields:list<string>,behavior:string,message:string} $config */
+    private function duplicateIndexSignature(array $config): string
+    {
+        return hash('sha256', (string)wp_json_encode([
+            'version'=>2,
+            'enabled'=>$config['enabled'],
+            'fields'=>$config['fields'],
+            'behavior'=>$config['behavior'],
+        ], JSON_UNESCAPED_UNICODE));
+    }
+
+    /** @return array{indexed:int,duplicates:int,skipped:int} */
+    private function rebuildDuplicateIndexForForm(array $form): array
+    {
+        $slug = sanitize_key((string)($form['slug'] ?? ''));
+        if ($slug === '') return ['indexed'=>0,'duplicates'=>0,'skipped'=>0];
+        $config = $this->duplicatePolicy->config($form);
+        $indexed = 0;
+        $duplicates = 0;
+        $skipped = 0;
+
+        global $wpdb;
+        $wpdb->query('START TRANSACTION');
+        try {
+            $this->duplicateRepository->clearForForm($slug);
+            if (!$this->submissions->resetDuplicateMetadataForForm($slug)) {
+                throw new \RuntimeException('duplicate metadata reset failed');
+            }
+
+            if ($config['enabled'] && $config['fields'] !== []) {
+                $afterId = 0;
+                do {
+                    $rows = $this->submissions->activeForFormAfterId($slug, $afterId, 250);
+                    foreach ($rows as $row) {
+                        $afterId = max($afterId, (int)($row['id'] ?? 0));
+                        $data = $this->sanitizeBySchema($form, (array)($row['data'] ?? []));
+                        if ($this->duplicatePolicy->missingFields($form, $data) !== []) {
+                            $skipped++;
+                            continue;
+                        }
+
+                        $decision = $this->duplicatePolicy->evaluate($form, $data, (int)$row['id']);
+                        if ($decision->isDuplicate()) {
+                            $duplicates++;
+                            if ($decision->behavior === 'allow' && $decision->duplicateSubmissionId) {
+                                if (!$this->submissions->update((int)$row['id'], [
+                                    'is_duplicate'=>1,
+                                    'duplicate_of_submission_id'=>(int)$decision->duplicateSubmissionId,
+                                ])) {
+                                    throw new \RuntimeException('duplicate metadata rebuild failed');
+                                }
+                            }
+                            continue;
+                        }
+
+                        if ($decision->fingerprint !== '' && $this->duplicateRepository->reserve($slug, (int)$row['id'], $decision->fingerprint)) {
+                            $indexed++;
+                            continue;
+                        }
+
+                        if ($decision->fingerprint !== '') {
+                            $owner = $this->duplicateRepository->find($slug, $decision->fingerprint, (int)$row['id']);
+                            if ($owner !== null) {
+                                $duplicates++;
+                                if ($config['behavior'] === 'allow' && !$this->submissions->update((int)$row['id'], [
+                                    'is_duplicate'=>1,
+                                    'duplicate_of_submission_id'=>$owner,
+                                ])) {
+                                    throw new \RuntimeException('duplicate collision metadata rebuild failed');
+                                }
+                            }
+                        }
+                    }
+                } while ($rows !== [] && count($rows) === 250);
+            }
+
+            $stored = get_option('afe_duplicate_index_signatures', []);
+            $stored = is_array($stored) ? $stored : [];
+            $stored[$slug] = $this->duplicateIndexSignature($config);
+            update_option('afe_duplicate_index_signatures', $stored, false);
+            $wpdb->query('COMMIT');
+        } catch (\Throwable $e) {
+            $wpdb->query('ROLLBACK');
+            throw $e;
+        }
+
+        return ['indexed'=>$indexed,'duplicates'=>$duplicates,'skipped'=>$skipped];
     }
 
     public function resolvedForm(string $slug): array

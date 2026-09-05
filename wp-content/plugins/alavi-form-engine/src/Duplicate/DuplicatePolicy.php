@@ -19,6 +19,13 @@ final class DuplicatePolicy
             return new DuplicateDecision(false, '', null, $config['behavior'], $config['message']);
         }
 
+        // A duplicate combination is meaningful only when every configured
+        // fingerprint component has a value. This mirrors the live preflight
+        // and avoids treating two incomplete submissions as duplicates.
+        if ($this->missingFields($form, $data) !== []) {
+            return new DuplicateDecision(false, '', null, $config['behavior'], $config['message']);
+        }
+
         $fingerprint = $this->fingerprints->make((string)$form['slug'], $config['fields'], $data);
         $duplicateId = $this->repository->find((string)$form['slug'], $fingerprint, $currentSubmissionId);
 
