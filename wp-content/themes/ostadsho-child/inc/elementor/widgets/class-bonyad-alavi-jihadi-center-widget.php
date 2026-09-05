@@ -462,6 +462,40 @@ final class Bonyad_Alavi_Jihadi_Center_Widget extends Widget_Base {
 		$this->add_control( 'hero_overlay', array( 'label' => 'رنگ Overlay', 'type' => Controls_Manager::COLOR, 'default' => 'rgba(0,68,33,.78)', 'selectors' => array( '{{WRAPPER}} .ba-jihadi-center' => '--ba-jc-hero-overlay: {{VALUE}};' ) ) );
 		$this->add_control( 'hero_image_heading', array( 'label' => 'تصویر Hero', 'type' => Controls_Manager::HEADING, 'separator' => 'before' ) );
 		$this->add_responsive_control(
+			'hero_image_width',
+			array(
+				'label'          => 'عرض تصویر',
+				'type'           => Controls_Manager::SLIDER,
+				'size_units'     => array( '%', 'px', 'vw' ),
+				'range'          => array(
+					'%'  => array( 'min' => 1, 'max' => 200 ),
+					'px' => array( 'min' => 1, 'max' => 2400 ),
+					'vw' => array( 'min' => 1, 'max' => 200 ),
+				),
+				'default'        => array( 'size' => 100, 'unit' => '%' ),
+				'tablet_default' => array( 'size' => 100, 'unit' => '%' ),
+				'mobile_default' => array( 'size' => 100, 'unit' => '%' ),
+				'selectors'      => array( '{{WRAPPER}} .ba-jihadi-center__hero-image' => 'width: {{SIZE}}{{UNIT}};' ),
+			)
+		);
+		$this->add_responsive_control(
+			'hero_image_height',
+			array(
+				'label'          => 'ارتفاع تصویر',
+				'type'           => Controls_Manager::SLIDER,
+				'size_units'     => array( '%', 'px', 'vh' ),
+				'range'          => array(
+					'%'  => array( 'min' => 1, 'max' => 200 ),
+					'px' => array( 'min' => 1, 'max' => 2400 ),
+					'vh' => array( 'min' => 1, 'max' => 200 ),
+				),
+				'default'        => array( 'size' => 100, 'unit' => '%' ),
+				'tablet_default' => array( 'size' => 100, 'unit' => '%' ),
+				'mobile_default' => array( 'size' => 100, 'unit' => '%' ),
+				'selectors'      => array( '{{WRAPPER}} .ba-jihadi-center__hero-image' => 'height: {{SIZE}}{{UNIT}};' ),
+			)
+		);
+		$this->add_responsive_control(
 			'hero_image_fit',
 			array(
 				'label'     => 'نحوه نمایش تصویر',
