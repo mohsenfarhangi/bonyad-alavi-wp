@@ -10,6 +10,16 @@
 - **Stable tag:** فعلاً `1.0.27`
 - **تست واقعی ملی‌پیامک:** PASS گزارش‌شده توسط مدیر پروژه در 2026-09-04
 
+## Patch اصلاح Master Switch پیامک
+
+- مشکل گزارش‌شده در staging: با وجود فعال‌بودن SMS در UI، Runtime می‌توانست پیام «سرویس پیامک در تنظیمات Alavi Form Engine غیرفعال است» بدهد.
+- `SmsSettings` اضافه شد تا ساختار فعلی `afe_settings['sms']['enabled']` و کلید legacy `afe_settings['sms_enabled']` به‌صورت مرکزی normalize شوند.
+- Settings Save از این checkpoint هر دو کلید current/legacy را با مقدار یکسان ذخیره می‌کند تا ارتقا/بازگشت بین checkpointها state متناقض نسازد.
+- `SmsProviderRegistry` اکنون `enabledResolver` runtime دارد؛ درست هنگام resolve هر SMS Action وضعیت فعلی `afe_settings` دوباره خوانده می‌شود و فقط به snapshot زمان Plugin boot وابسته نیست.
+- Provider routing داخلی و Persian WooCommerce SMS هر دو از همین Master Switch مشترک استفاده می‌کنند.
+- Bootstrap preflight کلاس `SmsSettings` را نیز بررسی می‌کند.
+- Regression اختصاصی: `tests/sms-settings-switch.php`.
+
 ## Patch لینک مشاهده فایل‌ها در Preview
 
 - FileField در Preview دیگر فقط نام فایل را نمایش نمی‌دهد؛ نام هر فایل به لینک مشاهده تبدیل شده است.
@@ -109,8 +119,8 @@
 ## QA این checkpoint
 
 - `tools/qa.sh`: PASS
-- Regression: **48/48 PASS**
-- PHP lint: **150 فایل PASS**
+- Regression: **49/49 PASS**
+- PHP lint: **152 فایل PASS**
 - JavaScript syntax: PASS
 - composer.json: PASS
 - local JalaliDatePicker: PASS
@@ -121,7 +131,7 @@
 
 - گزارش staging در 2026-09-04 نشان داد اگر فایل‌های جدید checkpoint به‌صورت ناقص روی نسخه قدیمی کپی شوند، `DuplicateRepository` می‌تواند هنگام boot با `Class not found` متوقف شود.
 - فایل `DuplicateRepository.php` و PSR-4 صحیح داخل بسته موجود بودند؛ ریشه خطا deployment ناقص/ناخوانا تشخیص داده شد.
-- bootstrap اکنون ۱۶ کلاس حیاتی boot را قبل از ثبت hook اصلی بررسی می‌کند و در نصب ناقص به‌جای Fatal خام، Admin Notice + error log واضح ثبت می‌کند.
+- bootstrap اکنون ۱۷ کلاس حیاتی boot را قبل از ثبت hook اصلی بررسی می‌کند و در نصب ناقص به‌جای Fatal خام، Admin Notice + error log واضح ثبت می‌کند.
 - تست‌های `bootstrap-autoload.php` و `bootstrap-preflight.php` اضافه شدند تا هم autoload بسته و هم رفتار امن در نصب ناقص regression داشته باشند.
 - برای ارتقا بین checkpointها باید **کل پوشه افزونه** جایگزین شود؛ کپی انتخابی فایل‌های تغییرکرده پشتیبانی نمی‌شود.
 

@@ -11,6 +11,7 @@ use BonyadAlavi\FormEngine\Actions\Tokens\TokenResolver;
 use BonyadAlavi\FormEngine\Actions\Sms\MeliPayamakProvider;
 use BonyadAlavi\FormEngine\Actions\Sms\PersianWooCommerceSmsProvider;
 use BonyadAlavi\FormEngine\Actions\Sms\SmsProviderRegistry;
+use BonyadAlavi\FormEngine\Actions\Sms\SmsSettings;
 use BonyadAlavi\FormEngine\Actions\Pdf\PdfGenerator;
 use BonyadAlavi\FormEngine\Admin\DatabasePage;
 use BonyadAlavi\FormEngine\Admin\FormsPage;
@@ -103,12 +104,14 @@ final class Plugin
         $tokenResolver = new TokenResolver();
         $secretStore = new SecretStore();
         $globalSettings = (array)get_option('afe_settings', []);
-        $smsSettings = isset($globalSettings['sms']) && is_array($globalSettings['sms']) ? $globalSettings['sms'] : [];
+        $smsSettings = SmsSettings::section($globalSettings);
         $smsSettings['password'] = $secretStore->decrypt((string)($smsSettings['password'] ?? ''));
         $smsSettings['api_key'] = $secretStore->decrypt((string)($smsSettings['api_key'] ?? ''));
-        $defaultSmsProvider = sanitize_key((string)($smsSettings['default_provider'] ?? $smsSettings['provider'] ?? 'melipayamak'));
-        if ($defaultSmsProvider === '') $defaultSmsProvider = 'melipayamak';
-        $smsProviders = new SmsProviderRegistry($defaultSmsProvider, !empty($smsSettings['enabled']));
+        $defaultSmsProvider = SmsSettings::defaultProvider($globalSettings);
+        $smsProviders = new SmsProviderRegistry($defaultSmsProvider, SmsSettings::enabled($globalSettings));
+        $smsProviders->setEnabledResolver(static function(): bool {
+            return SmsSettings::enabled((array)get_option('afe_settings', []));
+        });
         $meliPayamak = new MeliPayamakProvider($smsSettings);
         $smsProviders->register(
             'melipayamak',

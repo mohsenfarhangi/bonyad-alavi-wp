@@ -9,6 +9,7 @@ use BonyadAlavi\FormEngine\Core\SecretStore;
 use BonyadAlavi\FormEngine\Form\FormRegistry;
 use BonyadAlavi\FormEngine\Style\StyleIsolationManager;
 use BonyadAlavi\FormEngine\Actions\Sms\SmsProviderRegistry;
+use BonyadAlavi\FormEngine\Actions\Sms\SmsSettings;
 
 final class SettingsPage
 {
@@ -38,7 +39,8 @@ final class SettingsPage
         echo '<label class="afe-span-2"><input type="checkbox" name="delete_data_on_uninstall" value="1" '.checked(!empty($settings['delete_data_on_uninstall']),true,false).'> هنگام Uninstall تمام داده‌ها و جداول افزونه حذف شوند <strong>(غیرقابل بازگشت)</strong></label>';
         echo '</div></div>';
 
-        $sms=is_array($settings['sms']??null)?(array)$settings['sms']:[];
+        $sms=SmsSettings::section($settings);
+        $smsEnabled=SmsSettings::enabled($settings);
         $smsAuth=in_array((string)($sms['auth_mode']??'legacy'),['legacy','api_key'],true)?(string)$sms['auth_mode']:'legacy';
         $hasSmsPassword=(string)($sms['password']??'')!=='';
         $hasSmsApiKey=(string)($sms['api_key']??'')!=='';
@@ -54,7 +56,7 @@ final class SettingsPage
         $pwsmsModes=array_map('sanitize_key',(array)($pwsmsStatus['modes']??[]));
 
         echo '<div class="afe-admin-card"><h2>پیامک</h2><div class="afe-admin-grid">';
-        echo '<label class="afe-span-2"><input type="checkbox" name="sms_enabled" value="1" '.checked(!empty($sms['enabled']),true,false).'> سرویس پیامک برای Actionهای فرم فعال باشد</label>';
+        echo '<label class="afe-span-2"><input type="checkbox" name="sms_enabled" value="1" '.checked($smsEnabled,true,false).'> سرویس پیامک برای Actionهای فرم فعال باشد</label>';
         echo '<label class="afe-span-2">Provider پیش‌فرض<select name="sms_default_provider">';
         foreach($providerOptions as $providerKey=>$providerLabel){
             $unavailable=$this->smsProviders!==null&&!$this->smsProviders->isAvailable((string)$providerKey);
@@ -156,6 +158,8 @@ final class SettingsPage
             'recaptcha_secret_key'=>(string)($old['recaptcha_secret_key']??''),
             'delete_data_on_uninstall'=>!empty($_POST['delete_data_on_uninstall']),
             'style_isolation'=>(new StyleIsolationManager())->normalize(sanitize_key(wp_unslash($_POST['style_isolation']??StyleIsolationManager::MODE_STRONG))),
+            // Keep the legacy top-level switch synchronized for upgrades/downgrades.
+            'sms_enabled'=>$smsEnabled,
             'sms'=>[
                 'enabled'=>$smsEnabled,
                 'provider'=>$defaultProvider,

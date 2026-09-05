@@ -18,6 +18,7 @@
 - تست واقعی ملی‌پیامک توسط مدیر پروژه **PASS** گزارش شده است.
 - SMS Engine اکنون Provider Router دارد: Provider پیش‌فرض سراسری + Override در هر SMS Action.
 - Integration اختیاری `Persian WooCommerce SMS` از Gateway/Credential همان افزونه استفاده می‌کند و هیچ Credential تکراری در AFE ذخیره نمی‌کند؛ capability Pattern براساس Gateway فعال تشخیص داده می‌شود.
+- Master Switch پیامک در ساختار current/legacy سازگار است و Runtime قبل از هر ارسال state فعلی تنظیمات را دوباره resolve می‌کند تا ارتقا یا snapshot قدیمی باعث خطای کاذب «غیرفعال است» نشود.
 - Template پیش‌فرض SMS فرم `jihadi-group-registration` همچنان `submission.submitted -> leader_mobile -> once_per_submission` است و عمداً بدون متن/Pattern hard-code و غیرفعال باقی مانده تا محتوای تأییدشده از Action Builder تنظیم شود.
 - Release hardening روی WordPress User Actions اضافه شده است: هدف‌های Administrator/`manage_options` بدون opt-in سطح `afe_manage_settings` قابل Login/Update/Role/Meta نیستند و metaهای امنیتی capability/session/application-password در Runtime مسدودند.
 - Assign Role نقش‌های سفارشی دارای `manage_options` را نیز privileged در نظر می‌گیرد.

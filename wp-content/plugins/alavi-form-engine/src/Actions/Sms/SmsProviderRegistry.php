@@ -19,6 +19,9 @@ final class SmsProviderRegistry
     /** @var array<string,array{label:string,provider:SmsProviderInterface,modes:callable,available:callable,status:callable}> */
     private array $providers = [];
 
+    /** @var null|callable():bool */
+    private $enabledResolver = null;
+
     public function __construct(
         private string $defaultProvider = 'melipayamak',
         private bool $enabled = true
@@ -61,7 +64,20 @@ final class SmsProviderRegistry
 
     public function enabled(): bool
     {
+        if (is_callable($this->enabledResolver)) {
+            try {
+                return (bool)($this->enabledResolver)();
+            } catch (\Throwable) {
+                return false;
+            }
+        }
         return $this->enabled;
+    }
+
+    /** @param null|callable():bool $resolver */
+    public function setEnabledResolver(?callable $resolver): void
+    {
+        $this->enabledResolver = $resolver;
     }
 
     public function setDefaultProvider(string $key): void
@@ -83,7 +99,7 @@ final class SmsProviderRegistry
 
     public function resolve(string $requested, string $mode): SmsProviderInterface
     {
-        if (!$this->enabled) {
+        if (!$this->enabled()) {
             throw new RuntimeException('سرویس پیامک در تنظیمات Alavi Form Engine غیرفعال است.');
         }
 

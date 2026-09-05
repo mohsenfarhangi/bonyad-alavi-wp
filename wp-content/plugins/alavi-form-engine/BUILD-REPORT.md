@@ -41,6 +41,14 @@ The project administrator reported the real MeliPayamak account test **PASS** on
 - Added `tools/qa.sh` as a unified preflight for PHP version, all regression tests, PHP lint, JS syntax, composer JSON, local Jalali assets, external runtime asset registration, and plugin version consistency.
 - Added `docs/FEATURE-COMPLETENESS-1.0.28.md` mapping the handoff feature set to implementation/test coverage.
 
+
+### اصلاح Master Switch پیامک
+
+- افزودن `SmsSettings` برای سازگاری کلید current و legacy فعال‌سازی SMS.
+- همگام‌سازی `sms.enabled` و `sms_enabled` هنگام Save.
+- refresh وضعیت Master Switch هنگام Runtime resolve هر SMS Action.
+- افزودن `tests/sms-settings-switch.php` و Bootstrap preflight کلاس جدید.
+
 ## QA performed
 
 - Unified `tools/qa.sh`: **PASS**.
@@ -317,6 +325,6 @@ Browser print / Save as PDF is always available from a submission. Direct server
 
 ### QA
 
-- 48 regression tests: PASS.
-- 150 PHP files linted: PASS.
+- 49 regression tests: PASS.
+- 152 PHP files linted: PASS.
 - JavaScript syntax and package QA: PASS.

@@ -17,6 +17,7 @@
 | Default applicant SMS template | `tests/jihadi-default-sms-action.php` | `submission.submitted`, `leader_mobile`, `once_per_submission`, disabled until content is configured |
 | SMS provider/action | `tests/melipayamak-provider.php`, `tests/sms-action.php` | Legacy/API-token, free/pattern contracts and recipient/token handling |
 | SMS provider routing / Persian WooCommerce SMS | `tests/sms-provider-registry.php`, `tests/persian-woocommerce-sms-provider.php`, `tests/sms-action-provider-routing.php` | global default, per-Action override, external gateway delegation, known Pattern strategies |
+| SMS master switch compatibility | `tests/sms-settings-switch.php` | current/legacy option compatibility, runtime refresh, save synchronization |
 | Action runtime/retry | `tests/action-manager.php`, `tests/action-manager-retry.php`, `tests/extended-action-registry.php`, `tests/redirect-action.php` | execution policies, runtime outputs, retry, redirect and extended actions |
 | Duplicate policy | `tests/duplicate-policy.php`, `tests/duplicate-repository.php` | normalization, owner promotion, trash/restore safety |
 | Field ordering | `tests/field-ordering.php` | same-scope reordering and safe append of newly code-defined fields |
@@ -74,6 +75,8 @@ Run on a staging clone using the same PHP/WordPress/Elementor major versions int
    - The provider/account connectivity itself is already reported PASS by the project administrator.
 
 8. **Persian WooCommerce SMS Integration**
+   - Master Switch پیامک را فعال و Save کنید؛ یک SMS Action را اجرا کنید و تأیید کنید پیام «سرویس پیامک ... غیرفعال است» نمایش داده نمی‌شود.
+   - Master Switch را غیرفعال و Save کنید؛ اجرای Action باید با همان پیام واضح Fail شود و Submission rollback نشود.
    - Persian WooCommerce SMS را فعال کنید و یک Gateway واقعی در تنظیمات همان افزونه انتخاب/تنظیم کنید.
    - در تنظیمات AFE، Provider پیش‌فرض را روی Persian WooCommerce SMS بگذارید و تأیید کنید نام Gateway فعال و modeهای قابل استفاده نمایش داده می‌شوند.
    - یک SMS Action با Provider=`پیش‌فرض سراسری` و یک Action دیگر با Override=`Persian WooCommerce SMS` اجرا کنید؛ هر دو باید از همان Credential/Gateway خارجی استفاده کنند و AFE نباید درخواست Credential جدید بدهد.
