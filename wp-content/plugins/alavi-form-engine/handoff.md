@@ -10,6 +10,15 @@
 - **Stable tag:** فعلاً `1.0.27`
 - **تست واقعی ملی‌پیامک:** PASS گزارش‌شده توسط مدیر پروژه در 2026-09-04
 
+## Patch لینک مشاهده فایل‌ها در Preview
+
+- FileField در Preview دیگر فقط نام فایل را نمایش نمی‌دهد؛ نام هر فایل به لینک مشاهده تبدیل شده است.
+- فایل‌های ذخیره‌شده با `target="_blank"` و `rel="noopener noreferrer"` در تب جدید باز می‌شوند.
+- URL فایل ذخیره‌شده ابتدا از Attachment متعلق به همان Submission resolve می‌شود و در صورت نبود Attachment از URL امن رکورد فایل استفاده می‌شود.
+- Live Preview برای فایل تازه‌ای که هنوز Upload نشده با `URL.createObjectURL()` لینک موقت مرورگر می‌سازد؛ بنابراین فایل قبل از Submit نیز از Preview قابل بازکردن است.
+- Live Preview فایل‌های موجود از `data-file-url` همان فایل استفاده می‌کند و فقط schemeهای `http/https/blob` را می‌پذیرد.
+- Regression اختصاصی: `tests/preview-file-links.php`.
+
 ## Patch جهت اعداد در Preview و حذف text-align عمومی کنترل‌ها
 
 - `text-align:right !important` از rule عمومی `.afe-shell.afe-isolation-strong .afe-form .afe-control` حذف شد؛ جهت متن هر کنترل دیگر به‌صورت اجباری از rule عمومی تعیین نمی‌شود.
@@ -100,8 +109,8 @@
 ## QA این checkpoint
 
 - `tools/qa.sh`: PASS
-- Regression: **47/47 PASS**
-- PHP lint: **149 فایل PASS**
+- Regression: **48/48 PASS**
+- PHP lint: **150 فایل PASS**
 - JavaScript syntax: PASS
 - composer.json: PASS
 - local JalaliDatePicker: PASS

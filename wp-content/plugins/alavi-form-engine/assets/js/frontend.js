@@ -779,6 +779,7 @@
           row.className = 'afe-upload__existing-file is-selected';
           row.dataset.existingFile = '';
           row.dataset.fileId = String(fileId);
+          row.dataset.fileUrl = url;
 
           const label = document.createElement('label');
           label.className = 'afe-upload__existing-choice';
@@ -1666,6 +1667,46 @@
   }
   function escapeAttr(value) { return escapeHtml(value).replaceAll('"','&quot;'); }
 
+  const previewObjectUrls = new Map();
+  function previewObjectUrl(file) {
+    if (!(file instanceof File) || typeof URL?.createObjectURL !== 'function') return '';
+    const key = `${file.name}|${file.size}|${file.lastModified}|${file.type}`;
+    if (!previewObjectUrls.has(key)) previewObjectUrls.set(key, URL.createObjectURL(file));
+    return previewObjectUrls.get(key) || '';
+  }
+
+  window.addEventListener('beforeunload', () => {
+    previewObjectUrls.forEach(url => { try { URL.revokeObjectURL(url); } catch (_) {} });
+    previewObjectUrls.clear();
+  }, {once:true});
+
+  function safePreviewFileUrl(value) {
+    const raw = String(value || '').trim();
+    if (!raw) return '';
+    try {
+      const parsed = new URL(raw, window.location.href);
+      return ['http:', 'https:', 'blob:'].includes(parsed.protocol) ? parsed.href : '';
+    } catch (_) { return ''; }
+  }
+
+  function previewFileLinks(wrapper) {
+    if (!wrapper) return '<span class="afe-preview-empty">ثبت نشده</span>';
+    const upload = qs(wrapper, '.afe-upload');
+    if (!upload) return '<span class="afe-preview-empty">ثبت نشده</span>';
+    const items = [];
+    qsa(upload, '[data-existing-file].is-selected').forEach(row => {
+      const name = String(qs(row, '.afe-upload__existing-info strong')?.textContent || 'فایل').trim();
+      const url = safePreviewFileUrl(row.dataset.fileUrl || '');
+      items.push(`<li><span class="afe-preview-file-icon">📎</span>${url ? `<a class="afe-preview-file-link" href="${escapeAttr(url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(name)}</a>` : `<span>${escapeHtml(name)}</span>`}</li>`);
+    });
+    const input = qs(upload, 'input[type="file"]');
+    Array.from(input?.files || []).forEach(file => {
+      const url = safePreviewFileUrl(previewObjectUrl(file));
+      items.push(`<li><span class="afe-preview-file-icon">📎</span>${url ? `<a class="afe-preview-file-link" href="${escapeAttr(url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(file.name)}</a>` : `<span>${escapeHtml(file.name)}</span>`}</li>`);
+    });
+    return items.length ? `<ul class="afe-preview-files">${items.join('')}</ul>` : '<span class="afe-preview-empty">ثبت نشده</span>';
+  }
+
   function previewFieldWrapper(form, fieldName) {
     return qsa(form, '.afe-field[data-field]').find(el => el.dataset.field === fieldName) || null;
   }
@@ -1748,6 +1789,9 @@
       if (!wrapper || wrapper.hidden) return;
       if (target.dataset.previewType === 'repeater') {
         target.innerHTML = previewRepeaterHtml(wrapper);
+      } else if (target.dataset.previewType === 'file') {
+        target.innerHTML = previewFileLinks(wrapper);
+        setPreviewDirection(target, false);
       } else {
         const value = previewControlText(wrapper);
         target.textContent = value;

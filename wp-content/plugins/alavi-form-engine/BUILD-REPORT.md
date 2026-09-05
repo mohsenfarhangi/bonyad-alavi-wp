@@ -304,3 +304,19 @@ Browser print / Save as PDF is always available from a submission. Direct server
 - 37 regression tests: PASS.
 - 134 PHP files linted: PASS.
 - JavaScript syntax, composer.json, local JalaliDatePicker, no-runtime-CDN and version consistency: PASS.
+
+
+## 1.0.28-dev Preview file links patch
+
+- FileField values in Preview are now clickable links instead of plain filenames.
+- Persisted files open in a new tab with `noopener noreferrer` and resolve through the owned attachment when available.
+- Live Preview creates temporary `blob:` URLs for newly selected local files so they can be opened before submission.
+- Existing uploaded files expose their safe URL to the live Preview through `data-file-url`.
+- Preview accepts only `http`, `https`, and `blob` URL schemes.
+- Added `tests/preview-file-links.php`.
+
+### QA
+
+- 48 regression tests: PASS.
+- 150 PHP files linted: PASS.
+- JavaScript syntax and package QA: PASS.

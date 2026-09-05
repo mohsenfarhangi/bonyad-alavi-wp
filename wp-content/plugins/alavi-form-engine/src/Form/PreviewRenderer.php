@@ -65,7 +65,12 @@ final class PreviewRenderer
             else {
                 $items = '';
                 foreach ($files as $file) {
-                    $items .= '<li><span class="afe-preview-file-icon">📎</span><span>'.esc_html((string)($file['original_name'] ?? 'فایل')).'</span><small>'.esc_html(size_format((int)($file['size'] ?? 0))).'</small></li>';
+                    $fileName = (string)($file['original_name'] ?? 'فایل');
+                    $fileUrl = $this->previewFileUrl($file, $submissionId);
+                    $label = $fileUrl !== ''
+                        ? '<a class="afe-preview-file-link" href="'.esc_url($fileUrl).'" target="_blank" rel="noopener noreferrer">'.esc_html($fileName).'</a>'
+                        : '<span>'.esc_html($fileName).'</span>';
+                    $items .= '<li><span class="afe-preview-file-icon">📎</span>'.$label.'<small>'.esc_html(size_format((int)($file['size'] ?? 0))).'</small></li>';
                 }
                 $content = '<ul class="afe-preview-files">'.$items.'</ul>';
             }
@@ -84,6 +89,20 @@ final class PreviewRenderer
         }
         $wide = in_array($type, ['textarea','repeater','file'], true) ? ' afe-preview-field--wide' : '';
         return '<div class="afe-preview-field'.$wide.'" data-preview-field="'.esc_attr($name).'"><span class="afe-preview-label">'.esc_html($label).'</span>'.$content.'</div>';
+    }
+
+    private function previewFileUrl(array $file, int $submissionId): string
+    {
+        $attachmentId = (int)($file['attachment_id'] ?? 0);
+        if ($attachmentId > 0 && (int)get_post_meta($attachmentId, '_afe_submission_id', true) === $submissionId) {
+            $attachmentUrl = wp_get_attachment_url($attachmentId);
+            if (is_string($attachmentUrl) && $attachmentUrl !== '') return $attachmentUrl;
+        }
+
+        $url = trim((string)($file['url'] ?? ''));
+        if ($url === '') return '';
+        $scheme = strtolower((string)wp_parse_url($url, PHP_URL_SCHEME));
+        return in_array($scheme, ['http', 'https'], true) ? $url : '';
     }
 
     private function usesLeftToRightPreview(array $field, mixed $value): bool

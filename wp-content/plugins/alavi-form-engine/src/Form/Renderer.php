@@ -539,7 +539,7 @@ final class Renderer
 
                 // No <a> element is used intentionally. Elementor/theme lightbox
                 // handlers therefore cannot hijack clicks on existing files.
-                $existingHtml .= '<div class="afe-upload__existing-file is-selected" data-existing-file data-file-id="'.esc_attr((string)$fileId).'">'
+                $existingHtml .= '<div class="afe-upload__existing-file is-selected" data-existing-file data-file-id="'.esc_attr((string)$fileId).'" data-file-url="'.esc_attr(esc_url($url)).'">'
                     .'<label class="afe-upload__existing-choice">'
                     .'<input type="checkbox" class="afe-upload__existing-toggle" data-existing-file-toggle name="afe_keep_files['.esc_attr($fieldKey).'][]" value="'.esc_attr((string)$fileId).'" checked>'
                     .'<span class="afe-upload__existing-check" aria-hidden="true"></span>'

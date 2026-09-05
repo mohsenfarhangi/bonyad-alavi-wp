@@ -1204,3 +1204,5 @@ textarea.afe-control { resize:vertical; min-height:118px; line-height:1.9; }
   text-align:left !important;
   unicode-bidi:plaintext !important;
 }
+.afe-shell .afe-preview-file-link{color:var(--afe-primary);font-weight:600;text-decoration:none;overflow-wrap:anywhere}
+.afe-shell .afe-preview-file-link:hover,.afe-shell .afe-preview-file-link:focus{text-decoration:underline}
