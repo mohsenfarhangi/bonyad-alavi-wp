@@ -121,7 +121,9 @@ Run on a staging clone using the same PHP/WordPress/Elementor major versions int
     - After all live cases PASS, bump plugin version to `1.0.28`, DB version to `1.0.5`, Stable tag to `1.0.28`, update final changelog/docs, rerun all automated checks, then build the production ZIP.
 
 
-## جهت ورودی‌های شماره‌ای
+## جهت ورودی‌ها و اعداد Preview
 
-- [ ] موبایل، تلفن، کد ملی، شبا و سایر ورودی‌های عددی از سمت چپ تایپ شوند و مقدار داخل کنترل LTR/چپ‌چین باشد؛ حتی در حالت Strong Isolation نباید rule عمومی `text-align:right !important` بر آن غلبه کند. Label و چیدمان کلی فرم RTL بماند.
+- [ ] موبایل، تلفن، کد ملی، شبا و سایر ورودی‌های عددی از سمت چپ تایپ شوند و مقدار داخل کنترل LTR/چپ‌چین باشد. Label و چیدمان کلی فرم RTL بماند.
+- [ ] Rule عمومی `.afe-form .afe-control` در Strong Isolation نباید `text-align` اجباری داشته باشد.
+- [ ] در مرحله Preview، تمام مقادیر عددی/شماره‌ای، تاریخ‌ها، سلول‌های عددی Repeater و شماره ردیف‌ها LTR و `text-align:left` باشند.
 - [ ] همین رفتار در ویرایش Submission و Repeaterهای مدیریتی نیز بررسی شود.

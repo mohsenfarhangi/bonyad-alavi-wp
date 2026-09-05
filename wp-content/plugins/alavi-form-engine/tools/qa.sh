@@ -4,6 +4,9 @@ export TERM="${TERM:-dumb}"
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT"
 failed=0
+QA_TMP_DIR="$ROOT/.afe-qa-tmp-$$"
+mkdir -p "$QA_TMP_DIR"
+trap 'rm -rf "$QA_TMP_DIR"' EXIT
 
 pass(){ printf 'PASS %s\n' "$1"; }
 fail(){ printf 'FAIL %s\n' "$1"; failed=1; }
@@ -13,11 +16,11 @@ if php -r 'exit(version_compare(PHP_VERSION,"8.3.0",">=")?0:1);'; then pass "PHP
 test_count=0
 for test_file in tests/*.php; do
   test_count=$((test_count+1))
-  if php "$test_file" >/tmp/afe-qa-test.out 2>&1; then
+  if php "$test_file" >$QA_TMP_DIR/test.out 2>&1; then
     :
   else
     printf '\n--- %s ---\n' "$test_file"
-    cat /tmp/afe-qa-test.out
+    cat $QA_TMP_DIR/test.out
     fail "regression $test_file"
   fi
 done
@@ -26,15 +29,15 @@ if [ "$failed" -eq 0 ]; then pass "$test_count regression tests"; fi
 lint_count=0
 while IFS= read -r -d '' php_file; do
   lint_count=$((lint_count+1))
-  if ! php -l "$php_file" >/tmp/afe-qa-lint.out 2>&1; then
-    cat /tmp/afe-qa-lint.out
+  if ! php -l "$php_file" >$QA_TMP_DIR/lint.out 2>&1; then
+    cat $QA_TMP_DIR/lint.out
     fail "PHP lint $php_file"
   fi
 done < <(find src tests -type f -name '*.php' -print0)
 for php_file in alavi-form-engine.php uninstall.php; do
   lint_count=$((lint_count+1))
-  if ! php -l "$php_file" >/tmp/afe-qa-lint.out 2>&1; then
-    cat /tmp/afe-qa-lint.out
+  if ! php -l "$php_file" >$QA_TMP_DIR/lint.out 2>&1; then
+    cat $QA_TMP_DIR/lint.out
     fail "PHP lint $php_file"
   fi
 done
@@ -54,8 +57,8 @@ else
   fail "local JalaliDatePicker assets"
 fi
 
-if grep -RInE 'wp_(register|enqueue)_(script|style)\([^\n]*(https?:)?//' src alavi-form-engine.php >/tmp/afe-qa-cdn.out 2>/dev/null; then
-  cat /tmp/afe-qa-cdn.out
+if grep -RInE 'wp_(register|enqueue)_(script|style)\([^\n]*(https?:)?//' src alavi-form-engine.php >$QA_TMP_DIR/cdn.out 2>/dev/null; then
+  cat $QA_TMP_DIR/cdn.out
   fail "runtime JS/CSS has no external CDN registration"
 else
   pass "runtime JS/CSS has no external CDN registration"

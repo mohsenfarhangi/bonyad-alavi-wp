@@ -1697,6 +1697,30 @@
     return value || '—';
   }
 
+  function previewTextLooksNumeric(value) {
+    const text = String(value || '').trim();
+    if (!text || !/[0-9۰-۹٠-٩]/u.test(text)) return false;
+    return /^[0-9۰-۹٠-٩\s+\-().\/:،,]+$/u.test(text);
+  }
+
+  function previewFieldUsesLtr(wrapper, value = '') {
+    if (!wrapper) return previewTextLooksNumeric(value);
+    const control = qs(wrapper, 'input:not([type="hidden"]):not([type="file"]),textarea,select');
+    return !!control?.matches('[data-afe-ltr="1"],[dir="ltr"],[type="tel"],[type="number"],[type="date"],[inputmode="numeric"],[inputmode="decimal"],[inputmode="tel"]')
+      || previewTextLooksNumeric(value);
+  }
+
+  function setPreviewDirection(target, useLtr) {
+    if (!target) return;
+    if (useLtr) {
+      target.setAttribute('dir', 'ltr');
+      target.dataset.afeLtr = '1';
+    } else {
+      target.removeAttribute('dir');
+      delete target.dataset.afeLtr;
+    }
+  }
+
   function previewRepeaterHtml(wrapper) {
     if (!wrapper) return '<span class="afe-preview-empty">ثبت نشده</span>';
     const rows = qsa(wrapper, '.afe-repeater-items > .afe-repeater-row');
@@ -1704,8 +1728,12 @@
     const fieldHeaders = qsa(rows[0], '.afe-field').map(field => cleanFieldLabel(field));
     const head = fieldHeaders.map(label => `<th>${escapeHtml(label)}</th>`).join('');
     const body = rows.map((row, index) => {
-      const cells = qsa(row, '.afe-field').map(field => `<td>${escapeHtml(previewControlText(field))}</td>`).join('');
-      return `<tr><td>${index + 1}</td>${cells}</tr>`;
+      const cells = qsa(row, '.afe-field').map(field => {
+        const value = previewControlText(field);
+        const attrs = previewFieldUsesLtr(field, value) ? ' dir="ltr" data-afe-ltr="1"' : '';
+        return `<td${attrs}>${escapeHtml(value)}</td>`;
+      }).join('');
+      return `<tr><td dir="ltr" data-afe-ltr="1">${index + 1}</td>${cells}</tr>`;
     }).join('');
     return `<div class="afe-preview-repeater"><table><thead><tr><th>ردیف</th>${head}</tr></thead><tbody>${body}</tbody></table></div>`;
   }
@@ -1718,8 +1746,13 @@
       const block = target.closest('.afe-preview-field');
       if (block) block.hidden = !wrapper || wrapper.hidden;
       if (!wrapper || wrapper.hidden) return;
-      if (target.dataset.previewType === 'repeater') target.innerHTML = previewRepeaterHtml(wrapper);
-      else target.textContent = previewControlText(wrapper);
+      if (target.dataset.previewType === 'repeater') {
+        target.innerHTML = previewRepeaterHtml(wrapper);
+      } else {
+        const value = previewControlText(wrapper);
+        target.textContent = value;
+        setPreviewDirection(target, previewFieldUsesLtr(wrapper, value));
+      }
     });
   }
 

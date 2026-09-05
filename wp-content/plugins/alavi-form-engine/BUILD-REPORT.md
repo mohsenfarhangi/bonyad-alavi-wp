@@ -1,5 +1,14 @@
 # Build / QA Report — Alavi Form Engine 1.0.28-dev Feature-complete Pre-acceptance Checkpoint
 
+
+## 1.0.28-dev Preview numeric direction patch
+
+- Removed the forced `text-align:right !important` declaration from the generic Strong Isolation `.afe-form .afe-control` rule.
+- Live preview now marks numeric/identifier values with `dir="ltr"` and `data-afe-ltr="1"`.
+- Server-rendered/locked preview applies the same LTR marker to numeric fields and numeric-looking scalar values.
+- Preview repeater numeric cells and row indexes are explicitly LTR/left-aligned.
+- Added `tests/preview-numeric-direction.php` regression coverage.
+
 ## Status
 
 **Feature-complete against the 1.0.28 handoff, not yet production-tagged.** Stable production baseline remains **1.0.27**. Plugin version remains **1.0.28-dev**, Stable tag remains **1.0.27**, and DB development checkpoint remains **1.0.5-dev.2**.
@@ -10,7 +19,7 @@ The project administrator reported the real MeliPayamak account test **PASS** on
 
 - Numeric/identifier controls (`tel`, `number`, `date`, and numeric/decimal/tel input modes) now render with semantic `dir="ltr"` and left-aligned values while labels/form layout remain RTL.
 - Added the same LTR/left-aligned behavior to wp-admin Submission editing and admin Repeater child controls.
-- Hardened Strong Isolation defense with an explicit `data-afe-ltr="1"` marker and higher-specificity `input.afe-control[data-afe-ltr="1"]` override so the generic `.afe-control { text-align:right !important; }` rule cannot win in staging/theme cascade; no reliance on `:is()` remains for the guaranteed override.
+- Removed forced `text-align` from the generic Strong Isolation `.afe-form .afe-control` rule and kept explicit `data-afe-ltr="1"` overrides for numeric/identifier controls.
 - Added `tests/numeric-input-direction.php` and expanded Input Mask Renderer/Admin assertions.
 - Added `SmsProviderRegistry` routing with a global default provider and per-SMS-Action override.
 - Added `PersianWooCommerceSmsProvider`, delegating through the external plugin public `PWSMS()->send_sms()` API and active gateway without copying credentials into AFE.
@@ -35,8 +44,8 @@ The project administrator reported the real MeliPayamak account test **PASS** on
 ## QA performed
 
 - Unified `tools/qa.sh`: **PASS**.
-- Standalone regression suite: **PASS (46 test scripts)**.
-- PHP syntax lint across `src/`, `tests/`, plugin bootstrap and uninstall: **PASS (148 PHP files)**.
+- Standalone regression suite: **PASS (47 test scripts)**.
+- PHP syntax lint across `src/`, `tests/`, plugin bootstrap and uninstall: **PASS (149 PHP files)**.
 - `assets/js/admin.js` and `assets/js/frontend.js`: **PASS**.
 - `composer.json`: **PASS**.
 - Local JalaliDatePicker JS/CSS presence: **PASS**.
@@ -55,6 +64,7 @@ The project administrator reported the real MeliPayamak account test **PASS** on
   - `tests/sms-provider-registry.php`
   - `tests/persian-woocommerce-sms-provider.php`
   - `tests/sms-action-provider-routing.php`
+  - `tests/preview-numeric-direction.php`
 
 ## Release blocker / live acceptance
 

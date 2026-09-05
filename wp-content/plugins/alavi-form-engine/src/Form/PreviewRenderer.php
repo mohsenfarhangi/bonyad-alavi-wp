@@ -55,8 +55,10 @@ final class PreviewRenderer
         $name = (string)$field['name'];
         $label = $this->presenter->fieldLabel($field);
         $type = (string)($field['type'] ?? 'text');
+        $ltrPreview = $this->usesLeftToRightPreview($field, $value);
         if ($live) {
-            $content = '<div class="afe-preview-value" data-afe-preview-value="'.esc_attr($name).'" data-preview-type="'.esc_attr($type).'">—</div>';
+            $ltrAttrs = $ltrPreview ? ' dir="ltr" data-afe-ltr="1"' : '';
+            $content = '<div class="afe-preview-value" data-afe-preview-value="'.esc_attr($name).'" data-preview-type="'.esc_attr($type).'"'.$ltrAttrs.'>—</div>';
         } elseif ($type === 'file') {
             $files = $submissionId > 0 ? $this->submissions->filesForField($submissionId, $name) : [];
             if (!$files) $content = '<span class="afe-preview-empty">ثبت نشده</span>';
@@ -73,13 +75,38 @@ final class PreviewRenderer
             else {
                 $children=array_values(array_filter((array)($field['fields']??[]),static fn(array $child): bool => ($child['type']??'')!=='html'));
                 $head=''; foreach($children as $child) $head.='<th>'.esc_html($this->presenter->fieldLabel($child)).'</th>';
-                $body=''; foreach(array_values($rows) as $i=>$row){ if(!is_array($row)) continue; $cells=''; foreach($children as $child){ $childName=(string)($child['name']??''); $cells.='<td>'.$this->presenter->displayField($child,$row[$childName]??'',array_merge($context,$row)).'</td>'; } $body.='<tr><td>'.($i+1).'</td>'.$cells.'</tr>'; }
+                $body=''; foreach(array_values($rows) as $i=>$row){ if(!is_array($row)) continue; $cells=''; foreach($children as $child){ $childName=(string)($child['name']??''); $childValue=$row[$childName]??''; $ltrCell=$this->usesLeftToRightPreview($child,$childValue); $cellAttrs=$ltrCell?' dir="ltr" data-afe-ltr="1"':''; $cells.='<td'.$cellAttrs.'>'.$this->presenter->displayField($child,$childValue,array_merge($context,$row)).'</td>'; } $body.='<tr><td dir="ltr" data-afe-ltr="1">'.($i+1).'</td>'.$cells.'</tr>'; }
                 $content='<div class="afe-preview-repeater"><table><thead><tr><th>ردیف</th>'.$head.'</tr></thead><tbody>'.$body.'</tbody></table></div>';
             }
         } else {
-            $content = $this->presenter->displayField($field, $value, $context);
+            $ltrAttrs = $ltrPreview ? ' dir="ltr" data-afe-ltr="1"' : '';
+            $content = '<div class="afe-preview-value"'.$ltrAttrs.'>'.$this->presenter->displayField($field, $value, $context).'</div>';
         }
         $wide = in_array($type, ['textarea','repeater','file'], true) ? ' afe-preview-field--wide' : '';
         return '<div class="afe-preview-field'.$wide.'" data-preview-field="'.esc_attr($name).'"><span class="afe-preview-label">'.esc_html($label).'</span>'.$content.'</div>';
     }
+
+    private function usesLeftToRightPreview(array $field, mixed $value): bool
+    {
+        $type = (string)($field['type'] ?? '');
+        if (in_array($type, ['tel', 'number', 'date'], true)) return true;
+        if ((string)($field['character_mode'] ?? 'normal') === 'digits') return true;
+
+        $attributes = (array)($field['attributes'] ?? []);
+        $inputMode = strtolower(trim((string)($attributes['inputmode'] ?? '')));
+        if (in_array($inputMode, ['numeric', 'decimal', 'tel'], true)) return true;
+
+        $mask = $field['input_mask'] ?? null;
+        if (is_array($mask)) {
+            $maskInputMode = strtolower(trim((string)($mask['inputmode'] ?? '')));
+            if (in_array($maskInputMode, ['numeric', 'decimal', 'tel'], true)) return true;
+        }
+
+        if (!is_scalar($value)) return false;
+        $text = trim((string)$value);
+        if ($text === '' || preg_match('/[0-9۰-۹٠-٩]/u', $text) !== 1) return false;
+
+        return preg_match('/^[0-9۰-۹٠-٩\s+\-().\/:،,]+$/u', $text) === 1;
+    }
+
 }

@@ -565,7 +565,6 @@ textarea.afe-control { resize:vertical; min-height:118px; line-height:1.9; }
   color:var(--afe-ink) !important;
   font:inherit !important;
   line-height:1.5 !important;
-  text-align:right !important;
   box-shadow:none !important;
   outline:0 !important;
 }
@@ -1195,3 +1194,13 @@ textarea.afe-control { resize:vertical; min-height:118px; line-height:1.9; }
   unicode-bidi: plaintext !important;
 }
 
+
+
+/* 1.0.28-dev patch — numeric values in preview always read from the left */
+.afe-shell .afe-preview-value[data-afe-ltr="1"],
+.afe-shell .afe-preview-repeater td[data-afe-ltr="1"],
+.afe-shell .afe-preview-repeater td:first-child {
+  direction:ltr !important;
+  text-align:left !important;
+  unicode-bidi:plaintext !important;
+}

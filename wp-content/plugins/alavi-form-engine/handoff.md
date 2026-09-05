@@ -10,6 +10,16 @@
 - **Stable tag:** فعلاً `1.0.27`
 - **تست واقعی ملی‌پیامک:** PASS گزارش‌شده توسط مدیر پروژه در 2026-09-04
 
+## Patch جهت اعداد در Preview و حذف text-align عمومی کنترل‌ها
+
+- `text-align:right !important` از rule عمومی `.afe-shell.afe-isolation-strong .afe-form .afe-control` حذف شد؛ جهت متن هر کنترل دیگر به‌صورت اجباری از rule عمومی تعیین نمی‌شود.
+- کنترل‌های عددی/شماره‌ای همچنان با `dir="ltr"` و `data-afe-ltr="1"` جهت صریح خود را دارند.
+- در Preview زنده، مقدارهای عددی/شماره‌ای براساس نوع کنترل یا عددی‌بودن مقدار با `dir="ltr"` و `data-afe-ltr="1"` علامت‌گذاری می‌شوند.
+- در Preview قفل‌شده/سروررندر نیز فیلدهای عددی، تاریخ، موبایل و مقدارهای عددی‌مانند LTR/چپ‌چین هستند.
+- سلول‌های عددی Repeater و ستون شماره ردیف Preview نیز LTR و `text-align:left` هستند.
+- Regression اختصاصی: `tests/preview-numeric-direction.php`.
+- QA script دیگر به `/tmp` سیستم وابسته نیست و فایل‌های موقت را داخل پوشه موقت محلی پروژه می‌سازد و در پایان پاک می‌کند.
+
 ## Patch اصلاح Strong Isolation برای فیلدهای LTR
 
 - مشکل گزارش‌شده در staging: rule عمومی `.afe-shell.afe-isolation-strong .afe-form .afe-control { text-align:right !important; }` می‌توانست در cascade واقعی سایت روی ورودی‌های عددی غالب بماند.
@@ -90,8 +100,8 @@
 ## QA این checkpoint
 
 - `tools/qa.sh`: PASS
-- Regression: **46/46 PASS**
-- PHP lint: **148 فایل PASS**
+- Regression: **47/47 PASS**
+- PHP lint: **149 فایل PASS**
 - JavaScript syntax: PASS
 - composer.json: PASS
 - local JalaliDatePicker: PASS
