@@ -114,3 +114,7 @@
   direction:ltr !important;
   text-align:left !important;
 }
+
+/* 1.0.28-dev patch — numeric/identifier controls remain LTR in admin editing */
+.afe-admin-control[data-afe-ltr="1"]{direction:ltr!important;text-align:left!important;unicode-bidi:plaintext!important}
+

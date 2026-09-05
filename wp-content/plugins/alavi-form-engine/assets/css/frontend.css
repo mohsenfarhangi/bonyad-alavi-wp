@@ -1180,3 +1180,18 @@ textarea.afe-control { resize:vertical; min-height:118px; line-height:1.9; }
   direction: ltr !important;
   text-align: left !important;
 }
+
+/* 1.0.28-dev patch — guaranteed LTR override after strong isolation */
+.afe-shell .afe-form input.afe-control[data-afe-ltr="1"],
+.afe-shell .afe-form textarea.afe-control[data-afe-ltr="1"] {
+  direction: ltr !important;
+  text-align: left !important;
+  unicode-bidi: plaintext;
+}
+.afe-shell.afe-isolation-strong .afe-form input.afe-control[data-afe-ltr="1"],
+.afe-shell.afe-isolation-strong .afe-form textarea.afe-control[data-afe-ltr="1"] {
+  direction: ltr !important;
+  text-align: left !important;
+  unicode-bidi: plaintext !important;
+}
+

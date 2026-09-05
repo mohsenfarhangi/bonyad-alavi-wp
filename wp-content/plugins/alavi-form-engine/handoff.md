@@ -10,6 +10,15 @@
 - **Stable tag:** فعلاً `1.0.27`
 - **تست واقعی ملی‌پیامک:** PASS گزارش‌شده توسط مدیر پروژه در 2026-09-04
 
+## Patch اصلاح Strong Isolation برای فیلدهای LTR
+
+- مشکل گزارش‌شده در staging: rule عمومی `.afe-shell.afe-isolation-strong .afe-form .afe-control { text-align:right !important; }` می‌توانست در cascade واقعی سایت روی ورودی‌های عددی غالب بماند.
+- Renderer اکنون برای هر کنترل شماره‌ای/عددی علاوه بر `dir="ltr"`، marker صریح `data-afe-ltr="1"` تولید می‌کند.
+- CSS نهایی از selector مستقل و قوی‌تر `input.afe-control[data-afe-ltr="1"]` استفاده می‌کند و `direction:ltr !important` + `text-align:left !important` را بعد از Strong Isolation اعمال می‌کند؛ وابستگی به `:is()` برای این override حذف شده است.
+- `unicode-bidi:plaintext` برای رفتار پایدار caret/نمایش رشته‌های عددی ترکیبی اضافه شده است.
+- همین marker و override در ویرایش Submission و Repeaterهای wp-admin نیز اعمال می‌شود.
+- Regression `tests/numeric-input-direction.php` اکنون وجود marker و selector Strong Isolation جدید را الزام می‌کند.
+
 ## Patch جهت نمایش فیلدهای عددی / شماره‌ای
 
 - ورودی‌های `tel`، `number`، `date` و هر input با `inputmode=numeric|decimal|tel` در Renderer به‌صورت semantic با `dir="ltr"` خروجی می‌شوند.

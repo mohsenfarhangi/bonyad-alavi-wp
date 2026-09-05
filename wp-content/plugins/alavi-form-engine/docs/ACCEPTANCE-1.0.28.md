@@ -123,5 +123,5 @@ Run on a staging clone using the same PHP/WordPress/Elementor major versions int
 
 ## جهت ورودی‌های شماره‌ای
 
-- [ ] موبایل، تلفن، کد ملی، شبا و سایر ورودی‌های عددی از سمت چپ تایپ شوند و مقدار داخل کنترل LTR/چپ‌چین باشد؛ Label و چیدمان کلی فرم RTL بماند.
+- [ ] موبایل، تلفن، کد ملی، شبا و سایر ورودی‌های عددی از سمت چپ تایپ شوند و مقدار داخل کنترل LTR/چپ‌چین باشد؛ حتی در حالت Strong Isolation نباید rule عمومی `text-align:right !important` بر آن غلبه کند. Label و چیدمان کلی فرم RTL بماند.
 - [ ] همین رفتار در ویرایش Submission و Repeaterهای مدیریتی نیز بررسی شود.

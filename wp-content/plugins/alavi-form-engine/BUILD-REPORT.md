@@ -10,7 +10,7 @@ The project administrator reported the real MeliPayamak account test **PASS** on
 
 - Numeric/identifier controls (`tel`, `number`, `date`, and numeric/decimal/tel input modes) now render with semantic `dir="ltr"` and left-aligned values while labels/form layout remain RTL.
 - Added the same LTR/left-aligned behavior to wp-admin Submission editing and admin Repeater child controls.
-- Added Strong Isolation defense so hostile theme CSS cannot force number-like controls back to right alignment.
+- Hardened Strong Isolation defense with an explicit `data-afe-ltr="1"` marker and higher-specificity `input.afe-control[data-afe-ltr="1"]` override so the generic `.afe-control { text-align:right !important; }` rule cannot win in staging/theme cascade; no reliance on `:is()` remains for the guaranteed override.
 - Added `tests/numeric-input-direction.php` and expanded Input Mask Renderer/Admin assertions.
 - Added `SmsProviderRegistry` routing with a global default provider and per-SMS-Action override.
 - Added `PersianWooCommerceSmsProvider`, delegating through the external plugin public `PWSMS()->send_sms()` API and active gateway without copying credentials into AFE.
@@ -35,8 +35,8 @@ The project administrator reported the real MeliPayamak account test **PASS** on
 ## QA performed
 
 - Unified `tools/qa.sh`: **PASS**.
-- Standalone regression suite: **PASS (45 test scripts)**.
-- PHP syntax lint across `src/`, `tests/`, plugin bootstrap and uninstall: **PASS (147 PHP files)**.
+- Standalone regression suite: **PASS (46 test scripts)**.
+- PHP syntax lint across `src/`, `tests/`, plugin bootstrap and uninstall: **PASS (148 PHP files)**.
 - `assets/js/admin.js` and `assets/js/frontend.js`: **PASS**.
 - `composer.json`: **PASS**.
 - Local JalaliDatePicker JS/CSS presence: **PASS**.
