@@ -1,43 +1,36 @@
-# Patch Manifest — v0.5.5
+# Patch Manifest — v0.5.6
 
-مبدا Patch: `v0.5.4`  
-مقصد Patch: `v0.5.5`
+مبدا Patch: `v0.5.5`  
+مقصد Patch: `v0.5.6`
 
 ## هدف
 
-تکمیل کنترل‌های ریسپانسیو استایل برای پنل آمار و Hero ویجت «مرکز حرکت‌های مردمی و جهادی».
+اصلاح ابعاد تصویر Hero برای عملکرد قطعی کنترل‌های `object-fit` و `object-position` در Elementor.
 
 ## فایل‌های تغییرکرده
-
-### `inc/elementor/widgets/class-bonyad-alavi-jihadi-center-widget.php`
-
-علت ورود به Patch:
-
-- افزودن Margin چهارجهته و ریسپانسیو برای `.ba-jihadi-center__stats-wrap`.
-- تکمیل کنترل ارتفاع ریسپانسیو Hero.
-- افزودن کنترل `object-fit` ریسپانسیو تصویر Hero.
-- تبدیل موقعیت تصویر Hero به کنترل ریسپانسیو با ۹ موقعیت.
-- افزودن Opacity ریسپانسیو و CSS Filterهای استاندارد Elementor برای تصویر Hero.
 
 ### `assets/css/bonyad-alavi-jihadi-center-widget.css`
 
 علت ورود به Patch:
 
-- حذف Min Height ثابت موبایل Hero که کنترل ریسپانسیو Elementor را خنثی می‌کرد.
-- تعریف fallback ریسپانسیو `--ba-jc-hero-height` برای Tablet و Mobile.
+- تعیین صریح `width: 100%` و `height: 100%` برای `.ba-jihadi-center__hero-media`.
+- افزودن `overflow: hidden` به کانتینر رسانه Hero.
+- قراردادن `.ba-jihadi-center__hero-image` به‌صورت absolute با `inset: 0`.
+- تعیین صریح `width: 100%` و `height: 100%` روی تصویر Hero.
+- حذف محدودیت‌های عمومی تصویر با `max-width: none` و `max-height: none` تا `object-fit` روی ابعاد واقعی Hero اعمال شود.
 
 ### `docs/handoff.md`
 
 علت ورود به Patch:
 
-- ثبت قرارداد جدید کنترل‌های استایل Hero و آمار برای توسعه‌های آینده.
-- افزودن نسخه `v0.5.5` به تاریخچه پروژه.
+- ثبت قرارداد دائمی ابعاد تصویر Hero برای توسعه‌های آینده.
+- افزودن نسخه `v0.5.6` به تاریخچه پروژه.
 
-### `docs/versions/v0.5.5.md`
+### `docs/versions/v0.5.6.md`
 
 علت ورود به Patch:
 
-- مستندسازی کامل تغییرات، سازگاری و تست‌های نسخه.
+- مستندسازی اصلاح Object Fit تصویر Hero و تست‌های نسخه.
 
 ## فایل حذف‌شده
 
@@ -45,12 +38,12 @@
 
 ## روش اعمال
 
-محتوای این ZIP را روی ریشه قالب `ostadsho-child` نسخه `v0.5.4` کپی و Replace کنید.
+محتوای این ZIP را روی ریشه قالب `ostadsho-child` نسخه `v0.5.5` کپی و Replace کنید.
 
 ## بررسی‌های انجام‌شده
 
-- `php -l` برای تمام فایل‌های PHP قالب: موفق
-- `node --check` برای تمام فایل‌های JavaScript قالب: موفق
-- بررسی حذف Rule ثابت `min-height:480px` روی Hero موبایل: موفق
-- بررسی وجود کنترل‌های جدید Elementor: موفق
+- `php -l` برای تمام 25 فایل PHP قالب: موفق
+- `node --check` برای تمام 9 فایل JavaScript قالب: موفق
+- بررسی `width:100%` و `height:100%` روی Hero Media و Hero Image: موفق
+- بررسی باقی‌ماندن کنترل‌های `object-fit` و `object-position` Elementor: موفق
 - تست سلامت ZIP کامل و Patch: موفق

@@ -119,6 +119,7 @@ Block عمومی BEM:
 - [v0.5.3 — Lazy Rendering و Fade-in سکشن‌های مرکز](versions/v0.5.3.md)
 - [v0.5.4 — اصلاح بارگذاری Asset تب‌های تنظیمات بر اساس دسترسی کاربر](versions/v0.5.4.md)
 - [v0.5.5 — کنترل‌های ریسپانسیو آمار و Hero](versions/v0.5.5.md)
+- [v0.5.6 — اصلاح ابعاد تصویر Hero برای عملکرد صحیح Object Fit](versions/v0.5.6.md)
 
 ## معماری ذخیره تنظیمات بنیاد علوی
 
@@ -175,6 +176,7 @@ Block عمومی BEM:
 - از نسخه `v0.5.2` روی selector پایه‌ی `.ba-jihadi-center__system-icon svg` هیچ `fill` اجباری تعریف نمی‌شود؛ کنترل رنگ عادی و Hover فقط از `color` استفاده می‌کند تا SVGهای مبتنی بر `currentColor` رفتار استاندارد داشته باشند. رنگ Hover آیکون باید کنترل مستقل Elementor داشته باشد و با Hover/Focus کارت تغییر کند.
 - از نسخه `v0.5.3` تمام بخش‌های اصلی ویجت از Behavior Hook مشترک `data-ba-jc-reveal` برای Fade-in یک‌باره استفاده می‌کنند. سکشن‌های پایین صفحه علاوه بر آن Modifier `ba-jihadi-center__viewport-section--lazy` دارند و با `content-visibility: auto` Lazy Render می‌شوند. Hero به دلیل LCP eager باقی می‌ماند. این رفتار در `prefers-reduced-motion` و Elementor Editor نباید انیمیشن/محدودیت ویرایشی ایجاد کند.
 - از نسخه `v0.5.5` کنترل Margin چهارجهته ریسپانسیو برای `.ba-jihadi-center__stats-wrap` و کنترل‌های ارتفاع، `object-fit`، `object-position`، opacity و CSS Filter برای تصویر Hero در Elementor در دسترس هستند. Min Height موبایل Hero نباید در CSS ثابت شود و باید از `--ba-jc-hero-height` پیروی کند.
+- از نسخه `v0.5.6` کانتینر `.ba-jihadi-center__hero-media` و تصویر `.ba-jihadi-center__hero-image` باید ابعاد صریح `width: 100%` و `height: 100%` داشته باشند. خود تصویر به‌صورت absolute داخل Media Container قرار می‌گیرد تا کنترل‌های `object-fit` و `object-position` Elementor همیشه روی جعبه‌ای با ابعاد مشخص اعمال شوند.
 
 آیتم Partner فقط وقتی معتبر است که حداقل تصویر، SVG/Icon یا عنوان داشته باشد. URL به‌تنهایی نباید یک کارت خالی ایجاد کند.
 
