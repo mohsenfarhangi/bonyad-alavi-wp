@@ -10,6 +10,22 @@
 - **Stable tag:** فعلاً `1.0.27`
 - **تست واقعی ملی‌پیامک:** PASS گزارش‌شده توسط مدیر پروژه در 2026-09-04
 
+## Patch یکپارچه‌سازی SMS با Persian WooCommerce SMS
+
+- `SmsProviderRegistry` اضافه شد؛ Provider پیش‌فرض سراسری و Override مستقل در هر SMS Action پشتیبانی می‌شود.
+- Provider داخلی `melipayamak` بدون تغییر قراردادهای Legacy/API-token حفظ شده است.
+- Adapter جدید `PersianWooCommerceSmsProvider` از API عمومی `PWSMS()->send_sms()` و Gateway فعال خود افزونه Persian WooCommerce SMS استفاده می‌کند؛ Credential، API Key، Password و Sender آن افزونه داخل AFE کپی/ذخیره نمی‌شود.
+- اگر Gateway در Persian WooCommerce SMS تغییر کند، AFE در اجرای بعدی همان Gateway جدید را تشخیص می‌دهد.
+- ارسال آزاد برای Gateway فعال قابل استفاده است. Pattern فقط وقتی در UI فعال می‌شود که strategy شناخته‌شده/ثبت‌شده وجود داشته باشد؛ built-in strategy فعلی شامل `MeliPayamakPattern`/ملی‌پیامک خدماتی/ترکیبی و `KaveNegarLookUp` است.
+- Gateway ناشناخته در Pattern به‌جای ارسال payload حدسی با خطای روشن Fail می‌شود؛ Submission rollback نمی‌شود و خطا در Action Log ثبت می‌شود.
+- Hookهای توسعه‌دهنده: `afe_register_sms_providers`, `afe_pwsms_supported_modes`, `afe_pwsms_pattern_strategy`, `afe_pwsms_pattern_payload`, `afe_pwsms_send_data`.
+- در تنظیمات سراسری AFE، Provider پیش‌فرض قابل انتخاب است؛ وضعیت افزونه خارجی، Gateway فعال و modeهای قابل استفاده نمایش داده می‌شوند.
+- در Action Builder، Provider=`پیش‌فرض سراسری / ملی پیامک داخلی / Persian WooCommerce SMS` قابل انتخاب است و modeهای نامعتبر براساس capability فعلی Gateway غیرفعال می‌شوند.
+- اگر Persian WooCommerce SMS بعداً غیرفعال شود، config قبلی حفظ می‌شود و silently به Provider دیگر تغییر نمی‌کند؛ Runtime خطای واضح می‌دهد.
+- `sms_enabled` Master Switch کل SMS است. نبود OpenSSL فقط ذخیره Credential جدید Provider داخلی را محدود می‌کند و Integration خارجی را غیرفعال نمی‌کند.
+- Bootstrap preflight کلاس‌های جدید SMS Router/Adapter را نیز بررسی می‌کند.
+- Regressionها: `sms-provider-registry.php`, `persian-woocommerce-sms-provider.php`, `sms-action-provider-routing.php`.
+
 ## افزوده‌شده پس از feature-complete اولیه: Input Mask عمومی
 
 - `InputMaskDefinition`, `InputMaskRegistry`, `InputMaskPattern` اضافه شدند.
@@ -57,8 +73,8 @@
 ## QA این checkpoint
 
 - `tools/qa.sh`: PASS
-- Regression: **42/42 PASS**
-- PHP lint: **142 فایل PASS**
+- Regression: **45/45 PASS**
+- PHP lint: **147 فایل PASS**
 - JavaScript syntax: PASS
 - composer.json: PASS
 - local JalaliDatePicker: PASS
@@ -69,7 +85,7 @@
 
 - گزارش staging در 2026-09-04 نشان داد اگر فایل‌های جدید checkpoint به‌صورت ناقص روی نسخه قدیمی کپی شوند، `DuplicateRepository` می‌تواند هنگام boot با `Class not found` متوقف شود.
 - فایل `DuplicateRepository.php` و PSR-4 صحیح داخل بسته موجود بودند؛ ریشه خطا deployment ناقص/ناخوانا تشخیص داده شد.
-- bootstrap اکنون ۱۴ کلاس حیاتی boot را قبل از ثبت hook اصلی بررسی می‌کند و در نصب ناقص به‌جای Fatal خام، Admin Notice + error log واضح ثبت می‌کند.
+- bootstrap اکنون ۱۶ کلاس حیاتی boot را قبل از ثبت hook اصلی بررسی می‌کند و در نصب ناقص به‌جای Fatal خام، Admin Notice + error log واضح ثبت می‌کند.
 - تست‌های `bootstrap-autoload.php` و `bootstrap-preflight.php` اضافه شدند تا هم autoload بسته و هم رفتار امن در نصب ناقص regression داشته باشند.
 - برای ارتقا بین checkpointها باید **کل پوشه افزونه** جایگزین شود؛ کپی انتخابی فایل‌های تغییرکرده پشتیبانی نمی‌شود.
 

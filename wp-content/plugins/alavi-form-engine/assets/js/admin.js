@@ -596,6 +596,35 @@
           field.hidden = !!control && String(control.value) !== expected;
         });
       };
+      const syncSmsProvider = card => {
+        if (!card) return;
+        const provider = card.querySelector('[data-afe-ui-role="sms_provider"]');
+        const mode = card.querySelector('[data-afe-ui-role="sms_mode"]');
+        if (!provider || !mode) return;
+        let map = {};
+        try { map = JSON.parse(provider.dataset.afeProviderModes || '{}') || {}; } catch (_) { map = {}; }
+        const modes = Array.isArray(map[provider.value]) ? map[provider.value] : [];
+        [...mode.options].forEach(option => {
+          const supported = modes.includes(option.value);
+          // Keep an already-saved unsupported value selectable so saving another
+          // setting does not silently rewrite the Action. Once the user changes
+          // away from it, unsupported choices become disabled.
+          option.disabled = !supported && mode.value !== option.value;
+        });
+        const unsupported = mode.value && !modes.includes(mode.value);
+        let warning = card.querySelector('[data-afe-sms-provider-warning]');
+        if (unsupported && !warning) {
+          warning = document.createElement('div');
+          warning.className = 'afe-action-provider-warning';
+          warning.dataset.afeSmsProviderWarning = '1';
+          const config = card.querySelector('[data-afe-action-config]');
+          config?.prepend(warning);
+        }
+        if (warning) {
+          warning.hidden = !unsupported;
+          if (unsupported) warning.textContent = 'روش ارسال انتخاب‌شده توسط Provider/Gateway فعلی پشتیبانی نمی‌شود. Provider یا روش ارسال را تغییر دهید.';
+        }
+      };
       const syncCondition = row => {
         if (!row) return;
         const operator = qs(row, '[data-afe-condition-operator]');
@@ -616,6 +645,7 @@
         const label = qs(card, '[data-afe-action-label]');
         if (type && label) label.textContent = type.options[type.selectedIndex]?.text || type.value;
         syncShowWhen(card);
+        syncSmsProvider(card);
         card.querySelectorAll('[data-afe-condition-row]').forEach(syncCondition);
         syncConditionCount(card);
       };
@@ -725,7 +755,11 @@
         const type = event.target.closest('[data-afe-action-type]');
         if (type) replaceActionConfig(type.closest('[data-afe-action-row]'));
         const configControl = event.target.closest('[data-afe-config-field-key]');
-        if (configControl) syncShowWhen(configControl.closest('[data-afe-action-row]'));
+        if (configControl) {
+          const card = configControl.closest('[data-afe-action-row]');
+          syncShowWhen(card);
+          syncSmsProvider(card);
+        }
         const operator = event.target.closest('[data-afe-condition-operator]');
         if (operator) syncCondition(operator.closest('[data-afe-condition-row]'));
         markOverride();

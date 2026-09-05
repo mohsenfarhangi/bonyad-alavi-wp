@@ -36,6 +36,8 @@ The package includes the "ثبت نام گروه‌های مردمی و جهاد
 * Refactored Email and Webhook actions to use the shared TokenResolver.
 * Added SmsAction and MeliPayamak adapters for legacy username/password and console API-token modes, including free-text and pattern/shared sends; live-account SMS acceptance was reported PASS by the project administrator.
 * Added encrypted global storage for SMS password/API token plus per-action recipient/body/pattern configuration.
+* Added SMS provider routing with a global default + per-Action override and optional Persian WooCommerce SMS integration that reuses its active gateway/settings without copying credentials into AFE.
+* Added capability-aware free/Pattern handling for the external gateway with fail-closed unknown Pattern formats and developer extension hooks.
 * Added DuplicatePolicy integration for frontend, REST, admin edits, trash and restore, including active Draft matching and current-Submission exclusion during edits.
 * Added block, secure-reference, custom-message and allow+mark duplicate behaviors with is_duplicate / duplicate_of_submission_id metadata.
 * Added transactional duplicate-owner promotion so an active allow-mode duplicate becomes canonical when the previous fingerprint owner is edited or trashed.

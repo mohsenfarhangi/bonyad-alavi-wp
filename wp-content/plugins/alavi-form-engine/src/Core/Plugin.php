@@ -9,6 +9,8 @@ use BonyadAlavi\FormEngine\Actions\ActionExecutionRepository;
 use BonyadAlavi\FormEngine\Actions\Tokens\TokenRegistry;
 use BonyadAlavi\FormEngine\Actions\Tokens\TokenResolver;
 use BonyadAlavi\FormEngine\Actions\Sms\MeliPayamakProvider;
+use BonyadAlavi\FormEngine\Actions\Sms\PersianWooCommerceSmsProvider;
+use BonyadAlavi\FormEngine\Actions\Sms\SmsProviderRegistry;
 use BonyadAlavi\FormEngine\Actions\Pdf\PdfGenerator;
 use BonyadAlavi\FormEngine\Admin\DatabasePage;
 use BonyadAlavi\FormEngine\Admin\FormsPage;
@@ -104,12 +106,43 @@ final class Plugin
         $smsSettings = isset($globalSettings['sms']) && is_array($globalSettings['sms']) ? $globalSettings['sms'] : [];
         $smsSettings['password'] = $secretStore->decrypt((string)($smsSettings['password'] ?? ''));
         $smsSettings['api_key'] = $secretStore->decrypt((string)($smsSettings['api_key'] ?? ''));
-        $smsProvider = new MeliPayamakProvider($smsSettings);
+        $defaultSmsProvider = sanitize_key((string)($smsSettings['default_provider'] ?? $smsSettings['provider'] ?? 'melipayamak'));
+        if ($defaultSmsProvider === '') $defaultSmsProvider = 'melipayamak';
+        $smsProviders = new SmsProviderRegistry($defaultSmsProvider, !empty($smsSettings['enabled']));
+        $meliPayamak = new MeliPayamakProvider($smsSettings);
+        $smsProviders->register(
+            'melipayamak',
+            'ملی پیامک — تنظیمات Alavi Form Engine',
+            $meliPayamak,
+            ['free','pattern'],
+            true,
+            static function() use ($smsSettings): array {
+                $authMode = sanitize_key((string)($smsSettings['auth_mode'] ?? 'legacy'));
+                $configured = $authMode === 'api_key'
+                    ? trim((string)($smsSettings['api_key'] ?? '')) !== ''
+                    : trim((string)($smsSettings['username'] ?? '')) !== '' && (string)($smsSettings['password'] ?? '') !== '';
+                return [
+                    'configured'=>$configured,
+                    'auth_mode'=>$authMode,
+                    'sender'=>trim((string)($smsSettings['sender'] ?? '')),
+                ];
+            }
+        );
+        $pwsmsProvider = new PersianWooCommerceSmsProvider();
+        $smsProviders->register(
+            PersianWooCommerceSmsProvider::KEY,
+            'Persian WooCommerce SMS',
+            $pwsmsProvider,
+            static fn(): array => $pwsmsProvider->supportedModes(),
+            static fn(): bool => $pwsmsProvider->isAvailable(),
+            static fn(): array => $pwsmsProvider->status()
+        );
+        do_action('afe_register_sms_providers', $smsProviders);
         $actionRegistry = new ActionRegistry();
         $actionRegistry->registerCore($tokenResolver);
         $pdfGenerator = new PdfGenerator();
         $actionRegistry->registerExtended($tokenResolver, $submissionRepo, $pdfGenerator);
-        $actionRegistry->registerSms($tokenResolver, $smsProvider);
+        $actionRegistry->registerSms($tokenResolver, $smsProviders);
         $actionExecutions = new ActionExecutionRepository();
         $actions = new ActionManager($actionRegistry, $actionExecutions);
         $eventRegistry = new EventRegistry();
@@ -167,6 +200,7 @@ final class Plugin
         $this->container->set(InputMaskRegistry::class,$inputMaskRegistry);
         $this->container->set(TokenResolver::class,$tokenResolver);
         $this->container->set(SecretStore::class,$secretStore);
+        $this->container->set(SmsProviderRegistry::class,$smsProviders);
         $this->container->set(ActionRegistry::class,$actionRegistry);
         $this->container->set(ActionExecutionRepository::class,$actionExecutions);
         $this->container->set(ActionManager::class,$actions);
@@ -199,7 +233,7 @@ final class Plugin
             $submissionsPage = new SubmissionsPage($registry,$submissionRepo,$service,$sources,$formAccess,$dates,$actionExecutions,$actionRegistry,$eventRegistry);
             $reportsPage = new ReportsPage($registry,$submissionRepo,$formAccess,$dates);
             $databasePage = new DatabasePage(new Migrator(),$registry,$dedicated,$dates);
-            $settingsPage = new SettingsPage($registry,$formAccess,$secretStore);
+            $settingsPage = new SettingsPage($registry,$formAccess,$secretStore,$smsProviders);
             (new Menu($formsPage,$submissionsPage,$reportsPage,$databasePage,$settingsPage))->register();
         }
 

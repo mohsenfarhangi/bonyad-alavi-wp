@@ -16,6 +16,7 @@
 | Form definition | `tests/jihadi-form-1-0-23.php` | Jihadi schema, strict mobile/NID/IBAN and repeater shape remain compatible |
 | Default applicant SMS template | `tests/jihadi-default-sms-action.php` | `submission.submitted`, `leader_mobile`, `once_per_submission`, disabled until content is configured |
 | SMS provider/action | `tests/melipayamak-provider.php`, `tests/sms-action.php` | Legacy/API-token, free/pattern contracts and recipient/token handling |
+| SMS provider routing / Persian WooCommerce SMS | `tests/sms-provider-registry.php`, `tests/persian-woocommerce-sms-provider.php`, `tests/sms-action-provider-routing.php` | global default, per-Action override, external gateway delegation, known Pattern strategies |
 | Action runtime/retry | `tests/action-manager.php`, `tests/action-manager-retry.php`, `tests/extended-action-registry.php`, `tests/redirect-action.php` | execution policies, runtime outputs, retry, redirect and extended actions |
 | Duplicate policy | `tests/duplicate-policy.php`, `tests/duplicate-repository.php` | normalization, owner promotion, trash/restore safety |
 | Field ordering | `tests/field-ordering.php` | same-scope reordering and safe append of newly code-defined fields |
@@ -72,7 +73,16 @@ Run on a staging clone using the same PHP/WordPress/Elementor major versions int
    - Confirm recipient resolves from `leader_mobile` and repeat submit/retry paths do not send unintended duplicates.
    - The provider/account connectivity itself is already reported PASS by the project administrator.
 
-8. **Field ordering / Repeater ordering**
+8. **Persian WooCommerce SMS Integration**
+   - Persian WooCommerce SMS را فعال کنید و یک Gateway واقعی در تنظیمات همان افزونه انتخاب/تنظیم کنید.
+   - در تنظیمات AFE، Provider پیش‌فرض را روی Persian WooCommerce SMS بگذارید و تأیید کنید نام Gateway فعال و modeهای قابل استفاده نمایش داده می‌شوند.
+   - یک SMS Action با Provider=`پیش‌فرض سراسری` و یک Action دیگر با Override=`Persian WooCommerce SMS` اجرا کنید؛ هر دو باید از همان Credential/Gateway خارجی استفاده کنند و AFE نباید درخواست Credential جدید بدهد.
+   - ارسال آزاد را تست کنید. اگر Gateway فعال Pattern-capable شناخته می‌شود، Pattern/Lookup را نیز با Pattern ID و پارامترهای واقعی تست کنید.
+   - Gateway را داخل Persian WooCommerce SMS تغییر دهید، سپس بدون تغییر Credential در AFE دوباره Action را اجرا کنید و استفاده از Gateway جدید را تأیید کنید.
+   - افزونه Persian WooCommerce SMS را موقتاً غیرفعال کنید؛ Action قبلی باید config خود را حفظ کند، Submission موفق بماند و Action Log خطای Provider unavailable ثبت کند.
+   - Provider پیش‌فرض را به ملی پیامک داخلی برگردانید و تأیید کنید Action دارای Override خارجی همچنان از Provider خارجی استفاده می‌کند.
+
+9. **Field ordering / Repeater ordering**
    - در تب «فیلدها و چیدمان» تأیید کنید فقط بخش چیدمان دیده می‌شود و Editorهای Override در محتوای اصلی تب وجود ندارند.
    - روی یک Field کلیک کنید و تأیید کنید تنظیمات Override همان Field داخل `afe-admin-side` باز می‌شود؛ سپس یک Child Field داخل Repeater را نیز بررسی کنید.
    - روی HtmlBlock کلیک کنید/بررسی کنید که فقط Drag & Drop دارد و پنل Override فیلدی برای آن باز نمی‌شود.
@@ -80,12 +90,12 @@ Run on a staging clone using the same PHP/WordPress/Elementor major versions int
    - Reorder children inside a Repeater and confirm new rows follow the saved order.
    - Confirm a field cannot be dragged to another Step in this version.
 
-9. **Date modes**
+10. **Date modes**
    - Test Jalali `combined`, `picker`, and `manual` fields.
    - Confirm picker-only prevents direct typing UX, manual-only does not open the picker, and backend rejects invalid calendar dates.
    - Confirm bundled JalaliDatePicker assets load locally without CDN requests.
 
-10. **Input Mask**
+11. **Input Mask**
     - روی موبایل preset «شماره موبایل ایران» را بررسی کنید؛ مقدار باید هنگام تایپ مانند `0912 345 6789` نمایش داده شود.
     - Submit/Edit را انجام دهید و تأیید کنید Token/SMS/ذخیره‌سازی مقدار تمیز `09123456789` را دریافت می‌کنند.
     - همان Submission را از wp-admin ویرایش کنید؛ Mask باید در فیلد مدیریت نیز دیده شود و ذخیره مجدد مقدار تمیز را حفظ کند.
@@ -94,18 +104,18 @@ Run on a staging clone using the same PHP/WordPress/Elementor major versions int
     - Override را روی «بدون Mask» بگذارید و تأیید کنید preset کدنویسی‌شده همان فیلد غیرفعال می‌شود.
     - تاریخ را جداگانه بررسی کنید؛ DateField باید همچنان از mask خودکار calendar استفاده کند.
 
-11. **Field constraints / validators**
+12. **Field constraints / validators**
     - Test digits, Persian letters, English letters, alnum, allowed-extra and forbidden-extra modes.
     - Test min/max/exact length including Persian Unicode input.
     - Test each enabled validator and its custom message.
     - Test an invalid/expensive Custom Regex save and confirm it is rejected/limited server-side.
 
-12. **Admin UX**
+13. **Admin UX**
     - Open the Jihadi form with all Steps/Repeaters and inspect tabs at common desktop widths.
     - Verify Action Builder, Token Palette, Duplicate tab and Field Ordering do not overflow or become unusable.
     - Check drag handles, select controls and save feedback.
 
-13. **Release gate**
+14. **Release gate**
     - Browser console: no uncaught JS errors during the above flows.
     - PHP error log: no new warnings/notices/fatals from AFE under `WP_DEBUG` staging.
     - After all live cases PASS, bump plugin version to `1.0.28`, DB version to `1.0.5`, Stable tag to `1.0.28`, update final changelog/docs, rerun all automated checks, then build the production ZIP.

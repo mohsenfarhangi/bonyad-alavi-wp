@@ -8,6 +8,8 @@
 وضعیت این checkpoint:
 
 - تست واقعی ملی‌پیامک توسط مدیر پروژه **PASS** گزارش شده است.
+- SMS Engine اکنون Provider Router دارد: Provider پیش‌فرض سراسری + Override در هر SMS Action.
+- Integration اختیاری `Persian WooCommerce SMS` از Gateway/Credential همان افزونه استفاده می‌کند و هیچ Credential تکراری در AFE ذخیره نمی‌کند؛ capability Pattern براساس Gateway فعال تشخیص داده می‌شود.
 - Template پیش‌فرض SMS فرم `jihadi-group-registration` همچنان `submission.submitted -> leader_mobile -> once_per_submission` است و عمداً بدون متن/Pattern hard-code و غیرفعال باقی مانده تا محتوای تأییدشده از Action Builder تنظیم شود.
 - Release hardening روی WordPress User Actions اضافه شده است: هدف‌های Administrator/`manage_options` بدون opt-in سطح `afe_manage_settings` قابل Login/Update/Role/Meta نیستند و metaهای امنیتی capability/session/application-password در Runtime مسدودند.
 - Assign Role نقش‌های سفارشی دارای `manage_options` را نیز privileged در نظر می‌گیرد.
@@ -50,6 +52,7 @@
 - Field Override مدیریتی بدون تغییر Source Definition
 - UI چیدمان متمرکز: تب «فیلدها و چیدمان» فقط Drag & Drop را نمایش می‌دهد و Override هر Field با کلیک روی همان Field در `afe-admin-side` باز می‌شود
 - Input Mask Registry عمومی برای text/tel با presetهای موبایل، تلفن ثابت، کد ملی، کد پستی، کارت بانکی، شبا و Mask سفارشی
+- SMS Provider Registry با Provider پیش‌فرض سراسری، Override هر Action و Integration اختیاری Persian WooCommerce SMS بدون کپی Credential
 - Conditional Logic با show/hide/required/optional
 - Data Source: static, callback, database, posts, taxonomy, users, JSON, REST, geography, custom
 - Action Pipeline و Event Dispatcher

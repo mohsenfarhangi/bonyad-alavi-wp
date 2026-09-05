@@ -420,8 +420,23 @@ final class FormsPage
                 $lines=is_array($value)?implode("\n",array_map('strval',$value)):(string)$value;
                 echo '<textarea rows="4" name="'.esc_attr($name).'" data-afe-config-field-key="'.esc_attr((string)$key).'" placeholder="هر پارامتر در یک خط">'.esc_textarea($lines).'</textarea>';
             }elseif($type==='select'){
-                echo '<select name="'.esc_attr($name).'" data-afe-config-field-key="'.esc_attr((string)$key).'">';
-                foreach((array)($schema['options']??[]) as $option=>$label) echo '<option value="'.esc_attr((string)$option).'" '.selected((string)$value,(string)$option,false).'>'.esc_html((string)$label).'</option>';
+                $selectAttrs='';
+                $uiRole=sanitize_key((string)($schema['ui_role']??''));
+                if($uiRole!=='') $selectAttrs.=' data-afe-ui-role="'.esc_attr($uiRole).'"';
+                if(isset($schema['provider_modes']) && is_array($schema['provider_modes'])){
+                    $json=wp_json_encode($schema['provider_modes'],JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES);
+                    if(is_string($json)) $selectAttrs.=' data-afe-provider-modes="'.esc_attr($json).'"';
+                }
+                if(!empty($schema['default_provider'])) $selectAttrs.=' data-afe-default-provider="'.esc_attr((string)$schema['default_provider']).'"';
+                $disabledOptions=array_map('strval',(array)($schema['disabled_options']??[]));
+                echo '<select name="'.esc_attr($name).'" data-afe-config-field-key="'.esc_attr((string)$key).'"'.$selectAttrs.'>';
+                foreach((array)($schema['options']??[]) as $option=>$label){
+                    $option=(string)$option;
+                    // Preserve an already-saved unavailable provider instead of
+                    // silently changing it when another admin setting is saved.
+                    $disabled=in_array($option,$disabledOptions,true) && (string)$value!==$option ? ' disabled' : '';
+                    echo '<option value="'.esc_attr($option).'" '.selected((string)$value,$option,false).$disabled.'>'.esc_html((string)$label).'</option>';
+                }
                 echo '</select>';
             }elseif($type==='field_select'){
                 echo '<select name="'.esc_attr($name).'" data-afe-config-field-key="'.esc_attr((string)$key).'"><option value="">انتخاب فیلد…</option>';
@@ -462,6 +477,7 @@ final class FormsPage
                 $inputType=$type==='url'?'url':'text';
                 echo '<input type="'.esc_attr($inputType).'" name="'.esc_attr($name).'" value="'.esc_attr((string)$value).'" data-afe-config-field-key="'.esc_attr((string)$key).'">';
             }
+            if(!empty($schema['description'])) echo '<span class="description">'.esc_html((string)$schema['description']).'</span>';
             echo '</label>';
         }
     }

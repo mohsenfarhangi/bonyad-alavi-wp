@@ -138,3 +138,13 @@ Validation has two compatible layers:
 `InputMaskRegistry` owns non-executable mask presets. `SubmissionService` resolves the selected preset/custom pattern into the runtime field, then normalizes masked text/tel values before validation, duplicate detection, Action/Token execution and storage. Renderer/Frontend and the admin `FormDataPresenter` control formatting/caret; both public and admin persistence paths normalize the value again in PHP.
 
 Custom Regex is capability-gated and constrained before persistence; runtime PCRE applies explicit match/recursion limits. Raw PHP/callback code is never accepted from admin UI.
+
+## SMS Provider routing
+
+مسیر SMS در 1.0.28-dev:
+
+`SmsAction -> SmsProviderRegistry -> effective provider (global default / Action override) -> provider adapter -> external/native gateway`
+
+`SmsProviderRegistry` فقط routing/capability را برعهده دارد. Provider داخلی ملی‌پیامک Credential رمز‌شده AFE را مصرف می‌کند. `PersianWooCommerceSmsProvider` هیچ Credentialی را وارد مدل AFE نمی‌کند و در Runtime از `PWSMS()->get_sms_gateway()`/`send_sms()` استفاده می‌کند. این جداسازی باعث می‌شود تغییر Gateway در افزونه خارجی بدون migration یا sync Credential در AFE اعمال شود.
+
+Capabilityهای `free/pattern` در زمان boot برای UI Action Builder snapshot می‌شوند و در Runtime دوباره enforce می‌شوند. Pattern ناشناخته fail-closed است: AFE payload حدسی به Gateway خارجی ارسال نمی‌کند. Strategy/Capability اضافی فقط از Hook توسعه‌دهنده ثبت می‌شود.

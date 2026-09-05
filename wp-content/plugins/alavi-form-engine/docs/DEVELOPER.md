@@ -577,3 +577,43 @@ Text-like Fields can receive admin overrides for:
 - minimum / maximum / exact length
 
 For identifiers such as National ID, use a text Field with numeric input hints. Do **not** switch identifiers to `type=number`, because leading zeroes are meaningful data.
+
+## SMS Provider Registry و Persian WooCommerce SMS
+
+از 1.0.28-dev، `SmsAction` به یک Provider ثابت قفل نیست. `SmsProviderRegistry` یک Provider پیش‌فرض سراسری را resolve می‌کند و هر Action می‌تواند با کلید `provider` آن را Override کند. مقدار `default` یعنی استفاده از Provider سراسری.
+
+Integration داخلی Persian WooCommerce SMS فقط از API عمومی `PWSMS()` استفاده می‌کند. AFE نام کاربری، Password، API Key یا Sender آن افزونه را نمی‌خواند/کپی نمی‌کند؛ `send_sms()` و Gateway فعال همان افزونه مسئول Credential و ارسال هستند.
+
+برای ثبت Provider جدید:
+
+```php
+add_action('afe_register_sms_providers', function ($providers) {
+    $providers->register(
+        'my_provider',
+        'Provider اختصاصی',
+        new MySmsProvider(),
+        ['free', 'pattern'],
+        true
+    );
+});
+```
+
+برای Gatewayهای Pattern افزونه Persian WooCommerce SMS که AFE به‌صورت built-in فرمت آن‌ها را نمی‌شناسد، integration را بدون ویرایش Core توسعه دهید:
+
+```php
+add_filter('afe_pwsms_supported_modes', function (array $modes, array $gateway) {
+    if (($gateway['id'] ?? '') === 'my_pattern_gateway') $modes[] = 'pattern';
+    return $modes;
+}, 10, 2);
+
+add_filter('afe_pwsms_pattern_strategy', function (string $strategy, array $gateway) {
+    return ($gateway['id'] ?? '') === 'my_pattern_gateway' ? 'my_gateway' : $strategy;
+}, 10, 2);
+
+add_filter('afe_pwsms_pattern_payload', function (string $payload, $message, array $gateway, $gatewayObject, string $strategy) {
+    if ($strategy !== 'my_gateway') return $payload;
+    return $message->patternCode . ':' . implode('|', $message->patternValues);
+}, 10, 5);
+```
+
+Hook `afe_pwsms_send_data` نیز آخرین payload آرایه‌ای قبل از `PWSMS()->send_sms()` را در اختیار Integration قرار می‌دهد. Raw PHP از Admin UI پذیرفته نمی‌شود؛ این Hookها فقط برای کد توسعه‌دهنده هستند.

@@ -8,13 +8,15 @@ use BonyadAlavi\FormEngine\Core\FormAccess;
 use BonyadAlavi\FormEngine\Core\SecretStore;
 use BonyadAlavi\FormEngine\Form\FormRegistry;
 use BonyadAlavi\FormEngine\Style\StyleIsolationManager;
+use BonyadAlavi\FormEngine\Actions\Sms\SmsProviderRegistry;
 
 final class SettingsPage
 {
     public function __construct(
         private readonly FormRegistry $registry,
         private readonly FormAccess $formAccess,
-        private readonly SecretStore $secrets
+        private readonly SecretStore $secrets,
+        private readonly ?SmsProviderRegistry $smsProviders = null
     ) {}
 
     public function render(): void
@@ -40,15 +42,49 @@ final class SettingsPage
         $smsAuth=in_array((string)($sms['auth_mode']??'legacy'),['legacy','api_key'],true)?(string)$sms['auth_mode']:'legacy';
         $hasSmsPassword=(string)($sms['password']??'')!=='';
         $hasSmsApiKey=(string)($sms['api_key']??'')!=='';
-        echo '<div class="afe-admin-card"><h2>پیامک — ملی پیامک</h2><div class="afe-admin-grid">';
+        $smsDefault=sanitize_key((string)($sms['default_provider']??$sms['provider']??'melipayamak'));
+        $providerOptions=$this->smsProviders?->providerOptions()??[
+            'melipayamak'=>'ملی پیامک — تنظیمات Alavi Form Engine',
+            'persian_woocommerce_sms'=>'Persian WooCommerce SMS',
+        ];
+        if(!isset($providerOptions[$smsDefault])) $smsDefault='melipayamak';
+        $pwsmsStatus=$this->smsProviders?->status('persian_woocommerce_sms')??['available'=>false,'modes'=>[],'gateway'=>[]];
+        $pwsmsGateway=is_array($pwsmsStatus['gateway']??null)?(array)$pwsmsStatus['gateway']:[];
+        $pwsmsGatewayName=trim((string)($pwsmsGateway['name']??''));
+        $pwsmsModes=array_map('sanitize_key',(array)($pwsmsStatus['modes']??[]));
+
+        echo '<div class="afe-admin-card"><h2>پیامک</h2><div class="afe-admin-grid">';
         echo '<label class="afe-span-2"><input type="checkbox" name="sms_enabled" value="1" '.checked(!empty($sms['enabled']),true,false).'> سرویس پیامک برای Actionهای فرم فعال باشد</label>';
+        echo '<label class="afe-span-2">Provider پیش‌فرض<select name="sms_default_provider">';
+        foreach($providerOptions as $providerKey=>$providerLabel){
+            $unavailable=$this->smsProviders!==null&&!$this->smsProviders->isAvailable((string)$providerKey);
+            $disabled=$unavailable&&$smsDefault!==(string)$providerKey?' disabled':'';
+            echo '<option value="'.esc_attr((string)$providerKey).'" '.selected($smsDefault,(string)$providerKey,false).$disabled.'>'.esc_html((string)$providerLabel).'</option>';
+        }
+        echo '</select><span class="description">هر SMS Action می‌تواند این Provider را Override کند. با انتخاب Persian WooCommerce SMS هیچ Credentialای داخل AFE کپی نمی‌شود و Gateway فعال همان افزونه استفاده خواهد شد.</span></label>';
+
+        if(!empty($pwsmsStatus['available'])){
+            $modeLabels=[];
+            if(in_array('free',$pwsmsModes,true)) $modeLabels[]='ارسال آزاد';
+            if(in_array('pattern',$pwsmsModes,true)) $modeLabels[]='Pattern';
+            echo '<div class="afe-span-2 afe-admin-callout"><strong>Persian WooCommerce SMS:</strong> فعال است';
+            if($pwsmsGatewayName!=='') echo ' — درگاه فعال: <strong>'.esc_html($pwsmsGatewayName).'</strong>';
+            if($modeLabels!==[]) echo ' — روش‌های قابل استفاده در AFE: '.esc_html(implode('، ',$modeLabels));
+            else echo ' — درگاه فعال قابل تشخیص/استفاده نیست.';
+            echo '<br><span class="description">تنظیمات درگاه، نام کاربری/API Key و شماره فرستنده مستقیماً از Persian WooCommerce SMS خوانده می‌شود.</span></div>';
+        }else{
+            echo '<div class="afe-span-2 afe-admin-callout"><strong>Persian WooCommerce SMS:</strong> افزونه فعال یا API عمومی آن در دسترس نیست. پس از فعال‌سازی، بدون ورود مجدد Credential در AFE قابل انتخاب خواهد بود.</div>';
+        }
+
+        echo '<div class="afe-span-2"><details '.($smsDefault==='melipayamak'?'open':'').'><summary><strong>تنظیمات Provider داخلی — ملی پیامک</strong></summary><div class="afe-admin-grid" style="margin-top:12px">';
         echo '<label>روش اتصال<select name="sms_auth_mode"><option value="legacy" '.selected($smsAuth,'legacy',false).'>نام کاربری / رمز عبور (REST قدیمی)</option><option value="api_key" '.selected($smsAuth,'api_key',false).'>API Key / Token کنسول جدید</option></select></label>';
-        echo '<label>شماره فرستنده پیش‌فرض<input class="regular-text" name="sms_sender" value="'.esc_attr((string)($sms['sender']??'')).'" inputmode="numeric"><span class="description">برای ارسال آزاد لازم است؛ Pattern معمولاً از خط خدماتی اشتراکی استفاده می‌کند.</span></label>';
+        echo '<label>شماره فرستنده پیش‌فرض<input class="regular-text" name="sms_sender" value="'.esc_attr((string)($sms['sender']??'')).'" inputmode="numeric"><span class="description">فقط برای Provider داخلی AFE استفاده می‌شود.</span></label>';
         echo '<label>نام کاربری ملی پیامک<input class="regular-text" name="sms_username" value="'.esc_attr((string)($sms['username']??'')).'" autocomplete="off"></label>';
         echo '<label>رمز عبور ملی پیامک<input class="regular-text" type="password" name="sms_password" value="" autocomplete="new-password" placeholder="'.esc_attr($hasSmsPassword?'ذخیره شده — برای تغییر وارد کنید':'').'"><span class="description">خالی بگذارید تا مقدار ذخیره‌شده تغییر نکند.</span></label>';
-        echo '<label class="afe-span-2">API Key / Token<input class="regular-text" type="password" name="sms_api_key" value="" autocomplete="new-password" placeholder="'.esc_attr($hasSmsApiKey?'ذخیره شده — برای تغییر وارد کنید':'').'"><span class="description">برای روش کنسول جدید. Token داخل URL امن HTTPS ارسال می‌شود و در UI دوباره نمایش داده نمی‌شود.</span></label>';
-        if(!$this->secrets->available()) echo '<div class="afe-span-2 afe-admin-callout"><strong>هشدار:</strong> OpenSSL روی سرور در دسترس نیست؛ ذخیره امن Credential جدید ممکن نیست و سرویس پیامک نباید فعال شود.</div>';
-        echo '<div class="afe-span-2 afe-admin-callout"><strong>امنیت:</strong> Password و API Key با کلید مشتق‌شده از WordPress salts رمز می‌شوند. تغییر salts نیازمند ورود دوباره Credentialهاست. Endpoint سرویس از UI قابل تغییر نیست.</div>';
+        echo '<label class="afe-span-2">API Key / Token<input class="regular-text" type="password" name="sms_api_key" value="" autocomplete="new-password" placeholder="'.esc_attr($hasSmsApiKey?'ذخیره شده — برای تغییر وارد کنید':'').'"><span class="description">برای روش کنسول جدید؛ فقط Provider داخلی.</span></label>';
+        if(!$this->secrets->available()) echo '<div class="afe-span-2 afe-admin-callout"><strong>هشدار:</strong> OpenSSL روی سرور در دسترس نیست؛ Credential جدید Provider داخلی AFE قابل ذخیره امن نیست. این محدودیت روی Persian WooCommerce SMS اثری ندارد.</div>';
+        echo '<div class="afe-span-2 afe-admin-callout"><strong>امنیت:</strong> Credentialهای Provider داخلی با WordPress salts رمز می‌شوند. Persian WooCommerce SMS Credentialهای خودش را در اختیار AFE قرار نمی‌دهد و AFE آن‌ها را ذخیره نمی‌کند.</div>';
+        echo '</div></details></div>';
         echo '</div></div>';
 
         echo '<div class="afe-admin-card"><h2>ایزوله‌سازی استایل فرم</h2><div class="afe-admin-grid">';
@@ -105,12 +141,14 @@ final class SettingsPage
         $smsApiKey=(string)($oldSms['api_key']??'');
         $passwordInput=(string)wp_unslash($_POST['sms_password']??'');
         $apiKeyInput=trim((string)wp_unslash($_POST['sms_api_key']??''));
-        if($passwordInput!=='') $smsPassword=$this->secrets->encrypt($passwordInput);
-        if($apiKeyInput!=='') $smsApiKey=$this->secrets->encrypt($apiKeyInput);
+        if($passwordInput!=='' && $this->secrets->available()) $smsPassword=$this->secrets->encrypt($passwordInput);
+        if($apiKeyInput!=='' && $this->secrets->available()) $smsApiKey=$this->secrets->encrypt($apiKeyInput);
         $authMode=sanitize_key(wp_unslash($_POST['sms_auth_mode']??'legacy'));
         if(!in_array($authMode,['legacy','api_key'],true)) $authMode='legacy';
         $smsEnabled=!empty($_POST['sms_enabled']);
-        if($smsEnabled && !$this->secrets->available()) $smsEnabled=false;
+        $defaultProvider=sanitize_key(wp_unslash($_POST['sms_default_provider']??($oldSms['default_provider']??$oldSms['provider']??'melipayamak')));
+        $allowedProviders=array_keys($this->smsProviders?->providerOptions()??['melipayamak'=>'','persian_woocommerce_sms'=>'']);
+        if(!in_array($defaultProvider,$allowedProviders,true)) $defaultProvider='melipayamak';
         $settings=array_replace($old,[
             'api_enabled'=>!empty($_POST['api_enabled']),
             'api_public_forms'=>!empty($_POST['api_public_forms']),
@@ -120,7 +158,8 @@ final class SettingsPage
             'style_isolation'=>(new StyleIsolationManager())->normalize(sanitize_key(wp_unslash($_POST['style_isolation']??StyleIsolationManager::MODE_STRONG))),
             'sms'=>[
                 'enabled'=>$smsEnabled,
-                'provider'=>'melipayamak',
+                'provider'=>$defaultProvider,
+                'default_provider'=>$defaultProvider,
                 'auth_mode'=>$authMode,
                 'username'=>sanitize_text_field(wp_unslash($_POST['sms_username']??'')),
                 'password'=>$smsPassword,

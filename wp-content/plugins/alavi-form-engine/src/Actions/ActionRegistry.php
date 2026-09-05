@@ -6,6 +6,7 @@ namespace BonyadAlavi\FormEngine\Actions;
 use BonyadAlavi\FormEngine\Actions\Tokens\TokenResolver;
 use BonyadAlavi\FormEngine\Actions\Sms\SmsAction;
 use BonyadAlavi\FormEngine\Actions\Sms\SmsProviderInterface;
+use BonyadAlavi\FormEngine\Actions\Sms\SmsProviderRegistry;
 use BonyadAlavi\FormEngine\Actions\User\UserTargetResolver;
 use BonyadAlavi\FormEngine\Actions\User\UserActionGuard;
 use BonyadAlavi\FormEngine\Actions\User\CreateUserAction;
@@ -239,14 +240,24 @@ final class ActionRegistry
         ), new SavePostAction($tokens));
     }
 
-    public function registerSms(TokenResolver $tokens, SmsProviderInterface $provider): void
+    public function registerSms(TokenResolver $tokens, SmsProviderInterface|SmsProviderRegistry $provider): void
     {
+        $providers = $provider instanceof SmsProviderRegistry ? $provider : SmsProviderRegistry::single($provider);
         $this->register(new ActionDefinition(
             'sms',
             'ارسال پیامک',
-            'ارسال پیامک آزاد یا Pattern با یک گیرنده و پشتیبانی از Tokenهای فرم.',
+            'ارسال پیامک آزاد یا Pattern با یک گیرنده، Provider پیش‌فرض سراسری یا Override اختصاصی و پشتیبانی از Tokenهای فرم.',
             'communication',
             [
+                'provider'=>[
+                    'type'=>'select','label'=>'Provider / درگاه ارسال','required'=>true,'default'=>SmsProviderRegistry::USE_DEFAULT,
+                    'options'=>$providers->actionOptions(),
+                    'disabled_options'=>$providers->unavailableKeys(),
+                    'ui_role'=>'sms_provider',
+                    'provider_modes'=>$providers->actionModeMap(),
+                    'default_provider'=>$providers->defaultProvider(),
+                    'description'=>'پیش‌فرض سراسری از تنظیمات AFE خوانده می‌شود. Persian WooCommerce SMS در صورت فعال بودن، Credential و Gateway خودش را استفاده می‌کند.',
+                ],
                 'recipient_source'=>[
                     'type'=>'select','label'=>'نوع گیرنده','required'=>true,'default'=>'field',
                     'options'=>[
@@ -261,13 +272,13 @@ final class ActionRegistry
                 'recipient_token'=>['type'=>'text','label'=>'Token گیرنده','required'=>false,'tokens'=>true,'show_when'=>['recipient_source'=>'token']],
                 'recipient_user_id'=>['type'=>'user','label'=>'کاربر وردپرس','required'=>false,'tokens'=>true,'show_when'=>['recipient_source'=>'user']],
                 'recipient_user_meta'=>['type'=>'text','label'=>'کلید متای شماره موبایل کاربر','required'=>false,'default'=>'billing_phone','show_when'=>['recipient_source'=>'user']],
-                'mode'=>['type'=>'select','label'=>'روش ارسال','required'=>true,'default'=>'free','options'=>['free'=>'ارسال آزاد','pattern'=>'Pattern']],
-                'sender'=>['type'=>'text','label'=>'شماره فرستنده (اختیاری؛ جایگزین تنظیم سراسری)','required'=>false,'tokens'=>true,'show_when'=>['mode'=>'free']],
+                'mode'=>['type'=>'select','label'=>'روش ارسال','required'=>true,'default'=>'free','options'=>['free'=>'ارسال آزاد','pattern'=>'Pattern'],'ui_role'=>'sms_mode','description'=>'Pattern فقط برای Provider/Gatewayهایی فعال است که Integration آن را پشتیبانی کند.'],
+                'sender'=>['type'=>'text','label'=>'شماره فرستنده (اختیاری)','required'=>false,'tokens'=>true,'show_when'=>['mode'=>'free'],'description'=>'فقط برای Providerهایی که Sender را از Action می‌پذیرند (از جمله ملی پیامک داخلی AFE). Persian WooCommerce SMS از Sender تنظیم‌شده در همان افزونه استفاده می‌کند.'],
                 'body'=>['type'=>'textarea','label'=>'متن پیامک','required'=>false,'tokens'=>true,'show_when'=>['mode'=>'free']],
                 'pattern_code'=>['type'=>'text','label'=>'Pattern / Body ID','required'=>false,'tokens'=>true,'show_when'=>['mode'=>'pattern']],
                 'pattern_values'=>['type'=>'repeater_text','label'=>'پارامترهای Pattern به ترتیب','required'=>false,'tokens'=>true,'show_when'=>['mode'=>'pattern']],
             ]
-        ), new SmsAction($provider, $tokens));
+        ), new SmsAction($providers, $tokens));
     }
 
     public function has(string $key): bool

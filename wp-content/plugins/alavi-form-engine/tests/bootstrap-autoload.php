@@ -15,6 +15,8 @@ $critical = [
     BonyadAlavi\FormEngine\Actions\ActionExecutionRepository::class,
     BonyadAlavi\FormEngine\Actions\Tokens\TokenRegistry::class,
     BonyadAlavi\FormEngine\Actions\Tokens\TokenResolver::class,
+    BonyadAlavi\FormEngine\Actions\Sms\SmsProviderRegistry::class,
+    BonyadAlavi\FormEngine\Actions\Sms\PersianWooCommerceSmsProvider::class,
     BonyadAlavi\FormEngine\Validation\ValidatorRegistry::class,
     BonyadAlavi\FormEngine\Submission\SubmissionService::class,
 ];

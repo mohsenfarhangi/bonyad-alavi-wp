@@ -23,3 +23,7 @@ Jalali date fields use `majidh1/JalaliDatePicker`:
 - Package: `@majidh1/jalalidatepicker` version `1.0.0`
 - License: MIT
 - The pinned front-end dist assets are bundled locally under `assets/vendor/jalalidatepicker/`; no runtime CDN request is required.
+
+## Optional Persian WooCommerce SMS integration
+
+Alavi Form Engine does **not** bundle or redistribute Persian WooCommerce SMS. If that plugin is independently installed and active, AFE can delegate SMS delivery through its public runtime API and currently selected gateway. No Persian WooCommerce SMS credential is copied into the AFE package or database settings.

@@ -9,6 +9,7 @@
 | Token Registry/Resolver + Palette | Implemented | Email/Webhook/SMS/UI |
 | Action log / once / admin retry | Implemented | `ActionExecutionRepository`, `ActionManager` |
 | SMS + MeliPayamak legacy/API | Implemented + real provider PASS | free/pattern, recipient sources |
+| SMS Provider Router + Persian WooCommerce SMS | Implemented / pending live gateway acceptance | global default + per-Action override; reuses external gateway/settings without credential copy |
 | Redirect | Implemented | first effective redirect, external opt-in |
 | WordPress User Actions | Implemented + hardened | create/login/update/role/meta, privileged-target guards |
 | Status / internal note | Implemented | follow-up status event |

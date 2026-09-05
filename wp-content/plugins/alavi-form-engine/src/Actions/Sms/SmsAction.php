@@ -10,10 +10,18 @@ use RuntimeException;
 
 final class SmsAction implements ActionInterface
 {
+    private readonly SmsProviderRegistry $providers;
+
     public function __construct(
-        private readonly SmsProviderInterface $provider,
+        SmsProviderInterface|SmsProviderRegistry $provider,
         private readonly TokenResolver $tokens
-    ) {}
+    ) {
+        // Backward compatibility for developer code/tests that constructed the
+        // Action with one provider before provider routing was introduced.
+        $this->providers = $provider instanceof SmsProviderRegistry
+            ? $provider
+            : SmsProviderRegistry::single($provider);
+    }
 
     public function handle(ActionContext $context, array $config = []): void
     {
@@ -53,7 +61,10 @@ final class SmsAction implements ActionInterface
             }
         }
 
-        $result = $this->provider->send(new SmsMessage(
+        $providerKey = sanitize_key((string)($config['provider'] ?? SmsProviderRegistry::USE_DEFAULT));
+        $provider = $this->providers->resolve($providerKey, $mode);
+
+        $result = $provider->send(new SmsMessage(
             $recipient,
             $mode,
             $body,
