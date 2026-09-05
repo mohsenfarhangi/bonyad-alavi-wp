@@ -643,8 +643,32 @@ final class Bonyad_Alavi_Jihadi_Center_Widget extends Widget_Base {
 		$this->register_image_aspect_ratio_control( 'news_feature_image_ratio', 'نسبت تصویر خبر شاخص', '.ba-jihadi-center__news-feature', '3 / 2' );
 		$this->register_image_aspect_ratio_control( 'news_list_image_ratio', 'نسبت تصویر سایر اخبار', '.ba-jihadi-center__news-item-image', '3 / 2' );
 		$this->add_control( 'news_card_radius', array( 'label' => 'گردی تصویر/کارت', 'type' => Controls_Manager::SLIDER, 'range' => array( 'px' => array( 'min' => 0, 'max' => 40 ) ), 'default' => array( 'size' => 13 ), 'selectors' => array( '{{WRAPPER}} .ba-jihadi-center__news-feature, {{WRAPPER}} .ba-jihadi-center__news-item-image' => 'border-radius: {{SIZE}}{{UNIT}};' ) ) );
-		$this->add_group_control( Group_Control_Typography::get_type(), array( 'name' => 'news_feature_title_typography', 'label' => 'تایپوگرافی خبر شاخص', 'selector' => '{{WRAPPER}} .ba-jihadi-center__news-feature-title' ) );
-		$this->add_group_control( Group_Control_Typography::get_type(), array( 'name' => 'news_item_title_typography', 'label' => 'تایپوگرافی لیست اخبار', 'selector' => '{{WRAPPER}} .ba-jihadi-center__news-item-title' ) );
+		$this->register_post_item_text_style_controls(
+			'news_feature',
+			'متن خبر شاخص',
+			'.ba-jihadi-center__news-feature',
+			'.ba-jihadi-center__news-feature-title',
+			'.ba-jihadi-center__post-date',
+			array(
+				'title_color'       => '#ffffff',
+				'title_hover_color' => '#ffffff',
+				'date_color'        => '#dce9e1',
+				'date_hover_color'  => '#dce9e1',
+			)
+		);
+		$this->register_post_item_text_style_controls(
+			'news_item',
+			'متن سایر اخبار',
+			'.ba-jihadi-center__news-item',
+			'.ba-jihadi-center__news-item-title',
+			'.ba-jihadi-center__post-date',
+			array(
+				'title_color'       => '#243028',
+				'title_hover_color' => '#075433',
+				'date_color'        => '#87938b',
+				'date_hover_color'  => '#075433',
+			)
+		);
 		$this->add_responsive_control( 'news_list_image_width', array( 'label' => 'عرض تصویر لیست', 'type' => Controls_Manager::SLIDER, 'range' => array( 'px' => array( 'min' => 70, 'max' => 240 ) ), 'default' => array( 'size' => 128 ), 'selectors' => array( '{{WRAPPER}} .ba-jihadi-center__news-item' => 'grid-template-columns: {{SIZE}}{{UNIT}} minmax(0,1fr);', '{{WRAPPER}} .ba-jihadi-center__news-item-image' => 'width: {{SIZE}}{{UNIT}};' ) ) );
 		$this->end_controls_section();
 	}
@@ -662,11 +686,139 @@ final class Bonyad_Alavi_Jihadi_Center_Widget extends Widget_Base {
 		$this->register_image_aspect_ratio_control( 'media_feature_image_ratio', 'نسبت تصویر آیتم شاخص', '.ba-jihadi-center__media-feature', '3 / 2' );
 		$this->register_image_aspect_ratio_control( 'media_list_image_ratio', 'نسبت تصویر سایر آیتم‌ها', '.ba-jihadi-center__media-thumb', '6 / 5' );
 		$this->add_control( 'media_card_radius', array( 'label' => 'گردی کارت‌ها', 'type' => Controls_Manager::SLIDER, 'range' => array( 'px' => array( 'min' => 0, 'max' => 40 ) ), 'default' => array( 'size' => 13 ), 'selectors' => array( '{{WRAPPER}} .ba-jihadi-center__media-feature, {{WRAPPER}} .ba-jihadi-center__media-item, {{WRAPPER}} .ba-jihadi-center__media-thumb' => 'border-radius: {{SIZE}}{{UNIT}};' ) ) );
-		$this->add_group_control( Group_Control_Typography::get_type(), array( 'name' => 'media_feature_title_typography', 'label' => 'تایپوگرافی آیتم شاخص', 'selector' => '{{WRAPPER}} .ba-jihadi-center__media-feature-title' ) );
-		$this->add_group_control( Group_Control_Typography::get_type(), array( 'name' => 'media_item_title_typography', 'label' => 'تایپوگرافی آیتم‌های کوچک', 'selector' => '{{WRAPPER}} .ba-jihadi-center__media-item-title' ) );
+		$this->register_post_item_text_style_controls(
+			'media_feature',
+			'متن آیتم شاخص',
+			'.ba-jihadi-center__media-feature',
+			'.ba-jihadi-center__media-feature-title',
+			'.ba-jihadi-center__media-date',
+			array(
+				'title_color'       => '#ffffff',
+				'title_hover_color' => '#ffffff',
+				'date_color'        => '#dce9e1',
+				'date_hover_color'  => '#dce9e1',
+			)
+		);
+		$this->register_post_item_text_style_controls(
+			'media_item',
+			'متن سایر آیتم‌ها',
+			'.ba-jihadi-center__media-item',
+			'.ba-jihadi-center__media-item-title',
+			'.ba-jihadi-center__media-date',
+			array(
+				'title_color'       => '#ffffff',
+				'title_hover_color' => '#ffffff',
+				'date_color'        => '#cfddd4',
+				'date_hover_color'  => '#cfddd4',
+			)
+		);
 		$this->add_control( 'media_play_bg', array( 'label' => 'پس‌زمینه آیکون پخش', 'type' => Controls_Manager::COLOR, 'default' => '#ffffff', 'selectors' => array( '{{WRAPPER}} .ba-jihadi-center__media-play' => 'background: {{VALUE}};' ) ) );
 		$this->add_control( 'media_play_color', array( 'label' => 'رنگ آیکون پخش', 'type' => Controls_Manager::COLOR, 'default' => '#069043', 'selectors' => array( '{{WRAPPER}} .ba-jihadi-center__media-play' => 'color: {{VALUE}};' ) ) );
 		$this->end_controls_section();
+	}
+
+	/**
+	 * کنترل‌های تایپوگرافی و رنگ متن یک آیتم محتوا را به‌صورت مشترک ثبت می‌کند.
+	 *
+	 * عنوان و تاریخ هر آیتم دارای تایپوگرافی مستقل هستند و رنگ‌های حالت عادی و
+	 * Hover/Focus نیز از تب‌های استاندارد Elementor مدیریت می‌شوند. این Helper
+	 * برای یکسان‌سازی قرارداد استایل آیتم شاخص و آیتم‌های ثانویه اخبار و رسانه است.
+	 *
+	 * @param string $prefix         پیشوند یکتای کنترل‌ها.
+	 * @param string $label          عنوان گروه کنترل‌ها.
+	 * @param string $item_selector  سلکتور BEM آیتم لینک‌شونده.
+	 * @param string $title_selector سلکتور BEM عنوان داخل آیتم.
+	 * @param string $date_selector  سلکتور BEM تاریخ داخل آیتم.
+	 * @param array  $defaults       رنگ‌های پیش‌فرض عنوان و تاریخ.
+	 * @return void
+	 */
+	private function register_post_item_text_style_controls( $prefix, $label, $item_selector, $title_selector, $date_selector, array $defaults = array() ) {
+		$defaults = wp_parse_args(
+			$defaults,
+			array(
+				'title_color'       => '#243028',
+				'title_hover_color' => '#075433',
+				'date_color'        => '#87938b',
+				'date_hover_color'  => '#075433',
+			)
+		);
+
+		$title_target = $item_selector . ' ' . $title_selector;
+		$date_target  = $item_selector . ' ' . $date_selector;
+
+		$this->add_control(
+			$prefix . '_text_heading',
+			array(
+				'label'     => $label,
+				'type'      => Controls_Manager::HEADING,
+				'separator' => 'before',
+			)
+		);
+
+		$this->add_group_control(
+			Group_Control_Typography::get_type(),
+			array(
+				'name'     => $prefix . '_title_typography',
+				'label'    => 'تایپوگرافی عنوان',
+				'selector' => '{{WRAPPER}} ' . $title_target,
+			)
+		);
+		$this->add_group_control(
+			Group_Control_Typography::get_type(),
+			array(
+				'name'     => $prefix . '_date_typography',
+				'label'    => 'تایپوگرافی تاریخ',
+				'selector' => '{{WRAPPER}} ' . $date_target,
+			)
+		);
+
+		$this->start_controls_tabs( $prefix . '_text_color_tabs' );
+		$this->start_controls_tab( $prefix . '_text_normal_tab', array( 'label' => 'عادی' ) );
+		$this->add_control(
+			$prefix . '_title_color',
+			array(
+				'label'     => 'رنگ عنوان',
+				'type'      => Controls_Manager::COLOR,
+				'default'   => $defaults['title_color'],
+				'selectors' => array( '{{WRAPPER}} ' . $title_target => 'color: {{VALUE}};' ),
+			)
+		);
+		$this->add_control(
+			$prefix . '_date_color',
+			array(
+				'label'     => 'رنگ تاریخ',
+				'type'      => Controls_Manager::COLOR,
+				'default'   => $defaults['date_color'],
+				'selectors' => array( '{{WRAPPER}} ' . $date_target => 'color: {{VALUE}};' ),
+			)
+		);
+		$this->end_controls_tab();
+
+		$this->start_controls_tab( $prefix . '_text_hover_tab', array( 'label' => 'هاور' ) );
+		$this->add_control(
+			$prefix . '_title_hover_color',
+			array(
+				'label'     => 'رنگ عنوان',
+				'type'      => Controls_Manager::COLOR,
+				'default'   => $defaults['title_hover_color'],
+				'selectors' => array(
+					'{{WRAPPER}} ' . $item_selector . ':hover ' . $title_selector . ', {{WRAPPER}} ' . $item_selector . ':focus-visible ' . $title_selector => 'color: {{VALUE}};',
+				),
+			)
+		);
+		$this->add_control(
+			$prefix . '_date_hover_color',
+			array(
+				'label'     => 'رنگ تاریخ',
+				'type'      => Controls_Manager::COLOR,
+				'default'   => $defaults['date_hover_color'],
+				'selectors' => array(
+					'{{WRAPPER}} ' . $item_selector . ':hover ' . $date_selector . ', {{WRAPPER}} ' . $item_selector . ':focus-visible ' . $date_selector => 'color: {{VALUE}};',
+				),
+			)
+		);
+		$this->end_controls_tab();
+		$this->end_controls_tabs();
 	}
 
 	/**
@@ -1167,7 +1319,7 @@ final class Bonyad_Alavi_Jihadi_Center_Widget extends Widget_Base {
 		<a class="ba-jihadi-center__media-feature" href="<?php echo esc_url( get_permalink( $post ) ); ?>">
 			<?php $this->render_post_image( $post, 'large', 'ba-jihadi-center__media-feature-image' ); ?>
 			<span class="ba-jihadi-center__media-play" aria-hidden="true"><?php echo $this->get_play_icon(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></span>
-			<div class="ba-jihadi-center__media-feature-content"><?php if ( $duration ) : ?><span class="ba-jihadi-center__duration"><?php echo esc_html( $duration ); ?></span><?php endif; ?><h3 class="ba-jihadi-center__media-feature-title"><?php echo esc_html( get_the_title( $post ) ); ?></h3></div>
+			<div class="ba-jihadi-center__media-feature-content"><?php if ( $duration ) : ?><span class="ba-jihadi-center__duration"><?php echo esc_html( $duration ); ?></span><?php endif; ?><time class="ba-jihadi-center__media-date ba-jihadi-center__media-date--feature"><?php echo esc_html( get_the_date( '', $post ) ); ?></time><h3 class="ba-jihadi-center__media-feature-title"><?php echo esc_html( get_the_title( $post ) ); ?></h3></div>
 		</a>
 		<?php
 	}
