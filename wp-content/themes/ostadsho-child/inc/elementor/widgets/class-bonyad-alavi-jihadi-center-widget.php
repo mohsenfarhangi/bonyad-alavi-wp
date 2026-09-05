@@ -640,7 +640,8 @@ final class Bonyad_Alavi_Jihadi_Center_Widget extends Widget_Base {
 		$this->add_control( 'news_bg', array( 'label' => 'پس‌زمینه سکشن', 'type' => Controls_Manager::COLOR, 'default' => '#ffffff', 'selectors' => array( '{{WRAPPER}} .ba-jihadi-center__news-section' => 'background: {{VALUE}};' ) ) );
 		$this->add_responsive_control( 'news_padding', array( 'label' => 'فاصله داخلی سکشن', 'type' => Controls_Manager::DIMENSIONS, 'size_units' => array( 'px', 'em' ), 'selectors' => array( '{{WRAPPER}} .ba-jihadi-center__news-section' => 'padding: {{TOP}}{{UNIT}} {{RIGHT}}{{UNIT}} {{BOTTOM}}{{UNIT}} {{LEFT}}{{UNIT}};' ) ) );
 		$this->register_section_heading_style_controls( 'news', '.ba-jihadi-center__news-section' );
-		$this->add_responsive_control( 'news_feature_height', array( 'label' => 'ارتفاع خبر شاخص', 'type' => Controls_Manager::SLIDER, 'range' => array( 'px' => array( 'min' => 240, 'max' => 700 ) ), 'default' => array( 'size' => 455 ), 'selectors' => array( '{{WRAPPER}} .ba-jihadi-center__news-feature' => 'min-height: {{SIZE}}{{UNIT}};' ) ) );
+		$this->register_image_aspect_ratio_control( 'news_feature_image_ratio', 'نسبت تصویر خبر شاخص', '.ba-jihadi-center__news-feature', '3 / 2' );
+		$this->register_image_aspect_ratio_control( 'news_list_image_ratio', 'نسبت تصویر سایر اخبار', '.ba-jihadi-center__news-item-image', '3 / 2' );
 		$this->add_control( 'news_card_radius', array( 'label' => 'گردی تصویر/کارت', 'type' => Controls_Manager::SLIDER, 'range' => array( 'px' => array( 'min' => 0, 'max' => 40 ) ), 'default' => array( 'size' => 13 ), 'selectors' => array( '{{WRAPPER}} .ba-jihadi-center__news-feature, {{WRAPPER}} .ba-jihadi-center__news-item-image' => 'border-radius: {{SIZE}}{{UNIT}};' ) ) );
 		$this->add_group_control( Group_Control_Typography::get_type(), array( 'name' => 'news_feature_title_typography', 'label' => 'تایپوگرافی خبر شاخص', 'selector' => '{{WRAPPER}} .ba-jihadi-center__news-feature-title' ) );
 		$this->add_group_control( Group_Control_Typography::get_type(), array( 'name' => 'news_item_title_typography', 'label' => 'تایپوگرافی لیست اخبار', 'selector' => '{{WRAPPER}} .ba-jihadi-center__news-item-title' ) );
@@ -658,13 +659,55 @@ final class Bonyad_Alavi_Jihadi_Center_Widget extends Widget_Base {
 		$this->add_control( 'media_bg', array( 'label' => 'پس‌زمینه سکشن', 'type' => Controls_Manager::COLOR, 'default' => '#075433', 'selectors' => array( '{{WRAPPER}} .ba-jihadi-center__media-section' => 'background: {{VALUE}};' ) ) );
 		$this->add_responsive_control( 'media_padding', array( 'label' => 'فاصله داخلی سکشن', 'type' => Controls_Manager::DIMENSIONS, 'size_units' => array( 'px', 'em' ), 'selectors' => array( '{{WRAPPER}} .ba-jihadi-center__media-section' => 'padding: {{TOP}}{{UNIT}} {{RIGHT}}{{UNIT}} {{BOTTOM}}{{UNIT}} {{LEFT}}{{UNIT}};' ) ) );
 		$this->register_section_heading_style_controls( 'media', '.ba-jihadi-center__media-section', true );
-		$this->add_responsive_control( 'media_feature_height', array( 'label' => 'ارتفاع آیتم شاخص', 'type' => Controls_Manager::SLIDER, 'range' => array( 'px' => array( 'min' => 240, 'max' => 700 ) ), 'default' => array( 'size' => 455 ), 'selectors' => array( '{{WRAPPER}} .ba-jihadi-center__media-feature' => 'min-height: {{SIZE}}{{UNIT}};' ) ) );
+		$this->register_image_aspect_ratio_control( 'media_feature_image_ratio', 'نسبت تصویر آیتم شاخص', '.ba-jihadi-center__media-feature', '3 / 2' );
+		$this->register_image_aspect_ratio_control( 'media_list_image_ratio', 'نسبت تصویر سایر آیتم‌ها', '.ba-jihadi-center__media-thumb', '6 / 5' );
 		$this->add_control( 'media_card_radius', array( 'label' => 'گردی کارت‌ها', 'type' => Controls_Manager::SLIDER, 'range' => array( 'px' => array( 'min' => 0, 'max' => 40 ) ), 'default' => array( 'size' => 13 ), 'selectors' => array( '{{WRAPPER}} .ba-jihadi-center__media-feature, {{WRAPPER}} .ba-jihadi-center__media-item, {{WRAPPER}} .ba-jihadi-center__media-thumb' => 'border-radius: {{SIZE}}{{UNIT}};' ) ) );
 		$this->add_group_control( Group_Control_Typography::get_type(), array( 'name' => 'media_feature_title_typography', 'label' => 'تایپوگرافی آیتم شاخص', 'selector' => '{{WRAPPER}} .ba-jihadi-center__media-feature-title' ) );
 		$this->add_group_control( Group_Control_Typography::get_type(), array( 'name' => 'media_item_title_typography', 'label' => 'تایپوگرافی آیتم‌های کوچک', 'selector' => '{{WRAPPER}} .ba-jihadi-center__media-item-title' ) );
 		$this->add_control( 'media_play_bg', array( 'label' => 'پس‌زمینه آیکون پخش', 'type' => Controls_Manager::COLOR, 'default' => '#ffffff', 'selectors' => array( '{{WRAPPER}} .ba-jihadi-center__media-play' => 'background: {{VALUE}};' ) ) );
 		$this->add_control( 'media_play_color', array( 'label' => 'رنگ آیکون پخش', 'type' => Controls_Manager::COLOR, 'default' => '#069043', 'selectors' => array( '{{WRAPPER}} .ba-jihadi-center__media-play' => 'color: {{VALUE}};' ) ) );
 		$this->end_controls_section();
+	}
+
+	/**
+	 * کنترل ریسپانسیو نسبت تصویر را با گزینه‌های استاندارد به بخش استایل اضافه می‌کند.
+	 *
+	 * این Helper برای جلوگیری از تکرار تنظیمات یکسان نسبت تصویر در سکشن‌های
+	 * اخبار و چندرسانه‌ای استفاده می‌شود.
+	 *
+	 * @param string $control_id شناسه یکتای کنترل Elementor.
+	 * @param string $label      عنوان نمایشی کنترل.
+	 * @param string $selector   سلکتور BEM مقصد در محدوده ویجت.
+	 * @param string $default    نسبت تصویر پیش‌فرض به فرمت CSS.
+	 * @return void
+	 */
+	private function register_image_aspect_ratio_control( $control_id, $label, $selector, $default = '3 / 2' ) {
+		$options = array(
+			'1 / 1'  => '1:1',
+			'6 / 5'  => '6:5',
+			'4 / 3'  => '4:3',
+			'3 / 2'  => '3:2',
+			'16 / 9' => '16:9',
+			'21 / 9' => '21:9',
+			'3 / 4'  => '3:4',
+			'2 / 3'  => '2:3',
+			'9 / 16' => '9:16',
+		);
+
+		$this->add_responsive_control(
+			$control_id,
+			array(
+				'label'           => $label,
+				'type'            => Controls_Manager::SELECT,
+				'options'         => $options,
+				'default'         => $default,
+				'tablet_default'  => $default,
+				'mobile_default'  => $default,
+				'selectors'       => array(
+					'{{WRAPPER}} ' . $selector => 'aspect-ratio: {{VALUE}};',
+				),
+			)
+		);
 	}
 
 	/**
