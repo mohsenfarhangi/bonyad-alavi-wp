@@ -119,3 +119,9 @@ Run on a staging clone using the same PHP/WordPress/Elementor major versions int
     - Browser console: no uncaught JS errors during the above flows.
     - PHP error log: no new warnings/notices/fatals from AFE under `WP_DEBUG` staging.
     - After all live cases PASS, bump plugin version to `1.0.28`, DB version to `1.0.5`, Stable tag to `1.0.28`, update final changelog/docs, rerun all automated checks, then build the production ZIP.
+
+
+## جهت ورودی‌های شماره‌ای
+
+- [ ] موبایل، تلفن، کد ملی، شبا و سایر ورودی‌های عددی از سمت چپ تایپ شوند و مقدار داخل کنترل LTR/چپ‌چین باشد؛ Label و چیدمان کلی فرم RTL بماند.
+- [ ] همین رفتار در ویرایش Submission و Repeaterهای مدیریتی نیز بررسی شود.

@@ -8,6 +8,10 @@ The project administrator reported the real MeliPayamak account test **PASS** on
 
 ## Changes in this checkpoint
 
+- Numeric/identifier controls (`tel`, `number`, `date`, and numeric/decimal/tel input modes) now render with semantic `dir="ltr"` and left-aligned values while labels/form layout remain RTL.
+- Added the same LTR/left-aligned behavior to wp-admin Submission editing and admin Repeater child controls.
+- Added Strong Isolation defense so hostile theme CSS cannot force number-like controls back to right alignment.
+- Added `tests/numeric-input-direction.php` and expanded Input Mask Renderer/Admin assertions.
 - Added `SmsProviderRegistry` routing with a global default provider and per-SMS-Action override.
 - Added `PersianWooCommerceSmsProvider`, delegating through the external plugin public `PWSMS()->send_sms()` API and active gateway without copying credentials into AFE.
 - Added runtime capability detection for free/pattern modes, known Pattern payload adapters for MeliPayamak service/combined and Kavenegar Lookup gateways, plus extension filters for additional gateways.
@@ -80,7 +84,7 @@ Do **not** bump to `1.0.28` / DB `1.0.5` / Stable tag `1.0.28` until that live m
 
 ## Automated checks performed for this package
 
-- PHP syntax lint across `src/` and `tests/`: PASS (147 PHP files including bootstrap/uninstall at this checkpoint; code target remains PHP >= 8.3).
+- PHP syntax lint across `src/` and `tests/`: PASS (148 PHP files including bootstrap/uninstall at this checkpoint; code target remains PHP >= 8.3).
 - Built-in validator tests: PASS (Iran IBAN checksum, National ID valid/invalid checksum, Persian mobile digits, digit normalization).
 - Built-in Jihadi Group Registration form construction: PASS (13 steps, 62 top-level non-HTML items, 3 repeaters, 5 file fields).
 - JavaScript syntax check for front-end/admin assets: PASS.

@@ -40,3 +40,8 @@
 - `Update User Meta` and `Create User -> user_meta` reject WordPress capability/session/application-password meta keys at runtime.
 - Assign Role treats custom roles with `manage_options` as privileged, not only the literal `administrator` role.
 - Tokenized URL settings preserve valid `{{...}}` tokens during admin sanitization; final resolved URLs are still sanitized by their runtime action.
+
+
+## Numeric input direction
+
+Number-like controls (`tel`, `number`, `date`, and numeric/decimal/tel input modes) are rendered LTR and left-aligned in both frontend and admin editing while the surrounding form remains RTL.

@@ -10,6 +10,14 @@
 - **Stable tag:** فعلاً `1.0.27`
 - **تست واقعی ملی‌پیامک:** PASS گزارش‌شده توسط مدیر پروژه در 2026-09-04
 
+## Patch جهت نمایش فیلدهای عددی / شماره‌ای
+
+- ورودی‌های `tel`، `number`، `date` و هر input با `inputmode=numeric|decimal|tel` در Renderer به‌صورت semantic با `dir="ltr"` خروجی می‌شوند.
+- متن داخل این کنترل‌ها در Frontend از سمت چپ شروع و `text-align:left` است؛ Strong Isolation نیز با rule صریح `!important` اجازه بازگشت قالب سایت به راست‌چین را نمی‌دهد.
+- همین رفتار در ویرایش Submission داخل wp-admin و Child Fieldهای Repeater مدیریتی اعمال شده است.
+- این تغییر روی موبایل، تلفن ثابت، کد ملی، شبا، کد پستی، کارت بانکی، DateField و سایر ورودی‌های عددی قابل اعمال است؛ Label و Layout کلی فرم همچنان RTL باقی می‌مانند.
+- Regression اختصاصی: `tests/numeric-input-direction.php` و assertionهای تکمیلی در تست‌های Input Mask Renderer/Admin.
+
 ## Patch یکپارچه‌سازی SMS با Persian WooCommerce SMS
 
 - `SmsProviderRegistry` اضافه شد؛ Provider پیش‌فرض سراسری و Override مستقل در هر SMS Action پشتیبانی می‌شود.
@@ -73,8 +81,8 @@
 ## QA این checkpoint
 
 - `tools/qa.sh`: PASS
-- Regression: **45/45 PASS**
-- PHP lint: **147 فایل PASS**
+- Regression: **46/46 PASS**
+- PHP lint: **148 فایل PASS**
 - JavaScript syntax: PASS
 - composer.json: PASS
 - local JalaliDatePicker: PASS

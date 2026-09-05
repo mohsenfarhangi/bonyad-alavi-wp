@@ -254,10 +254,14 @@ final class FormDataPresenter
         }
         $type=(string)($field['type']??'text');
         $attrs=' name="'.esc_attr($inputName).'" class="afe-admin-control"';
+        $inputMode='';
         if ($maskPattern!=='' && InputMaskPattern::isValid($maskPattern) && in_array($type,['text','tel'],true)) {
             $attrs.=' data-afe-input-mask="'.esc_attr($maskPattern).'" maxlength="'.esc_attr((string)InputMaskPattern::displayLength($maskPattern)).'"';
             $inputMode=(string)($mask['inputmode']??InputMaskPattern::suggestedInputMode($maskPattern));
             if ($inputMode!=='') $attrs.=' inputmode="'.esc_attr($inputMode).'"';
+        }
+        if (in_array($type,['tel','number','date'],true) || in_array(strtolower($inputMode),['numeric','decimal','tel'],true)) {
+            $attrs.=' dir="ltr" data-afe-ltr="1"';
         }
         if ($type==='textarea') {
             return '<textarea'.$attrs.' rows="4">'.esc_textarea((string)$value).'</textarea>';

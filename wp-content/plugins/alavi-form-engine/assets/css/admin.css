@@ -108,3 +108,9 @@
 
 .afe-action-provider-warning{grid-column:1/-1;padding:10px 12px;border:1px solid #dba617;border-radius:10px;background:#fff8e5;color:#6b4f00;font-size:12px;line-height:1.8}
 .afe-action-config-field .description{display:block;margin-top:6px;color:#646970;font-size:11px;line-height:1.7}
+
+/* 1.0.28-dev — numeric/identifier submission values use LTR left alignment */
+.afe-admin-control:is([dir="ltr"], [type="tel"], [type="number"], [inputmode="numeric"], [inputmode="decimal"], [data-afe-admin-date]) {
+  direction:ltr !important;
+  text-align:left !important;
+}

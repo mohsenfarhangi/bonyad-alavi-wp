@@ -28,6 +28,7 @@ $checks=[
     'normalized-pattern'=>str_contains($attrs,'data-afe-normalized-pattern="09[0-9]{9}"'),
     'raw-pattern-removed'=>!preg_match('/\spattern=/', $attrs),
     'numeric-inputmode'=>str_contains($attrs,'inputmode="numeric"'),
+    'numeric-direction-ltr'=>str_contains($attrs,'dir="ltr"'),
 ];
 
 $failed=false;

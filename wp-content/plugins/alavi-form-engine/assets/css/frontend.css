@@ -1170,3 +1170,13 @@ textarea.afe-control { resize:vertical; min-height:118px; line-height:1.9; }
 /* 1.0.24 — per-form brand mark */
 .afe-shell .afe-brand-mark--image{overflow:hidden;background:transparent;box-shadow:none;border:1px solid var(--afe-border);padding:4px}
 .afe-shell .afe-brand-mark--image img{display:block;width:100%;height:100%;object-fit:contain;border-radius:inherit}
+
+/* 1.0.28-dev — numeric/identifier inputs read and type from the left */
+.afe-shell .afe-form .afe-control:is([dir="ltr"], [type="tel"], [type="number"], [inputmode="numeric"], [inputmode="decimal"], .afe-date) {
+  direction: ltr;
+  text-align: left;
+}
+.afe-shell.afe-isolation-strong .afe-form .afe-control:is([dir="ltr"], [type="tel"], [type="number"], [inputmode="numeric"], [inputmode="decimal"], .afe-date) {
+  direction: ltr !important;
+  text-align: left !important;
+}

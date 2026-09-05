@@ -33,6 +33,7 @@ $checks=[
     'admin-edit-formatted'=>str_contains($html,'value="0912 345 6789"'),
     'admin-mask-data'=>str_contains($html,'data-afe-input-mask="9999 999 9999"'),
     'admin-mask-maxlength'=>str_contains($html,'maxlength="13"'),
+    'admin-numeric-direction-ltr'=>str_contains($html,'dir="ltr"'),
     'admin-save-normalized'=>$clean==='09123456789',
     'admin-display-formatted'=>$display==='0912 345 6789',
 ];

@@ -52,6 +52,7 @@
 - Field Override مدیریتی بدون تغییر Source Definition
 - UI چیدمان متمرکز: تب «فیلدها و چیدمان» فقط Drag & Drop را نمایش می‌دهد و Override هر Field با کلیک روی همان Field در `afe-admin-side` باز می‌شود
 - Input Mask Registry عمومی برای text/tel با presetهای موبایل، تلفن ثابت، کد ملی، کد پستی، کارت بانکی، شبا و Mask سفارشی
+- ورودی‌های شماره‌ای/عددی در Frontend و ویرایش ادمین به‌صورت LTR و چپ‌چین نمایش داده می‌شوند، بدون تغییر RTL بودن Label و ساختار فرم
 - SMS Provider Registry با Provider پیش‌فرض سراسری، Override هر Action و Integration اختیاری Persian WooCommerce SMS بدون کپی Credential
 - Conditional Logic با show/hide/required/optional
 - Data Source: static, callback, database, posts, taxonomy, users, JSON, REST, geography, custom

@@ -333,6 +333,10 @@ final class Renderer
             if ($min>0) $attributes['minlength']=$min;
             if ($max>0) $attributes['maxlength']=$max;
         }
+        if ($this->usesLeftToRightNumericInput($field, $attributes)) {
+            if (!isset($attributes['dir'])) $attributes['dir']='ltr';
+            $attributes['data-afe-ltr']='1';
+        }
         foreach ((array)($field['validators']??[]) as $validator) {
             if (is_string($validator)) $validator=['key'=>$validator];
             if (!is_array($validator) || ($validator['key']??'')!=='custom_regex') continue;
@@ -368,6 +372,15 @@ final class Renderer
             if ($value !== '' && $value !== null) $has=true;
         }
         return $has ? [$row] : [];
+    }
+
+    /** @param array<string,mixed> $field @param array<string,mixed> $attributes */
+    private function usesLeftToRightNumericInput(array $field, array $attributes): bool
+    {
+        $type=(string)($field['type']??'');
+        if (in_array($type,['tel','number','date'],true)) return true;
+        $inputMode=strtolower(trim((string)($attributes['inputmode']??'')));
+        return in_array($inputMode,['numeric','decimal','tel'],true);
     }
 
     private function dateInput(array $field, mixed $value, string $common): string
