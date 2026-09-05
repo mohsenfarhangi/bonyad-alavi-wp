@@ -328,3 +328,21 @@ Browser print / Save as PDF is always available from a submission. Direct server
 - 49 regression tests: PASS.
 - 152 PHP files linted: PASS.
 - JavaScript syntax and package QA: PASS.
+
+
+## 1.0.28-dev Live duplicate preflight patch
+
+- Added authenticated/anonymous `afe_check_duplicate` AJAX preflight protected by the form nonce.
+- Live duplicate lookup starts only after every configured fingerprint path has a meaningful value.
+- Frontend watches only duplicate fields, debounces by 450ms and aborts stale in-flight checks.
+- Preflight excludes file bytes and does not consume final-submit captcha/rate-limit flow.
+- Current submission is excluded only after applicant access is verified.
+- Reference URLs remain gated by the existing applicant-access resolver.
+- Final submit duplicate evaluation and transactional fingerprint reservation remain authoritative.
+- Added `tests/live-duplicate-check.php` and completeness coverage in `tests/duplicate-policy.php`.
+
+### QA
+
+- 50 regression tests: PASS.
+- 153 PHP files linted: PASS.
+- JavaScript/composer/assets/no-runtime-CDN/version checks: PASS.

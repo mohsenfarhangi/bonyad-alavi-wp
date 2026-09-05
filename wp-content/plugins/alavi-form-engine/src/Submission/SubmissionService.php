@@ -44,6 +44,67 @@ final class SubmissionService
         private readonly InputMaskRegistry $inputMasks
     ) {}
 
+    /**
+     * Lightweight duplicate preflight for the public form. It intentionally
+     * skips captcha, validation and submission rate-limit consumption: the
+     * final submit path remains authoritative and repeats the duplicate check
+     * transaction-safely.
+     */
+    public function checkDuplicateHttp(): array|WP_Error
+    {
+        $slug = sanitize_key(wp_unslash($_POST['afe_form_slug'] ?? ''));
+        if (!$this->registry->has($slug)) return new WP_Error('form','فرم پیدا نشد.');
+
+        $nonce = sanitize_text_field(wp_unslash($_POST['_afe_nonce'] ?? ''));
+        if ($nonce === '' || !wp_verify_nonce($nonce, 'afe_submit_'.$slug)) {
+            return new WP_Error('nonce','اعتبار بررسی فرم منقضی شده است. صفحه را تازه‌سازی کنید.');
+        }
+
+        $form = $this->resolvedForm($slug);
+        $config = $this->duplicatePolicy->config($form);
+        if (!$config['enabled'] || $config['fields'] === []) {
+            return ['enabled'=>false,'ready'=>false,'duplicate'=>false,'blocking'=>false];
+        }
+
+        $data = $this->sanitizeBySchema($form, (array)wp_unslash($_POST['afe_data'] ?? []));
+        $missing = $this->duplicatePolicy->missingFields($form, $data);
+        if ($missing !== []) {
+            return [
+                'enabled'=>true,
+                'ready'=>false,
+                'duplicate'=>false,
+                'blocking'=>false,
+                'missing_fields'=>$missing,
+            ];
+        }
+
+        $excludeSubmissionId = 0;
+        $existing = $this->resolveExisting($form);
+        if ($existing && $this->canApplicantAccess($form, $existing)) {
+            $excludeSubmissionId = (int)$existing['id'];
+        }
+
+        $decision = $this->duplicatePolicy->evaluate($form, $data, $excludeSubmissionId);
+        $payload = [
+            'enabled'=>true,
+            'ready'=>true,
+            'duplicate'=>$decision->isDuplicate(),
+            'blocking'=>$decision->blocksDuplicate(),
+            'behavior'=>$decision->behavior,
+            'message'=>$decision->message,
+        ];
+
+        if ($decision->isDuplicate() && $decision->behavior === 'reference' && $decision->duplicateSubmissionId) {
+            $row = $this->submissions->find((int)$decision->duplicateSubmissionId);
+            if ($row) {
+                $url = $this->duplicateReferenceUrl($form, $row);
+                if ($url !== '') $payload['edit_url'] = $url;
+            }
+        }
+
+        return $payload;
+    }
+
     public function handleHttp(): array|WP_Error
     {
         $slug = sanitize_key(wp_unslash($_POST['afe_form_slug'] ?? ''));

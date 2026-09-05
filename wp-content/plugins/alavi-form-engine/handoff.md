@@ -10,6 +10,20 @@
 - **Stable tag:** فعلاً `1.0.27`
 - **تست واقعی ملی‌پیامک:** PASS گزارش‌شده توسط مدیر پروژه در 2026-09-04
 
+## Patch بررسی زنده Duplicate قبل از Submit
+
+- وقتی Duplicate Policy فعال باشد، Renderer مسیر فیلدهای Fingerprint را با `data-afe-duplicate-fields` در فرم قرار می‌دهد.
+- Frontend فقط تغییر همان فیلدها را دنبال می‌کند و به‌محض اینکه همه مسیرهای انتخاب‌شده مقدار معنی‌دار داشته باشند، با debounce 450ms درخواست `afe_check_duplicate` می‌فرستد.
+- درخواست Live فقط `afe_data` و credentialهای لازم برای edit را می‌فرستد؛ File bytes در این preflight ارسال نمی‌شوند.
+- درخواست‌های قبلی هنگام تایپ جدید با `AbortController` لغو می‌شوند و پاسخ stale به UI اعمال نمی‌شود.
+- Endpoint عمومی با همان nonce فرم محافظت می‌شود و قبل از Query، داده را با schema/Mask فعلی sanitize و normalize می‌کند.
+- در ویرایش معتبر، Submission جاری از مقایسه Duplicate مستثنا می‌شود؛ spoof کردن `submission_id` بدون دسترسی باعث exclusion نمی‌شود.
+- نتیجه Live سه حالت UI دارد: سبز برای «تکراری پیدا نشد»، قرمز برای policyهای blocking و زرد برای `allow`.
+- در behavior=`reference` لینک ثبت قبلی فقط وقتی برگردانده می‌شود که `duplicateReferenceUrl()` دسترسی معتبر کاربر را تأیید کند.
+- بررسی نهایی Duplicate در `handleHttp()` و guard تراکنشی fingerprint بدون تغییر باقی مانده و مرجع نهایی است؛ Live check فقط UX زودهنگام است.
+- Repeater pathها مثل `members.national_id` نیز پشتیبانی می‌شوند و add/remove ردیف باعث بازبینی state Duplicate می‌شود.
+- Regressionها: `tests/live-duplicate-check.php` و assertionهای تکمیلی `tests/duplicate-policy.php`.
+
 ## Patch اصلاح Master Switch پیامک
 
 - مشکل گزارش‌شده در staging: با وجود فعال‌بودن SMS در UI، Runtime می‌توانست پیام «سرویس پیامک در تنظیمات Alavi Form Engine غیرفعال است» بدهد.

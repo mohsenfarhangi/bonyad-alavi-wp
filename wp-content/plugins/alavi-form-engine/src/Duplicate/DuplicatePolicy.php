@@ -57,6 +57,61 @@ final class DuplicatePolicy
         ];
     }
 
+    /**
+     * Return duplicate fingerprint fields that do not yet have a meaningful
+     * value. This is used by the public live duplicate preflight so the DB is
+     * queried only after every configured fingerprint component is complete.
+     *
+     * @return list<string>
+     */
+    public function missingFields(array $form, array $data): array
+    {
+        $config = $this->config($form);
+        if (!$config['enabled'] || $config['fields'] === []) return [];
+
+        $missing = [];
+        foreach ($config['fields'] as $path) {
+            if (!$this->hasMeaningfulValue($this->valueForPath($data, $path))) $missing[] = $path;
+        }
+        return $missing;
+    }
+
+    private function valueForPath(mixed $value, string $path): mixed
+    {
+        $parts = array_values(array_filter(explode('.', $path), static fn(string $part): bool => $part !== ''));
+        return $this->walkPath($value, $parts);
+    }
+
+    /** @param list<string> $parts */
+    private function walkPath(mixed $value, array $parts): mixed
+    {
+        if ($parts === []) return $value;
+        $part = array_shift($parts);
+        if (!is_array($value)) return null;
+
+        if (array_is_list($value)) {
+            $result = [];
+            foreach ($value as $row) {
+                $resolved = $this->walkPath($row, array_merge([$part], $parts));
+                if ($this->hasMeaningfulValue($resolved)) $result[] = $resolved;
+            }
+            return $result;
+        }
+
+        if (!array_key_exists($part, $value)) return null;
+        return $this->walkPath($value[$part], $parts);
+    }
+
+    private function hasMeaningfulValue(mixed $value): bool
+    {
+        if (is_array($value)) {
+            foreach ($value as $one) if ($this->hasMeaningfulValue($one)) return true;
+            return false;
+        }
+        if ($value === null) return false;
+        return trim((string)$value) !== '';
+    }
+
     /** @return array<string,string> */
     public function fieldLabels(array $form): array
     {

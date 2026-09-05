@@ -241,3 +241,5 @@ The package includes the "ثبت نام گروه‌های مردمی و جهاد
 = 1.0.28-dev preview numeric direction patch =
 * Removed forced text-align from the generic Strong Isolation form-control rule.
 * Numeric and identifier values are LTR/left-aligned in live and locked previews, including repeater cells and row numbers.
+
+* 1.0.28-dev: بررسی زنده Duplicate پس از تکمیل همه فیلدهای Fingerprint.

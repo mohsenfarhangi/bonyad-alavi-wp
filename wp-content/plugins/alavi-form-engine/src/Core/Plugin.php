@@ -223,6 +223,8 @@ final class Plugin
 
         add_action('wp_ajax_afe_submit', [$this,'ajaxSubmit']);
         add_action('wp_ajax_nopriv_afe_submit', [$this,'ajaxSubmit']);
+        add_action('wp_ajax_afe_check_duplicate', [$this,'ajaxCheckDuplicate']);
+        add_action('wp_ajax_nopriv_afe_check_duplicate', [$this,'ajaxCheckDuplicate']);
         add_action('wp_ajax_afe_request_edit', [$this,'ajaxRequestEdit']);
         add_action('wp_ajax_nopriv_afe_request_edit', [$this,'ajaxRequestEdit']);
         add_action('wp_ajax_afe_refresh_captcha', [$this,'ajaxRefreshCaptcha']);
@@ -298,6 +300,26 @@ final class Plugin
             if (is_readable($js) && is_readable($css)) return;
             echo '<div class="notice notice-warning"><p><strong>Alavi Form Engine:</strong> فایل‌های لوکال JalaliDatePicker پیدا نشدند. فایل‌های <code>jalalidatepicker.min.js</code> و <code>jalalidatepicker.min.css</code> را داخل <code>assets/vendor/jalalidatepicker/</code> قرار دهید.</p></div>';
         });
+    }
+
+    public function ajaxCheckDuplicate(): void
+    {
+        /** @var SubmissionService $service */
+        $service = $this->container->get(SubmissionService::class);
+        try {
+            nocache_headers();
+            $result = $service->checkDuplicateHttp();
+            if (is_wp_error($result)) {
+                wp_send_json_error([
+                    'message'=>$result->get_error_message(),
+                    'code'=>$result->get_error_code(),
+                ], 422);
+            }
+            wp_send_json_success($result);
+        } catch (Throwable $e) {
+            if (defined('WP_DEBUG') && WP_DEBUG) error_log('[AFE duplicate preflight] '.$e->getMessage());
+            wp_send_json_error(['message'=>'بررسی تکراری بودن اطلاعات انجام نشد.'],500);
+        }
     }
 
     public function ajaxSubmit(): void

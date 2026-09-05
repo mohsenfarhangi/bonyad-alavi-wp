@@ -142,10 +142,20 @@ final class Renderer
         $resumeBox = $this->resumeBox($form, !empty($editing['row']));
 
         $shellClass = $this->styleIsolation->shellClass($form);
+        $duplicateConfig = (array)($form['settings']['duplicate'] ?? []);
+        $duplicateFields = !empty($duplicateConfig['enabled'])
+            ? array_values(array_filter(array_map('strval', (array)($duplicateConfig['fields'] ?? []))))
+            : [];
+        $duplicateAttrs = $duplicateFields !== []
+            ? ' data-afe-duplicate-fields="'.esc_attr((string)wp_json_encode($duplicateFields, JSON_UNESCAPED_UNICODE)).'"'
+            : '';
+        $duplicateLive = $duplicateFields !== []
+            ? '<div class="afe-duplicate-live" data-afe-duplicate-live aria-live="polite" aria-atomic="true" hidden></div>'
+            : '';
 
         return '<div class="'.esc_attr($shellClass).'" data-afe-isolation="'.esc_attr($this->styleIsolation->modeForForm($form)).'" dir="rtl">'.$editingNotice.$lockPanel.$resumeBox
-            . '<form class="afe-form" method="post" enctype="multipart/form-data" novalidate data-form="'.esc_attr($slug).'"'.($locked?' data-afe-readonly="1"':'').' data-afe-lock-after-submit="'.(!empty($form['settings']['lock_after_submit'])?'1':'0').'" data-afe-preview-enabled="'.($previewEnabled?'1':'0').'" data-afe-lock-warning="'.esc_attr((string)($form['settings']['lock_warning']??'')).'">'
-            . $hidden . $content
+            . '<form class="afe-form" method="post" enctype="multipart/form-data" novalidate data-form="'.esc_attr($slug).'"'.($locked?' data-afe-readonly="1"':'').' data-afe-lock-after-submit="'.(!empty($form['settings']['lock_after_submit'])?'1':'0').'" data-afe-preview-enabled="'.($previewEnabled?'1':'0').'" data-afe-lock-warning="'.esc_attr((string)($form['settings']['lock_warning']??'')).'"'.$duplicateAttrs.'>'
+            . $hidden . $duplicateLive . $content
             . ($locked?'':'<div class="afe-captcha-wrap">'.$this->security->captchaMarkup((string)($form['settings']['captcha']??'custom')).'</div>')
             . '<div class="afe-form-result" aria-live="polite"></div>'
             . '</form></div>';

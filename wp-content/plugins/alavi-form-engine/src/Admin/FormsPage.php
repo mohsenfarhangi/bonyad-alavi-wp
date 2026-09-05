@@ -263,6 +263,7 @@ final class FormsPage
         echo '</select></label>';
         echo '<label class="afe-span-2">پیام تکراری<textarea name="duplicate_message" rows="3" placeholder="این اطلاعات قبلاً ثبت شده است.">'.esc_textarea($config['message']).'</textarea><span class="description">در حالت ارجاع، لینک ثبت قبلی فقط زمانی نمایش داده می‌شود که مالکیت/دسترسی معتبر کاربر سمت PHP تأیید شود.</span></label>';
         echo '</div>';
+        echo '<div class="afe-admin-callout"><strong>بررسی زنده:</strong> به‌محض اینکه همه فیلدهای Fingerprint در فرم تکمیل شوند، بدون انتظار برای ثبت نهایی بررسی تکراری بودن انجام می‌شود و پیام مناسب به کاربر نمایش داده می‌شود. بررسی نهایی سمت سرور در Submit همچنان برقرار است.</div>';
         echo '<div class="afe-admin-callout">حالت «اجازه ثبت» رکورد جدید را با <code>is_duplicate=1</code> و مرجع Submission اصلی ذخیره می‌کند. این علامت‌گذاری مستقل از Workflow است.</div>';
         echo '</div>';
     }

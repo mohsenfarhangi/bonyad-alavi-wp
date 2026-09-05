@@ -1365,6 +1365,7 @@
           initFileUploads(row);
           initConstrainedInputs(row);
           updateRepeater(wrapper);
+          form.dispatchEvent(new CustomEvent('afe:duplicate-input-changed', {detail:{control:null}}));
           row.scrollIntoView({behavior:'smooth', block:'nearest'});
           return;
         }
@@ -1380,6 +1381,7 @@
             });
           });
           updateRepeater(wrapper);
+          form.dispatchEvent(new CustomEvent('afe:duplicate-input-changed', {detail:{control:null}}));
         }
       });
     });
@@ -1868,6 +1870,270 @@
     });
   }
 
+  function afeDataPath(control) {
+    if (!(control instanceof Element)) return '';
+    const name = String(control.getAttribute('name') || '');
+    if (!name.startsWith('afe_data[')) return '';
+    const parts = [];
+    const re = /\[([^\]]*)\]/g;
+    let match;
+    while ((match = re.exec(name)) !== null) {
+      const part = String(match[1] || '');
+      if (!part || /^\d+$/.test(part)) continue;
+      parts.push(part);
+    }
+    return parts.join('.');
+  }
+
+  function duplicatePathControls(form, path) {
+    return qsa(form, '[name]').filter(control => {
+      if (control.disabled || control.type === 'file' || control.type === 'hidden') return false;
+      return afeDataPath(control) === path;
+    });
+  }
+
+  function duplicateControlValues(controls) {
+    if (!controls.length) return [];
+    const values = [];
+    const radioNames = new Set();
+    controls.forEach(control => {
+      if (control instanceof HTMLInputElement && control.type === 'radio') {
+        if (radioNames.has(control.name)) return;
+        radioNames.add(control.name);
+        const checked = controls.find(one => one.name === control.name && one.checked);
+        if (checked) values.push(String(checked.value || '').trim());
+        return;
+      }
+      if (control instanceof HTMLInputElement && control.type === 'checkbox') {
+        if (control.checked) values.push(String(control.value || '').trim());
+        return;
+      }
+      if (control instanceof HTMLSelectElement && control.multiple) {
+        Array.from(control.selectedOptions || []).forEach(option => {
+          const value = String(option.value || '').trim();
+          if (value) values.push(value);
+        });
+        return;
+      }
+      const value = String(control.value ?? '').trim();
+      if (value) values.push(value);
+    });
+    return values.filter(value => value !== '');
+  }
+
+  function duplicateControlComplete(control) {
+    if (!(control instanceof HTMLInputElement || control instanceof HTMLSelectElement || control instanceof HTMLTextAreaElement)) return false;
+    if (control.disabled || control.type === 'file' || control.type === 'hidden') return false;
+
+    if (control instanceof HTMLInputElement && ['radio','checkbox'].includes(control.type)) {
+      return control.checked && String(control.value || '').trim() !== '';
+    }
+    if (control instanceof HTMLSelectElement && control.multiple) {
+      return Array.from(control.selectedOptions || []).some(option => String(option.value || '').trim() !== '');
+    }
+
+    const value = String(control.value ?? '').trim();
+    if (!value) return false;
+
+    const mask = String(control.dataset.afeInputMask || '');
+    if (mask) {
+      const requiredSlots = inputMaskNodes(mask).filter(node => node.type === 'slot').length;
+      if (requiredSlots > 0 && Array.from(unmaskInputValue(value, mask)).length < requiredSlots) return false;
+    }
+    const dateMask = String(control.dataset.afeDateMask || '');
+    if (dateMask && control.type !== 'date' && latinDigits(value).replace(/\D+/g, '').length < 8) return false;
+
+    if (typeof control.checkValidity === 'function' && !control.checkValidity()) return false;
+    return true;
+  }
+
+  function duplicatePathComplete(form, path) {
+    const controls = duplicatePathControls(form, path);
+    if (!controls.length) return false;
+    const valued = controls.filter(control => {
+      if (control instanceof HTMLInputElement && ['radio','checkbox'].includes(control.type)) return control.checked && String(control.value || '').trim() !== '';
+      if (control instanceof HTMLSelectElement && control.multiple) return Array.from(control.selectedOptions || []).some(option => String(option.value || '').trim() !== '');
+      return String(control.value ?? '').trim() !== '';
+    });
+    return valued.length > 0 && valued.every(duplicateControlComplete);
+  }
+
+  function duplicateFields(form) {
+    try {
+      const fields = JSON.parse(form.dataset.afeDuplicateFields || '[]');
+      return Array.isArray(fields) ? fields.map(String).filter(Boolean) : [];
+    } catch (_) { return []; }
+  }
+
+  function duplicateAnchor(form, fields, preferredControl = null) {
+    const isActiveWrapper = wrapper => {
+      if (!wrapper || wrapper.hidden) return false;
+      const step = wrapper.closest('.afe-step');
+      return !step || step.classList.contains('is-active');
+    };
+    const preferredPath = afeDataPath(preferredControl);
+    if (preferredPath && fields.includes(preferredPath)) {
+      const wrapper = preferredControl.closest('.afe-field');
+      if (isActiveWrapper(wrapper)) return wrapper;
+    }
+    for (let index = fields.length - 1; index >= 0; index -= 1) {
+      const controls = duplicatePathControls(form, fields[index]);
+      const wrapper = controls.map(control => control.closest('.afe-field')).find(isActiveWrapper);
+      if (wrapper) return wrapper;
+    }
+    return qs(form, '.afe-step.is-active .afe-step-heading') || qs(form, '.afe-step.is-active');
+  }
+
+  function duplicateRequestData(form) {
+    const source = new FormData(form);
+    const fd = new FormData();
+    fd.set('action', 'afe_check_duplicate');
+    for (const [name, value] of source.entries()) {
+      if (typeof value !== 'string') continue;
+      if (name.startsWith('afe_data[') || ['afe_form_slug','_afe_nonce','_afe_submission_id','_afe_edit_token','_afe_tracking'].includes(name)) {
+        fd.append(name, value);
+      }
+    }
+    return fd;
+  }
+
+  function duplicateNotice(form) {
+    return qs(form, '[data-afe-duplicate-live]');
+  }
+
+  function clearDuplicateNotice(form) {
+    const notice = duplicateNotice(form);
+    if (!notice) return;
+    notice.hidden = true;
+    notice.innerHTML = '';
+    notice.removeAttribute('data-state');
+    notice.removeAttribute('aria-busy');
+  }
+
+  function showDuplicateNotice(form, payload, anchor) {
+    const notice = duplicateNotice(form);
+    if (!notice) return;
+    if (anchor?.parentElement) anchor.insertAdjacentElement('afterend', notice);
+
+    const duplicate = Boolean(payload?.duplicate);
+    const blocking = Boolean(payload?.blocking);
+    const behavior = String(payload?.behavior || 'block');
+    let state = 'success';
+    let message = 'برای این ترکیب از اطلاعات، ثبت تکراری پیدا نشد.';
+    let extra = '';
+
+    if (duplicate) {
+      state = blocking ? 'error' : 'warning';
+      message = String(payload?.message || 'این اطلاعات قبلاً ثبت شده است.');
+      if (behavior === 'allow') extra = '<span class="afe-duplicate-live__hint">طبق تنظیمات فرم، ایجاد ثبت جدید همچنان مجاز است.</span>';
+      if (payload?.edit_url) {
+        extra += `<a class="afe-result-link afe-duplicate-live__link" href="${escapeAttr(String(payload.edit_url))}">مشاهده یا ادامه ثبت قبلی</a>`;
+      }
+    }
+
+    notice.dataset.state = state;
+    notice.removeAttribute('aria-busy');
+    notice.innerHTML = `<div class="afe-duplicate-live__content"><strong>${duplicate ? 'بررسی ثبت تکراری' : 'بررسی تکراری بودن انجام شد'}</strong><span>${escapeHtml(message)}</span>${extra}</div>`;
+    notice.hidden = false;
+  }
+
+  function initLiveDuplicateCheck(form) {
+    const fields = duplicateFields(form);
+    const notice = duplicateNotice(form);
+    if (!fields.length || !notice || form.dataset.afeReadonly === '1') return;
+    if (form.dataset.afeDuplicateReady === '1') return;
+    form.dataset.afeDuplicateReady = '1';
+
+    let timer = 0;
+    let sequence = 0;
+    let controller = null;
+    let lastSignature = '';
+    let inFlightSignature = '';
+    let preferredControl = null;
+
+    const currentState = () => fields.map(path => [path, duplicateControlValues(duplicatePathControls(form, path))]);
+    const ready = state => state.every(([path, values]) => Array.isArray(values) && values.length > 0 && duplicatePathComplete(form, path));
+
+    const run = async () => {
+      const state = currentState();
+      if (!ready(state)) {
+        lastSignature = '';
+        controller?.abort();
+        clearDuplicateNotice(form);
+        return;
+      }
+
+      const signature = JSON.stringify(state);
+      if (signature === lastSignature || signature === inFlightSignature) return;
+      inFlightSignature = signature;
+      const requestSequence = ++sequence;
+      controller?.abort();
+      controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
+      notice.setAttribute('aria-busy', 'true');
+
+      try {
+        const res = await fetch(cfg.ajaxUrl, {
+          method: 'POST',
+          body: duplicateRequestData(form),
+          credentials: 'same-origin',
+          cache: 'no-store',
+          signal: controller?.signal,
+        });
+        const json = await res.json();
+        if (requestSequence !== sequence) return;
+        if (!res.ok || !json.success) throw new Error(json?.data?.message || `HTTP ${res.status}`);
+        const payload = json.data || {};
+        if (!payload.enabled || !payload.ready) {
+          clearDuplicateNotice(form);
+          return;
+        }
+        showDuplicateNotice(form, payload, duplicateAnchor(form, fields, preferredControl));
+        lastSignature = signature;
+      } catch (error) {
+        if (error?.name === 'AbortError' || requestSequence !== sequence) return;
+        const anchor = duplicateAnchor(form, fields, preferredControl);
+        if (anchor?.parentElement) anchor.insertAdjacentElement('afterend', notice);
+        notice.dataset.state = 'warning';
+        notice.removeAttribute('aria-busy');
+        notice.innerHTML = '<div class="afe-duplicate-live__content"><strong>بررسی تکراری بودن انجام نشد</strong><span>در ثبت نهایی، اطلاعات دوباره سمت سرور بررسی می‌شوند.</span></div>';
+        notice.hidden = false;
+      } finally {
+        if (requestSequence === sequence) inFlightSignature = '';
+      }
+    };
+
+    const schedule = control => {
+      preferredControl = control instanceof Element ? control : preferredControl;
+      const state = currentState();
+      clearTimeout(timer);
+      const signature = ready(state) ? JSON.stringify(state) : '';
+      if (signature && signature === lastSignature) return;
+      controller?.abort();
+      inFlightSignature = '';
+      sequence += 1;
+      if (!ready(state)) {
+        lastSignature = '';
+        clearDuplicateNotice(form);
+        return;
+      }
+      clearDuplicateNotice(form);
+      timer = window.setTimeout(run, 450);
+    };
+
+    const onControlChange = event => {
+      const control = event.target;
+      if (!(control instanceof HTMLInputElement || control instanceof HTMLSelectElement || control instanceof HTMLTextAreaElement)) return;
+      const path = afeDataPath(control);
+      if (!fields.includes(path)) return;
+      schedule(control);
+    };
+
+    form.addEventListener('input', onControlChange);
+    form.addEventListener('change', onControlChange);
+    form.addEventListener('afe:duplicate-input-changed', event => schedule(event.detail?.control || null));
+    window.setTimeout(() => schedule(null), 60);
+  }
+
   function initForm(form) {
     const steps = qsa(form, '.afe-step');
     let current = Math.max(0, steps.findIndex(s => s.classList.contains('is-active')));
@@ -1893,6 +2159,11 @@
       if (captcha) captcha.hidden = current !== steps.length - 1;
       if (steps[current]?.dataset.afePreviewStep === '1') updatePreview(form);
       applyConditions(form);
+      const liveDuplicateNotice = duplicateNotice(form);
+      if (liveDuplicateNotice && !liveDuplicateNotice.hidden && !steps[current]?.contains(liveDuplicateNotice)) {
+        const anchor = qs(steps[current], '.afe-step-heading') || steps[current];
+        anchor?.insertAdjacentElement('afterend', liveDuplicateNotice);
+      }
       form.scrollIntoView({behavior:'smooth', block:'start'});
     };
 
@@ -1986,6 +2257,7 @@
     initRepeaters(form);
     initDependencies(form);
     initUniqueGroups(form);
+    initLiveDuplicateCheck(form);
     renderStep(current);
   }
 

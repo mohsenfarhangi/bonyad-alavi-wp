@@ -61,12 +61,28 @@ $three=$fingerprints->make('demo',['mobile','members.national_id'],[
     'members'=>[['national_id'=>'0012345678'],['national_id'=>'9999999999']],
 ]);
 
+$missingNone=$policy->missingFields($form,[
+    'mobile'=>'09121234567',
+    'members'=>[['national_id'=>'0012345678']],
+]);
+$missingMobile=$policy->missingFields($form,[
+    'mobile'=>'   ',
+    'members'=>[['national_id'=>'0012345678']],
+]);
+$missingRepeater=$policy->missingFields($form,[
+    'mobile'=>'09121234567',
+    'members'=>[['national_id'=>''],['national_id'=>null]],
+]);
+
 $checks=[
     'config-enabled'=>$config['enabled']===true,
     'config-field-whitelist'=>$config['fields']===['mobile','members.national_id'],
     'config-behavior'=>$config['behavior']==='allow',
     'config-message'=>$config['message']==='پیام سفارشی',
     'field-labels'=>$policy->fieldLabels($form)===['mobile'=>'موبایل','members.national_id'=>'کد ملی'],
+    'live-complete-no-missing'=>$missingNone===[],
+    'live-missing-top-level'=>$missingMobile===['mobile'],
+    'live-missing-repeater-path'=>$missingRepeater===['members.national_id'],
     'fingerprint-normalization'=>$one===$two,
     'fingerprint-combination-change'=>$one!==$three,
 ];

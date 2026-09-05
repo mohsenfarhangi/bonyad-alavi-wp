@@ -57,6 +57,12 @@ Run on a staging clone using the same PHP/WordPress/Elementor major versions int
    - After approval, edit and submit again; confirm self-duplicate exclusion works.
 
 5. **Duplicate policy**
+   - Select two or more fingerprint fields. Before final Submit, fill all selected fields and verify the Live duplicate status appears after the last relevant field.
+   - Verify no duplicate request/status is shown while at least one selected fingerprint field is still empty.
+   - Change one fingerprint value quickly several times and verify only the latest result is reflected in the UI.
+   - For `block/message/reference`, verify a duplicate is reported before Submit; for `allow`, verify a warning is shown but the form remains submittable.
+   - For `reference`, verify the previous-submission link is shown only when the current visitor has valid ownership/edit credentials.
+   - Confirm final Submit still blocks/marks duplicates correctly even if JavaScript is disabled or the Live preflight request fails.
    - Test a configured multi-field fingerprint against an existing draft and final submission.
    - Exercise block, custom message, secure reference and allow+mark modes.
    - Trash the canonical submission and confirm an active duplicate is promoted safely.
