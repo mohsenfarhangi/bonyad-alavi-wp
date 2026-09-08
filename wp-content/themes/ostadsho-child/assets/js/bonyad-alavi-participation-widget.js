@@ -899,15 +899,39 @@
 			this.root.classList.toggle('bap--checkout-active', Boolean(locked));
 		}
 
+		/**
+		 * فیلدهای صورتحساب تزریق‌شده را با API فرانت‌اند ووکامرس راه‌اندازی می‌کند.
+		 *
+		 * Eventهای داخلی country_to_state_* و updated_checkout نباید دستی و بدون
+		 * آرگومان Trigger شوند؛ WooCommerce هنگام change کشور آن‌ها را با context
+		 * صحیح خودش منتشر می‌کند.
+		 */
 		initializeCheckoutFields() {
 			if (!window.jQuery) {
 				return;
 			}
 
-			window.jQuery(document.body).trigger('wc-enhanced-select-init');
-			window.jQuery(document.body).trigger('country_to_state_changing');
-			window.jQuery(document.body).trigger('country_to_state_changed');
-			window.jQuery(document.body).trigger('updated_checkout');
+			const $ = window.jQuery;
+			const { quickCheckout } = this.elements;
+
+			if (!quickCheckout) {
+				return;
+			}
+
+			const $quickCheckout = $(quickCheckout);
+
+			// SelectWoo/Enhanced Select ووکامرس را برای فیلدهای تازه تزریق‌شده فعال می‌کند.
+			$(document.body).trigger('wc-enhanced-select-init');
+
+			// فقط change واقعی فیلد کشور را اجرا می‌کنیم تا country-select.js تمام
+			// Eventهای داخلی را با wrapper و country صحیح خودش تولید کند.
+			const $countryFields = $quickCheckout.find(
+				':input.country_to_state, select[name="billing_country"]'
+			);
+
+			$countryFields.each(function () {
+				$(this).trigger('change');
+			});
 		}
 
 		setSubmitLoading(loading) {

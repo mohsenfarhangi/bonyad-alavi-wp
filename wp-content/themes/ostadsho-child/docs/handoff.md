@@ -181,6 +181,7 @@ Block عمومی BEM:
 - سایر اقلام Cart نباید وارد Order شوند و نباید توسط Gateway حذف شوند. اجرای `is_available()` و `process_payment()` در Cart موقت از `BA_Participation_Payment_Gateway_Service::with_isolated_cart()` عبور می‌کند و Session/Persistent Cart واقعی snapshot/restore می‌شود.
 - Gatewayهای دارای Payment Fields داخلی (`has_fields()`) در Quick Checkout پشتیبانی نمی‌شوند؛ مسیر هدف Hosted/Redirect Gateway است.
 - Terms/Privacy و Hookهای Checkout Validation ووکامرس باید در مسیر Inline حفظ شوند.
+- از نسخه `v0.6.5` Eventهای داخلی WooCommerce مانند `country_to_state_changing`، `country_to_state_changed` و `updated_checkout` نباید در Quick Checkout بدون آرگومان مناسب به‌صورت دستی Trigger شوند. برای فیلدهای Billing تزریق‌شده فقط `wc-enhanced-select-init` اجرا و سپس خود فیلد `billing_country`/`.country_to_state` با `change` واقعی راه‌اندازی می‌شود تا `country-select.js` wrapper و context صحیح را خودش بسازد.
 - UI مرحله دوم زیر Block `bap` و Elementهای `bap__quick-*` باقی می‌ماند و هیچ selector عمومی جدیدی برای Checkout ساخته نمی‌شود.
 
 جزئیات در [مستند نسخه v0.6.0](versions/v0.6.0.md) ثبت شده است.

@@ -1,56 +1,26 @@
-# Patch Manifest — v0.5.5
+# Patch v0.6.5
 
-مبدا Patch: `v0.5.4`  
-مقصد Patch: `v0.5.5`
+مبدأ: `ostadsho-child v0.6.4`  
+مقصد: `ostadsho-child v0.6.5`
 
 ## هدف
 
-تکمیل کنترل‌های ریسپانسیو استایل برای پنل آمار و Hero ویجت «مرکز حرکت‌های مردمی و جهادی».
+رفع خطای JavaScript زیر هنگام کلیک اول برای آماده‌سازی پرداخت سریع:
 
-## فایل‌های تغییرکرده
+`Cannot read properties of undefined (reading 'find')`
 
-### `inc/elementor/widgets/class-bonyad-alavi-jihadi-center-widget.php`
+## علت
 
-علت ورود به Patch:
+Handler ویجت مشارکت Eventهای داخلی WooCommerce یعنی `country_to_state_changing`، `country_to_state_changed` و `updated_checkout` را بدون آرگومان‌های لازم دستی Trigger می‌کرد. Country/State Handler ووکامرس برای این Eventها wrapper/context لازم دارد و در نبود آن `.find()` روی `undefined` اجرا می‌شد.
 
-- افزودن Margin چهارجهته و ریسپانسیو برای `.ba-jihadi-center__stats-wrap`.
-- تکمیل کنترل ارتفاع ریسپانسیو Hero.
-- افزودن کنترل `object-fit` ریسپانسیو تصویر Hero.
-- تبدیل موقعیت تصویر Hero به کنترل ریسپانسیو با ۹ موقعیت.
-- افزودن Opacity ریسپانسیو و CSS Filterهای استاندارد Elementor برای تصویر Hero.
+## فایل‌های Patch
 
-### `assets/css/bonyad-alavi-jihadi-center-widget.css`
+- `assets/js/bonyad-alavi-participation-widget.js` — حذف Trigger دستی Eventهای داخلی و راه‌اندازی Country/State از طریق `change` واقعی فیلد Billing Country داخل Quick Checkout.
+- `docs/handoff.md` — ثبت قرارداد توسعه برای Eventهای Checkout ووکامرس.
+- `docs/versions/v0.6.5.md` — جزئیات نسخه و تست‌ها.
 
-علت ورود به Patch:
+## اعمال Patch
 
-- حذف Min Height ثابت موبایل Hero که کنترل ریسپانسیو Elementor را خنثی می‌کرد.
-- تعریف fallback ریسپانسیو `--ba-jc-hero-height` برای Tablet و Mobile.
+محتویات پوشه `ostadsho-child` داخل این Patch را روی پوشه قالب فرزند موجود جایگزین کنید.
 
-### `docs/handoff.md`
-
-علت ورود به Patch:
-
-- ثبت قرارداد جدید کنترل‌های استایل Hero و آمار برای توسعه‌های آینده.
-- افزودن نسخه `v0.5.5` به تاریخچه پروژه.
-
-### `docs/versions/v0.5.5.md`
-
-علت ورود به Patch:
-
-- مستندسازی کامل تغییرات، سازگاری و تست‌های نسخه.
-
-## فایل حذف‌شده
-
-ندارد.
-
-## روش اعمال
-
-محتوای این ZIP را روی ریشه قالب `ostadsho-child` نسخه `v0.5.4` کپی و Replace کنید.
-
-## بررسی‌های انجام‌شده
-
-- `php -l` برای تمام فایل‌های PHP قالب: موفق
-- `node --check` برای تمام فایل‌های JavaScript قالب: موفق
-- بررسی حذف Rule ثابت `min-height:480px` روی Hero موبایل: موفق
-- بررسی وجود کنترل‌های جدید Elementor: موفق
-- تست سلامت ZIP کامل و Patch: موفق
+هیچ فایل حذفی در این نسخه وجود ندارد.
