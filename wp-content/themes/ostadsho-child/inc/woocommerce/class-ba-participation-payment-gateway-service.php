@@ -14,6 +14,9 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 final class BA_Participation_Payment_Gateway_Service {
 
+	/** نسخه پیاده‌سازی Service برای تشخیص هماهنگی فایل‌های Patch. */
+	const VERSION = '0.6.3';
+
 	const OPTION_NAME = 'ba_participation_settings';
 	const OPTION_KEY  = 'payment_gateway';
 

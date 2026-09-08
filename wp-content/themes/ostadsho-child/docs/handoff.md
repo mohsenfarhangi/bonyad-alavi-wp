@@ -169,7 +169,9 @@ Block عمومی BEM:
 - درگاه فعال از `ba_participation_settings[payment_gateway]` خوانده می‌شود و هیچ fallback خودکاری به Gateway دیگر وجود ندارد.
 - فهرست Gateway در داشبورد فقط شامل Gatewayهای `enabled` WooCommerce است؛ تنظیم Merchant/API همچنان متعلق به WooCommerce است.
 - Sanitize شناسه Gateway هنگام ذخیره نباید به Runtime Gateway Registry درخواست AJAX وابسته باشد و **نباید case شناسه را تغییر دهد**. شناسه‌هایی مانند `WC_Sep_Payment_Gateway` باید دقیقاً با همان حروف بزرگ/کوچک ذخیره شوند؛ استفاده از `sanitize_key()` برای Persist شناسه Gateway ممنوع است. فعال/موجود بودن Gateway هنگام اجرای پرداخت با `get_selected_gateway()` و `validate_gateway_availability()` کنترل می‌شود.
-- برای سازگاری با داده‌های `v0.6.1`، مقدار lowercase ذخیره‌شده باید هنگام خواندن با `BA_Participation_Payment_Gateway_Service::resolve_registered_gateway_id()` به شناسه واقعی `$gateway->id` نگاشت شود.
+- برای سازگاری با داده‌های `v0.6.1`، مقدار lowercase ذخیره‌شده باید به شناسه واقعی `$gateway->id` نگاشت شود. UI تنظیمات نباید بدون `method_exists()` به Resolver یک Service نسخه‌پذیر وابسته باشد؛ `ba_resolve_participation_gateway_id_for_settings()` مسیر Compatibility مدیریت است.
+- Sanitize شناسه Gateway در تب مشارکت از `ba_sanitize_participation_gateway_id()` عبور می‌کند و عمداً مستقل از Service است تا نصب ترکیبی Patch یا OPcache قدیمی باعث lowercase شدن دوباره شناسه نشود.
+- Quick Checkout برای یافتن درگاه انتخاب‌شده از Resolver سازگار داخلی خود استفاده می‌کند تا حتی در صورت اجرای نسخه قدیمی Service، شناسه Case-sensitive به درگاه واقعی تطبیق داده شود.
 - خواندن فیلدهای Checkout فقط از `WC_Checkout::get_checkout_fields()` و رندر آن‌ها از `woocommerce_form_field()` انجام می‌شود؛ Feature نباید یک Schema موازی برای فیلدهای Billing/Shipping بسازد.
 - Product/Amount در مرحله Prepare و Process هر دو باید با `Bonyad_Alavi_WooCommerce_Participation::validate_project_amount()` اعتبارسنجی شوند.
 - Order پرداخت سریع فقط یک line item از پروژه جاری دارد و Metaهای `_bap_participation_amount` و `_bap_goal_amount` را نگه می‌دارد.

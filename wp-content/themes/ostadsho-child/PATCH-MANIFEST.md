@@ -1,25 +1,26 @@
-# Patch Manifest — v0.6.2
+# Patch Manifest — v0.6.3
 
 ## مبدا و مقصد
 
-- مبدا: `v0.6.1`
-- مقصد: `v0.6.2`
+- مبدا: `v0.6.2`
+- مقصد: `v0.6.3`
 
 ## هدف Patch
 
-اصلاح ذخیره و بازیابی درگاه‌هایی که شناسه آن‌ها حروف بزرگ دارد، به‌خصوص `WC_Sep_Payment_Gateway`. در نسخه قبل استفاده از `sanitize_key()` باعث lowercase شدن ID و عدم تطبیق با Gateway واقعی WooCommerce می‌شد.
+رفع Fatal صفحه تنظیمات مشارکت در نصب‌های ترکیبی که `tab-participation.php` جدید اجرا می‌شود ولی نسخه قدیمی `BA_Participation_Payment_Gateway_Service` هنوز در حافظه/سرور فعال است. همچنین مسیر ذخیره و پرداخت درگاه SEP از نسخه Service مستقل شده تا شناسه `WC_Sep_Payment_Gateway` lowercase نشود.
 
 ## فایل‌های Patch
 
-- `inc/woocommerce/class-ba-participation-payment-gateway-service.php` — حفظ case شناسه Gateway، lookup بر اساس `$gateway->id` واقعی و Migration مقدار lowercase نسخه قبل.
-- `inc/admin/settings/tab-participation.php` — Resolve کردن مقدار ذخیره‌شده قبل از انتخاب گزینه Select تا SEP صحیح در UI نمایش داده شود.
-- `docs/handoff.md` — ثبت قرارداد دائمی عدم استفاده از `sanitize_key()` برای Persist شناسه Gateway.
-- `docs/versions/v0.6.2.md` — شرح مشکل، اصلاح، Migration و تست‌های این نسخه.
+- `inc/admin/settings/tab-participation.php` — افزودن Compatibility Guard، Resolver مستقل تنظیمات و Sanitize Case-sensitive مستقل از Service.
+- `inc/woocommerce/class-ba-participation-payment-gateway-service.php` — ثبت نسخه Service `0.6.3` برای تشخیص هماهنگی فایل‌ها و حفظ پیاده‌سازی Case-sensitive.
+- `inc/woocommerce/class-ba-participation-quick-checkout-service.php` — Resolve مستقیم Gateway بر اساس `$gateway->id` واقعی برای جلوگیری از اثر Service قدیمی روی پرداخت SEP.
+- `docs/handoff.md` — ثبت قرارداد سازگاری Gateway و ممنوعیت وابستگی مستقیم UI به متد نسخه‌پذیر Service.
+- `docs/versions/v0.6.3.md` — شرح علت Fatal، راهکار و تست‌های نسخه.
 
 ## فایل حذف‌شده
 
 هیچ فایلی حذف نشده است.
 
-## نکته Migration
+## نکته استقرار
 
-اگر `v0.6.1` مقدار `wc_sep_payment_gateway` را ذخیره کرده باشد، نسخه جدید آن را هنگام خواندن به `WC_Sep_Payment_Gateway` نگاشت می‌کند. با ذخیره مجدد تنظیمات، مقدار صحیح و Case-sensitive در دیتابیس Persist می‌شود.
+Patch باید با حفظ مسیرها روی قالب جایگزین شود. اگر PHP بعد از جایگزینی کامل فایل‌ها همچنان نسخه قدیمی کلاس را اجرا می‌کند، OPcache/PHP-FPM سرور باید پاک یا reload شود. Guard این نسخه از Fatal صفحه تنظیمات جلوگیری می‌کند، اما برای اطمینان از اجرای تمام کد جدید بهتر است Cache PHP نیز refresh شود.

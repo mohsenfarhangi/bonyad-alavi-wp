@@ -292,8 +292,7 @@ function ba_sanitize_participation_settings( $input ) {
 	$slider_images = is_array( $slider_images ) ? $slider_images : array();
 	$slider_images = array_values( array_unique( array_filter( array_map( 'absint', $slider_images ) ) ) );
 
-	$gateway_service = class_exists( 'BA_Participation_Payment_Gateway_Service' ) ? new BA_Participation_Payment_Gateway_Service() : null;
-	$gateway_id      = isset( $input['payment_gateway'] ) ? $input['payment_gateway'] : '';
+	$gateway_id = isset( $input['payment_gateway'] ) ? ba_sanitize_participation_gateway_id( $input['payment_gateway'] ) : '';
 
 	return array(
 		'donated_amount_title'          => sanitize_text_field( isset( $input['donated_amount_title'] ) ? $input['donated_amount_title'] : '' ),
@@ -303,7 +302,7 @@ function ba_sanitize_participation_settings( $input ) {
 		'executed_projects_value_title' => sanitize_text_field( isset( $input['executed_projects_value_title'] ) ? $input['executed_projects_value_title'] : '' ),
 		'executed_projects_value'       => ba_sanitize_integer_value( isset( $input['executed_projects_value'] ) ? $input['executed_projects_value'] : 0 ),
 		'slider_images'                 => $slider_images,
-		'payment_gateway'               => $gateway_service ? $gateway_service->sanitize_gateway_id( $gateway_id ) : '',
+		'payment_gateway'               => $gateway_id,
 	);
 }
 
@@ -407,6 +406,57 @@ function ba_render_participation_slider_field( $args ) {
 }
 
 /**
+ * شناسه درگاه مشارکت را بدون تغییر حروف بزرگ و کوچک پاک‌سازی می‌کند.
+ *
+ * این Helper عمداً مستقل از Service است تا ذخیره تنظیمات حتی در زمان اجرای
+ * نسخه کش‌شده یا قدیمی Service نیز شناسه‌های Case-sensitive را خراب نکند.
+ *
+ * @param mixed $gateway_id شناسه خام درگاه.
+ * @return string
+ */
+function ba_sanitize_participation_gateway_id( $gateway_id ) {
+	$gateway_id = sanitize_text_field( (string) $gateway_id );
+
+	return (string) preg_replace( '/[^A-Za-z0-9_-]/', '', $gateway_id );
+}
+
+/**
+ * شناسه ذخیره‌شده را برای نمایش در Select با درگاه‌های ثبت‌شده تطبیق می‌دهد.
+ *
+ * اگر Service جدید در دسترس باشد از Resolver آن استفاده می‌شود. در نصب‌های
+ * ترکیبی یا OPcache قدیمی، بدون فراخوانی متد ناموجود، مقایسه Case-insensitive
+ * روی گزینه‌های فعال انجام می‌شود تا صفحه مدیریت Fatal ندهد.
+ *
+ * @param string                                                   $gateway_id شناسه ذخیره‌شده.
+ * @param BA_Participation_Payment_Gateway_Service|null            $service    سرویس درگاه.
+ * @param array<string,string>                                     $choices    گزینه‌های فعال.
+ * @return string
+ */
+function ba_resolve_participation_gateway_id_for_settings( $gateway_id, $service, $choices ) {
+	$gateway_id = ba_sanitize_participation_gateway_id( $gateway_id );
+
+	if ( '' === $gateway_id ) {
+		return '';
+	}
+
+	if ( $service && method_exists( $service, 'resolve_registered_gateway_id' ) ) {
+		return (string) $service->resolve_registered_gateway_id( $gateway_id );
+	}
+
+	$legacy_key = strtolower( $gateway_id );
+
+	foreach ( array_keys( $choices ) as $registered_id ) {
+		$registered_id = ba_sanitize_participation_gateway_id( $registered_id );
+
+		if ( $registered_id === $gateway_id || strtolower( $registered_id ) === $legacy_key ) {
+			return $registered_id;
+		}
+	}
+
+	return $gateway_id;
+}
+
+/**
  * فهرست درگاه‌های فعال WooCommerce را برای پرداخت سریع مشارکت نمایش می‌دهد.
  *
  * @param array $args آرگومان‌های فیلد Settings API.
@@ -417,8 +467,8 @@ function ba_render_participation_gateway_field( $args ) {
 	$key     = $args['key'];
 	$service = class_exists( 'BA_Participation_Payment_Gateway_Service' ) ? new BA_Participation_Payment_Gateway_Service() : null;
 	$value   = isset( $options[ $key ] ) ? (string) $options[ $key ] : '';
-	$value   = $service ? $service->resolve_registered_gateway_id( $value ) : $value;
 	$choices = $service ? $service->get_active_gateway_choices() : array();
+	$value   = ba_resolve_participation_gateway_id_for_settings( $value, $service, $choices );
 	?>
 	<select name="<?php echo esc_attr( $args['option_name'] . '[' . $key . ']' ); ?>" class="regular-text">
 		<option value="">انتخاب درگاه پرداخت</option>

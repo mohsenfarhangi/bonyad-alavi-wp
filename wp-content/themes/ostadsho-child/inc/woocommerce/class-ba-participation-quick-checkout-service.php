@@ -43,7 +43,7 @@ final class BA_Participation_Quick_Checkout_Service {
 			return $context;
 		}
 
-		$gateway = $this->gateway_service->get_selected_gateway();
+		$gateway = $this->get_selected_gateway_compat();
 		if ( is_wp_error( $gateway ) ) {
 			return $gateway;
 		}
@@ -94,7 +94,7 @@ final class BA_Participation_Quick_Checkout_Service {
 			return $context;
 		}
 
-		$gateway = $this->gateway_service->get_selected_gateway();
+		$gateway = $this->get_selected_gateway_compat();
 		if ( is_wp_error( $gateway ) ) {
 			return $gateway;
 		}
@@ -432,4 +432,65 @@ final class BA_Participation_Quick_Checkout_Service {
 
 		return implode( ' ', $messages );
 	}
+
+	/**
+	 * درگاه انتخاب‌شده را مستقل از نسخه Service و با حفظ Case شناسه پیدا می‌کند.
+	 *
+	 * این مسیر دفاعی برای نصب‌های ترکیبی Patch یا OPcache قدیمی است؛ نسخه‌های
+	 * قدیمی Service ممکن است شناسه‌هایی مانند WC_Sep_Payment_Gateway را با
+	 * sanitize_key() به lowercase تبدیل کنند. این متد Option را مستقیم می‌خواند
+	 * و آن را با مقدار واقعی $gateway->id تطبیق می‌دهد.
+	 *
+	 * @return WC_Payment_Gateway|WP_Error
+	 */
+	private function get_selected_gateway_compat() {
+		$options    = get_option( BA_Participation_Payment_Gateway_Service::OPTION_NAME, array() );
+		$gateway_id = isset( $options[ BA_Participation_Payment_Gateway_Service::OPTION_KEY ] )
+			? $this->sanitize_gateway_id_compat( $options[ BA_Participation_Payment_Gateway_Service::OPTION_KEY ] )
+			: '';
+
+		if ( '' === $gateway_id ) {
+			return new WP_Error( 'bap_gateway_not_configured', 'درگاه پرداخت مشارکت در تنظیمات بنیاد علوی انتخاب نشده است.' );
+		}
+
+		if ( ! function_exists( 'WC' ) || ! WC()->payment_gateways() ) {
+			return new WP_Error( 'bap_gateway_missing', 'درگاه‌های پرداخت WooCommerce در دسترس نیستند.' );
+		}
+
+		$gateways   = WC()->payment_gateways()->payment_gateways();
+		$legacy_key = strtolower( $gateway_id );
+
+		foreach ( is_array( $gateways ) ? $gateways : array() as $gateway ) {
+			if ( ! $gateway instanceof WC_Payment_Gateway ) {
+				continue;
+			}
+
+			$registered_id = $this->sanitize_gateway_id_compat( $gateway->id );
+
+			if ( $registered_id !== $gateway_id && strtolower( $registered_id ) !== $legacy_key ) {
+				continue;
+			}
+
+			if ( 'yes' !== $gateway->enabled ) {
+				return new WP_Error( 'bap_gateway_disabled', 'درگاه پرداخت انتخاب‌شده غیرفعال است.' );
+			}
+
+			return $gateway;
+		}
+
+		return new WP_Error( 'bap_gateway_missing', 'درگاه پرداخت انتخاب‌شده در WooCommerce در دسترس نیست.' );
+	}
+
+	/**
+	 * شناسه Gateway را بدون تغییر حروف بزرگ و کوچک پاک‌سازی می‌کند.
+	 *
+	 * @param mixed $gateway_id شناسه خام درگاه.
+	 * @return string
+	 */
+	private function sanitize_gateway_id_compat( $gateway_id ) {
+		$gateway_id = sanitize_text_field( (string) $gateway_id );
+
+		return (string) preg_replace( '/[^A-Za-z0-9_-]/', '', $gateway_id );
+	}
+
 }
