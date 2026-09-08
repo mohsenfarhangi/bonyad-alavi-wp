@@ -1,34 +1,25 @@
-# Patch Manifest — v0.6.1
+# Patch Manifest — v0.6.2
 
-مبدأ این Patch: `ostadsho-child v0.6.0`
+## مبدا و مقصد
 
-مقصد: `ostadsho-child v0.6.1`
+- مبدا: `v0.6.1`
+- مقصد: `v0.6.2`
 
-## هدف
+## هدف Patch
 
-اصلاح ذخیره نشدن مقدار «درگاه پرداخت مشارکت» در تب تنظیمات مشارکت مردمی هنگام ذخیره AJAX.
-
-## علت مشکل
-
-Sanitize مقدار `payment_gateway` هنگام Persist دوباره به `get_active_gateway_choices()` وابسته بود. برخی افزونه‌های درگاه در درخواست `admin-ajax.php` Registry کامل Gatewayها را initialize نمی‌کنند و در نتیجه مقدار انتخاب‌شده می‌توانست به رشته خالی تبدیل شود.
+اصلاح ذخیره و بازیابی درگاه‌هایی که شناسه آن‌ها حروف بزرگ دارد، به‌خصوص `WC_Sep_Payment_Gateway`. در نسخه قبل استفاده از `sanitize_key()` باعث lowercase شدن ID و عدم تطبیق با Gateway واقعی WooCommerce می‌شد.
 
 ## فایل‌های Patch
 
-- `inc/woocommerce/class-ba-participation-payment-gateway-service.php`
-  - حذف وابستگی `sanitize_gateway_id()` به لیست Runtime Gatewayها.
-  - ذخیره شناسه با `sanitize_key()`.
-  - حفظ بررسی وجود، فعال بودن و availability در زمان واقعی پرداخت.
-
-- `docs/handoff.md`
-  - ثبت قرارداد جدید Sanitize و Validation درگاه.
-
-- `docs/versions/v0.6.1.md`
-  - مستندات کامل اصلاح این نسخه.
+- `inc/woocommerce/class-ba-participation-payment-gateway-service.php` — حفظ case شناسه Gateway، lookup بر اساس `$gateway->id` واقعی و Migration مقدار lowercase نسخه قبل.
+- `inc/admin/settings/tab-participation.php` — Resolve کردن مقدار ذخیره‌شده قبل از انتخاب گزینه Select تا SEP صحیح در UI نمایش داده شود.
+- `docs/handoff.md` — ثبت قرارداد دائمی عدم استفاده از `sanitize_key()` برای Persist شناسه Gateway.
+- `docs/versions/v0.6.2.md` — شرح مشکل، اصلاح، Migration و تست‌های این نسخه.
 
 ## فایل حذف‌شده
 
-ندارد.
+هیچ فایلی حذف نشده است.
 
-## اعمال Patch
+## نکته Migration
 
-محتویات این ZIP باید روی ریشه قالب `ostadsho-child` کپی و فایل‌های هم‌نام جایگزین شوند.
+اگر `v0.6.1` مقدار `wc_sep_payment_gateway` را ذخیره کرده باشد، نسخه جدید آن را هنگام خواندن به `WC_Sep_Payment_Gateway` نگاشت می‌کند. با ذخیره مجدد تنظیمات، مقدار صحیح و Case-sensitive در دیتابیس Persist می‌شود.

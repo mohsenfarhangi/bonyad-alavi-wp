@@ -25,12 +25,18 @@ final class BA_Participation_Payment_Gateway_Service {
 	public function get_active_gateway_choices() {
 		$choices = array();
 
-		foreach ( $this->get_all_gateways() as $gateway_id => $gateway ) {
+		foreach ( $this->get_all_gateways() as $gateway ) {
 			if ( ! $gateway instanceof WC_Payment_Gateway || 'yes' !== $gateway->enabled ) {
 				continue;
 			}
 
-			$choices[ (string) $gateway_id ] = wp_strip_all_tags( $gateway->get_title() ?: $gateway->get_method_title() );
+			$gateway_id = $this->sanitize_gateway_id( $gateway->id );
+
+			if ( '' === $gateway_id ) {
+				continue;
+			}
+
+			$choices[ $gateway_id ] = wp_strip_all_tags( $gateway->get_title() ?: $gateway->get_method_title() );
 		}
 
 		return $choices;
@@ -42,9 +48,10 @@ final class BA_Participation_Payment_Gateway_Service {
 	 * @return string
 	 */
 	public function get_selected_gateway_id() {
-		$options = get_option( self::OPTION_NAME, array() );
+		$options    = get_option( self::OPTION_NAME, array() );
+		$gateway_id = isset( $options[ self::OPTION_KEY ] ) ? $this->sanitize_gateway_id( $options[ self::OPTION_KEY ] ) : '';
 
-		return isset( $options[ self::OPTION_KEY ] ) ? sanitize_key( (string) $options[ self::OPTION_KEY ] ) : '';
+		return $this->resolve_registered_gateway_id( $gateway_id );
 	}
 
 	/**
@@ -54,17 +61,16 @@ final class BA_Participation_Payment_Gateway_Service {
 	 */
 	public function get_selected_gateway() {
 		$gateway_id = $this->get_selected_gateway_id();
-		$gateways   = $this->get_all_gateways();
 
 		if ( '' === $gateway_id ) {
 			return new WP_Error( 'bap_gateway_not_configured', 'درگاه پرداخت مشارکت در تنظیمات بنیاد علوی انتخاب نشده است.' );
 		}
 
-		if ( empty( $gateways[ $gateway_id ] ) || ! $gateways[ $gateway_id ] instanceof WC_Payment_Gateway ) {
+		$gateway = $this->find_gateway_by_id( $gateway_id );
+
+		if ( ! $gateway instanceof WC_Payment_Gateway ) {
 			return new WP_Error( 'bap_gateway_missing', 'درگاه پرداخت انتخاب‌شده در ووکامرس در دسترس نیست.' );
 		}
-
-		$gateway = $gateways[ $gateway_id ];
 
 		if ( 'yes' !== $gateway->enabled ) {
 			return new WP_Error( 'bap_gateway_disabled', 'درگاه پرداخت انتخاب‌شده غیرفعال است.' );
@@ -86,7 +92,42 @@ final class BA_Participation_Payment_Gateway_Service {
 	 * @return string
 	 */
 	public function sanitize_gateway_id( $gateway_id ) {
-		return sanitize_key( (string) $gateway_id );
+		$gateway_id = sanitize_text_field( (string) $gateway_id );
+
+		return (string) preg_replace( '/[^A-Za-z0-9_-]/', '', $gateway_id );
+	}
+
+	/**
+	 * شناسه ذخیره‌شده را با شناسه واقعی Gateway ثبت‌شده تطبیق می‌دهد.
+	 *
+	 * این مسیر برای سازگاری با نسخه 0.6.1 لازم است؛ در آن نسخه sanitize_key()
+	 * شناسه‌های دارای حروف بزرگ مانند WC_Sep_Payment_Gateway را lowercase می‌کرد.
+	 *
+	 * @param mixed $gateway_id شناسه ذخیره‌شده یا ارسالی.
+	 * @return string
+	 */
+	public function resolve_registered_gateway_id( $gateway_id ) {
+		$gateway_id = $this->sanitize_gateway_id( $gateway_id );
+
+		if ( '' === $gateway_id ) {
+			return '';
+		}
+
+		$legacy_key = sanitize_key( $gateway_id );
+
+		foreach ( $this->get_all_gateways() as $gateway ) {
+			if ( ! $gateway instanceof WC_Payment_Gateway ) {
+				continue;
+			}
+
+			$registered_id = $this->sanitize_gateway_id( $gateway->id );
+
+			if ( $registered_id === $gateway_id || sanitize_key( $registered_id ) === $legacy_key ) {
+				return $registered_id;
+			}
+		}
+
+		return $gateway_id;
 	}
 
 	/**
@@ -255,6 +296,29 @@ final class BA_Participation_Payment_Gateway_Service {
 		}
 
 		delete_user_meta( $snapshot['user_id'], $snapshot['key'] );
+	}
+
+
+	/**
+	 * Gateway ثبت‌شده را با مقایسه شناسه واقعی و حساس به حروف پیدا می‌کند.
+	 *
+	 * @param string $gateway_id شناسه دقیق Gateway.
+	 * @return WC_Payment_Gateway|null
+	 */
+	private function find_gateway_by_id( $gateway_id ) {
+		$gateway_id = $this->sanitize_gateway_id( $gateway_id );
+
+		foreach ( $this->get_all_gateways() as $gateway ) {
+			if ( ! $gateway instanceof WC_Payment_Gateway ) {
+				continue;
+			}
+
+			if ( $this->sanitize_gateway_id( $gateway->id ) === $gateway_id ) {
+				return $gateway;
+			}
+		}
+
+		return null;
 	}
 
 	/**

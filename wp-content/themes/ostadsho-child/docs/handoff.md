@@ -125,6 +125,7 @@ Block عمومی BEM:
 - [v0.5.9 — کنترل استایل عنوان و تاریخ اخبار و چندرسانه‌ای](versions/v0.5.9.md)
 - [v0.6.0 — پرداخت سریع Inline در صفحه مشارکت مردمی](versions/v0.6.0.md)
 - [v0.6.1 — اصلاح ذخیره درگاه پرداخت مشارکت](versions/v0.6.1.md)
+- [v0.6.2 — حفظ شناسه Case-sensitive درگاه‌های پرداخت](versions/v0.6.2.md)
 
 ## معماری ذخیره تنظیمات بنیاد علوی
 
@@ -167,7 +168,8 @@ Block عمومی BEM:
 
 - درگاه فعال از `ba_participation_settings[payment_gateway]` خوانده می‌شود و هیچ fallback خودکاری به Gateway دیگر وجود ندارد.
 - فهرست Gateway در داشبورد فقط شامل Gatewayهای `enabled` WooCommerce است؛ تنظیم Merchant/API همچنان متعلق به WooCommerce است.
-- Sanitize شناسه Gateway هنگام ذخیره نباید به Runtime Gateway Registry درخواست AJAX وابسته باشد؛ مقدار انتخابی فقط با `sanitize_key()` نرمال می‌شود و فعال/موجود بودن Gateway هنگام اجرای پرداخت با `get_selected_gateway()` و `validate_gateway_availability()` کنترل می‌شود.
+- Sanitize شناسه Gateway هنگام ذخیره نباید به Runtime Gateway Registry درخواست AJAX وابسته باشد و **نباید case شناسه را تغییر دهد**. شناسه‌هایی مانند `WC_Sep_Payment_Gateway` باید دقیقاً با همان حروف بزرگ/کوچک ذخیره شوند؛ استفاده از `sanitize_key()` برای Persist شناسه Gateway ممنوع است. فعال/موجود بودن Gateway هنگام اجرای پرداخت با `get_selected_gateway()` و `validate_gateway_availability()` کنترل می‌شود.
+- برای سازگاری با داده‌های `v0.6.1`، مقدار lowercase ذخیره‌شده باید هنگام خواندن با `BA_Participation_Payment_Gateway_Service::resolve_registered_gateway_id()` به شناسه واقعی `$gateway->id` نگاشت شود.
 - خواندن فیلدهای Checkout فقط از `WC_Checkout::get_checkout_fields()` و رندر آن‌ها از `woocommerce_form_field()` انجام می‌شود؛ Feature نباید یک Schema موازی برای فیلدهای Billing/Shipping بسازد.
 - Product/Amount در مرحله Prepare و Process هر دو باید با `Bonyad_Alavi_WooCommerce_Participation::validate_project_amount()` اعتبارسنجی شوند.
 - Order پرداخت سریع فقط یک line item از پروژه جاری دارد و Metaهای `_bap_participation_amount` و `_bap_goal_amount` را نگه می‌دارد.

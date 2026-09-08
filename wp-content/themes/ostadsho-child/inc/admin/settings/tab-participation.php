@@ -415,8 +415,9 @@ function ba_render_participation_slider_field( $args ) {
 function ba_render_participation_gateway_field( $args ) {
 	$options = ba_get_participation_settings();
 	$key     = $args['key'];
-	$value   = isset( $options[ $key ] ) ? sanitize_key( (string) $options[ $key ] ) : '';
 	$service = class_exists( 'BA_Participation_Payment_Gateway_Service' ) ? new BA_Participation_Payment_Gateway_Service() : null;
+	$value   = isset( $options[ $key ] ) ? (string) $options[ $key ] : '';
+	$value   = $service ? $service->resolve_registered_gateway_id( $value ) : $value;
 	$choices = $service ? $service->get_active_gateway_choices() : array();
 	?>
 	<select name="<?php echo esc_attr( $args['option_name'] . '[' . $key . ']' ); ?>" class="regular-text">
