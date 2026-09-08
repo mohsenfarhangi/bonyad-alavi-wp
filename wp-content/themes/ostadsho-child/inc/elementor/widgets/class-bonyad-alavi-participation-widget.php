@@ -1586,20 +1586,16 @@ class Bonyad_Alavi_Participation_Widget extends Widget_Base {
          */
         $faq_items = array_merge( $product_faq_items, $static_faq_items );
 
-        //اطلاعات اجاکس
-        $cart_ajax_endpoint = class_exists( 'Bonyad_Alavi_WooCommerce_Participation' ) ? Bonyad_Alavi_WooCommerce_Participation::get_ajax_endpoint() : '';
-
-        $cart_nonce = class_exists( 'Bonyad_Alavi_WooCommerce_Participation' ) ? Bonyad_Alavi_WooCommerce_Participation::create_nonce() : '';
-
-        $cart_url = wc_get_cart_url();
-
-        $project_in_cart = class_exists( 'Bonyad_Alavi_WooCommerce_Participation' ) ? Bonyad_Alavi_WooCommerce_Participation::is_product_in_cart( $product->get_id() ) : false;
+        // اطلاعات AJAX پرداخت سریع مستقل از سبد فعلی کاربر.
+        $quick_prepare_endpoint = class_exists( 'Bonyad_Alavi_WooCommerce_Participation' ) ? Bonyad_Alavi_WooCommerce_Participation::get_quick_prepare_endpoint() : '';
+        $quick_payment_endpoint = class_exists( 'Bonyad_Alavi_WooCommerce_Participation' ) ? Bonyad_Alavi_WooCommerce_Participation::get_quick_payment_endpoint() : '';
+        $cart_nonce             = class_exists( 'Bonyad_Alavi_WooCommerce_Participation' ) ? Bonyad_Alavi_WooCommerce_Participation::create_nonce() : '';
         ?>
 		<div class="bap"
 			dir="rtl"
-             data-cart-endpoint="<?php echo esc_url( $cart_ajax_endpoint ); ?>"
+             data-quick-prepare-endpoint="<?php echo esc_url( $quick_prepare_endpoint ); ?>"
+             data-quick-payment-endpoint="<?php echo esc_url( $quick_payment_endpoint ); ?>"
              data-cart-nonce="<?php echo esc_attr( $cart_nonce ); ?>"
-             data-cart-url="<?php echo esc_url( $cart_url ); ?>"
              data-goal-amount="<?php echo esc_attr( $public_target ); ?>"
 			data-project-id="<?php echo esc_attr( $product_id ); ?>"
 			data-project-title="<?php echo esc_attr( $product->get_title() ); ?>"
@@ -1809,6 +1805,8 @@ class Bonyad_Alavi_Participation_Widget extends Widget_Base {
 							<span class="bap__amount-error" id="<?php echo esc_attr( $uid . '-error' ); ?>" role="alert"></span>
 						</div>
 
+                        <div class="bap__quick-checkout" hidden aria-live="polite"></div>
+
 						<button class="bap__submit" type="submit">
 							<span><?php echo esc_html( $settings['submit_text'] ); ?></span>
                             <svg viewBox="0 0 24 24">
@@ -1823,9 +1821,6 @@ class Bonyad_Alavi_Participation_Widget extends Widget_Base {
                         </button>
 					</form>
 
-                    <a class="bap__cart-link" href="<?php echo esc_url( $cart_url ); ?>"<?php echo $project_in_cart ? '' : 'hidden'; ?>>
-                        مشاهده سبد مشارکت
-                    </a>
 
 					<?php if ( ! empty( $settings['trust_items'] ) ) : ?>
 						<div class="bap__trust-row" aria-label="<?php echo esc_attr__( 'مزیت‌های مشارکت', 'bonyad-alavi-child' ); ?>">

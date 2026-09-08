@@ -103,7 +103,9 @@ require_once get_stylesheet_directory() . '/inc/elementor/elementor-widgets.php'
 // المنتور: داینامیک‌تگ‌های تنظیمات بنیاد علوی
 require_once get_stylesheet_directory() . '/inc/elementor/dynamic-tags.php';
 
-//افزودن به سبد خرید مشارکت مردمی
+// پرداخت و سبد مشارکت مردمی.
+require_once get_stylesheet_directory() . '/inc/woocommerce/class-ba-participation-payment-gateway-service.php';
+require_once get_stylesheet_directory() . '/inc/woocommerce/class-ba-participation-quick-checkout-service.php';
 require_once get_stylesheet_directory() . '/inc/woocommerce/class-ba-woocommerce-participation.php';
 
 // سرویس و تب تنظیمات مرکز حرکت‌های مردمی و جهادی.

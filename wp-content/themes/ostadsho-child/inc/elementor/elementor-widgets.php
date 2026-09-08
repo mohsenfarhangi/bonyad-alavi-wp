@@ -68,7 +68,7 @@ final class BA_Elementor_Assets {
 		$this->register_script(
 			'bonyad-alavi-participation-widget',
 			'assets/js/bonyad-alavi-participation-widget.js',
-			array( 'elementor-frontend', 'ba-product-carousel-core' )
+			array( 'elementor-frontend', 'ba-product-carousel-core', 'wc-country-select', 'wc-address-i18n' )
 		);
 
 		$this->register_script(

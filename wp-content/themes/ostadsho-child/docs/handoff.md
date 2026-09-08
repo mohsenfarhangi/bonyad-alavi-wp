@@ -123,6 +123,7 @@ Block عمومی BEM:
 - [v0.5.7 — کنترل ریسپانسیو عرض و ارتفاع تصویر Hero](versions/v0.5.7.md)
 - [v0.5.8 — نسبت تصویر ریسپانسیو اخبار و چندرسانه‌ای](versions/v0.5.8.md)
 - [v0.5.9 — کنترل استایل عنوان و تاریخ اخبار و چندرسانه‌ای](versions/v0.5.9.md)
+- [v0.6.0 — پرداخت سریع Inline در صفحه مشارکت مردمی](versions/v0.6.0.md)
 
 ## معماری ذخیره تنظیمات بنیاد علوی
 
@@ -155,6 +156,25 @@ Block عمومی BEM:
 جزئیات کامل این قرارداد در [مستند نسخه v0.5.4](versions/v0.5.4.md) ثبت شده است.
 
 جزئیات ذخیره AJAX در [مستند نسخه v0.5.0](versions/v0.5.0.md) ثبت شده است.
+
+
+## معماری پرداخت سریع مشارکت مردمی
+
+از نسخه `v0.6.0` ویجت `bonyad_alavi_participation` برای پرداخت اصلی از Cart واقعی کاربر استفاده نمی‌کند. کلیک اول فقط Product/Amount را اعتبارسنجی و فاکتور + Checkout Fields را به‌صورت Inline آماده می‌کند؛ کلیک دوم Order مستقل همان پروژه را ایجاد و Gateway انتخاب‌شده را اجرا می‌کند.
+
+قرارداد ثابت:
+
+- درگاه فعال از `ba_participation_settings[payment_gateway]` خوانده می‌شود و هیچ fallback خودکاری به Gateway دیگر وجود ندارد.
+- فهرست Gateway در داشبورد فقط شامل Gatewayهای `enabled` WooCommerce است؛ تنظیم Merchant/API همچنان متعلق به WooCommerce است.
+- خواندن فیلدهای Checkout فقط از `WC_Checkout::get_checkout_fields()` و رندر آن‌ها از `woocommerce_form_field()` انجام می‌شود؛ Feature نباید یک Schema موازی برای فیلدهای Billing/Shipping بسازد.
+- Product/Amount در مرحله Prepare و Process هر دو باید با `Bonyad_Alavi_WooCommerce_Participation::validate_project_amount()` اعتبارسنجی شوند.
+- Order پرداخت سریع فقط یک line item از پروژه جاری دارد و Metaهای `_bap_participation_amount` و `_bap_goal_amount` را نگه می‌دارد.
+- سایر اقلام Cart نباید وارد Order شوند و نباید توسط Gateway حذف شوند. اجرای `is_available()` و `process_payment()` در Cart موقت از `BA_Participation_Payment_Gateway_Service::with_isolated_cart()` عبور می‌کند و Session/Persistent Cart واقعی snapshot/restore می‌شود.
+- Gatewayهای دارای Payment Fields داخلی (`has_fields()`) در Quick Checkout پشتیبانی نمی‌شوند؛ مسیر هدف Hosted/Redirect Gateway است.
+- Terms/Privacy و Hookهای Checkout Validation ووکامرس باید در مسیر Inline حفظ شوند.
+- UI مرحله دوم زیر Block `bap` و Elementهای `bap__quick-*` باقی می‌ماند و هیچ selector عمومی جدیدی برای Checkout ساخته نمی‌شود.
+
+جزئیات در [مستند نسخه v0.6.0](versions/v0.6.0.md) ثبت شده است.
 
 ## معماری صفحه مرکز حرکت‌های مردمی و جهادی
 

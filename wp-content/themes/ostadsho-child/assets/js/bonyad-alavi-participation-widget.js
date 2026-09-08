@@ -27,6 +27,9 @@
 			this.documentOverflow = '';
 			this.lightboxIndex = 0;
 			this.lightboxTouchStartX = null;
+			this.checkoutStage = 'amount';
+			this.lockedAmount = 0;
+			this.payButtonText = 'پرداخت';
 
 			this.faNumber = new Intl.NumberFormat('fa-IR');
 			this.compactFaNumber = new Intl.NumberFormat('fa-IR', {
@@ -74,7 +77,7 @@
 				noncashButtons: [...this.root.querySelectorAll('button.bap__noncash-option[data-noncash]')],
 				submitButton: this.root.querySelector('.bap__submit'),
 				submitLabel: this.root.querySelector('.bap__submit > span'),
-				cartLink: this.root.querySelector('.bap__cart-link')
+				quickCheckout: this.root.querySelector('.bap__quick-checkout')
 			};
 		}
 
@@ -95,9 +98,9 @@
 				copyMessage: data.copyMessage || 'لینک پروژه کپی شد.',
 				goalAmount: this.parseAmount(data.goalAmount),
 
-				cartEndpoint: data.cartEndpoint || '',
+				quickPrepareEndpoint: data.quickPrepareEndpoint || '',
+				quickPaymentEndpoint: data.quickPaymentEndpoint || '',
 				cartNonce: data.cartNonce || '',
-				cartUrl: data.cartUrl || '',
 			};
 		}
 
@@ -117,6 +120,7 @@
 				shareButton,
 				copyLinkButton,
 				noncashButtons,
+				quickCheckout,
 			} = this.elements;
 
 			presetButtons.forEach((button) => {
@@ -149,6 +153,18 @@
 
 			if (copyLinkButton) {
 				copyLinkButton.addEventListener('click', () => this.copyProjectLink(), this.listenerOptions);
+			}
+
+
+
+			if (quickCheckout) {
+				quickCheckout.addEventListener('click', (event) => {
+					const editButton = event.target.closest('.bap__quick-edit-amount');
+					if (editButton) {
+						event.preventDefault();
+						this.resetQuickCheckout();
+					}
+				}, this.listenerOptions);
 			}
 
 			noncashButtons.forEach((button) => {
@@ -449,7 +465,11 @@
 			if (mode === 'woocommerce') {
 				event.preventDefault();
 
-				this.addParticipationToCart(amount);
+				if (this.checkoutStage === 'checkout') {
+					this.processQuickPayment(this.lockedAmount || amount);
+				} else {
+					this.prepareQuickCheckout(amount);
+				}
 
 				return;
 			}
@@ -734,108 +754,160 @@
 			);
 		}
 
-		async addParticipationToCart(amount) {
-			const {amountError, cartLink,} = this.elements;
 
-			if (!this.config.cartEndpoint || !this.config.cartNonce) {
+		async prepareQuickCheckout(amount) {
+			const {amountError, quickCheckout} = this.elements;
+
+			if (!this.config.quickPrepareEndpoint || !this.config.cartNonce || !quickCheckout) {
 				if (amountError) {
-					amountError.textContent = 'اتصال به سبد خرید در دسترس نیست.';
+					amountError.textContent = 'پرداخت سریع در دسترس نیست.';
 				}
-
 				return;
 			}
 
-			if (amountError) {amountError.textContent = '';}
+			if (amountError) {
+				amountError.textContent = '';
+			}
 
 			this.setSubmitLoading(true);
-
 			const body = new URLSearchParams();
-
 			body.set('nonce', this.config.cartNonce);
-
 			body.set('product_id', this.config.projectId);
-
 			body.set('amount', String(amount));
 
 			try {
-				const response = await fetch(
-					this.config.cartEndpoint,
-					{
-						method: 'POST',
-						credentials: 'same-origin',
-						headers: {
-							'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
-						},
-						body: body.toString(),
-					}
-				);
-
-				let payload = null;
-
-				try {
-					payload = await response.json();
-				} catch (error) {
-					throw new Error(
-						'پاسخ نامعتبر از سرور دریافت شد.'
-					);
-				}
-
-				if (!payload || !payload.success) {
-					throw new Error(payload && payload.data && payload.data.message ? payload.data.message : 'افزودن به سبد خرید انجام نشد.');
-				}
-
+				const payload = await this.requestJson(this.config.quickPrepareEndpoint, body);
 				const data = payload.data || {};
 
-				/*
-                 * نمایش دکمه مشاهده سبد خرید.
-                 */
-				if (cartLink) {
-					cartLink.href = data.cart_url || this.config.cartUrl || '#';
-					cartLink.hidden = false;
-				}
+				quickCheckout.innerHTML = data.html || '';
+				quickCheckout.hidden = false;
+				this.checkoutStage = 'checkout';
+				this.lockedAmount = Number(data.amount) || amount;
+				this.payButtonText = data.pay_label || 'پرداخت';
+				this.setAmountControlsLocked(true);
+				this.refreshSubmitLabel();
+				this.initializeCheckoutFields();
+				this.updateStickySidebar();
 
-				/*
-                 * WooCommerce Cart Fragments.
-                 */
-				if (window.jQuery && data.fragments) {
-					window.jQuery(document.body).trigger('added_to_cart', [data.fragments, data.cart_hash || '', null,]);
-				}
-
-				this.showToast(data.message || 'سبد خرید به‌روزرسانی شد.');
-
-				/*
-                 * Event اختیاری برای سایر کدهای سایت.
-                 */
-				this.root.dispatchEvent(
-					new CustomEvent('bonyad-alavi:cart-updated', {
-							bubbles: true,
-
-							detail: {
-								projectId: this.config.projectId,
-
-								amount: data.amount || amount,
-
-								updated: Boolean(data.updated),
-
-								cartUrl: data.cart_url || '',
-
-								cartCount: data.cart_count || 0,
-							},
-						}
-					)
-				);
-
+				quickCheckout.scrollIntoView({
+					behavior: this.prefersReducedMotion() ? 'auto' : 'smooth',
+					block: 'nearest',
+				});
 			} catch (error) {
-
-				const message = error instanceof Error ? error.message : 'خطایی در ارتباط با سبد خرید رخ داد.';
-
 				if (amountError) {
-					amountError.textContent = message;
+					amountError.textContent = error instanceof Error ? error.message : 'آماده‌سازی پرداخت انجام نشد.';
 				}
-
 			} finally {
 				this.setSubmitLoading(false);
 			}
+		}
+
+		async processQuickPayment(amount) {
+			const {form, amountError} = this.elements;
+
+			if (!form || !this.config.quickPaymentEndpoint || !this.config.cartNonce) {
+				return;
+			}
+
+			if (amountError) {
+				amountError.textContent = '';
+			}
+
+			this.setSubmitLoading(true);
+			const body = new URLSearchParams();
+			const formData = new FormData(form);
+
+			formData.forEach((value, key) => {
+				if (typeof value === 'string') {
+					body.append(key, value);
+				}
+			});
+
+			body.set('nonce', this.config.cartNonce);
+			body.set('product_id', this.config.projectId);
+			body.set('amount', String(amount));
+
+			try {
+				const payload = await this.requestJson(this.config.quickPaymentEndpoint, body);
+				const data = payload.data || {};
+
+				if (!data.redirect) {
+					throw new Error('آدرس انتقال به درگاه دریافت نشد.');
+				}
+
+				window.location.assign(data.redirect);
+			} catch (error) {
+				if (amountError) {
+					amountError.textContent = error instanceof Error ? error.message : 'شروع پرداخت انجام نشد.';
+				}
+				this.setSubmitLoading(false);
+			}
+		}
+
+		async requestJson(endpoint, body) {
+			const response = await fetch(endpoint, {
+				method: 'POST',
+				credentials: 'same-origin',
+				headers: {
+					'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+				},
+				body: body.toString(),
+			});
+
+			let payload = null;
+			try {
+				payload = await response.json();
+			} catch (error) {
+				throw new Error('پاسخ نامعتبر از سرور دریافت شد.');
+			}
+
+			if (!payload || !payload.success) {
+				throw new Error(payload && payload.data && payload.data.message ? payload.data.message : 'عملیات پرداخت انجام نشد.');
+			}
+
+			return payload;
+		}
+
+		resetQuickCheckout() {
+			const {quickCheckout, amountInput} = this.elements;
+			this.checkoutStage = 'amount';
+			this.lockedAmount = 0;
+			this.setAmountControlsLocked(false);
+
+			if (quickCheckout) {
+				quickCheckout.innerHTML = '';
+				quickCheckout.hidden = true;
+			}
+
+			this.refreshSubmitLabel();
+			this.updateStickySidebar();
+
+			if (amountInput) {
+				amountInput.focus();
+			}
+		}
+
+		setAmountControlsLocked(locked) {
+			const {amountInput, presetButtons} = this.elements;
+			if (amountInput) {
+				amountInput.readOnly = Boolean(locked);
+				amountInput.setAttribute('aria-readonly', locked ? 'true' : 'false');
+			}
+			presetButtons.forEach((button) => {
+				button.disabled = Boolean(locked);
+			});
+			this.root.classList.toggle('bap--checkout-active', Boolean(locked));
+		}
+
+		initializeCheckoutFields() {
+			if (!window.jQuery) {
+				return;
+			}
+
+			window.jQuery(document.body).trigger('wc-enhanced-select-init');
+			window.jQuery(document.body).trigger('country_to_state_changing');
+			window.jQuery(document.body).trigger('country_to_state_changed');
+			window.jQuery(document.body).trigger('updated_checkout');
 		}
 
 		setSubmitLoading(loading) {
@@ -856,8 +928,20 @@
 			submitButton.setAttribute('aria-busy', loading ? 'true' : 'false');
 
 			if (submitLabel) {
-				submitLabel.textContent = loading ? 'در حال افزودن...' : this.submitOriginalText;
+				if (loading) {
+					submitLabel.textContent = this.checkoutStage === 'checkout' ? 'در حال انتقال به درگاه...' : 'در حال آماده‌سازی...';
+				} else {
+					this.refreshSubmitLabel();
+				}
 			}
+		}
+
+		refreshSubmitLabel() {
+			const {submitLabel} = this.elements;
+			if (!submitLabel) {
+				return;
+			}
+			submitLabel.textContent = this.checkoutStage === 'checkout' ? this.payButtonText : (this.submitOriginalText || submitLabel.textContent);
 		}
 		onDestroy() {
 			window.clearTimeout(this.toastTimer);

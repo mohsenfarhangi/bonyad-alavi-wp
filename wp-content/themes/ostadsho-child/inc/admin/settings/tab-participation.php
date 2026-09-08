@@ -50,7 +50,8 @@ function ba_register_participation_settings_fields( $tab ) {
 				'completed_projects'      => 0,
 				'executed_projects_value_title' => 'ارزش پروژه‌های اجرا شده با همکاری خیرین',
 				'executed_projects_value' => 0,
-				'slider_images'           => array(),
+				'slider_images'                   => array(),
+				'payment_gateway'                 => '',
 			),
 		)
 	);
@@ -154,6 +155,36 @@ function ba_register_participation_settings_fields( $tab ) {
 			'key'         => 'slider_images',
 		)
 	);
+
+	add_settings_section(
+		'ba_participation_payment_section',
+		'پرداخت سریع مشارکت',
+		'ba_render_participation_payment_intro',
+		$tab['page_slug']
+	);
+
+	add_settings_field(
+		'payment_gateway',
+		'درگاه پرداخت مشارکت',
+		'ba_render_participation_gateway_field',
+		$tab['page_slug'],
+		'ba_participation_payment_section',
+		array(
+			'option_name' => $tab['option_name'],
+			'key'         => 'payment_gateway',
+			'description' => 'فقط درگاه‌های فعال ووکامرس نمایش داده می‌شوند. اطلاعات اتصال درگاه همچنان از تنظیمات پرداخت ووکامرس مدیریت می‌شود.',
+		)
+	);
+}
+
+
+/**
+ * توضیح بخش تنظیم درگاه پرداخت سریع را نمایش می‌دهد.
+ *
+ * @return void
+ */
+function ba_render_participation_payment_intro() {
+	echo '<p class="ba-settings-description">درگاه انتخاب‌شده برای پرداخت مستقیم همین پروژه استفاده می‌شود و سایر اقلام سبد کاربر وارد سفارش پرداخت سریع نمی‌شوند.</p>';
 }
 
 /**
@@ -182,6 +213,7 @@ function ba_get_participation_settings() {
 		'executed_projects_value_title' => 'ارزش پروژه‌های اجرا شده با همکاری خیرین',
 		'executed_projects_value' => 0,
 		'slider_images'           => array(),
+		'payment_gateway'         => '',
 	);
 
 	$options = get_option( 'ba_participation_settings', array() );
@@ -260,14 +292,18 @@ function ba_sanitize_participation_settings( $input ) {
 	$slider_images = is_array( $slider_images ) ? $slider_images : array();
 	$slider_images = array_values( array_unique( array_filter( array_map( 'absint', $slider_images ) ) ) );
 
+	$gateway_service = class_exists( 'BA_Participation_Payment_Gateway_Service' ) ? new BA_Participation_Payment_Gateway_Service() : null;
+	$gateway_id      = isset( $input['payment_gateway'] ) ? $input['payment_gateway'] : '';
+
 	return array(
 		'donated_amount_title'          => sanitize_text_field( isset( $input['donated_amount_title'] ) ? $input['donated_amount_title'] : '' ),
-		'donated_amount'          => ba_sanitize_integer_value( isset( $input['donated_amount'] ) ? $input['donated_amount'] : 0 ),
+		'donated_amount'                => ba_sanitize_integer_value( isset( $input['donated_amount'] ) ? $input['donated_amount'] : 0 ),
 		'completed_projects_title'      => sanitize_text_field( isset( $input['completed_projects_title'] ) ? $input['completed_projects_title'] : '' ),
-		'completed_projects'      => ba_sanitize_integer_value( isset( $input['completed_projects'] ) ? $input['completed_projects'] : 0 ),
+		'completed_projects'            => ba_sanitize_integer_value( isset( $input['completed_projects'] ) ? $input['completed_projects'] : 0 ),
 		'executed_projects_value_title' => sanitize_text_field( isset( $input['executed_projects_value_title'] ) ? $input['executed_projects_value_title'] : '' ),
-		'executed_projects_value' => ba_sanitize_integer_value( isset( $input['executed_projects_value'] ) ? $input['executed_projects_value'] : 0 ),
-		'slider_images'           => $slider_images,
+		'executed_projects_value'       => ba_sanitize_integer_value( isset( $input['executed_projects_value'] ) ? $input['executed_projects_value'] : 0 ),
+		'slider_images'                 => $slider_images,
+		'payment_gateway'               => $gateway_service ? $gateway_service->sanitize_gateway_id( $gateway_id ) : '',
 	);
 }
 
@@ -367,5 +403,32 @@ function ba_render_participation_slider_field( $args ) {
 		<p class="ba-media-picker__empty" <?php echo ! empty( $image_ids ) ? 'hidden' : ''; ?>>هنوز تصویری برای اسلایدر انتخاب نشده است.</p>
 		<p class="description">می‌توانید چند تصویر را از کتابخانه رسانه وردپرس/ووکامرس انتخاب کنید و با کشیدن تصاویر، ترتیب اسلایدر را تغییر دهید.</p>
 	</div>
+	<?php
+}
+
+/**
+ * فهرست درگاه‌های فعال WooCommerce را برای پرداخت سریع مشارکت نمایش می‌دهد.
+ *
+ * @param array $args آرگومان‌های فیلد Settings API.
+ * @return void
+ */
+function ba_render_participation_gateway_field( $args ) {
+	$options = ba_get_participation_settings();
+	$key     = $args['key'];
+	$value   = isset( $options[ $key ] ) ? sanitize_key( (string) $options[ $key ] ) : '';
+	$service = class_exists( 'BA_Participation_Payment_Gateway_Service' ) ? new BA_Participation_Payment_Gateway_Service() : null;
+	$choices = $service ? $service->get_active_gateway_choices() : array();
+	?>
+	<select name="<?php echo esc_attr( $args['option_name'] . '[' . $key . ']' ); ?>" class="regular-text">
+		<option value="">انتخاب درگاه پرداخت</option>
+		<?php foreach ( $choices as $gateway_id => $gateway_title ) : ?>
+			<option value="<?php echo esc_attr( $gateway_id ); ?>" <?php selected( $value, $gateway_id ); ?>><?php echo esc_html( $gateway_title ); ?></option>
+		<?php endforeach; ?>
+	</select>
+	<?php if ( empty( $choices ) ) : ?>
+		<p class="description">هیچ درگاه پرداخت فعالی در WooCommerce پیدا نشد.</p>
+	<?php elseif ( ! empty( $args['description'] ) ) : ?>
+		<p class="description"><?php echo esc_html( $args['description'] ); ?></p>
+	<?php endif; ?>
 	<?php
 }
