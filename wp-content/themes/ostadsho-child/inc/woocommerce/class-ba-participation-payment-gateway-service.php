@@ -74,21 +74,19 @@ final class BA_Participation_Payment_Gateway_Service {
 	}
 
 	/**
-	 * مقدار تنظیم درگاه را فقط در صورتی نگه می‌دارد که درگاه در WooCommerce فعال باشد.
+	 * شناسه درگاه انتخاب‌شده را برای ذخیره تنظیمات نرمال و پاک‌سازی می‌کند.
+	 *
+	 * اعتبارسنجی فعال/قابل‌استفاده بودن Gateway عمداً در این مرحله انجام نمی‌شود؛
+	 * بعضی افزونه‌های درگاه در درخواست admin-ajax همه Gatewayها را initialize نمی‌کنند
+	 * و وابستگی Sanitize به Runtime Gateway Registry می‌تواند انتخاب معتبر را خالی کند.
+	 * اعتبارسنجی قطعی در زمان پرداخت توسط get_selected_gateway() و
+	 * validate_gateway_availability() انجام می‌شود.
 	 *
 	 * @param mixed $gateway_id شناسه خام درگاه.
 	 * @return string
 	 */
 	public function sanitize_gateway_id( $gateway_id ) {
-		$gateway_id = sanitize_key( (string) $gateway_id );
-
-		if ( '' === $gateway_id ) {
-			return '';
-		}
-
-		$choices = $this->get_active_gateway_choices();
-
-		return isset( $choices[ $gateway_id ] ) ? $gateway_id : '';
+		return sanitize_key( (string) $gateway_id );
 	}
 
 	/**
