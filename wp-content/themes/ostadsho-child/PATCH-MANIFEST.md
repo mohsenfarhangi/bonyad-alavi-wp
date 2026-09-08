@@ -1,26 +1,41 @@
-# Patch Manifest — v0.6.3
+# Patch Manifest — v0.6.4
 
-## مبدا و مقصد
+مبدأ: `ostadsho-child v0.6.3`  
+مقصد: `ostadsho-child v0.6.4`
 
-- مبدا: `v0.6.2`
-- مقصد: `v0.6.3`
+## هدف
 
-## هدف Patch
+محدودکردن پرداخت سریع صفحه مشارکت مردمی به فیلدهای صورتحساب WooCommerce و اجباری‌کردن عرض کامل فیلدهای فرم بدون اثرگذاری روی فرم‌های دیگر سایت.
 
-رفع Fatal صفحه تنظیمات مشارکت در نصب‌های ترکیبی که `tab-participation.php` جدید اجرا می‌شود ولی نسخه قدیمی `BA_Participation_Payment_Gateway_Service` هنوز در حافظه/سرور فعال است. همچنین مسیر ذخیره و پرداخت درگاه SEP از نسخه Service مستقل شده تا شناسه `WC_Sep_Payment_Gateway` lowercase نشود.
+## فایل‌های Patch و علت حضور
 
-## فایل‌های Patch
+### `inc/woocommerce/class-ba-participation-quick-checkout-service.php`
+- رندر Quick Checkout فقط از گروه `billing` در `WC_Checkout::get_checkout_fields()` انجام می‌شود.
+- Shipping، Account و Order Fields دیگر در فرم Inline نمایش داده نمی‌شوند.
+- Validation فقط روی Billing Fields اجرا می‌شود تا فیلد مخفی Shipping خطای Required ایجاد نکند.
+- Terms/Privacy استاندارد WooCommerce حفظ شده است.
 
-- `inc/admin/settings/tab-participation.php` — افزودن Compatibility Guard، Resolver مستقل تنظیمات و Sanitize Case-sensitive مستقل از Service.
-- `inc/woocommerce/class-ba-participation-payment-gateway-service.php` — ثبت نسخه Service `0.6.3` برای تشخیص هماهنگی فایل‌ها و حفظ پیاده‌سازی Case-sensitive.
-- `inc/woocommerce/class-ba-participation-quick-checkout-service.php` — Resolve مستقیم Gateway بر اساس `$gateway->id` واقعی برای جلوگیری از اثر Service قدیمی روی پرداخت SEP.
-- `docs/handoff.md` — ثبت قرارداد سازگاری Gateway و ممنوعیت وابستگی مستقیم UI به متد نسخه‌پذیر Service.
-- `docs/versions/v0.6.3.md` — شرح علت Fatal، راهکار و تست‌های نسخه.
+### `assets/css/bonyad-alavi-participation-widget.css`
+- Grid فیلدهای Quick Checkout تک‌ستونه شده است.
+- `.form-row`های داخل `bap__donation-form` با `width: 100% !important` و `max-width: 100% !important` اجباری شده‌اند.
+- Float پیش‌فرض WooCommerce با `float: none !important` خنثی شده است.
+- Override فقط در Scope فرم مشارکت اعمال می‌شود و به سایر فرم‌های WooCommerce نشت نمی‌کند.
+
+### `docs/handoff.md`
+- قرارداد Billing-only و Force Width برای Quick Checkout به مستندات اصلی پروژه اضافه شده است.
+- نسخه‌های `v0.6.3` و `v0.6.4` در تاریخچه ثبت شده‌اند.
+
+### `docs/versions/v0.6.4.md`
+- جزئیات فنی، تست‌ها، مهاجرت و Commit پیشنهادی این نسخه.
 
 ## فایل حذف‌شده
 
-هیچ فایلی حذف نشده است.
+ندارد.
 
-## نکته استقرار
+## تست‌ها
 
-Patch باید با حفظ مسیرها روی قالب جایگزین شود. اگر PHP بعد از جایگزینی کامل فایل‌ها همچنان نسخه قدیمی کلاس را اجرا می‌کند، OPcache/PHP-FPM سرور باید پاک یا reload شود. Guard این نسخه از Fatal صفحه تنظیمات جلوگیری می‌کند، اما برای اطمینان از اجرای تمام کد جدید بهتر است Cache PHP نیز refresh شود.
+- Syntax تمام ۲۷ فایل PHP با `php -l` بررسی شد.
+- Syntax تمام ۹ فایل JavaScript با `node --check` بررسی شد.
+- قرارداد Billing-only برای Render و Validation به‌صورت استاتیک بررسی شد.
+- وجود `width: 100% !important` و Scope فرم مشارکت بررسی شد.
+- سلامت ZIP کامل و Patch با `unzip -t` بررسی شده است.

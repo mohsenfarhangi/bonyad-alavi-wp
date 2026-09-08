@@ -142,8 +142,8 @@ final class BA_Participation_Quick_Checkout_Service {
 			</section>
 
 			<section class="bap__quick-fields" aria-labelledby="bap-quick-fields-title">
-				<div class="bap__quick-section-head"><strong id="bap-quick-fields-title">اطلاعات پرداخت</strong></div>
-				<?php $this->render_checkout_fields( $checkout, $fields, $product ); ?>
+				<div class="bap__quick-section-head"><strong id="bap-quick-fields-title">اطلاعات صورتحساب</strong></div>
+				<?php $this->render_checkout_fields( $checkout, $fields ); ?>
 				<div class="bap__quick-terms"><?php wc_get_template( 'checkout/terms.php' ); ?></div>
 			</section>
 		</div>
@@ -153,39 +153,28 @@ final class BA_Participation_Quick_Checkout_Service {
 	}
 
 	/**
-	 * گروه‌های فعال فیلد Checkout را با API استاندارد woocommerce_form_field رندر می‌کند.
+	 * فقط فیلدهای فعال صورتحساب Checkout را با API استاندارد woocommerce_form_field رندر می‌کند.
 	 *
 	 * @param WC_Checkout $checkout نمونه Checkout.
 	 * @param array       $fields فیلدهای فیلترشده Checkout.
-	 * @param WC_Product  $product محصول پروژه.
 	 * @return void
 	 */
-	private function render_checkout_fields( WC_Checkout $checkout, array $fields, WC_Product $product ) {
-		$section_titles = array(
-			'billing'  => 'اطلاعات صورتحساب',
-			'shipping' => 'اطلاعات دریافت‌کننده',
-			'order'    => 'توضیحات سفارش',
-		);
-
-		foreach ( $fields as $section_key => $section_fields ) {
-			if ( 'account' === $section_key || ( 'shipping' === $section_key && ! $product->needs_shipping() ) || ! is_array( $section_fields ) || empty( $section_fields ) ) {
-				continue;
-			}
-
-			$section_title = isset( $section_titles[ $section_key ] ) ? $section_titles[ $section_key ] : 'اطلاعات تکمیلی';
-			?>
-			<div class="bap__quick-fieldset bap__quick-fieldset--<?php echo esc_attr( sanitize_html_class( $section_key ) ); ?>">
-				<span class="bap__quick-fieldset-title"><?php echo esc_html( $section_title ); ?></span>
-				<div class="bap__quick-field-grid">
-					<?php
-					foreach ( $section_fields as $key => $field ) {
-						echo woocommerce_form_field( $key, $field, $checkout->get_value( $key ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-					}
-					?>
-				</div>
-			</div>
-			<?php
+	private function render_checkout_fields( WC_Checkout $checkout, array $fields ) {
+		$billing_fields = isset( $fields['billing'] ) && is_array( $fields['billing'] ) ? $fields['billing'] : array();
+		if ( empty( $billing_fields ) ) {
+			return;
 		}
+		?>
+		<div class="bap__quick-fieldset bap__quick-fieldset--billing">
+			<div class="bap__quick-field-grid">
+				<?php
+				foreach ( $billing_fields as $key => $field ) {
+					echo woocommerce_form_field( $key, $field, $checkout->get_value( $key ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+				}
+				?>
+			</div>
+		</div>
+		<?php
 	}
 
 	/**
@@ -209,7 +198,7 @@ final class BA_Participation_Quick_Checkout_Service {
 		do_action( 'woocommerce_checkout_process' );
 
 		$data   = $checkout->get_posted_data();
-		$errors = $this->validate_checkout_data( $checkout, $data, $product );
+		$errors = $this->validate_checkout_data( $checkout, $data );
 
 		if ( ! $gateway->validate_fields() && ! wc_notice_count( 'error' ) ) {
 			$errors->add( 'payment_validation', 'اطلاعات مورد نیاز درگاه پرداخت معتبر نیست.' );
@@ -262,60 +251,53 @@ final class BA_Participation_Quick_Checkout_Service {
 	}
 
 	/**
-	 * Required و Validatorهای استاندارد فیلدهای Checkout را بررسی می‌کند.
+	 * Required و Validatorهای استاندارد فیلدهای صورتحساب Checkout را بررسی می‌کند.
 	 *
 	 * @param WC_Checkout $checkout نمونه Checkout.
 	 * @param array       $data داده Sanitized ووکامرس.
-	 * @param WC_Product  $product محصول پروژه.
 	 * @return WP_Error
 	 */
-	private function validate_checkout_data( WC_Checkout $checkout, array $data, WC_Product $product ) {
-		$errors = new WP_Error();
-		$fields = $checkout->get_checkout_fields();
+	private function validate_checkout_data( WC_Checkout $checkout, array $data ) {
+		$errors         = new WP_Error();
+		$fields         = $checkout->get_checkout_fields();
+		$billing_fields = isset( $fields['billing'] ) && is_array( $fields['billing'] ) ? $fields['billing'] : array();
 
-		foreach ( $fields as $section_key => $section_fields ) {
-			if ( 'account' === $section_key || ( 'shipping' === $section_key && ! $product->needs_shipping() ) || ! is_array( $section_fields ) ) {
+		foreach ( $billing_fields as $key => $field ) {
+			$value = isset( $data[ $key ] ) ? $data[ $key ] : '';
+			$label = ! empty( $field['label'] ) ? wp_strip_all_tags( $field['label'] ) : $key;
+
+			if ( ! empty( $field['required'] ) && '' === trim( (string) $value ) ) {
+				$errors->add( $key . '_required', sprintf( 'فیلد «%s» الزامی است.', $label ) );
 				continue;
 			}
 
-			foreach ( $section_fields as $key => $field ) {
-				$value = isset( $data[ $key ] ) ? $data[ $key ] : '';
-				$label = ! empty( $field['label'] ) ? wp_strip_all_tags( $field['label'] ) : $key;
+			if ( '' === trim( (string) $value ) ) {
+				continue;
+			}
 
-				if ( ! empty( $field['required'] ) && '' === trim( (string) $value ) ) {
-					$errors->add( $key . '_required', sprintf( 'فیلد «%s» الزامی است.', $label ) );
-					continue;
+			$field_country = ! empty( $data['billing_country'] )
+				? $data['billing_country']
+				: ( WC()->customer && is_callable( array( WC()->customer, 'get_billing_country' ) ) ? WC()->customer->get_billing_country() : '' );
+
+			if ( isset( $field['type'] ) && 'country' === $field['type'] && ! WC()->countries->country_exists( $value ) ) {
+				$errors->add( $key . '_country', sprintf( 'مقدار «%s» معتبر نیست.', $label ) );
+			}
+
+			$validators = ! empty( $field['validate'] ) && is_array( $field['validate'] ) ? $field['validate'] : array();
+			foreach ( $validators as $validator ) {
+				if ( 'email' === $validator && ! is_email( $value ) ) {
+					$errors->add( $key . '_email', sprintf( 'مقدار «%s» یک ایمیل معتبر نیست.', $label ) );
 				}
-
-				if ( '' === trim( (string) $value ) ) {
-					continue;
+				if ( 'phone' === $validator && class_exists( 'WC_Validation' ) && ! WC_Validation::is_phone( $value, $field_country ) ) {
+					$errors->add( $key . '_phone', sprintf( 'مقدار «%s» یک شماره تماس معتبر نیست.', $label ) );
 				}
-
-				$customer_country_getter = 'shipping' === $section_key ? 'get_shipping_country' : 'get_billing_country';
-				$field_country           = ! empty( $data[ $section_key . '_country' ] )
-					? $data[ $section_key . '_country' ]
-					: ( WC()->customer && is_callable( array( WC()->customer, $customer_country_getter ) ) ? WC()->customer->{$customer_country_getter}() : '' );
-
-				if ( isset( $field['type'] ) && 'country' === $field['type'] && ! WC()->countries->country_exists( $value ) ) {
-					$errors->add( $key . '_country', sprintf( 'مقدار «%s» معتبر نیست.', $label ) );
+				if ( 'postcode' === $validator && class_exists( 'WC_Validation' ) && ! WC_Validation::is_postcode( $value, $field_country ) ) {
+					$errors->add( $key . '_postcode', sprintf( 'مقدار «%s» معتبر نیست.', $label ) );
 				}
-
-				$validators = ! empty( $field['validate'] ) && is_array( $field['validate'] ) ? $field['validate'] : array();
-				foreach ( $validators as $validator ) {
-					if ( 'email' === $validator && ! is_email( $value ) ) {
-						$errors->add( $key . '_email', sprintf( 'مقدار «%s» یک ایمیل معتبر نیست.', $label ) );
-					}
-					if ( 'phone' === $validator && class_exists( 'WC_Validation' ) && ! WC_Validation::is_phone( $value, $field_country ) ) {
-						$errors->add( $key . '_phone', sprintf( 'مقدار «%s» یک شماره تماس معتبر نیست.', $label ) );
-					}
-					if ( 'postcode' === $validator && class_exists( 'WC_Validation' ) && ! WC_Validation::is_postcode( $value, $field_country ) ) {
-						$errors->add( $key . '_postcode', sprintf( 'مقدار «%s» معتبر نیست.', $label ) );
-					}
-					if ( 'state' === $validator && $field_country ) {
-						$states = WC()->countries->get_states( $field_country );
-						if ( is_array( $states ) && ! empty( $states ) && ! isset( $states[ $value ] ) ) {
-							$errors->add( $key . '_state', sprintf( 'مقدار «%s» معتبر نیست.', $label ) );
-						}
+				if ( 'state' === $validator && $field_country ) {
+					$states = WC()->countries->get_states( $field_country );
+					if ( is_array( $states ) && ! empty( $states ) && ! isset( $states[ $value ] ) ) {
+						$errors->add( $key . '_state', sprintf( 'مقدار «%s» معتبر نیست.', $label ) );
 					}
 				}
 			}

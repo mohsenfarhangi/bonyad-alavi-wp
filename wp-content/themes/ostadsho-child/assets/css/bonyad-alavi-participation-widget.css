@@ -662,23 +662,22 @@
     border-bottom: 0;
 }
 
-.bap__quick-fieldset-title {
-    display: block;
-    margin-bottom: 10px;
-    color: var(--bap-text);
-    font-size: 0.75rem;
-    font-weight: 800;
-}
-
 .bap__quick-field-grid {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: 1fr;
     gap: 10px;
 }
 
+/* فرم پرداخت سریع همیشه تک‌عرض است؛ !important برای غلبه بر Grid/Float پیش‌فرض WooCommerce لازم است. */
+.bap__donation-form .form-row,
+.woocommerce .bap__donation-form .form-row,
 .bap__quick-field-grid .form-row {
-    width: 100%;
-    float: none;
+    width: 100% !important;
+    max-width: 100% !important;
+    float: none !important;
+}
+
+.bap__quick-field-grid .form-row {
     margin: 0;
     padding: 0;
 }

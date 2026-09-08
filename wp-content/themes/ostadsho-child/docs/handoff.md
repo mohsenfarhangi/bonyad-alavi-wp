@@ -126,6 +126,8 @@ Block عمومی BEM:
 - [v0.6.0 — پرداخت سریع Inline در صفحه مشارکت مردمی](versions/v0.6.0.md)
 - [v0.6.1 — اصلاح ذخیره درگاه پرداخت مشارکت](versions/v0.6.1.md)
 - [v0.6.2 — حفظ شناسه Case-sensitive درگاه‌های پرداخت](versions/v0.6.2.md)
+- [v0.6.3 — مقاوم‌سازی درگاه در نصب‌های ترکیبی Patch](versions/v0.6.3.md)
+- [v0.6.4 — محدودسازی Quick Checkout به صورتحساب و یکسان‌سازی عرض فیلدها](versions/v0.6.4.md)
 
 ## معماری ذخیره تنظیمات بنیاد علوی
 
@@ -172,7 +174,8 @@ Block عمومی BEM:
 - برای سازگاری با داده‌های `v0.6.1`، مقدار lowercase ذخیره‌شده باید به شناسه واقعی `$gateway->id` نگاشت شود. UI تنظیمات نباید بدون `method_exists()` به Resolver یک Service نسخه‌پذیر وابسته باشد؛ `ba_resolve_participation_gateway_id_for_settings()` مسیر Compatibility مدیریت است.
 - Sanitize شناسه Gateway در تب مشارکت از `ba_sanitize_participation_gateway_id()` عبور می‌کند و عمداً مستقل از Service است تا نصب ترکیبی Patch یا OPcache قدیمی باعث lowercase شدن دوباره شناسه نشود.
 - Quick Checkout برای یافتن درگاه انتخاب‌شده از Resolver سازگار داخلی خود استفاده می‌کند تا حتی در صورت اجرای نسخه قدیمی Service، شناسه Case-sensitive به درگاه واقعی تطبیق داده شود.
-- خواندن فیلدهای Checkout فقط از `WC_Checkout::get_checkout_fields()` و رندر آن‌ها از `woocommerce_form_field()` انجام می‌شود؛ Feature نباید یک Schema موازی برای فیلدهای Billing/Shipping بسازد.
+- خواندن فیلدهای Checkout فقط از `WC_Checkout::get_checkout_fields()` و رندر آن‌ها از `woocommerce_form_field()` انجام می‌شود؛ Feature نباید Schema موازی بسازد. از نسخه `v0.6.4` Quick Checkout فقط گروه `billing` را نمایش و اعتبارسنجی می‌کند و گروه‌های `shipping`، `account` و `order` در فرم Inline رندر نمی‌شوند.
+- تمام `.form-row`های Quick Checkout باید داخل Scope فرم `bap__donation-form` با `width: 100% !important` و `max-width: 100% !important` رندر شوند تا Float/Grid پیش‌فرض WooCommerce عرض فیلدها را محدود نکند؛ این Force Override نباید به فرم‌های دیگر سایت نشت کند.
 - Product/Amount در مرحله Prepare و Process هر دو باید با `Bonyad_Alavi_WooCommerce_Participation::validate_project_amount()` اعتبارسنجی شوند.
 - Order پرداخت سریع فقط یک line item از پروژه جاری دارد و Metaهای `_bap_participation_amount` و `_bap_goal_amount` را نگه می‌دارد.
 - سایر اقلام Cart نباید وارد Order شوند و نباید توسط Gateway حذف شوند. اجرای `is_available()` و `process_payment()` در Cart موقت از `BA_Participation_Payment_Gateway_Service::with_isolated_cart()` عبور می‌کند و Session/Persistent Cart واقعی snapshot/restore می‌شود.
