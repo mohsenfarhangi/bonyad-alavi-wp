@@ -13,10 +13,17 @@ use BonyadAlavi\FormEngine\Submission\SubmissionService;
 use BonyadAlavi\FormEngine\Actions\ActionExecutionRepository;
 use BonyadAlavi\FormEngine\Actions\ActionRegistry;
 use BonyadAlavi\FormEngine\Events\EventRegistry;
+use BonyadAlavi\FormEngine\Export\PdfTemplateRenderer;
+use BonyadAlavi\FormEngine\Export\PdfExporter;
+use BonyadAlavi\FormEngine\Export\ExcelExporter;
+use RuntimeException;
 
 final class SubmissionsPage
 {
     private FormDataPresenter $presenter;
+    private PdfTemplateRenderer $pdfTemplates;
+    private PdfExporter $pdfExporter;
+    private ExcelExporter $excelExporter;
     /** @var array<string,array> */
     private array $formCache=[];
 
@@ -32,6 +39,9 @@ final class SubmissionsPage
         private readonly EventRegistry $events
     ) {
         $this->presenter=new FormDataPresenter($sources,$dates);
+        $this->pdfTemplates=new PdfTemplateRenderer($this->presenter,$repo,$dates);
+        $this->pdfExporter=new PdfExporter();
+        $this->excelExporter=new ExcelExporter($this->presenter,$repo,$dates);
     }
 
     public function render(): void
@@ -144,7 +154,7 @@ final class SubmissionsPage
         }
         if(!$trashed && $this->access->can($formSlug,FormAccess::EXPORT)) {
             $base=admin_url('admin.php?page=alavi-form-engine-submissions&submission='.$id.'&');
-            echo '<a class="button" target="_blank" href="'.esc_url($base.'action=pdf').'">PDF / چاپ</a> <a class="button" href="'.esc_url($base.'action=excel').'">Excel</a>';
+            echo '<a class="button" href="'.esc_url($base.'action=pdf').'">PDF</a> <a class="button" href="'.esc_url($base.'action=excel').'">Excel</a> <a class="button" target="_blank" href="'.esc_url($base.'action=print').'">چاپ</a>';
         }
         echo '</div></div></div>';
 
@@ -393,44 +403,26 @@ final class SubmissionsPage
         $formSlug=(string)$row['form_slug'];
         if(!$this->access->can($formSlug,FormAccess::EXPORT)) wp_die('برای خروجی این فرم دسترسی ندارید.');
         $form=$this->resolvedForm($formSlug);
-        if($action==='excel') { $this->exportSubmissionExcel($id,$row,$form); return; }
+        try {
+            if($action==='excel') {
+                $this->excelExporter->streamSingle($form,$row,'submission-'.$id.'.xlsx');
+            }
+            if($action==='pdf') {
+                $profile=$this->pdfTemplates->profile($form);
+                $html=$this->pdfTemplates->render($form,$row);
+                $bytes=$this->pdfExporter->bytes($html,(array)$profile['pdf']);
+                nocache_headers();
+                header('Content-Type: application/pdf');
+                header('Content-Disposition: attachment; filename="submission-'.$id.'.pdf"');
+                header('Content-Length: '.strlen($bytes));
+                echo $bytes; exit;
+            }
+        } catch (RuntimeException $e) {
+            wp_die(esc_html($e->getMessage()),'خطای خروجی',['back_link'=>true]);
+        }
 
         $title=$form['title'].' — ثبت #'.$id.' — '.$row['tracking_code'];
-        $html=$this->printDocument($title,$row,$form,$action==='pdf');
-        if($action==='pdf' && class_exists('\\Dompdf\\Dompdf')) {
-            $dompdf=new \Dompdf\Dompdf(['isRemoteEnabled'=>false]);
-            $dompdf->loadHtml($html,'UTF-8'); $dompdf->setPaper('A4','portrait'); $dompdf->render();
-            $dompdf->stream('submission-'.$id.'.pdf',['Attachment'=>true]); exit;
-        }
-        echo $html; exit;
-    }
-
-    private function exportSubmissionExcel(int $id,array $row,array $form): void
-    {
-        nocache_headers();
-        header('Content-Type: application/vnd.ms-excel; charset=UTF-8');
-        header('Content-Disposition: attachment; filename="submission-'.$id.'.xls"');
-        echo "\xEF\xBB\xBF";
-        echo '<?xml version="1.0" encoding="UTF-8"?><?mso-application progid="Excel.Sheet"?>';
-        echo '<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet" xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet"><Worksheet ss:Name="Submission"><Table>';
-        $this->excelRow(['فرم',(string)$form['title']]);
-        $this->excelRow(['کد رهگیری',(string)$row['tracking_code']]);
-        $this->excelRow(['وضعیت',(string)($form['workflow'][$row['status']]??$row['status'])]);
-        $this->excelRow(['تاریخ ثبت',$this->dates->formatUtc((string)$row['created_at'],true)]);
-        foreach($this->presenter->sections($form) as $section) {
-            $this->excelRow([(string)($section['step']['title']??''),'']);
-            foreach($section['fields'] as $field) {
-                $name=(string)$field['name'];
-                if(($field['type']??'')==='file') {
-                    $fileNames=[];
-                    foreach($this->repo->filesForField($id,$name) as $file) $fileNames[]=(string)$file['original_name'];
-                    $this->excelRow([$this->presenter->fieldLabel($field),$fileNames?implode("\n",$fileNames):'—']);
-                    continue;
-                }
-                $this->excelRow([$this->presenter->fieldLabel($field),$this->presenter->plainField($field,$row['data'][$name]??'',$row['data'])]);
-            }
-        }
-        echo '</Table></Worksheet></Workbook>'; exit;
+        echo $this->printDocument($title,$row,$form,false); exit;
     }
 
     private function printDocument(string $title,array $row,array $form,bool $autoPrint): string
@@ -469,32 +461,13 @@ final class SubmissionsPage
         $filters['from_utc']=$this->dates->filterBoundary($filters['from'],false)??'';
         $filters['to_utc']=$this->dates->filterBoundary($filters['to'],true)??'';
         $rows=$this->repo->list($filters,1,5000)['rows'];
-        nocache_headers(); header('Content-Type: application/vnd.ms-excel; charset=UTF-8'); header('Content-Disposition: attachment; filename="submissions-'.gmdate('Ymd-His').'.xls"');
-        echo "\xEF\xBB\xBF"; echo '<?xml version="1.0" encoding="UTF-8"?><?mso-application progid="Excel.Sheet"?>';
-        echo '<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet" xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet"><Worksheet ss:Name="Submissions"><Table>';
-        $this->excelRow(['ID','فرم','وضعیت','کد رهگیری','تاریخ','عنوان/گروه','اطلاعات']);
-        foreach($rows as $row) {
-            $form=$this->resolvedForm((string)$row['form_slug']);
-            $info=[];
-            foreach($this->presenter->sections($form) as $section) foreach($section['fields'] as $field) {
-                if(($field['type']??'')==='file') continue;
-                $name=(string)$field['name'];
-                $value=$this->presenter->plainField($field,$row['data'][$name]??'',$row['data']);
-                if($value!=='—') $info[]=$this->presenter->fieldLabel($field).': '.$value;
-            }
-            $this->excelRow([
-                (string)$row['id'],(string)$form['title'],(string)($form['workflow'][$row['status']]??$row['status']),$row['tracking_code'],$this->dates->formatUtc((string)$row['created_at'],true),
-                (string)($row['data']['group_name']??$row['data']['full_name']??''),implode("\n",$info),
-            ]);
+        $grouped=[];
+        foreach($rows as $row){$slug=(string)$row['form_slug'];if(!isset($grouped[$slug]))$grouped[$slug]=['form'=>$this->resolvedForm($slug),'rows'=>[]];$grouped[$slug]['rows'][]=$row;}
+        try {
+            $this->excelExporter->streamList(array_values($grouped),'submissions-'.gmdate('Ymd-His').'.xlsx');
+        } catch (RuntimeException $e) {
+            wp_die(esc_html($e->getMessage()),'خطای خروجی Excel',['back_link'=>true]);
         }
-        echo '</Table></Worksheet></Workbook>'; exit;
-    }
-
-    private function excelRow(array $cells): void
-    {
-        echo '<Row>';
-        foreach($cells as $cell) echo '<Cell><Data ss:Type="String">'.esc_html((string)$cell).'</Data></Cell>';
-        echo '</Row>';
     }
 
     private function resolvedForm(string $slug): array

@@ -51,6 +51,15 @@ fi
 
 if php -r '$j=json_decode(file_get_contents("composer.json"),true); exit(is_array($j)?0:1);'; then pass "composer.json"; else fail "composer.json"; fi
 
+if [ "${AFE_REQUIRE_EXPORT_VENDOR:-0}" = "1" ]; then
+  if php -r '''require "vendor/autoload.php"; exit(class_exists("PhpOffice\\PhpSpreadsheet\\Spreadsheet") && class_exists("PhpOffice\\PhpSpreadsheet\\Writer\\Xlsx") && class_exists("Com\\Tecnick\\Pdf\\Tcpdf") ? 0 : 1);'''; then
+    pass "export vendor package classes"
+  else
+    fail "export vendor package classes"
+  fi
+  if [ -f vendor/tecnickcom/tc-lib-pdf-font/target/fonts/dejavusans.json ]; then pass "tc-lib-pdf DejaVu font assets"; else fail "tc-lib-pdf DejaVu font assets"; fi
+fi
+
 if [ -s assets/vendor/jalalidatepicker/jalalidatepicker.min.js ] && [ -s assets/vendor/jalalidatepicker/jalalidatepicker.min.css ]; then
   pass "local JalaliDatePicker assets"
 else

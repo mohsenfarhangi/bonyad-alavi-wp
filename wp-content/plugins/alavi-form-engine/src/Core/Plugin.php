@@ -48,6 +48,7 @@ use BonyadAlavi\FormEngine\Template\TemplateRegistry;
 use BonyadAlavi\FormEngine\Template\TemplateResolver;
 use BonyadAlavi\FormEngine\Template\TemplateOverrideNormalizer;
 use BonyadAlavi\FormEngine\Validation\ValidatorRegistry;
+use BonyadAlavi\FormEngine\Export\PdfExporter;
 use Throwable;
 
 final class Plugin
@@ -143,7 +144,7 @@ final class Plugin
         do_action('afe_register_sms_providers', $smsProviders);
         $actionRegistry = new ActionRegistry();
         $actionRegistry->registerCore($tokenResolver);
-        $pdfGenerator = new PdfGenerator();
+        $pdfGenerator = new PdfGenerator($submissionRepo, new PdfExporter());
         $actionRegistry->registerExtended($tokenResolver, $submissionRepo, $pdfGenerator);
         $actionRegistry->registerSms($tokenResolver, $smsProviders);
         $actionExecutions = new ActionExecutionRepository();

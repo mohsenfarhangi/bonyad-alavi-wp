@@ -19,6 +19,9 @@ use BonyadAlavi\FormEngine\Duplicate\DuplicatePolicy;
 use BonyadAlavi\FormEngine\Validation\ValidatorRegistry;
 use BonyadAlavi\FormEngine\InputMask\InputMaskPattern;
 use BonyadAlavi\FormEngine\InputMask\InputMaskRegistry;
+use BonyadAlavi\FormEngine\Export\ExportProfile;
+use BonyadAlavi\FormEngine\Export\ExportConfigSanitizer;
+use BonyadAlavi\FormEngine\Export\ExportPackageStatus;
 
 final class FormsPage
 {
@@ -190,6 +193,39 @@ final class FormsPage
             14
         );
         echo '</div>';
+
+        // Output templates: PDF is HTML/CSS + tokens; Excel stays structural.
+        $codeExport=ExportProfile::resolve($codeForm);
+        $storedExport=(array)($storedSettings['exports']??[]);
+        $resolvedExport=ExportProfile::resolve($codeForm,$storedExport);
+        $pdfStatus=ExportPackageStatus::pdfReady()?'آماده':'پکیج در vendor این نصب در دسترس نیست';
+        $excelStatus=ExportPackageStatus::excelReady()?'آماده':'پکیج در vendor این نصب در دسترس نیست';
+        $pdfMissing=ExportPackageStatus::pdfMissingExtensions();
+        $excelMissing=ExportPackageStatus::excelMissingExtensions();
+        echo '<div class="afe-admin-card afe-export-reset-card"><div class="afe-admin-card-title"><div><h2>قالب‌های خروجی فرم</h2><p>Source Definition فرم مبنا است و تغییرات این بخش فقط Override مدیریتی ایجاد می‌کند.</p></div></div><label><input type="checkbox" name="reset_export_profile" value="1"> بازگشت PDF و Excel به قالب پیش‌فرض تعریف‌شده در کد فرم</label></div>';
+        echo '<div class="afe-admin-card afe-export-template-card"><div class="afe-admin-card-title"><div><h2>قالب خروجی PDF</h2><p>قالب امن HTML/CSS مخصوص همین فرم. PHP، Shortcode و منابع خارجی اجرا نمی‌شوند.</p></div><span class="afe-template-status '.(ExportPackageStatus::pdfReady()?'is-default':'is-custom').'">'.esc_html($pdfStatus).'</span></div>';
+        if($pdfMissing!==[]) echo '<div class="afe-warning">Extensionهای PHP لازم برای PDF: <code>'.esc_html(implode(', ',$pdfMissing)).'</code></div>';
+        echo '<div class="afe-admin-grid"><label>اندازه صفحه<select name="export_profile[pdf][page_size]"><option value="A4" '.selected((string)$resolvedExport['pdf']['page_size'],'A4',false).'>A4</option><option value="A5" '.selected((string)$resolvedExport['pdf']['page_size'],'A5',false).'>A5</option><option value="LETTER" '.selected((string)$resolvedExport['pdf']['page_size'],'LETTER',false).'>Letter</option></select></label><label>جهت صفحه<select name="export_profile[pdf][orientation]"><option value="portrait" '.selected((string)$resolvedExport['pdf']['orientation'],'portrait',false).'>عمودی</option><option value="landscape" '.selected((string)$resolvedExport['pdf']['orientation'],'landscape',false).'>افقی</option></select></label></div>';
+        $exportTokens=ExportProfile::PDF_TOKENS;
+        foreach($this->exportFieldTokens($codeForm) as $one)$exportTokens[]=$one;
+        $this->renderTemplateEditor('export_profile[pdf][header_html]','Header PDF','بالای سند PDF. می‌توانید از Tokenهای فرم استفاده کنید.',(string)$codeExport['pdf']['header_html'],(string)($storedExport['pdf']['header_html']??''),$exportTokens,5,true);
+        $this->renderTemplateEditor('export_profile[pdf][body_html]','Body PDF','بدنه سند. Token {{fields_table}} جدول استاندارد و فارسی همه فیلدهای فرم را تولید می‌کند.',(string)$codeExport['pdf']['body_html'],(string)($storedExport['pdf']['body_html']??''),$exportTokens,9);
+        $this->renderTemplateEditor('export_profile[pdf][footer_html]','Footer PDF','پایین سند PDF.',(string)$codeExport['pdf']['footer_html'],(string)($storedExport['pdf']['footer_html']??''),$exportTokens,4,true);
+        echo '<div class="afe-template-editor"><div class="afe-template-editor__head"><div><h3>CSS خروجی PDF</h3><p>CSS محدود و بدون url()/@import. فونت پیش‌فرض PDF، DejaVu Sans یونیکد است.</p></div></div><textarea class="afe-code" name="export_profile[pdf][css]" rows="12" spellcheck="false">'.esc_textarea((string)$resolvedExport['pdf']['css']).'</textarea></div>';
+        echo '</div>';
+
+        echo '<div class="afe-admin-card afe-export-template-card"><div class="afe-admin-card-title"><div><h2>قالب خروجی Excel</h2><p>خروجی XLSX واقعی با PhpSpreadsheet. ساختار ستون‌ها، ترتیب، عنوان و عرض برای همین فرم قابل تنظیم است.</p></div><span class="afe-template-status '.(ExportPackageStatus::excelReady()?'is-default':'is-custom').'">'.esc_html($excelStatus).'</span></div>';
+        if($excelMissing!==[]) echo '<div class="afe-warning">Extensionهای PHP لازم برای Excel: <code>'.esc_html(implode(', ',$excelMissing)).'</code></div>';
+        $excel=(array)$resolvedExport['excel'];
+        echo '<div class="afe-admin-grid"><label>نام Sheet<input name="export_profile[excel][sheet_name]" maxlength="31" value="'.esc_attr((string)$excel['sheet_name']).'"></label><label>رنگ پس‌زمینه Header<input dir="ltr" maxlength="6" name="export_profile[excel][header_fill]" value="'.esc_attr((string)$excel['header_fill']).'" placeholder="E7F1ED"></label><label>رنگ متن Header<input dir="ltr" maxlength="6" name="export_profile[excel][header_text]" value="'.esc_attr((string)$excel['header_text']).'" placeholder="0F6B4F"></label><label><input type="checkbox" name="export_profile[excel][rtl]" value="1" '.checked(!empty($excel['rtl']),true,false).'> Sheet راست‌به‌چپ</label><label><input type="checkbox" name="export_profile[excel][freeze_header]" value="1" '.checked(!empty($excel['freeze_header']),true,false).'> Freeze Header</label><label><input type="checkbox" name="export_profile[excel][auto_filter]" value="1" '.checked(!empty($excel['auto_filter']),true,false).'> AutoFilter</label><label><input type="checkbox" name="export_profile[excel][header_bold]" value="1" '.checked(!empty($excel['header_bold']),true,false).'> Header پررنگ</label></div>';
+        echo '<div class="afe-export-columns" data-afe-export-columns><div class="afe-export-columns__head"><strong>ستون‌های خروجی لیست</strong><span>Drag & Drop فقط ترتیب ستون‌های همین فرم را تغییر می‌دهد.</span></div>';
+        foreach(array_values((array)($excel['columns']??[])) as $index=>$column){
+            $field=(string)($column['field']??'');
+            echo '<div class="afe-export-column" draggable="true" data-afe-export-column><span class="afe-drag-handle" aria-hidden="true">⋮⋮</span><input type="hidden" name="export_profile[excel][columns]['.(int)$index.'][field]" value="'.esc_attr($field).'">';
+            echo '<label class="afe-export-column__enabled"><input type="checkbox" name="export_profile[excel][columns]['.(int)$index.'][enabled]" value="1" '.checked(!empty($column['enabled']),true,false).'> نمایش</label>';
+            echo '<label>فیلد<code>'.esc_html($field).'</code></label><label>عنوان ستون<input name="export_profile[excel][columns]['.(int)$index.'][label]" value="'.esc_attr((string)($column['label']??$field)).'"></label><label>عرض<input type="number" min="8" max="80" name="export_profile[excel][columns]['.(int)$index.'][width]" value="'.esc_attr((string)($column['width']??22)).'"></label></div>';
+        }
+        echo '</div></div>';
         echo '</section>';
 
         echo '<section class="afe-form-tab-panel" data-afe-form-tab-panel="assets" hidden>';
@@ -957,6 +993,11 @@ final class FormsPage
         $previewOverride=$this->templates->normalizeOverride($previewSubmitted,$previewDefault);
         if ($previewOverride!=='') $settings['preview_template']=$previewOverride;
 
+        $resetExportProfile=!empty($_POST['reset_export_profile']);
+        $submittedExport=(new ExportConfigSanitizer())->sanitize((array)($_POST['export_profile']??[]),$codeForm);
+        $codeExport=ExportProfile::resolve($codeForm);
+        if(!$resetExportProfile && $submittedExport!==$codeExport) $settings['exports']=$submittedExport;
+
         $styleIsolation=sanitize_key((string)($_POST['style_isolation']??'inherit'));
         if (array_key_exists($styleIsolation, StyleIsolationManager::modes())) {
             $settings['style_isolation']=$styleIsolation;
@@ -1004,6 +1045,18 @@ final class FormsPage
         echo '<textarea hidden tabindex="-1" aria-hidden="true" data-afe-template-default>'.esc_textarea($default).'</textarea>';
         echo '<div class="afe-template-editor__footer"><button type="button" class="button" data-afe-template-reset>بازگردانی به قالب پیش‌فرض</button><span data-afe-template-hint>'.($hasOverride?'این فرم در حال استفاده از Override ذخیره‌شده است.':'در حال استفاده از قالب پیش‌فرض کد/AFE است؛ تا زمان تغییر، Override ذخیره نمی‌شود.').'</span></div>';
         echo '</div>';
+    }
+
+    /** @return list<string> */
+    private function exportFieldTokens(array $form): array
+    {
+        $tokens=[];
+        foreach($this->flatten((array)($form['steps']??[])) as $path=>$field){
+            if(($field['type']??'')==='html') continue;
+            if(($field['type']??'')==='file' && !str_contains((string)$path,'.')) $tokens[]='{{files:'.$path.'}}';
+            else $tokens[]='{{field:'.$path.'}}';
+        }
+        return $tokens;
     }
 
     private function parseOptions(string $text): array

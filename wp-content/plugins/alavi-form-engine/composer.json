@@ -4,7 +4,9 @@
   "type": "wordpress-plugin",
   "license": "GPL-3.0-or-later",
   "require": {
-    "php": ">=8.3"
+    "php": ">=8.3",
+    "phpoffice/phpspreadsheet": "5.9.0",
+    "tecnickcom/tc-lib-pdf": "8.73.6"
   },
   "autoload": {
     "psr-4": {
@@ -15,7 +17,18 @@
     "optimize-autoloader": true,
     "sort-packages": true
   },
-  "suggest": {
-    "dompdf/dompdf": "Optional direct server-side PDF generation. Without it, the admin PDF action opens a print-optimized page that can be saved as PDF."
+  "scripts": {
+    "tc-lib-pdf-fonts": [
+      "[ -d vendor/tecnickcom/tc-lib-pdf-font ] && make -C vendor/tecnickcom/tc-lib-pdf-font deps fonts || true"
+    ],
+    "post-install-cmd": [
+      "@tc-lib-pdf-fonts"
+    ],
+    "post-update-cmd": [
+      "@tc-lib-pdf-fonts"
+    ],
+    "post-autoload-dump": [
+      "@tc-lib-pdf-fonts"
+    ]
   }
 }

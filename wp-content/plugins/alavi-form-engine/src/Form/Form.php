@@ -31,6 +31,7 @@ final class Form
     public function hideBrandMark(bool $hide = true): self { $this->settings['brand_mark_mode'] = $hide ? 'none' : 'default'; return $this; }
     public function workflow(array $workflow): self { $this->workflow = $workflow; return $this; }
     public function actions(array $actions): self { $this->actions = $actions; return $this; }
+    public function exports(array $exports): self { $this->settings['exports'] = array_replace_recursive((array)($this->settings['exports'] ?? []), $exports); return $this; }
     public function storage(string $storage): self { $this->storage = $storage; return $this; }
     public function template(string $template): self { $this->template = $template; return $this; }
 

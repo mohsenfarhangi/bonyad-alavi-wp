@@ -138,3 +138,17 @@ Run on a staging clone using the same PHP/WordPress/Elementor major versions int
 - [ ] Rule عمومی `.afe-form .afe-control` در Strong Isolation نباید `text-align` اجباری داشته باشد.
 - [ ] در مرحله Preview، تمام مقادیر عددی/شماره‌ای، تاریخ‌ها، سلول‌های عددی Repeater و شماره ردیف‌ها LTR و `text-align:left` باشند.
 - [ ] همین رفتار در ویرایش Submission و Repeaterهای مدیریتی نیز بررسی شود.
+
+
+## خروجی PDF و Excel
+
+- [ ] `vendor` شامل PhpSpreadsheet 5.9.0 و tc-lib-pdf 8.73.6 است و `AFE_REQUIRE_EXPORT_VENDOR=1 ./tools/qa.sh` PASS می‌شود.
+- [ ] PDF فرم جهادی با متن فارسی، RTL، جدول فیلدها و DejaVu Sans بدون مربع/حروف جدا تولید می‌شود.
+- [ ] A4/A5/Letter و Portrait/Landscape صحیح هستند.
+- [ ] تغییر Header/Body/Footer/CSS از پنل روی PDF خروجی اثر می‌گذارد و Reset به Source Definition کار می‌کند.
+- [ ] لینک فایل‌ها در PDF قابل کلیک است.
+- [ ] XLSX فرم جهادی RTL است و ترتیب/عنوان/عرض ستون‌ها مطابق تنظیمات فرم است.
+- [ ] موبایل/کد ملی/شبا/کدپستی/کارت بانکی صفر اول را در Excel حفظ می‌کنند.
+- [ ] Export چندفرمی برای هر فرم Sheet جدا با قالب همان فرم می‌سازد.
+- [ ] Hyperlink فایل در Excel معتبر است.
+- [ ] Generate PDF و Email PDF Action از همان PDF profile فرم استفاده می‌کنند.

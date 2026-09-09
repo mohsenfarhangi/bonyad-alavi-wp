@@ -363,3 +363,18 @@ Browser print / Save as PDF is always available from a submission. Direct server
 - 154 PHP files linted: PASS.
 - JavaScript/composer/assets/no-runtime-CDN/version checks: PASS.
 
+
+
+## Checkpoint 11 — Package-based PDF / Excel output
+
+- Removed the manual SpreadsheetML export path and optional Dompdf path from submission exports.
+- Added `phpoffice/phpspreadsheet` 5.9.0 integration for real XLSX output.
+- Added `tecnickcom/tc-lib-pdf` 8.73.6 integration for Unicode/RTL PDF output.
+- Added per-form `ExportProfile`: code definition is source of truth; admin settings are overrides.
+- Added safe PDF HTML/CSS templates with token palette, page size/orientation and reset-to-source option.
+- Added structural Excel template builder with draggable columns, labels, widths, RTL, freeze, autofilter and header styles.
+- List export groups submissions by form and creates one worksheet per form.
+- Identifier-like Excel values are explicitly strings so Persian/mobile/national-id/IBAN values preserve leading zeroes.
+- Added Jihadi-specific PDF/Excel defaults.
+- Added runtime package/extension/font preflight and `tools/build-vendor.sh`.
+- This development build environment cannot download Composer packages; release packaging must run `tools/build-vendor.sh` in a network-enabled build environment, then `AFE_REQUIRE_EXPORT_VENDOR=1 tools/qa.sh`.

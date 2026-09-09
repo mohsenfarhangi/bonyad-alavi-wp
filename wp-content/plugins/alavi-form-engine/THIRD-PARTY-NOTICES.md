@@ -27,3 +27,12 @@ Jalali date fields use `majidh1/JalaliDatePicker`:
 ## Optional Persian WooCommerce SMS integration
 
 Alavi Form Engine does **not** bundle or redistribute Persian WooCommerce SMS. If that plugin is independently installed and active, AFE can delegate SMS delivery through its public runtime API and currently selected gateway. No Persian WooCommerce SMS credential is copied into the AFE package or database settings.
+
+
+## Export packages (1.0.28-dev)
+
+- **PhpSpreadsheet 5.9.0** — `phpoffice/phpspreadsheet` — MIT License. Used for `.xlsx` generation.
+- **tc-lib-pdf 8.73.6** — `tecnickcom/tc-lib-pdf` — GNU LGPL-3.0-or-later. Used for server-side PDF generation.
+- `tc-lib-pdf` uses its companion package family, including `tc-lib-pdf-font`, for Unicode font metadata. Font assets retain their upstream licenses and are generated during the Composer build step; see the upstream font notices.
+
+No export package is loaded from a CDN at runtime. Production/release builds must install Composer dependencies into the plugin `vendor` directory and generate the tc-lib PDF font metadata before packaging.

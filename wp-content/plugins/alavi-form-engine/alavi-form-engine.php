@@ -64,6 +64,10 @@ $criticalBootstrapClasses = [
     'BonyadAlavi\\FormEngine\\InputMask\\InputMaskRegistry' => 'src/InputMask/InputMaskRegistry.php',
     'BonyadAlavi\\FormEngine\\InputMask\\InputMaskPattern' => 'src/InputMask/InputMaskPattern.php',
     'BonyadAlavi\\FormEngine\\Submission\\SubmissionService' => 'src/Submission/SubmissionService.php',
+    'BonyadAlavi\\FormEngine\\Export\\ExportProfile' => 'src/Export/ExportProfile.php',
+    'BonyadAlavi\\FormEngine\\Export\\ExportPackageStatus' => 'src/Export/ExportPackageStatus.php',
+    'BonyadAlavi\\FormEngine\\Export\\PdfExporter' => 'src/Export/PdfExporter.php',
+    'BonyadAlavi\\FormEngine\\Export\\ExcelExporter' => 'src/Export/ExcelExporter.php',
 ];
 $bootstrapErrors = [];
 foreach ($criticalBootstrapClasses as $criticalClass => $relativeFile) {

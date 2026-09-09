@@ -13,7 +13,7 @@
 | Redirect | Implemented | first effective redirect, external opt-in |
 | WordPress User Actions | Implemented + hardened | create/login/update/role/meta, privileged-target guards |
 | Status / internal note | Implemented | follow-up status event |
-| PDF / Email PDF | Implemented | Dompdf optional |
+| PDF / Email PDF | Implemented (source integration) | tc-lib-pdf 8.73.6 + per-form safe template; vendor build required |
 | Post/CPT create/update/upsert | Implemented | safe post type/status controls |
 | Conditional Logic / execution policy | Implemented | required operators + always/once/first-event-cycle |
 | Duplicate Policy | Implemented | block/reference/message/allow+mark + promotion |
@@ -45,3 +45,5 @@
 ## Numeric input direction
 
 Number-like controls (`tel`, `number`, `date`, and numeric/decimal/tel input modes) are rendered LTR and left-aligned in both frontend and admin editing while the surrounding form remains RTL.
+
+- Excel export: PhpSpreadsheet 5.9.0, per-form structural profile, XLSX, RTL and per-form multi-sheet export.

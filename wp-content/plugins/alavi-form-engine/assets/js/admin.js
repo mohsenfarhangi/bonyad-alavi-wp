@@ -1012,3 +1012,39 @@ document.addEventListener('submit', function(event){
   const message = form.getAttribute('data-afe-confirm') || 'آیا مطمئن هستید؟';
   if (!window.confirm(message)) event.preventDefault();
 });
+
+// Structural Excel export columns: drag & drop without external runtime libraries.
+(() => {
+  const lists = document.querySelectorAll('[data-afe-export-columns]');
+  lists.forEach((list) => {
+    let dragging = null;
+    const reindex = () => {
+      [...list.querySelectorAll('[data-afe-export-column]')].forEach((row, index) => {
+        row.querySelectorAll('[name*="export_profile[excel][columns]"]').forEach((input) => {
+          input.name = input.name.replace(/export_profile\[excel\]\[columns\]\[\d+\]/, `export_profile[excel][columns][${index}]`);
+        });
+      });
+    };
+    list.addEventListener('dragstart', (event) => {
+      const row = event.target.closest('[data-afe-export-column]');
+      if (!row) return;
+      dragging = row;
+      row.classList.add('is-dragging');
+      if (event.dataTransfer) event.dataTransfer.effectAllowed = 'move';
+    });
+    list.addEventListener('dragover', (event) => {
+      if (!dragging) return;
+      event.preventDefault();
+      const target = event.target.closest('[data-afe-export-column]');
+      if (!target || target === dragging) return;
+      const rect = target.getBoundingClientRect();
+      const after = event.clientY > rect.top + rect.height / 2;
+      target.parentNode.insertBefore(dragging, after ? target.nextSibling : target);
+    });
+    list.addEventListener('dragend', () => {
+      if (dragging) dragging.classList.remove('is-dragging');
+      dragging = null;
+      reindex();
+    });
+  });
+})();

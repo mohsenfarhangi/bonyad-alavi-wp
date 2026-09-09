@@ -148,3 +148,8 @@ Custom Regex is capability-gated and constrained before persistence; runtime PCR
 `SmsProviderRegistry` فقط routing/capability را برعهده دارد. Provider داخلی ملی‌پیامک Credential رمز‌شده AFE را مصرف می‌کند. `PersianWooCommerceSmsProvider` هیچ Credentialی را وارد مدل AFE نمی‌کند و در Runtime از `PWSMS()->get_sms_gateway()`/`send_sms()` استفاده می‌کند. این جداسازی باعث می‌شود تغییر Gateway در افزونه خارجی بدون migration یا sync Credential در AFE اعمال شود.
 
 Capabilityهای `free/pattern` در زمان boot برای UI Action Builder snapshot می‌شوند و در Runtime دوباره enforce می‌شوند. Pattern ناشناخته fail-closed است: AFE payload حدسی به Gateway خارجی ارسال نمی‌کند. Strategy/Capability اضافی فقط از Hook توسعه‌دهنده ثبت می‌شود.
+
+
+## Export subsystem
+
+`src/Export` مرز مستقل خروجی است: `ExportProfile`/`ExportConfigSanitizer`، `PdfTemplateRenderer`/`PdfExporter` و `ExcelExporter`. Source Definition فرم مبنا است؛ `afe_forms.settings_json.exports` فقط Override مدیریتی است. PDF و XLSX هیچ CDN/runtime downloader ندارند.

@@ -118,3 +118,6 @@
 /* 1.0.28-dev patch — numeric/identifier controls remain LTR in admin editing */
 .afe-admin-control[data-afe-ltr="1"]{direction:ltr!important;text-align:left!important;unicode-bidi:plaintext!important}
 
+
+/* Export template builder */
+.afe-export-template-card{margin-top:18px}.afe-export-columns{display:grid;gap:8px;margin-top:16px}.afe-export-columns__head{display:flex;align-items:center;justify-content:space-between;gap:12px}.afe-export-columns__head span{color:#66756f;font-size:12px}.afe-export-column{display:grid;grid-template-columns:28px 76px minmax(150px,.8fr) minmax(220px,1.4fr) 100px;align-items:end;gap:10px;padding:10px 12px;border:1px solid #dbe5e0;border-radius:10px;background:#fff;cursor:grab}.afe-export-column.is-dragging{opacity:.55}.afe-export-column .afe-drag-handle{font-size:20px;color:#87938e;align-self:center}.afe-export-column label{display:grid;gap:5px;margin:0}.afe-export-column label code{direction:ltr;text-align:left;white-space:normal;overflow-wrap:anywhere}.afe-export-column__enabled{align-self:center!important;display:flex!important;flex-direction:row!important;align-items:center;gap:6px!important}@media(max-width:900px){.afe-export-column{grid-template-columns:28px 1fr}.afe-export-column>*:not(.afe-drag-handle){grid-column:2}.afe-export-columns__head{align-items:flex-start;flex-direction:column}}

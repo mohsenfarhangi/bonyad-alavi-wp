@@ -86,7 +86,26 @@
 
 ## PDF و Excel
 
-Excel بدون dependency خارجی با SpreadsheetML خروجی داده می‌شود. دکمه PDF/چاپ همیشه صفحه چاپ‌بهینه باز می‌کند و مرورگر می‌تواند آن را Save as PDF کند. اگر کلاس `Dompdf\Dompdf` در autoload پروژه در دسترس باشد، خروجی مستقیم PDF نیز به‌صورت خودکار استفاده می‌شود؛ `dompdf/dompdf` در این ZIP اجباری/باندل نشده است.
+خروجی‌ها در 1.0.28-dev به‌صورت package-based طراحی شده‌اند:
+
+- Excel: `phpoffice/phpspreadsheet` نسخه `5.9.0` و خروجی واقعی `.xlsx`.
+- PDF: `tecnickcom/tc-lib-pdf` نسخه `8.73.6` با فونت Unicode/RTL از `tc-lib-pdf-font`.
+- هر فرم یک Output Profile پیش‌فرض در Source Definition دارد و Admin فقط Override می‌سازد.
+- PDF از HTML/CSS امن + Token Palette استفاده می‌کند؛ PHP، Shortcode، `url()` و `@import` از UI اجرا نمی‌شوند.
+- Excel ساختاری است: Sheet name، RTL، Freeze Header، AutoFilter، رنگ Header، ترتیب/عنوان/عرض/نمایش ستون‌ها.
+- شماره موبایل، کد ملی، شبا، کارت و سایر شناسه‌ها با `TYPE_STRING` نوشته می‌شوند تا صفر اول حذف نشود.
+- Export چندفرمی، برای هر فرم Sheet جدا با قالب همان فرم می‌سازد.
+- فرم جهادی Output Profile اختصاصی فارسی برای PDF و Excel دارد.
+- فایل‌ها در خروجی‌ها در صورت وجود URL معتبر به‌صورت hyperlink ارائه می‌شوند.
+
+Dependencyها باید در build نهایی داخل `vendor` نصب شوند. برای ساخت vendor:
+
+```bash
+./tools/build-vendor.sh
+AFE_REQUIRE_EXPORT_VENDOR=1 ./tools/qa.sh
+```
+
+`tc-lib-pdf` برای فارسی به font metadata تولیدشده نیاز دارد و Composer script پروژه مرحله `tc-lib-pdf-font` را اجرا می‌کند. اگر package، Extension یا font asset ناقص باشد، Export با پیام مدیریتی واضح متوقف می‌شود و Fatal خام ایجاد نمی‌کند.
 
 ## امنیت Template
 

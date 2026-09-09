@@ -19,6 +19,10 @@ $critical = [
     BonyadAlavi\FormEngine\Actions\Sms\PersianWooCommerceSmsProvider::class,
     BonyadAlavi\FormEngine\Validation\ValidatorRegistry::class,
     BonyadAlavi\FormEngine\Submission\SubmissionService::class,
+    BonyadAlavi\FormEngine\Export\ExportProfile::class,
+    BonyadAlavi\FormEngine\Export\ExportPackageStatus::class,
+    BonyadAlavi\FormEngine\Export\PdfExporter::class,
+    BonyadAlavi\FormEngine\Export\ExcelExporter::class,
 ];
 
 foreach ($critical as $class) {

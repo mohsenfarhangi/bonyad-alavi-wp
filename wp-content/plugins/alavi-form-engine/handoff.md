@@ -646,3 +646,24 @@ Eventها در UI فقط با Label فارسی اصلی دیده شوند؛ slug
 
 پس از نصب این checkpoint، برای تست Duplicate حتماً یک ترکیب از اطلاعات یک Submission قدیمی را وارد کنید. نیازی به Submit نهایی نیست؛ پس از تکمیل تمام فیلدهای Fingerprint باید فقط در حالت تکراری پیام ظاهر شود.
 
+
+
+## Checkpoint 11 — خروجی PDF / Excel پکیج‌محور
+
+تصمیم‌های قطعی و پیاده‌سازی‌شده:
+
+- Excel با `phpoffice/phpspreadsheet` نسخه 5.9.0 و XLSX واقعی.
+- PDF با `tecnickcom/tc-lib-pdf` نسخه 8.73.6 و Unicode/RTL.
+- هر فرم `settings.exports` پیش‌فرض در Source Definition دارد؛ Admin فقط Override ذخیره می‌کند.
+- PDF: HTML/CSS امن + Token Palette + page size/orientation + Header/Body/Footer. هیچ PHP/Shortcode و منبع خارجی runtime مجاز نیست.
+- Excel: تنظیم ساختاری Sheet/RTL/Freeze/AutoFilter/Header و ترتیب/عنوان/عرض/نمایش ستون‌ها.
+- Export لیست چندفرمی: هر فرم یک Sheet جدا و با Output Profile خودش.
+- تمام مقدارهای Excel به‌صورت string نوشته می‌شوند تا صفر اول شناسه‌ها حذف نشود.
+- فایل‌ها در خروجی در صورت URL معتبر hyperlink می‌شوند.
+- فرم `jihadi-group-registration` قالب اختصاصی PDF و Excel دارد.
+- UI گزینه بازگشت کامل Output Profile به Source Definition دارد.
+- Build Gate: `tools/build-vendor.sh` و سپس `AFE_REQUIRE_EXPORT_VENDOR=1 ./tools/qa.sh`.
+- tc-lib-pdf font metadata (`dejavusans.json`) باید در build تولید شود.
+- محیط ساخت این checkpoint دسترسی شبکه/Composer ندارد؛ بنابراین dependencyهای third-party در ZIP dev باندل نشده‌اند و این checkpoint هنوز Production-ready نیست. نسخه انتشار نهایی فقط بعد از vendor build + acceptance واقعی ساخته شود.
+
+Acceptance باقی‌مانده: PDF فارسی/RTL واقعی، XLSX واقعی، حفظ صفر اول، hyperlink فایل، ویرایش/Reset قالب، multi-form sheets و Generate/Email PDF Action روی staging.

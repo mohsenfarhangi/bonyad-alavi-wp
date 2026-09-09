@@ -617,3 +617,8 @@ add_filter('afe_pwsms_pattern_payload', function (string $payload, $message, arr
 ```
 
 Hook `afe_pwsms_send_data` نیز آخرین payload آرایه‌ای قبل از `PWSMS()->send_sms()` را در اختیار Integration قرار می‌دهد. Raw PHP از Admin UI پذیرفته نمی‌شود؛ این Hookها فقط برای کد توسعه‌دهنده هستند.
+
+
+## Export profiles
+
+`Form::exports()` یک Output Profile پیش‌فرض برای PDF/Excel ثبت می‌کند. `ExportProfile::resolve()` تعریف کد را با Override مدیر merge می‌کند. PDF templateها فقط HTML/CSS sanitize‌شده و tokenهای whitelist هستند؛ Excel یک مدل ساختاری سلولی دارد. Release build باید Composer vendor و tc-lib-pdf font metadata را قبل از ZIP تولید کند.

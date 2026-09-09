@@ -246,3 +246,7 @@ The package includes the "ثبت نام گروه‌های مردمی و جهاد
 
 * 1.0.28-dev: Live Duplicate فقط در صورت تشخیص ثبت تکراری پیام نمایش می‌دهد؛ نتیجه غیرتکراری و خطای موقت preflight بی‌صدا هستند.
 * 1.0.28-dev: ایندکس Fingerprint هنگام تغییر تنظیمات Duplicate بازسازی می‌شود و ثبت‌های قدیمی با self-heal مبتنی بر signature وارد تشخیص می‌شوند.
+
+* Replaced manual SpreadsheetML/Dompdf-optional exports with package-based PhpSpreadsheet XLSX and tc-lib-pdf PDF engines.
+* Added per-form editable PDF HTML/CSS/token templates and structural Excel output profiles.
+* Added RTL/Persian export handling, identifier-as-text Excel cells, per-form sheets for multi-form exports, safe file hyperlinks and export package/font preflight.

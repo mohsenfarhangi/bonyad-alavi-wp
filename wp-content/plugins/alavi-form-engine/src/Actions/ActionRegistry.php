@@ -195,7 +195,7 @@ final class ActionRegistry
         $this->register(new ActionDefinition(
             'generate_pdf',
             'تولید PDF',
-            'PDF سمت سرور تولید می‌کند و مسیر آن را برای Actionهای بعدی همان زنجیره در Runtime قرار می‌دهد. نیازمند Dompdf است.',
+            'PDF سمت سرور با قالب خروجی همان فرم و پکیج tc-lib-pdf تولید می‌کند و مسیر آن را برای Actionهای بعدی همان زنجیره در Runtime قرار می‌دهد.',
             'document',
             [
                 'filename'=>['type'=>'text','label'=>'نام فایل (اختیاری)','required'=>false,'tokens'=>true],
