@@ -18,16 +18,11 @@
     "sort-packages": true
   },
   "scripts": {
-    "tc-lib-pdf-fonts": [
-      "[ -d vendor/tecnickcom/tc-lib-pdf-font ] && make -C vendor/tecnickcom/tc-lib-pdf-font deps fonts || true"
-    ],
+    "tc-lib-pdf-fonts": "bash tools/build-pdf-fonts.sh",
     "post-install-cmd": [
       "@tc-lib-pdf-fonts"
     ],
     "post-update-cmd": [
-      "@tc-lib-pdf-fonts"
-    ],
-    "post-autoload-dump": [
       "@tc-lib-pdf-fonts"
     ]
   }

@@ -105,7 +105,7 @@ Dependencyها باید در build نهایی داخل `vendor` نصب شوند.
 AFE_REQUIRE_EXPORT_VENDOR=1 ./tools/qa.sh
 ```
 
-`tc-lib-pdf` برای فارسی به font metadata تولیدشده نیاز دارد و Composer script پروژه مرحله `tc-lib-pdf-font` را اجرا می‌کند. اگر package، Extension یا font asset ناقص باشد، Export با پیام مدیریتی واضح متوقف می‌شود و Fatal خام ایجاد نمی‌کند.
+`tc-lib-pdf` برای فارسی به font metadata تولیدشده نیاز دارد. Composer script پروژه اکنون `tools/build-pdf-fonts.sh` را بدون نادیده‌گرفتن خطا اجرا می‌کند. اگر dependencyها قبلاً نصب شده‌اند و فقط فونت آماده نیست، از ریشه افزونه `bash tools/build-pdf-fonts.sh` را اجرا کنید و وجود `vendor/tecnickcom/tc-lib-pdf-font/target/fonts/dejavu/dejavusans.json` را بررسی کنید. خروجی XLSX نیز ابتدا در فایل موقت کامل ساخته و اعتبارسنجی می‌شود و سپس با HTTP headers تمیز stream می‌شود تا خطاهای Writer به‌صورت `ERR_INVALID_RESPONSE` مخفی نشوند.
 
 ## امنیت Template
 

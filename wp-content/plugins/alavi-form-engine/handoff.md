@@ -667,3 +667,21 @@ Eventها در UI فقط با Label فارسی اصلی دیده شوند؛ slug
 - محیط ساخت این checkpoint دسترسی شبکه/Composer ندارد؛ بنابراین dependencyهای third-party در ZIP dev باندل نشده‌اند و این checkpoint هنوز Production-ready نیست. نسخه انتشار نهایی فقط بعد از vendor build + acceptance واقعی ساخته شود.
 
 Acceptance باقی‌مانده: PDF فارسی/RTL واقعی، XLSX واقعی، حفظ صفر اول، hyperlink فایل، ویرایش/Reset قالب، multi-form sheets و Generate/Email PDF Action روی staging.
+
+
+## Checkpoint 11.1 — اصلاح Runtime خروجی PDF/Excel
+
+- Build فونت PDF دیگر failure را با `|| true` مخفی نمی‌کند.
+- دستور استاندارد پس از نصب dependencyها: `bash tools/build-pdf-fonts.sh`. این script target رسمی `make fonts` پکیج `tc-lib-pdf-font` را اجرا و `dejavusans.json` را verify می‌کند.
+- `tools/build-vendor.sh` نصب package و ساخت font metadata را deterministic کرده است.
+- Excel دیگر مستقیماً روی `php://output` نوشته نمی‌شود؛ ابتدا XLSX کامل در فایل موقت ساخته و ZIP signature بررسی می‌شود، سپس Binary stream انجام می‌شود.
+- `BinaryDownload` خروجی PDF/XLSX را با پاک‌سازی output buffer، `Content-Length` و غیرفعال‌سازی zlib output compression ارسال می‌کند.
+- Export endpointها `Throwable` را catch/log می‌کنند تا خطای Writer/Runtime به‌جای `ERR_INVALID_RESPONSE` به پیام مدیریتی قابل تشخیص تبدیل شود.
+- Acceptance: اجرای `bash tools/build-pdf-fonts.sh` روی staging، وجود `dejavusans.json`، سپس تست دانلود PDF و XLSX تک‌ثبت و لیستی.
+
+
+### Patch 11.2 — اصلاح مسیر Font Metadata tc-lib-pdf
+- خروجی `make fonts` برای DejaVu در layout فعلی پکیج داخل `target/fonts/dejavu/` ساخته می‌شود.
+- Runtime/Build Gate اکنون `target/fonts/dejavu/dejavusans.json` را مسیر اصلی می‌داند و layout قدیمی مستقیم را فقط برای backward compatibility می‌پذیرد.
+- `K_PATH_FONTS` روی پوشه واقعی خانواده DejaVu تنظیم می‌شود.
+- اسکریپت build در صورت نبود artifact، فهرست فایل‌های تولیدشده را برای دیباگ چاپ می‌کند.

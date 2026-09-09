@@ -60,5 +60,26 @@ final class ExcelExporter
     private function cell(int $col,int $row): string{return \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($col).$row;}
     private function uniqueSheetName(string $name,array $used): string{if(!in_array($name,$used,true))return$name;$base=$name;for($i=2;$i<1000;$i++){$suffix='-'.$i;$max=31-strlen($suffix);$candidate=(function_exists('mb_substr')?mb_substr($base,0,$max):substr($base,0,$max)).$suffix;if(!in_array($candidate,$used,true))return$candidate;}return substr(hash('sha256',$name),0,12);}
     private function safeSheetName(string $name): string{$name=preg_replace('~[\\/?*\[\]:]+~u',' ',$name)??'Sheet';$name=trim($name);if($name==='')$name='Sheet';return function_exists('mb_substr')?mb_substr($name,0,31):substr($name,0,31);}
-    private function stream(object $spreadsheet,string $filename): never{nocache_headers();header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');header('Content-Disposition: attachment; filename="'.sanitize_file_name($filename).'"');header('Cache-Control: max-age=0');$writer=new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);$writer->save('php://output');$spreadsheet->disconnectWorksheets();exit;}
+    private function stream(object $spreadsheet,string $filename): never
+    {
+        $tmp=function_exists('wp_tempnam')?wp_tempnam($filename):tempnam(sys_get_temp_dir(),'afe-xlsx-');
+        if(!is_string($tmp)||$tmp===''){$spreadsheet->disconnectWorksheets();throw new RuntimeException('ساخت فایل موقت برای خروجی Excel ناموفق بود. مسیر موقت PHP/WordPress را بررسی کنید.');}
+        try{
+            $writer=new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
+            $writer->save($tmp);
+            $spreadsheet->disconnectWorksheets();
+            clearstatcache(true,$tmp);
+            $size=is_file($tmp)?filesize($tmp):false;
+            if($size===false||$size<4)throw new RuntimeException('PhpSpreadsheet فایل XLSX معتبری تولید نکرد.');
+            $head=file_get_contents($tmp,false,null,0,2);
+            if($head!=='PK')throw new RuntimeException('خروجی تولیدشده ساختار معتبر XLSX/ZIP ندارد.');
+            BinaryDownload::streamFile($tmp,'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',$filename,true);
+        }catch(\Throwable $e){
+            $spreadsheet->disconnectWorksheets();
+            @unlink($tmp);
+            if($e instanceof RuntimeException)throw $e;
+            error_log('[Alavi Form Engine] Excel export failed: '.get_class($e).': '.$e->getMessage());
+            throw new RuntimeException('تولید فایل Excel ناموفق بود: '.$e->getMessage(),0,$e);
+        }
+    }
 }

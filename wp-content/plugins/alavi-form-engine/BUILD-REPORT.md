@@ -119,7 +119,7 @@ The plugin seeds all 31 Iranian provinces offline. County/district data is downl
 
 ## PDF
 
-Browser print / Save as PDF is always available from a submission. Direct server-side PDF is used when `Dompdf\Dompdf` is already available through the site's Composer/autoload environment; Dompdf is not bundled in this ZIP.
+Browser print remains available. Direct server-side PDF in the 1.0.28 development line uses bundled Composer dependency `tecnickcom/tc-lib-pdf`; Dompdf is no longer part of the export path.
 
 ## 1.0.5 Geography Chunk Import
 - Manual geography JSON import uses authenticated WordPress Ajax.
@@ -378,3 +378,16 @@ Browser print / Save as PDF is always available from a submission. Direct server
 - Added Jihadi-specific PDF/Excel defaults.
 - Added runtime package/extension/font preflight and `tools/build-vendor.sh`.
 - This development build environment cannot download Composer packages; release packaging must run `tools/build-vendor.sh` in a network-enabled build environment, then `AFE_REQUIRE_EXPORT_VENDOR=1 tools/qa.sh`.
+
+
+## Checkpoint 11.1 — Export runtime hardening
+
+- Fixed the PDF font build gate: font generation no longer uses `|| true`; `tools/build-pdf-fonts.sh` runs the upstream-supported `make fonts` target and verifies `dejavusans.json`.
+- `tools/build-vendor.sh` installs dependencies with `--no-scripts`, builds Unicode font assets explicitly, then verifies package classes and font metadata.
+- Excel XLSX is generated to a temporary file first; direct `php://output` writing was removed.
+- XLSX ZIP signature/size is verified before any download headers are sent.
+- Shared `BinaryDownload` clears output buffers, disables zlib output compression, sends Content-Length and streams binary files safely.
+- Submission PDF download uses the same binary response path.
+- Export endpoints catch `Throwable` and log the concrete error before showing an admin error, preventing opaque `ERR_INVALID_RESPONSE` for writer/runtime failures.
+
+- Fixed tc-lib-pdf DejaVu font detection: current bulk build stores metadata under `target/fonts/dejavu/dejavusans.json`; legacy flat layout remains supported.

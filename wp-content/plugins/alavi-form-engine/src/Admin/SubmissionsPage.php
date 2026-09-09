@@ -17,6 +17,7 @@ use BonyadAlavi\FormEngine\Export\PdfTemplateRenderer;
 use BonyadAlavi\FormEngine\Export\PdfExporter;
 use BonyadAlavi\FormEngine\Export\ExcelExporter;
 use RuntimeException;
+use Throwable;
 
 final class SubmissionsPage
 {
@@ -411,13 +412,10 @@ final class SubmissionsPage
                 $profile=$this->pdfTemplates->profile($form);
                 $html=$this->pdfTemplates->render($form,$row);
                 $bytes=$this->pdfExporter->bytes($html,(array)$profile['pdf']);
-                nocache_headers();
-                header('Content-Type: application/pdf');
-                header('Content-Disposition: attachment; filename="submission-'.$id.'.pdf"');
-                header('Content-Length: '.strlen($bytes));
-                echo $bytes; exit;
+                \BonyadAlavi\FormEngine\Export\BinaryDownload::streamBytes($bytes,'application/pdf','submission-'.$id.'.pdf');
             }
-        } catch (RuntimeException $e) {
+        } catch (Throwable $e) {
+            error_log('[Alavi Form Engine] Submission export failed: '.get_class($e).': '.$e->getMessage());
             wp_die(esc_html($e->getMessage()),'خطای خروجی',['back_link'=>true]);
         }
 
@@ -465,7 +463,8 @@ final class SubmissionsPage
         foreach($rows as $row){$slug=(string)$row['form_slug'];if(!isset($grouped[$slug]))$grouped[$slug]=['form'=>$this->resolvedForm($slug),'rows'=>[]];$grouped[$slug]['rows'][]=$row;}
         try {
             $this->excelExporter->streamList(array_values($grouped),'submissions-'.gmdate('Ymd-His').'.xlsx');
-        } catch (RuntimeException $e) {
+        } catch (Throwable $e) {
+            error_log('[Alavi Form Engine] Excel list export failed: '.get_class($e).': '.$e->getMessage());
             wp_die(esc_html($e->getMessage()),'خطای خروجی Excel',['back_link'=>true]);
         }
     }

@@ -143,6 +143,8 @@ Run on a staging clone using the same PHP/WordPress/Elementor major versions int
 ## خروجی PDF و Excel
 
 - [ ] `vendor` شامل PhpSpreadsheet 5.9.0 و tc-lib-pdf 8.73.6 است و `AFE_REQUIRE_EXPORT_VENDOR=1 ./tools/qa.sh` PASS می‌شود.
+- [ ] `bash tools/build-pdf-fonts.sh` بدون خطا اجرا می‌شود و فایل `vendor/tecnickcom/tc-lib-pdf-font/target/fonts/dejavu/dejavusans.json` وجود دارد.
+- [ ] دانلود XLSX تک‌ثبت و لیستی بدون `ERR_INVALID_RESPONSE` انجام می‌شود؛ در صورت خطای Writer، صفحه خطای مدیریتی قابل‌خواندن و log مشخص ثبت می‌شود.
 - [ ] PDF فرم جهادی با متن فارسی، RTL، جدول فیلدها و DejaVu Sans بدون مربع/حروف جدا تولید می‌شود.
 - [ ] A4/A5/Letter و Portrait/Landscape صحیح هستند.
 - [ ] تغییر Header/Body/Footer/CSS از پنل روی PDF خروجی اثر می‌گذارد و Reset به Source Definition کار می‌کند.

@@ -21,6 +21,7 @@ $critical = [
     BonyadAlavi\FormEngine\Submission\SubmissionService::class,
     BonyadAlavi\FormEngine\Export\ExportProfile::class,
     BonyadAlavi\FormEngine\Export\ExportPackageStatus::class,
+    BonyadAlavi\FormEngine\Export\BinaryDownload::class,
     BonyadAlavi\FormEngine\Export\PdfExporter::class,
     BonyadAlavi\FormEngine\Export\ExcelExporter::class,
 ];

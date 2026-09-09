@@ -1,0 +1,23 @@
+<?php
+declare(strict_types=1);
+$root=dirname(__DIR__);
+require_once $root.'/src/Export/ExportPackageStatus.php';
+use BonyadAlavi\FormEngine\Export\ExportPackageStatus;
+$tmp=sys_get_temp_dir().'/afe-font-layout-'.bin2hex(random_bytes(4));
+@mkdir($tmp.'/vendor/tecnickcom/tc-lib-pdf-font/target/fonts/dejavu',0777,true);
+define('AFE_PATH',$tmp.'/');
+file_put_contents($tmp.'/vendor/tecnickcom/tc-lib-pdf-font/target/fonts/dejavu/dejavusans.json','{}');
+$path=ExportPackageStatus::pdfFontPath();
+$expected=$tmp.'/vendor/tecnickcom/tc-lib-pdf-font/target/fonts/dejavu';
+$ok=$path===$expected;
+echo ($ok?'PASS ':'FAIL ').'dejavu-family-layout'.PHP_EOL;
+@unlink($tmp.'/vendor/tecnickcom/tc-lib-pdf-font/target/fonts/dejavu/dejavusans.json');
+@rmdir($tmp.'/vendor/tecnickcom/tc-lib-pdf-font/target/fonts/dejavu');
+@rmdir($tmp.'/vendor/tecnickcom/tc-lib-pdf-font/target/fonts');
+@rmdir($tmp.'/vendor/tecnickcom/tc-lib-pdf-font/target');
+@rmdir($tmp.'/vendor/tecnickcom/tc-lib-pdf-font');
+@rmdir($tmp.'/vendor/tecnickcom');
+@rmdir($tmp.'/vendor');
+@rmdir($tmp);
+if(!$ok)exit(1);
+echo "pdf font layout ok\n";

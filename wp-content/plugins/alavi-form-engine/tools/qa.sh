@@ -57,7 +57,7 @@ if [ "${AFE_REQUIRE_EXPORT_VENDOR:-0}" = "1" ]; then
   else
     fail "export vendor package classes"
   fi
-  if [ -f vendor/tecnickcom/tc-lib-pdf-font/target/fonts/dejavusans.json ]; then pass "tc-lib-pdf DejaVu font assets"; else fail "tc-lib-pdf DejaVu font assets"; fi
+  if [ -f vendor/tecnickcom/tc-lib-pdf-font/target/fonts/dejavu/dejavusans.json ] || [ -f vendor/tecnickcom/tc-lib-pdf-font/target/fonts/dejavusans.json ]; then pass "tc-lib-pdf DejaVu font assets"; else fail "tc-lib-pdf DejaVu font assets"; fi
 fi
 
 if [ -s assets/vendor/jalalidatepicker/jalalidatepicker.min.js ] && [ -s assets/vendor/jalalidatepicker/jalalidatepicker.min.css ]; then
