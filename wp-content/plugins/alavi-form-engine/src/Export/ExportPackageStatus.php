@@ -3,7 +3,12 @@ declare(strict_types=1);
 namespace BonyadAlavi\FormEngine\Export;
 final class ExportPackageStatus
 {
-    public static function excelReady(): bool{return class_exists('\\PhpOffice\\PhpSpreadsheet\\Spreadsheet')&&class_exists('\\PhpOffice\\PhpSpreadsheet\\Writer\\Xlsx');}
+    public static function excelReady(): bool{
+        $base=defined('AFE_PATH')?rtrim((string)AFE_PATH,'/\\'):rtrim(dirname(__DIR__,2),'/\\');
+        return is_file($base.'/vendor/phpoffice/phpspreadsheet/src/PhpSpreadsheet/Spreadsheet.php')
+            && is_file($base.'/vendor/phpoffice/phpspreadsheet/src/PhpSpreadsheet/Writer/Xlsx.php')
+            && is_file($base.'/vendor/maennchen/zipstream-php/src/ZipStream.php');
+    }
     public static function pdfReady(): bool{return class_exists('\\Com\\Tecnick\\Pdf\\Tcpdf');}
     public static function pdfFontReady(): bool{return self::pdfFontPath()!==null;}
     public static function pdfFontPath(): ?string{

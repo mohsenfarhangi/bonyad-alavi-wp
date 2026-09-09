@@ -39,7 +39,9 @@ try {
     mkdir($pluginRoot, 0777, true);
     copy($sourceRoot . '/alavi-form-engine.php', $pluginRoot . '/alavi-form-engine.php');
     $copyTree($sourceRoot . '/src', $pluginRoot . '/src');
-    $copyTree($sourceRoot . '/vendor', $pluginRoot . '/vendor');
+    if (is_dir($sourceRoot . '/vendor')) {
+        $copyTree($sourceRoot . '/vendor', $pluginRoot . '/vendor');
+    }
     unlink($pluginRoot . '/src/Duplicate/DuplicateRepository.php');
 
     $runner = $tempRoot . '/runner.php';

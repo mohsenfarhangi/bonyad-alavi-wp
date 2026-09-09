@@ -4,6 +4,7 @@
   "type": "wordpress-plugin",
   "license": "GPL-3.0-or-later",
   "require": {
+    "maennchen/zipstream-php": "3.2.2",
     "php": ">=8.3",
     "phpoffice/phpspreadsheet": "5.9.0",
     "tecnickcom/tc-lib-pdf": "8.73.6"

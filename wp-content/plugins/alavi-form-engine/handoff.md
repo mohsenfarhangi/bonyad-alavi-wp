@@ -685,3 +685,14 @@ Acceptance باقی‌مانده: PDF فارسی/RTL واقعی، XLSX واقع�
 - Runtime/Build Gate اکنون `target/fonts/dejavu/dejavusans.json` را مسیر اصلی می‌داند و layout قدیمی مستقیم را فقط برای backward compatibility می‌پذیرد.
 - `K_PATH_FONTS` روی پوشه واقعی خانواده DejaVu تنظیم می‌شود.
 - اسکریپت build در صورت نبود artifact، فهرست فایل‌های تولیدشده را برای دیباگ چاپ می‌کند.
+
+
+### Patch 11.3 — ایزوله‌سازی Composer برای Excel
+- خطای `ZipStream\ZipStream::__construct(): Argument #1 ($operationMode) ... null` به collision بین Composer vendor افزونه‌ها نسبت داده شد؛ stack trace کاربر نشان داد PhpSpreadsheet از `/plugins/pinova/vendor` لود شده بود.
+- AFE loader اکنون هنگام bootstrap در `$GLOBALS['afe_composer_loader']` نگه‌داری می‌شود.
+- `ExportAutoloadScope` هنگام Excel export، Composer loader سایر افزونه‌ها را موقتاً unregister می‌کند، loader خود AFE را prepend می‌کند و سپس منبع کلاس‌های PhpSpreadsheet/ZipStream را با Reflection زیر `AFE_PATH/vendor` verify می‌کند.
+- اگر یکی از کلاس‌های حساس پیش از Export از vendor افزونه دیگری preload شده باشد، AFE به‌جای TypeError/Fatal خروجی را متوقف و مسیر کلاس متداخل را در پیام مدیریتی و log گزارش می‌کند.
+- `maennchen/zipstream-php` مستقیماً روی `3.2.2` pin شده است؛ runtime مورد انتظار ZipStream v3 است و marker نسل v2 یعنی `ZipStream\Option\Archive` نباید در scope AFE resolve شود.
+- `ExportPackageStatus::excelReady()` دیگر `class_exists()` روی third-party packageها صدا نمی‌زند و فقط فایل‌های vendor خود AFE را بررسی می‌کند؛ بنابراین صفحه تنظیمات باعث preload ناخواسته package افزونه دیگر نمی‌شود.
+- تست `tests/excel-composer-isolation.php` یک vendor خارجی شبیه Pinova را شبیه‌سازی می‌کند و ثابت می‌کند loader خود AFE برنده resolution است و marker v2 لود نمی‌شود.
+- پس از نصب این patch روی staging، Composer dependencyهای AFE باید update شوند و سپس export تک‌ثبت/لیستی با Pinova فعال تست شود.

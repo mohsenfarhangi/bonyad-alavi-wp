@@ -6,6 +6,8 @@ $submissions=(string)file_get_contents($root.'/src/Admin/SubmissionsPage.php');
 $pdf=(string)file_get_contents($root.'/src/Export/PdfExporter.php');
 $build=(string)file_get_contents($root.'/tools/build-pdf-fonts.sh');
 $composer=(string)file_get_contents($root.'/composer.json');
+$scope=(string)file_get_contents($root.'/src/Export/ExportAutoloadScope.php');
+$status=(string)file_get_contents($root.'/src/Export/ExportPackageStatus.php');
 $checks=[
  'excel-does-not-stream-directly'=>!str_contains($excel,"save('php://output')"),
  'excel-writes-temp-first'=>str_contains($excel,'$writer->save($tmp)')&&str_contains($excel,'$head!==\'PK\''),
@@ -15,5 +17,8 @@ $checks=[
  'pdf-actionable-font-error'=>str_contains($pdf,'tools/build-pdf-fonts.sh'),
  'font-script-verifies-json'=>str_contains($build,'target/fonts/dejavu/dejavusans.json')&&str_contains($build,'dejavusans.json')&&str_contains($build,'make -C "$FONT_ROOT" fonts'),
  'composer-font-failure-not-hidden'=>!str_contains($composer,'|| true')&&str_contains($composer,'tools/build-pdf-fonts.sh'),
+ 'excel-removes-foreign-composer-loaders'=>str_contains($scope,'spl_autoload_unregister')&&str_contains($scope,'assertNoForeignExportClassesLoaded'),
+ 'excel-verifies-own-vendor-origin'=>str_contains($scope,'assertClassFromOwnVendor')&&str_contains($scope,'ReflectionClass'),
+ 'excel-status-does-not-autoload-package'=>!str_contains($status,"class_exists('\\\\PhpOffice\\PhpSpreadsheet"),
 ];
 foreach($checks as $name=>$ok){echo ($ok?'PASS ':'FAIL ').$name.PHP_EOL;if(!$ok)exit(1);}echo "export runtime hardening ok\n";

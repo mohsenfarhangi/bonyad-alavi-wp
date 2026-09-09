@@ -2,7 +2,16 @@
 declare(strict_types=1);
 
 $root = dirname(__DIR__);
-require_once $root . '/vendor/autoload.php';
+if (is_file($root . '/vendor/autoload.php')) {
+    require_once $root . '/vendor/autoload.php';
+} else {
+    spl_autoload_register(static function (string $class) use ($root): void {
+        $prefix='BonyadAlavi\\FormEngine\\';
+        if (!str_starts_with($class,$prefix)) return;
+        $file=$root.'/src/'.str_replace('\\','/',substr($class,strlen($prefix))).'.php';
+        if (is_file($file)) require_once $file;
+    });
+}
 
 $critical = [
     BonyadAlavi\FormEngine\Core\Plugin::class,
@@ -21,6 +30,7 @@ $critical = [
     BonyadAlavi\FormEngine\Submission\SubmissionService::class,
     BonyadAlavi\FormEngine\Export\ExportProfile::class,
     BonyadAlavi\FormEngine\Export\ExportPackageStatus::class,
+    BonyadAlavi\FormEngine\Export\ExportAutoloadScope::class,
     BonyadAlavi\FormEngine\Export\BinaryDownload::class,
     BonyadAlavi\FormEngine\Export\PdfExporter::class,
     BonyadAlavi\FormEngine\Export\ExcelExporter::class,

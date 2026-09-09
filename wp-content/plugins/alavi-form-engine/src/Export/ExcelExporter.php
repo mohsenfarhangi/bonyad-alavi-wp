@@ -12,18 +12,25 @@ final class ExcelExporter
 
     public function streamSingle(array $form,array $submission,string $filename): never
     {
-        $spreadsheet=$this->newSpreadsheet();$sheet=$spreadsheet->getActiveSheet();$this->buildDetailSheet($sheet,$form,$submission);$this->stream($spreadsheet,$filename);
+        ExportAutoloadScope::run(function () use ($form,$submission,$filename): never {
+            $spreadsheet=$this->newSpreadsheet();$sheet=$spreadsheet->getActiveSheet();$this->buildDetailSheet($sheet,$form,$submission);$this->stream($spreadsheet,$filename);
+        });
+        throw new RuntimeException('خروجی Excel بدون ارسال فایل پایان یافت.');
     }
 
     public function streamList(array $grouped,string $filename): never
     {
-        $spreadsheet=$this->newSpreadsheet();$first=true;$used=[];foreach($grouped as $bundle){$form=$bundle['form'];$rows=$bundle['rows'];$sheet=$first?$spreadsheet->getActiveSheet():$spreadsheet->createSheet();$first=false;$profile=$this->profile($form);$wanted=$this->safeSheetName((string)($profile['excel']['sheet_name']??$form['title']??'ثبت‌ها'));$title=$this->uniqueSheetName($wanted,$used);$used[]=$title;$this->buildListSheet($sheet,$form,$rows,$title);}if($first){$sheet=$spreadsheet->getActiveSheet();$sheet->setCellValue('A1','هیچ داده‌ای برای خروجی وجود ندارد.');}$this->stream($spreadsheet,$filename);
+        ExportAutoloadScope::run(function () use ($grouped,$filename): never {
+            $spreadsheet=$this->newSpreadsheet();$first=true;$used=[];foreach($grouped as $bundle){$form=$bundle['form'];$rows=$bundle['rows'];$sheet=$first?$spreadsheet->getActiveSheet():$spreadsheet->createSheet();$first=false;$profile=$this->profile($form);$wanted=$this->safeSheetName((string)($profile['excel']['sheet_name']??$form['title']??'ثبت‌ها'));$title=$this->uniqueSheetName($wanted,$used);$used[]=$title;$this->buildListSheet($sheet,$form,$rows,$title);}if($first){$sheet=$spreadsheet->getActiveSheet();$sheet->setCellValue('A1','هیچ داده‌ای برای خروجی وجود ندارد.');}$this->stream($spreadsheet,$filename);
+        });
+        throw new RuntimeException('خروجی Excel بدون ارسال فایل پایان یافت.');
     }
 
     private function newSpreadsheet(): object
     {
         if(!ExportPackageStatus::excelReady())throw new RuntimeException('پکیج Excel در دسترس نیست. وابستگی phpoffice/phpspreadsheet باید داخل vendor افزونه نصب و باندل شود.');
         $missing=ExportPackageStatus::excelMissingExtensions();if($missing)throw new RuntimeException('Extensionهای لازم Excel روی PHP فعال نیستند: '.implode(', ',$missing));
+        ExportAutoloadScope::assertOwnExcelRuntime();
         return new \PhpOffice\PhpSpreadsheet\Spreadsheet();
     }
 

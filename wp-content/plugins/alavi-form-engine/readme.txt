@@ -251,3 +251,4 @@ The package includes the "ثبت نام گروه‌های مردمی و جهاد
 * Added per-form editable PDF HTML/CSS/token templates and structural Excel output profiles.
 * Added RTL/Persian export handling, identifier-as-text Excel cells, per-form sheets for multi-form exports, safe file hyperlinks and export package/font preflight.
 * Hardened PDF font generation and XLSX binary streaming so font build failures are explicit and Excel writer failures no longer surface as opaque invalid HTTP responses.
+* Isolated PhpSpreadsheet/ZipStream resolution from other WordPress plugin Composer vendors and pinned ZipStream 3.2.2 to prevent mixed v2/v3 constructor failures.

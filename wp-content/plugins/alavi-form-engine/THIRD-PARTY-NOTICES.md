@@ -32,6 +32,7 @@ Alavi Form Engine does **not** bundle or redistribute Persian WooCommerce SMS. I
 ## Export packages (1.0.28-dev)
 
 - **PhpSpreadsheet 5.9.0** — `phpoffice/phpspreadsheet` — MIT License. Used for `.xlsx` generation.
+- **ZipStream-PHP 3.2.2** — `maennchen/zipstream-php` — MIT License. Explicitly pinned for the XLSX writer runtime to avoid mixed ZipStream v2/v3 resolution across WordPress plugin vendors.
 - **tc-lib-pdf 8.73.6** — `tecnickcom/tc-lib-pdf` — GNU LGPL-3.0-or-later. Used for server-side PDF generation.
 - `tc-lib-pdf` uses its companion package family, including `tc-lib-pdf-font`, for Unicode font metadata. Font assets retain their upstream licenses and are generated during the Composer build step; see the upstream font notices.
 

@@ -88,7 +88,7 @@
 
 خروجی‌ها در 1.0.28-dev به‌صورت package-based طراحی شده‌اند:
 
-- Excel: `phpoffice/phpspreadsheet` نسخه `5.9.0` و خروجی واقعی `.xlsx`.
+- Excel: `phpoffice/phpspreadsheet` نسخه `5.9.0` و خروجی واقعی `.xlsx`. برای جلوگیری از برخورد Composer بین افزونه‌های WordPress، `maennchen/zipstream-php` روی `3.2.2` قفل شده و Export داخل autoload scope اختصاصی AFE اجرا می‌شود.
 - PDF: `tecnickcom/tc-lib-pdf` نسخه `8.73.6` با فونت Unicode/RTL از `tc-lib-pdf-font`.
 - هر فرم یک Output Profile پیش‌فرض در Source Definition دارد و Admin فقط Override می‌سازد.
 - PDF از HTML/CSS امن + Token Palette استفاده می‌کند؛ PHP، Shortcode، `url()` و `@import` از UI اجرا نمی‌شوند.
@@ -105,7 +105,7 @@ Dependencyها باید در build نهایی داخل `vendor` نصب شوند.
 AFE_REQUIRE_EXPORT_VENDOR=1 ./tools/qa.sh
 ```
 
-`tc-lib-pdf` برای فارسی به font metadata تولیدشده نیاز دارد. Composer script پروژه اکنون `tools/build-pdf-fonts.sh` را بدون نادیده‌گرفتن خطا اجرا می‌کند. اگر dependencyها قبلاً نصب شده‌اند و فقط فونت آماده نیست، از ریشه افزونه `bash tools/build-pdf-fonts.sh` را اجرا کنید و وجود `vendor/tecnickcom/tc-lib-pdf-font/target/fonts/dejavu/dejavusans.json` را بررسی کنید. خروجی XLSX نیز ابتدا در فایل موقت کامل ساخته و اعتبارسنجی می‌شود و سپس با HTTP headers تمیز stream می‌شود تا خطاهای Writer به‌صورت `ERR_INVALID_RESPONSE` مخفی نشوند.
+`tc-lib-pdf` برای فارسی به font metadata تولیدشده نیاز دارد. Composer script پروژه اکنون `tools/build-pdf-fonts.sh` را بدون نادیده‌گرفتن خطا اجرا می‌کند. اگر dependencyها قبلاً نصب شده‌اند و فقط فونت آماده نیست، از ریشه افزونه `bash tools/build-pdf-fonts.sh` را اجرا کنید و وجود `vendor/tecnickcom/tc-lib-pdf-font/target/fonts/dejavu/dejavusans.json` را بررسی کنید. خروجی XLSX نیز ابتدا در فایل موقت کامل ساخته و اعتبارسنجی می‌شود و سپس با HTTP headers تمیز stream می‌شود تا خطاهای Writer به‌صورت `ERR_INVALID_RESPONSE` مخفی نشوند. AFE هنگام ساخت XLSX، Composer loader افزونه‌های دیگر را موقتاً از resolution خارج می‌کند و با Reflection تأیید می‌کند که PhpSpreadsheet/ZipStream واقعاً از `alavi-form-engine/vendor` لود شده‌اند؛ اگر کلاس متداخل از قبل توسط افزونه دیگری preload شده باشد، مسیر دقیق آن به‌صورت خطای مدیریتی/log گزارش می‌شود.
 
 ## امنیت Template
 

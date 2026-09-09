@@ -13,10 +13,12 @@ $composerRaw=(string)file_get_contents($root.'/composer.json');
 $jihadi=(string)file_get_contents($root.'/src/Forms/JihadiGroupRegistrationForm.php');
 $checks=[
  'phpspreadsheet-required'=>isset($composer['require']['phpoffice/phpspreadsheet']),
+ 'zipstream-v3-pinned'=>(($composer['require']['maennchen/zipstream-php']??'')==='3.2.2'),
  'tclib-pdf-required'=>isset($composer['require']['tecnickcom/tc-lib-pdf']),
  'no-dom-pdf'=>!str_contains($submissions,'Dompdf\\Dompdf')&&!str_contains($pdfAction,'Dompdf\\Dompdf'),
  'no-manual-spreadsheetml'=>!str_contains($submissions,'SpreadsheetML')&&!str_contains($submissions,'application/vnd.ms-excel'),
  'xlsx-writer'=>str_contains($excel,'PhpOffice\\PhpSpreadsheet\\Writer\\Xlsx'),
+ 'xlsx-autoload-scope'=>str_contains($excel,'ExportAutoloadScope::run')&&str_contains($excel,'assertOwnExcelRuntime'),
  'xlsx-explicit-string'=>str_contains($excel,'DataType::TYPE_STRING'),
  'tc-lib-pdf'=>str_contains($pdf,'Com\\Tecnick\\Pdf\\Tcpdf'),
  'pdf-font-explicit-builder'=>str_contains($buildFonts,'make -C')&&str_contains($buildFonts,'target/fonts/dejavu/dejavusans.json'),

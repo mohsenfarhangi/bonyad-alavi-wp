@@ -52,7 +52,7 @@ fi
 if php -r '$j=json_decode(file_get_contents("composer.json"),true); exit(is_array($j)?0:1);'; then pass "composer.json"; else fail "composer.json"; fi
 
 if [ "${AFE_REQUIRE_EXPORT_VENDOR:-0}" = "1" ]; then
-  if php -r '''require "vendor/autoload.php"; exit(class_exists("PhpOffice\\PhpSpreadsheet\\Spreadsheet") && class_exists("PhpOffice\\PhpSpreadsheet\\Writer\\Xlsx") && class_exists("Com\\Tecnick\\Pdf\\Tcpdf") ? 0 : 1);'''; then
+  if php -r '''require "vendor/autoload.php"; exit(class_exists("PhpOffice\\PhpSpreadsheet\\Spreadsheet") && class_exists("PhpOffice\\PhpSpreadsheet\\Writer\\Xlsx") && class_exists("ZipStream\\ZipStream") && enum_exists("ZipStream\\OperationMode") && !class_exists("ZipStream\\Option\\Archive") && class_exists("Com\\Tecnick\\Pdf\\Tcpdf") ? 0 : 1);'''; then
     pass "export vendor package classes"
   else
     fail "export vendor package classes"

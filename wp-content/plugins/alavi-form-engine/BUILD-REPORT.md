@@ -391,3 +391,13 @@ Browser print remains available. Direct server-side PDF in the 1.0.28 developmen
 - Export endpoints catch `Throwable` and log the concrete error before showing an admin error, preventing opaque `ERR_INVALID_RESPONSE` for writer/runtime failures.
 
 - Fixed tc-lib-pdf DejaVu font detection: current bulk build stores metadata under `target/fonts/dejavu/dejavusans.json`; legacy flat layout remains supported.
+
+
+## Checkpoint 11.3 — Excel Composer isolation
+
+- Diagnosed XLSX runtime failure as cross-plugin Composer class collision: PhpSpreadsheet was resolved from another plugin vendor while ZipStream API generation differed.
+- Added `ExportAutoloadScope` to temporarily remove foreign Composer loaders during XLSX generation and prioritize AFE's own loader.
+- Added Reflection origin checks for Spreadsheet, Xlsx, ZipStream0, ZipStream and OperationMode; foreign preloaded classes fail closed with an actionable path instead of a constructor TypeError.
+- Changed Excel package readiness to file-based checks under AFE vendor so admin status rendering does not preload another plugin's package.
+- Pinned `maennchen/zipstream-php` to 3.2.2 and reject the v2 `ZipStream\Option\Archive` marker inside AFE's export scope.
+- Added regression coverage that simulates a foreign Composer vendor taking precedence and verifies AFE isolation.

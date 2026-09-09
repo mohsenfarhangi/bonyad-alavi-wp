@@ -41,7 +41,10 @@ spl_autoload_register(static function (string $class): void {
 
 $vendor = AFE_PATH . 'vendor/autoload.php';
 if (is_readable($vendor)) {
-    require_once $vendor;
+    $afeComposerLoader = require $vendor;
+    if (is_object($afeComposerLoader) && method_exists($afeComposerLoader, 'loadClass')) {
+        $GLOBALS['afe_composer_loader'] = $afeComposerLoader;
+    }
 }
 
 // Fail early with a useful WordPress error instead of an opaque class-not-found
@@ -66,6 +69,7 @@ $criticalBootstrapClasses = [
     'BonyadAlavi\\FormEngine\\Submission\\SubmissionService' => 'src/Submission/SubmissionService.php',
     'BonyadAlavi\\FormEngine\\Export\\ExportProfile' => 'src/Export/ExportProfile.php',
     'BonyadAlavi\\FormEngine\\Export\\ExportPackageStatus' => 'src/Export/ExportPackageStatus.php',
+    'BonyadAlavi\\FormEngine\\Export\\ExportAutoloadScope' => 'src/Export/ExportAutoloadScope.php',
     'BonyadAlavi\\FormEngine\\Export\\BinaryDownload' => 'src/Export/BinaryDownload.php',
     'BonyadAlavi\\FormEngine\\Export\\PdfExporter' => 'src/Export/PdfExporter.php',
     'BonyadAlavi\\FormEngine\\Export\\ExcelExporter' => 'src/Export/ExcelExporter.php',
