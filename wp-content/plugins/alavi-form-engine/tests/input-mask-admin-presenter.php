@@ -28,13 +28,15 @@ $field=['type'=>'tel','input_mask'=>['key'=>'mobile_ir','pattern'=>'9999 999 999
 $html=$edit->invoke($presenter,$field,'09123456789',[],'afe_admin_data[mobile]');
 $clean=$sanitize->invoke($presenter,$field,'0912 345 6789');
 $display=$plain->invoke($presenter,$field,'09123456789',[]);
+$frontendDisplay=$plain->invoke($presenter,$field,'09123456789',[],true);
 
 $checks=[
-    'admin-edit-formatted'=>str_contains($html,'value="0912 345 6789"'),
-    'admin-mask-data'=>str_contains($html,'data-afe-input-mask="9999 999 9999"'),
-    'admin-mask-maxlength'=>str_contains($html,'maxlength="13"'),
+    'admin-edit-raw'=>str_contains($html,'value="09123456789"'),
+    'admin-mask-data-removed'=>!str_contains($html,'data-afe-input-mask='),
+    'admin-raw-maxlength'=>str_contains($html,'maxlength="11"'),
     'admin-numeric-direction-ltr'=>str_contains($html,'dir="ltr"'),
     'admin-save-normalized'=>$clean==='09123456789',
-    'admin-display-formatted'=>$display==='0912 345 6789',
+    'admin-display-raw'=>$display==='09123456789',
+    'frontend-display-formatted'=>$frontendDisplay==='0912 345 6789',
 ];
 foreach($checks as $name=>$ok){ echo ($ok?'PASS ':'FAIL ').$name.PHP_EOL; if(!$ok) exit(1); }

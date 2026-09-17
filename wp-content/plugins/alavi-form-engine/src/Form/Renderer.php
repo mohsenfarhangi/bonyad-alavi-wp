@@ -60,16 +60,16 @@ final class Renderer
         }
         wp_enqueue_script('afe-frontend');
 
-        if ($row && trim((string)$row->custom_css) !== '') {
-            wp_add_inline_style('afe-frontend', (string)$row->custom_css);
-        }
+        $customCss = $row ? trim((string)$row->custom_css) : '';
+        $customCssHtml = $customCss !== '' ? $this->renderCustomCss($slug, $customCss) : '';
+
         if ($row && trim((string)$row->custom_js) !== '') {
             wp_add_inline_script('afe-frontend', "\n/* AFE per-form custom JS */\n" . (string)$row->custom_js, 'after');
         }
 
         if ($locked && $previewEnabled) {
             $shellClass = $this->styleIsolation->shellClass($form);
-            return $this->renderLockedPreview($form, $editing, $shellClass);
+            return $customCssHtml . $this->renderLockedPreview($form, $editing, $shellClass);
         }
 
         $stepHtml = [];
@@ -153,7 +153,7 @@ final class Renderer
             ? '<div class="afe-duplicate-live" data-afe-duplicate-live aria-live="polite" aria-atomic="true" hidden></div>'
             : '';
 
-        return '<div class="'.esc_attr($shellClass).'" data-afe-isolation="'.esc_attr($this->styleIsolation->modeForForm($form)).'" dir="rtl">'.$editingNotice.$lockPanel.$resumeBox
+        return $customCssHtml . '<div class="'.esc_attr($shellClass).'" data-afe-isolation="'.esc_attr($this->styleIsolation->modeForForm($form)).'" dir="rtl">'.$editingNotice.$lockPanel.$resumeBox
             . '<form class="afe-form" method="post" enctype="multipart/form-data" novalidate data-form="'.esc_attr($slug).'"'.($locked?' data-afe-readonly="1"':'').' data-afe-lock-after-submit="'.(!empty($form['settings']['lock_after_submit'])?'1':'0').'" data-afe-preview-enabled="'.($previewEnabled?'1':'0').'" data-afe-lock-warning="'.esc_attr((string)($form['settings']['lock_warning']??'')).'"'.$duplicateAttrs.'>'
             . $hidden . $duplicateLive . $content
             . ($locked?'':'<div class="afe-captcha-wrap">'.$this->security->captchaMarkup((string)($form['settings']['captcha']??'custom')).'</div>')
@@ -200,6 +200,11 @@ final class Renderer
         $content=$this->previewRenderer->render($form,(array)($row['data']??[]),(int)$row['id'],false);
         $notice=(!empty($_GET['afe_submitted'])?'<div class="afe-notice afe-notice-success"><strong>اطلاعات با موفقیت ثبت شد.</strong><span>فرم اکنون قفل شده است.</span></div>':'').'<div class="afe-notice afe-notice-warning"><strong>این فرم پس از ثبت نهایی قفل شده است.</strong><span>اطلاعات زیر فقط قابل مشاهده است.</span></div>';
         return '<div class="'.esc_attr($shellClass).'" data-afe-isolation="'.esc_attr($this->styleIsolation->modeForForm($form)).'" dir="rtl">'.$notice.$this->editRequestPanel($form,$editing).'<div class="afe-locked-preview"><header class="afe-form-header">'.$this->renderBrandMark($form).'<div><h1>'.esc_html((string)$form['title']).'</h1><p>کد رهگیری: <strong dir="ltr">'.esc_html((string)$row['tracking_code']).'</strong></p></div></header>'.$content.'</div></div>';
+    }
+
+    private function renderCustomCss(string $slug, string $css): string
+    {
+        return '<style class="afe-form-custom-css" data-afe-form="'.esc_attr($slug).'">' . "\n" . $css . "\n" . '</style>';
     }
 
     private function renderBrandMark(array $form): string

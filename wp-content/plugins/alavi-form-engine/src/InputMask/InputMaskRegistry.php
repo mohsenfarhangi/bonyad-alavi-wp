@@ -18,7 +18,7 @@ final class InputMaskRegistry
         $this->register(new InputMaskDefinition('national_id_ir','کد ملی ایران','9999999999',$types,'0012345678','صفر ابتدایی حفظ می‌شود.','numeric'));
         $this->register(new InputMaskDefinition('postal_code_ir','کد پستی ایران','99999-99999',$types,'12345-67890','خط تیره فقط نمایشی است و ذخیره نمی‌شود.','numeric'));
         $this->register(new InputMaskDefinition('bank_card_ir','شماره کارت بانکی','9999 9999 9999 9999',$types,'6037 9912 3456 7890','فاصله‌ها فقط نمایشی هستند.','numeric'));
-        $this->register(new InputMaskDefinition('iban_digits_ir','شماره شبا (۲۴ رقم)','9999 9999 9999 9999 9999 9999',$types,'1234 5678 9012 3456 7890 1234','برای فرم‌هایی که ۲۴ رقم شبا را بدون IR ذخیره می‌کنند.','numeric'));
+        $this->register(new InputMaskDefinition('iban_digits_ir','شماره شبا (۲۴ رقم)','999999999999999999999999',$types,'123456789012345678901234','۲۴ رقم شبا بدون IR و بدون فاصله نمایش و ذخیره می‌شود.','numeric'));
     }
 
     public function register(InputMaskDefinition $definition): void

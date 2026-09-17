@@ -14,8 +14,11 @@ use BonyadAlavi\FormEngine\InputMask\InputMaskRegistry;
 
 $registry=new InputMaskRegistry();
 $mobile=$registry->get('mobile_ir');
+$iban=$registry->get('iban_digits_ir');
 $checks=[
     'mobile-preset'=>$mobile?->pattern==='9999 999 9999' && $mobile->supports('tel'),
+    'iban-contiguous-preset'=>$iban?->pattern==='999999999999999999999999' && $iban?->example==='123456789012345678901234',
+    'iban-format-no-spaces'=>InputMaskPattern::format('123456789012345678901234',(string)$iban?->pattern)==='123456789012345678901234',
     'mobile-normalize'=>InputMaskPattern::normalize('۰۹۱۲ ۳۴۵ ۶۷۸۹','9999 999 9999')==='09123456789',
     'mobile-format'=>InputMaskPattern::format('09123456789','9999 999 9999')==='0912 345 6789',
     'postal-normalize'=>InputMaskPattern::normalize('12345-67890','99999-99999')==='1234567890',

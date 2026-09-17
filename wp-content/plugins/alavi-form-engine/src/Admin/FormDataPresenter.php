@@ -50,17 +50,17 @@ final class FormDataPresenter
         return null;
     }
 
-    public function displayField(array $field,mixed $value,array $context=[]): string
+    public function displayField(array $field,mixed $value,array $context=[],bool $applyInputMask=false): string
     {
         if (($field['type'] ?? '') === 'repeater') {
             $rows=is_array($value)?$value:[];
             if (!$rows) $rows=$this->legacyRepeaterRows($field,$context);
-            return $this->displayRepeater($field,$rows,$context);
+            return $this->displayRepeater($field,$rows,$context,$applyInputMask);
         }
-        return $this->displayScalar($field,$value,$context);
+        return $this->displayScalar($field,$value,$context,$applyInputMask);
     }
 
-    public function plainField(array $field,mixed $value,array $context=[]): string
+    public function plainField(array $field,mixed $value,array $context=[],bool $applyInputMask=false): string
     {
         if (($field['type'] ?? '') === 'repeater') {
             $value=is_array($value)?$value:[];
@@ -74,7 +74,7 @@ final class FormDataPresenter
                 foreach ($children as $child) {
                     $childName=(string)($child['name'] ?? '');
                     if ($childName==='') continue;
-                    $parts[]=$this->fieldLabel($child).': '.$this->plainField($child,$row[$childName]??'',array_merge($context,$row));
+                    $parts[]=$this->fieldLabel($child).': '.$this->plainField($child,$row[$childName]??'',array_merge($context,$row),$applyInputMask);
                 }
                 $lines[]='ردیف '.($index+1).': '.implode(' | ',$parts);
             }
@@ -95,7 +95,9 @@ final class FormDataPresenter
         $text=isset($options[$key]) ? (string)$options[$key] : $key;
         $mask=$field['input_mask']??null;
         if (is_array($mask) && InputMaskPattern::isValid((string)($mask['pattern']??''))) {
-            $text=InputMaskPattern::format($text,(string)$mask['pattern']);
+            $pattern=(string)$mask['pattern'];
+            $text=InputMaskPattern::normalize($text,$pattern);
+            if ($applyInputMask) $text=InputMaskPattern::format($text,$pattern);
         }
         $prefix=trim((string)($field['display_prefix']??''));
         if ($prefix !== '' && !str_starts_with(strtoupper($text),strtoupper($prefix))) $text=$prefix.$text;
@@ -172,7 +174,7 @@ final class FormDataPresenter
         return $has ? [$row] : [];
     }
 
-    private function displayRepeater(array $field,array $rows,array $context): string
+    private function displayRepeater(array $field,array $rows,array $context,bool $applyInputMask=false): string
     {
         if (!$rows) return '<span class="afe-admin-empty">ثبت نشده</span>';
         $children=$this->children($field);
@@ -186,14 +188,14 @@ final class FormDataPresenter
             $html.='<tr><td class="afe-admin-repeater-index">'.($index+1).'</td>';
             foreach ($children as $child) {
                 $name=(string)($child['name']??'');
-                $html.='<td>'.$this->displayField($child,$row[$name]??'',$rowContext).'</td>';
+                $html.='<td>'.$this->displayField($child,$row[$name]??'',$rowContext,$applyInputMask).'</td>';
             }
             $html.='</tr>';
         }
         return $html.'</tbody></table></div>';
     }
 
-    private function displayScalar(array $field,mixed $value,array $context): string
+    private function displayScalar(array $field,mixed $value,array $context,bool $applyInputMask=false): string
     {
         if (is_array($value)) {
             if (!$value) return '<span class="afe-admin-empty">—</span>';
@@ -203,7 +205,7 @@ final class FormDataPresenter
             return esc_html(implode('، ',$labels));
         }
         if ($value === null || $value === '') return '<span class="afe-admin-empty">—</span>';
-        $text=$this->plainField($field,$value,$context);
+        $text=$this->plainField($field,$value,$context,$applyInputMask);
         return nl2br(esc_html($text));
     }
 
@@ -250,13 +252,13 @@ final class FormDataPresenter
         $mask=$field['input_mask']??null;
         $maskPattern=is_array($mask)?trim((string)($mask['pattern']??'')):'';
         if ($maskPattern!=='' && is_scalar($value) && InputMaskPattern::isValid($maskPattern)) {
-            $value=InputMaskPattern::format((string)$value,$maskPattern);
+            $value=InputMaskPattern::normalize((string)$value,$maskPattern);
         }
         $type=(string)($field['type']??'text');
         $attrs=' name="'.esc_attr($inputName).'" class="afe-admin-control"';
         $inputMode='';
         if ($maskPattern!=='' && InputMaskPattern::isValid($maskPattern) && in_array($type,['text','tel'],true)) {
-            $attrs.=' data-afe-input-mask="'.esc_attr($maskPattern).'" maxlength="'.esc_attr((string)InputMaskPattern::displayLength($maskPattern)).'"';
+            $attrs.=' maxlength="'.esc_attr((string)InputMaskPattern::slotCount($maskPattern)).'"';
             $inputMode=(string)($mask['inputmode']??InputMaskPattern::suggestedInputMode($maskPattern));
             if ($inputMode!=='') $attrs.=' inputmode="'.esc_attr($inputMode).'"';
         }
