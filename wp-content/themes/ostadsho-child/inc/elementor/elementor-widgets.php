@@ -53,6 +53,11 @@ final class BA_Elementor_Assets {
 			'bonyad-alavi-jihadi-center-widget',
 			'assets/css/bonyad-alavi-jihadi-center-widget.css'
 		);
+
+		$this->register_style(
+			'bonyad-alavi-home-hero-widget',
+			'assets/css/bonyad-alavi-home-hero-widget.css'
+		);
 	}
 
 	/**
@@ -80,6 +85,12 @@ final class BA_Elementor_Assets {
 		$this->register_script(
 			'bonyad-alavi-jihadi-center-widget',
 			'assets/js/bonyad-alavi-jihadi-center-widget.js',
+			array( 'elementor-frontend' )
+		);
+
+		$this->register_script(
+			'bonyad-alavi-home-hero-widget',
+			'assets/js/bonyad-alavi-home-hero-widget.js',
 			array( 'elementor-frontend' )
 		);
 	}
@@ -175,10 +186,12 @@ final class BA_Elementor_Widgets_Registrar {
 		require_once get_stylesheet_directory() . '/inc/elementor/widgets/class-bonyad-alavi-participation-widget.php';
 		require_once get_stylesheet_directory() . '/inc/elementor/widgets/class-bonyad-alavi-product-gallery-widget.php';
 		require_once get_stylesheet_directory() . '/inc/elementor/widgets/class-bonyad-alavi-jihadi-center-widget.php';
+		require_once get_stylesheet_directory() . '/inc/elementor/widgets/class-bonyad-alavi-home-hero-widget.php';
 
 		$widgets_manager->register( new \Bonyad_Alavi_Participation_Widget() );
 		$widgets_manager->register( new \Bonyad_Alavi_Product_Gallery_Widget() );
 		$widgets_manager->register( new \Bonyad_Alavi_Jihadi_Center_Widget() );
+		$widgets_manager->register( new \Bonyad_Alavi_Home_Hero_Widget() );
 	}
 }
 

@@ -1,6 +1,6 @@
 <?php
 /**
- * سرویس ساخت Query برای ویجت مرکز جهادی.
+ * سرویس مشترک ساخت Query برای ویجت‌های محتوایی قالب بنیاد علوی.
  *
  * @package OstadshoChild
  */
@@ -18,7 +18,7 @@ final class BA_Content_Query_Service {
 	 * Query را با پیشوند کنترل‌های یک سکشن می‌سازد.
 	 *
 	 * @param array  $settings تنظیمات ویجت.
-	 * @param string $prefix   پیشوند کنترل‌ها مانند news یا media.
+	 * @param string $prefix   پیشوند کنترل‌ها مانند news، media یا ticker.
 	 * @return WP_Query
 	 */
 	public function create_query( array $settings, $prefix ) {
