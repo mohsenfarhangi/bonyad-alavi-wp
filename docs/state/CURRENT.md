@@ -19,7 +19,7 @@ AFE release goal همچنان live acceptance نسخه 1.0.28 و رفع blocker 
 
 ### Jihadi form ownership transfer
 - Source Definition فرم `jihadi-group-registration` از `alavi-form-engine/src/Forms` به `ostadsho-child/inc/forms` منتقل شد.
-- ثبت مستقیم فرم از `Core\\Plugin` حذف و registration به `afe_register_forms` در child theme منتقل شد.
+- ثبت مستقیم فرم از `Core\Plugin` حذف و registration به `afe_register_forms` در child theme منتقل شد.
 - AFE boot از `plugins_loaded` به `after_setup_theme` priority 20 منتقل شد تا theme registration window معتبر باشد.
 - slug فرم تغییر نکرد؛ migration دیتابیس لازم نیست.
 - تست‌های اختصاصی فرم از suite افزونه خارج و regression theme جایگزین شد؛ یک regression برای bootstrap registration window نیز به AFE اضافه شد.

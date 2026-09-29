@@ -24,7 +24,7 @@ Plugin:
 - Engine هیچ Source Definition پروژه‌ای built-in ثبت نمی‌کند؛ فرم‌های سایت از hook `afe_register_forms` وارد `FormRegistry` می‌شوند.
 
 Source domains:
-`Actions, Admin, Core, DataSource, Database, Duplicate, Elementor, Events, Export, Form, Forms, InputMask, Localization, Repository, Rest, Security, Style, Submission, Template, Validation`.
+`Actions, Admin, Core, DataSource, Database, Duplicate, Elementor, Events, Export, Form, InputMask, Localization, Repository, Rest, Security, Style, Submission, Template, Validation`.
 
 ## Form Definition and Overrides
 

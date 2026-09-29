@@ -27,7 +27,7 @@ Bootstrap:
 - `Core\Plugin::instance()->boot()` در `plugins_loaded` اجرا می‌شود.
 
 Top-level domains:
-`Actions, Admin, Core, DataSource, Database, Duplicate, Elementor, Events, Export, Form, Forms, InputMask, Localization, Repository, Rest, Security, Style, Submission, Template, Validation`.
+`Actions, Admin, Core, DataSource, Database, Duplicate, Elementor, Events, Export, Form, InputMask, Localization, Repository, Rest, Security, Style, Submission, Template, Validation`.
 
 Flow اصلی:
 
