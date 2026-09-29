@@ -11,11 +11,22 @@
 
 ## Current Goal
 
-ویجت Elementor جدید برای `ba-quick-links` صفحه اصلی بر اساس reference `bonyad-alavi-redesign/redesign/index.html` پیاده‌سازی شده است. مرحله باز این subsystem، پذیرش بصری/رفتاری در Elementor واقعی و بررسی overflow/«بیشتر» در عرض‌های واقعی صفحه اصلی است.
+ویجت Elementor جدید برای `ba-live-stats` صفحه اصلی بر اساس reference `bonyad-alavi-redesign/redesign/index.html` پیاده‌سازی شده است. مرحله باز این subsystem، پذیرش بصری در Elementor واقعی و مقایسه desktop/tablet/mobile با reference است.
 
 AFE release goal همچنان live acceptance نسخه 1.0.28 و رفع blocker واقعی پیش از production promotion است.
 
 ## Recently Completed
+
+### Homepage Live Stats Elementor widget
+- ویجت `bonyad_alavi_home_live_stats` به child theme و دسته «بنیاد علوی» اضافه شد.
+- markup اصلی reference شامل `ba-live-stats`, `ba-container`, panel/title/grid/item/value/label حفظ شده و فقط root class `ba-home-live-stats-widget` برای scope اضافه شده است.
+- عنوان گزارش دو فیلد مستقل با defaultهای `گزارش برخط` و `اقدامات` دارد.
+- Repeater آمار فقط `NUMBER` + label دارد؛ کاربر عدد خام بدون جداکننده وارد می‌کند و frontend آن را با ارقام فارسی و جداکننده هزارگان `٬` نمایش می‌دهد.
+- ۶ مقدار/عنوان reference به‌صورت raw number default هستند.
+- CSS حالت نهایی reference حفظ شده: green shell + white rounded stats card، desktop 6 columns، tablet 3 columns، mobile 2 columns.
+- این block در reference هیچ JavaScriptی ندارد؛ برای widget نیز هیچ JS asset/dependency اضافه نشده است.
+- Style controls بدون visual default هستند و فقط تغییر صریح کاربر reference CSS را override می‌کند.
+- source commit: `51a6666f7fd1447075cfdd2a51afeeb946953ec1`.
 
 ### Homepage Quick Links Elementor widget
 - ویجت `bonyad_alavi_home_quick_links` به child theme اضافه و در دسته «بنیاد علوی» ثبت شد.
@@ -114,6 +125,7 @@ Open release work برای AFE:
 - [MODULE-CONTACT-FORM](../modules/contact-form.md)
 - [MODULE-HOME-HERO](../modules/theme-home-hero-widget.md)
 - [MODULE-HOME-QUICK-LINKS](../modules/theme-home-quick-links-widget.md)
+- [MODULE-HOME-LIVE-STATS](../modules/theme-home-live-stats-widget.md)
 
 ## Tests Status
 
@@ -130,6 +142,8 @@ Real MeliPayamak test: PASS reported by project administrator on 2026-09-04.
 Theme legacy v0.6.5 docs recorded PHP/JS syntax + ZIP checks for that patch.
 
 برای فرم تماس با ما regression `tests/contact-form-definition.php` اضافه شده است؛ source/test روی draft محلی PHP lint شدند و نسخه commit‌شده از GitHub برای slug، Geo province، required fields، admin email action و theme registration بازبینی استاتیک شد. **اجرای regression در checkout کامل repository و live WordPress هنوز در این session انجام نشده است.**
+
+برای Live Stats صفحه اصلی regression contract جدید `tests/home-live-stats-widget-contract.php` اضافه شده است. روی نسخه commit‌شده، markup، NUMBER-only input، ۶ default، formatter frontend، desktop/tablet/mobile CSS و نبود JS dependency به‌صورت استاتیک بازبینی شد. **PHP lint و live WordPress/Elementor acceptance در این session اجرا نشده‌اند.**
 
 برای Quick Links صفحه اصلی regression contract جدید `tests/home-quick-links-widget-contract.php` اضافه شده است. روی نسخه commit‌شده، contractهای markup/reference SVGs/colors/responsive/overflow/registration با GitHub source بازبینی و JavaScript با parser V8 بررسی شد. **PHP lint و live WordPress/Elementor acceptance در این session اجرا نشده‌اند.**
 
@@ -148,7 +162,7 @@ Historical PASSهای AFE/Theme به HEAD جدید تعمیم داده نمی‌
 
 ## Next Agent Handoff
 
-**Current task:** ویجت Quick Links صفحه اصلی مطابق `ba-quick-links` reference پیاده‌سازی شده است؛ مرحله باز بعدی live Elementor visual/overflow acceptance روی صفحه اصلی واقعی است.
+**Current task:** ویجت Live Stats صفحه اصلی مطابق `ba-live-stats` reference پیاده‌سازی شده است؛ مرحله باز بعدی live Elementor visual acceptance روی صفحه اصلی واقعی است.
 
 **Start here:** [../INDEX.md](../INDEX.md) → [../modules/INDEX.md](../modules/INDEX.md).
 

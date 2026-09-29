@@ -13,6 +13,7 @@
 | MODULE-CONTACT-FORM | Contact Form | contact-us, contact, province, geo, AFE registration | One-step site contact form owned by child theme with geo province field and admin email action | [contact-form.md](contact-form.md) |
 | MODULE-HOME-HERO | Homepage Hero Elementor Widget | homepage, hero, slider, mission nav, ticker, Elementor | Repeater-based Hero from redesign reference with query-driven ticker and scoped responsive assets | [theme-home-hero-widget.md](theme-home-hero-widget.md) |
 | MODULE-HOME-QUICK-LINKS | Homepage Quick Links Elementor Widget | homepage, quick links, services, overflow, more, Elementor | Reference-faithful `ba-quick-links` widget with Repeater items, original SVG/color defaults and scoped overflow JS | [theme-home-quick-links-widget.md](theme-home-quick-links-widget.md) |
+| MODULE-HOME-LIVE-STATS | Homepage Live Stats Elementor Widget | homepage, live stats, counters, report, Elementor | Reference-faithful `ba-live-stats` widget with numeric repeater values and frontend-only Persian thousands formatting | [theme-home-live-stats-widget.md](theme-home-live-stats-widget.md) |
 
 برای task فرم جهادی از `MODULE-JIHADI-FORM` شروع کن و در صورت تغییر Engine سپس `MODULE-AFE`/`MODULE-AFE-EXTENSION` را بخوان.
 
@@ -21,5 +22,7 @@
 برای تغییرات `ba-hero__grid`/Hero صفحه اصلی از `MODULE-HOME-HERO` شروع کن.
 
 برای تغییرات `ba-quick-links` صفحه اصلی از `MODULE-HOME-QUICK-LINKS` شروع کن.
+
+برای تغییرات `ba-live-stats` صفحه اصلی از `MODULE-HOME-LIVE-STATS` شروع کن.
 
 برای task ابتدا فقط module مرتبط را بخوان. اگر module به ADR اشاره کرد، سپس فقط همان ADR را باز کن.

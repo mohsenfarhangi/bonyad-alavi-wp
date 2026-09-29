@@ -339,3 +339,23 @@ Date: 2026-09-29
 - source commits: `28c2688e67d3ec3def18472f03d05eb182fd4808`, `392c26aba8959d7aa47927b7493ded9d5e9d73fb`, `d663991b83c001e5f47d992369707cd8dd939ddc`.
 
 Current contract: [MODULE-HOME-QUICK-LINKS](../modules/theme-home-quick-links-widget.md).
+
+## STATE-002-016 — Homepage Live Stats converted to Elementor widget
+
+Date: 2026-09-29
+
+- reference: `mohsenfarhangi/bonyad-alavi-redesign/redesign/index.html`، block `ba-live-stats` و final CSS refinements در `redesign/assets/css/home.css`.
+- ویجت جدید `Bonyad_Alavi_Home_Live_Stats_Widget` با slug Elementor برابر `bonyad_alavi_home_live_stats` به child theme اضافه شد.
+- markup reference حفظ شد: section/container/panel/title/title-line/grid/item/value/label؛ root class اضافی فقط برای CSS scope است.
+- عنوان دو control مستقل دارد: `گزارش برخط` و `اقدامات`.
+- stat Repeater شامل NUMBER control و label است. مقادیر default به‌صورت raw integer ذخیره می‌شوند: 266549, 348969, 109729, 17939, 25232, 1163646.
+- formatter فقط هنگام render، عدد را به ارقام فارسی و separator `٬` تبدیل می‌کند؛ بنابراین مدیر در Elementor جداکننده وارد نمی‌کند.
+- final visual contract reference حفظ شد: panel=158px+content / green shell / border 2px / radius22 / padding4 / gap4 / min-height96، white grid radius18، desktop 6 columns، tablet 148px + 3 columns، mobile 1-column panel + 2-column stats + radius14.
+- separatorهای بین آمارها مطابق reference در desktop/tablet/mobile حفظ شدند.
+- reference برای این block JavaScript ندارد؛ widget نیز `get_script_depends()` یا JS asset ندارد.
+- Style controls برای panel/title/grid/value/label/separator اضافه شدند ولی default ظاهری ندارند.
+- regression: `wp-content/themes/ostadsho-child/tests/home-live-stats-widget-contract.php`.
+- static source verification انجام شد؛ PHP lint و live Elementor acceptance هنوز تأیید نشده‌اند.
+- source commit: `51a6666f7fd1447075cfdd2a51afeeb946953ec1`.
+
+Current contract: [MODULE-HOME-LIVE-STATS](../modules/theme-home-live-stats-widget.md).
