@@ -2,8 +2,6 @@
 
 ## Repository Boundary
 
-Repository یک WordPress installation کامل نیست. ساختار اصلی track‌شده:
-
 ```text
 .
 ├── AGENTS.md
@@ -12,76 +10,111 @@ Repository یک WordPress installation کامل نیست. ساختار اصلی 
     ├── plugins/
     │   └── alavi-form-engine/
     └── themes/
-        ├── PATCH-MANIFEST.md
         └── ostadsho-child/
 ```
 
-## Application Components
+مستندات canonical فقط در root `docs/` هستند. package-facing README/readme/third-party notice داخل plugin باقی مانده‌اند.
 
-### 1. Alavi Form Engine (AFE)
+## 1. Alavi Form Engine
 
-ورودی plugin: `wp-content/plugins/alavi-form-engine/alavi-form-engine.php`
-
+ورودی: `wp-content/plugins/alavi-form-engine/alavi-form-engine.php`  
 Namespace: `BonyadAlavi\FormEngine`
 
-Composition root از PSR-4 fallback داخلی و Composer autoloader استفاده می‌کند، bootstrap preflight کلاس‌های حیاتی را چک می‌کند و سپس `Core\Plugin` را در `plugins_loaded` boot می‌کند.
+Bootstrap:
+- PSR-4 fallback داخلی همیشه ثبت می‌شود.
+- Composer autoloader اختصاصی plugin در صورت وجود load می‌شود.
+- critical bootstrap files/classes preflight می‌شوند.
+- `Core\Plugin::instance()->boot()` در `plugins_loaded` اجرا می‌شود.
 
-لایه‌های اصلی در `src/` شامل این domainها هستند: Actions، Admin، Core، DataSource، Database، Duplicate، Elementor، Events، Export، Form/Forms، InputMask، Localization، Repository، Rest، Security، Style، Submission، Template و Validation.
+Top-level domains:
+`Actions, Admin, Core, DataSource, Database, Duplicate, Elementor, Events, Export, Form, Forms, InputMask, Localization, Repository, Rest, Security, Style, Submission, Template, Validation`.
 
-Flow عمومی فرم:
+Flow اصلی:
 
 ```text
-Code Form Definition
-  -> resolved form + allowed admin overrides
-  -> Renderer / Elementor adapter
-  -> server-side validation + normalization
-  -> SubmissionService
-  -> repositories / files / duplicate guard
-  -> actions + events + tokens
-  -> admin/report/export surfaces
+PHP Form Definition
+ -> allowed Admin Overrides
+ -> resolved runtime form
+ -> Renderer / Elementor
+ -> normalization + validation
+ -> SubmissionService
+ -> repositories/files/duplicate guard
+ -> event/action/token pipeline
+ -> admin/report/export
 ```
 
-Shared AFE tables در مستند معماری داخلی شامل forms/submissions/values/files/notes/audit/action logs/action once/fingerprints و جداول geography هستند. فرم می‌تواند dedicated mirror table داشته باشد ولی shared submission data برای workflow و reporting نقش authority را حفظ می‌کند.
+Shared submission tables برای workflow/reporting authority باقی می‌مانند؛ form می‌تواند mirror table اختصاصی داشته باشد.
 
-Export subsystem در `src/Export` از PhpSpreadsheet/ZipStream و tc-lib-pdf استفاده می‌کند. Composer vendor در repository commit نشده و export runtime برای جلوگیری از collision با vendor افزونه‌های دیگر hardening اختصاصی دارد.
+مرجع فعلی: [MODULE-AFE](modules/alavi-form-engine.md)  
+Extension API: [MODULE-AFE-EXTENSION](modules/alavi-form-engine-extension-api.md)
 
-جزئیات: [MODULE-AFE](modules/alavi-form-engine.md)
+## 2. Child Theme
 
-### 2. Ostadsho Child Theme
+ورودی: `wp-content/themes/ostadsho-child/functions.php`
 
-ورودی اصلی: `wp-content/themes/ostadsho-child/functions.php`
-
-این فایل assetهای child theme/WooCommerce را enqueue و subsystemهای زیر را load می‌کند:
-
-- admin components و settings page/AJAX
-- Elementor widgets و dynamic tags
-- participation WooCommerce services/quick checkout
-- center settings service
+Composition شامل:
+- front/cart/checkout/thank-you assets
+- admin components و settings page
+- Elementor widgets/dynamic tags
+- participation WooCommerce services
+- center settings/content services
+- product media helpers/services
 - shortcodes و product FAQ
 
-کد theme در `inc/admin`, `inc/elementor`, `inc/helpers`, `inc/services`, `inc/shortcodes`, `inc/woocommerce` تفکیک شده است.
+Subdirectories اصلی:
+`inc/admin`, `inc/elementor`, `inc/helpers`, `inc/services`, `inc/shortcodes`, `inc/woocommerce`.
 
-### 3. Participation Quick Checkout
+مرجع: [MODULE-THEME](modules/ostadsho-child-theme.md)
 
-ویجت مشارکت، product/amount را validate می‌کند، billing fields ووکامرس را inline آماده می‌کند، order مستقل پروژه را می‌سازد و gateway انتخاب‌شده را اجرا می‌کند. Cart واقعی کاربر نباید وارد این order یا توسط gateway تغییر کند. جزئیات: [MODULE-PARTICIPATION](modules/participation-payments.md) و [ADR-002](decisions/ADR-002-participation-quick-checkout.md).
+## 3. Theme Admin Settings
 
-### 4. Jihadi Center
+`BA_Settings_Page` registry تب‌ها را resolve می‌کند؛ `BA_Settings_Ajax_Controller` مسیر مشترک AJAX save است و `BA_Settings_Access_Service` access persistence را یکپارچه می‌کند.
 
-صفحه مرکز حرکت‌های مردمی و جهادی توسط Elementor widget و service/settings مشترک theme مدیریت می‌شود. Content/query settings از sourceهای Dashboard/Elementor resolve می‌شوند و queryهای news/media از service مشترک عبور می‌کنند. جزئیات: [MODULE-JIHADI-CENTER](modules/jihadi-center.md).
+Assetهای تب بر اساس active tab resolve‌شده و capability load می‌شوند، نه صرفاً raw URL parameter.
+
+Admin Repeater یک component مشترک UI است و sanitize/persistence را مالک نمی‌شود.
+
+مرجع: [MODULE-THEME-ADMIN](modules/theme-admin-settings.md) و [ADR-003](decisions/ADR-003-shared-theme-settings-persistence.md).
+
+## 4. Product Media
+
+`BA_Product_Media_Service` و `BA_Media_Helper` منبع/رندر رسانه محصول را مشترک می‌کنند. Participation widget و product-gallery widget منطق انتخاب تصویر را duplicate نمی‌کنند.
+
+مرجع: [MODULE-THEME-MEDIA](modules/theme-product-media.md).
+
+## 5. Participation Quick Checkout
+
+Flow:
+
+```text
+select project amount
+ -> validate
+ -> inline WooCommerce billing fields
+ -> validate standard hooks
+ -> isolated project order
+ -> configured gateway in isolated cart context
+ -> redirect/payment result
+```
+
+Cart واقعی user نباید در order مشارکت وارد یا توسط gateway mutate شود.
+
+مرجع: [MODULE-PARTICIPATION](modules/participation-payments.md) و [ADR-002](decisions/ADR-002-participation-quick-checkout.md).
+
+## 6. Jihadi Center
+
+Dashboard و Elementor هر دو content/query inputs دارند، اما `BA_Center_Settings_Service::get_effective_settings()` تنها resolver معتبر است و queryها از `BA_Content_Query_Service` می‌گذرند.
+
+مرجع: [MODULE-JIHADI-CENTER](modules/jihadi-center.md) و [ADR-004](decisions/ADR-004-jihadi-center-source-precedence.md).
 
 ## External / Runtime Dependencies
 
 - WordPress
-- WooCommerce برای participation flow
-- Elementor برای widget integration
-- Persian WooCommerce SMS به‌صورت optional integration در AFE
-- Composer packages AFE: PhpSpreadsheet 5.9.0، ZipStream 3.2.2، tc-lib-pdf 8.73.6
-- JalaliDatePicker assets باید local باشند؛ AFE runtime CDN registration را ممنوع می‌کند.
+- WooCommerce برای participation
+- Elementor برای widget integrations
+- Persian WooCommerce SMS به‌صورت optional AFE provider integration
+- AFE Composer: PhpSpreadsheet 5.9.0، ZipStream 3.2.2، tc-lib-pdf 8.73.6
+- JalaliDatePicker browser assets به‌صورت local
 
-## Documentation Boundaries
+## Architecture History
 
-- این فایل فقط architecture جاری بین ماژول‌ها را نگه می‌دارد.
-- جزئیات AFE: `wp-content/plugins/alavi-form-engine/docs/ARCHITECTURE.md` و `docs/PROJECT_STATE.md`
-- جزئیات theme: `wp-content/themes/ostadsho-child/docs/handoff.md` و `docs/versions/`
-- چرایی تصمیم‌های مهم: ADRها
-- evolution زمانی: state history
+تاریخچه legacy که قبلاً در build/handoff/version docs پراکنده بود در [state-v002](state/state-v002.md) خلاصه و index شده است.

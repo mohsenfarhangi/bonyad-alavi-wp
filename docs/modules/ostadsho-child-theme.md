@@ -2,55 +2,55 @@
 
 **Status:** active custom integration layer  
 **Path:** `wp-content/themes/ostadsho-child/`  
-**Theme header version:** `2.8`  
-**Latest internal feature documentation:** `v0.6.5`
+**Theme header version:** `2.8`
 
 ## Purpose
 
-Child theme بنیاد علوی روی parent theme `ostadsho`، integrationهای اختصاصی سایت را نگه می‌دارد: Elementor widgets/dynamic tags، admin settings، WooCommerce participation flow، center settings/content، shortcodes و product FAQ.
+Child theme بنیاد علوی روی parent `ostadsho` integrationهای اختصاصی سایت را نگه می‌دارد: Elementor widgets/dynamic tags، admin settings، WooCommerce participation، product media، center content، shortcodes و product FAQ.
 
 ## Composition
 
 `functions.php`:
-
-- parent/child styles را enqueue می‌کند.
-- assetهای cart/checkout/thankyou مشارکت را بر اساس page context load می‌کند.
-- shortcodeها و admin repeater component را load می‌کند.
-- Elementor widgets/dynamic tags را register/load می‌کند.
-- participation payment/quick checkout services را load می‌کند.
-- center settings service و settings tabها را load می‌کند.
-- shared settings page/AJAX controller را initialize می‌کند.
+- parent/child styles و context-specific WooCommerce assets را enqueue می‌کند.
+- shortcodeها را load می‌کند.
+- admin repeater component و product FAQ را load می‌کند.
+- Elementor widgets/dynamic tags را load می‌کند.
+- participation gateway/quick-checkout services را load می‌کند.
+- center settings service/tab را load می‌کند.
+- settings access/page/AJAX controller را initialize می‌کند.
 
 Subdirectories:
-- `inc/admin`
-- `inc/elementor`
-- `inc/helpers`
-- `inc/services`
-- `inc/shortcodes`
-- `inc/woocommerce`
+`inc/admin`, `inc/elementor`, `inc/helpers`, `inc/services`, `inc/shortcodes`, `inc/woocommerce`.
 
-## Important Contracts
+## Development Conventions Migrated from Legacy Handoff
 
-- صفحه تنظیمات بنیاد علوی از settings registry + shared AJAX controller استفاده می‌کند؛ featureها endpoint ذخیره مستقل نسازند مگر contract tab صریحاً callback مخصوص داشته باشد.
-- assetهای tab باید از resolved active tab/capability path load شوند، نه صرفاً raw `$_GET['tab']`.
-- reusable admin repeater یک component مشترک دارد.
-- participation flow قرارداد جدا و حساس دارد؛ [MODULE-PARTICIPATION](participation-payments.md).
-- مرکز جهادی source precedence/query contracts جدا دارد؛ [MODULE-JIHADI-CENTER](jihadi-center.md).
+### UI / CSS
+- UI جدید با BEM و block اختصاصی، ترجیحاً prefix `ba-`.
+- selector عمومی و override سراسری بدون scope ممنوع.
+- feature CSS زیر block همان feature scope شود.
+- modifier: `block--modifier`; element: `block__element`.
 
-## Documentation
+### PHP
+- logic جدید تا حد عملی OOP و دارای responsibility روشن باشد.
+- Service/Helper/Strategy/Adapter فقط برای مسئله واقعی استفاده شود.
+- قبل از افزودن utility جدید، helper/service موجود بررسی شود.
+- logic مشترک duplicate نشود.
 
-Module handoff:
-`../../wp-content/themes/ostadsho-child/docs/handoff.md`
+### Comments
+- کلاس/متد/تابع جدید توضیح فارسی مفید داشته باشد.
+- کامنت «چرایی/contract» را توضیح دهد، نه syntax بدیهی.
 
-Version history:
-`../../wp-content/themes/ostadsho-child/docs/versions/`
+## Subsystems
 
-Component docs:
-`../../wp-content/themes/ostadsho-child/docs/components/admin-repeater.md`
+- [MODULE-THEME-ADMIN](theme-admin-settings.md) — settings page، AJAX، access و Repeater
+- [MODULE-THEME-MEDIA](theme-product-media.md) — product media/gallery
+- [MODULE-PARTICIPATION](participation-payments.md) — WooCommerce participation
+- [MODULE-JIHADI-CENTER](jihadi-center.md) — صفحه مرکز
 
-Latest patch manifest:
-`../../wp-content/themes/PATCH-MANIFEST.md`
+## Version History
+
+version docs legacy v0.1.0 تا v0.6.5 پس از migration حذف شده‌اند. خلاصه معنی‌دار آن‌ها در [state-v002](../state/state-v002.md) نگهداری می‌شود.
 
 ## Validation
 
-Theme v0.6.5 documentation records PHP lint، JS syntax و ZIP checks برای آن patch. این bootstrap آن‌ها را rerun نکرده است. برای task theme، syntax checks را در کنار integration-specific checks اجرا کن.
+مستند legacy آخرین participation patch، PHP lint و JavaScript syntax/ZIP checks را ثبت می‌کرد. این‌ها historical evidence هستند؛ برای HEAD جدید باید checks مرتبط دوباره اجرا شوند.

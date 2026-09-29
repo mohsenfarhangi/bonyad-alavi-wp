@@ -4,70 +4,323 @@
 **Path:** `wp-content/plugins/alavi-form-engine/`  
 **Namespace:** `BonyadAlavi\FormEngine`  
 **Development version:** `1.0.28-dev`  
-**Stable version documented by module:** `1.0.27`  
+**DB checkpoint:** `1.0.5-dev.2`  
+**Stable baseline/tag documented:** `1.0.27`  
 **PHP:** `>=8.3`
 
 ## Purpose
 
-Code-first extensible WordPress form engine با form rendering، submission persistence، validation، file handling، duplicate detection، actions/events/tokens، exports، data sources، admin/reporting و Elementor integration.
+Code-first extensible WordPress form engine با rendering، submission persistence، validation، uploads، duplicate detection، events/actions/tokens، PDF/XLSX export، data sources، Admin/Reports/REST و Elementor integration.
 
-## Structure
+## Bootstrap and Structure
 
-Top-level source domains:
+Entry point: `alavi-form-engine.php`.
 
+Plugin:
+- PSR-4 fallback داخلی را مستقل از Composer ثبت می‌کند.
+- در صورت وجود `vendor/autoload.php` loader اختصاصی را نگه می‌دارد.
+- critical bootstrap files/classes را قبل از boot validate می‌کند.
+- سپس `Core\Plugin` را boot می‌کند.
+
+Source domains:
 `Actions, Admin, Core, DataSource, Database, Duplicate, Elementor, Events, Export, Form, Forms, InputMask, Localization, Repository, Rest, Security, Style, Submission, Template, Validation`.
 
-Bootstrap:
-`alavi-form-engine.php -> Core\Plugin::boot()`
+## Form Definition and Overrides
 
-Critical bootstrap classes قبل از boot preflight می‌شوند. plugin PSR-4 fallback داخلی را حتی در حضور Composer نگه می‌دارد تا vendor ناقص مانع load کلاس‌های `src/` نشود.
+Contract: [ADR-001](../decisions/ADR-001-code-defined-forms.md).
 
-## Core Contracts
+- PHP Source Definition authority عضویت field/step و default behavior است.
+- Admin فقط overrideهای whitelisted اعمال می‌کند.
+- field/html block فقط داخل Step خود reorder می‌شود.
+- Repeater children فقط داخل همان Repeater reorder می‌شوند.
+- cross-step move پشتیبانی نمی‌شود.
+- item جدید code که در saved order قدیمی نیست به scope خودش append می‌شود.
+- raw PHP/callback از admin پذیرفته نمی‌شود.
 
-- source form definition + allowed overrides؛ [ADR-001](../decisions/ADR-001-code-defined-forms.md)
-- server-side validation/normalization authority
-- file ownership با submission/field relationship
-- trashed submissions از active scopes خارج
-- per-form capabilities در کنار global capabilities
-- action/event/token registries و persisted execution/once guards
-- browser runtime assets local؛ CDN registration مجاز نیست
-- Input Mask presentation/UX است؛ normalized value باید قبل از validation/duplicate/actions/storage استفاده شود.
-- export dependencies از Composer build می‌آیند، ولی `vendor/` در Git track نمی‌شود.
+## Fields, Dates, Validation and Masks
 
-## Current Focus / Risks
+DateField modes:
+- `combined` (default)
+- `picker`
+- `manual`
 
-مستند داخلی AFE نسخه 1.0.28 را feature-complete/pre-acceptance توصیف می‌کند. promotion به production تا live acceptance مجاز نیست.
+Storage/display:
+- Jalali: `YYYY/MM/DD`
+- Gregorian: `YYYY-MM-DD`
 
-اولویت‌های live acceptance ثبت‌شده:
-- Excel export در حضور Composer/vendor افزونه‌های دیگر
-- PDF فارسی/RTL و font assets
-- export template overrides
-- live duplicate behavior
+Validator Registry core coverage:
+- Iranian National ID
+- Iranian mobile
+- IBAN
+- Email
+- URL
+- postal code
+- bank card checksum
+- landline
+- date/calendar
+- custom regex
 
-Latest baseline commit `2b7cc8f` admin mask presentation را raw نگه می‌دارد، frontend preview را برای mask presentation opt-in می‌کند، IBAN 24 رقمی را بدون فاصله می‌کند و custom CSS هر form را همراه markup render می‌کند.
+Custom Regex:
+- نیازمند `afe_manage_settings`
+- max 500 chars
+- flags محدود `i,m,s,u,x`
+- compile test قبل save
+- custom message الزامی
+- runtime PCRE limits
+- frontend فقط UX؛ PHP authority
 
-## Tests
+Character/length overrides:
+`normal, digits, persian, english, alnum` + allowed/forbidden chars + min/max/exact length.
 
-`tools/qa.sh` unified entrypoint است و regression PHP scripts، PHP lint، JS syntax، composer JSON، local assets، CDN registration و version consistency را بررسی می‌کند.
+Input Mask syntax:
+- `9` digit
+- `A` Unicode letter
+- `*` alphanumeric
+- `\` escape
 
-در repository فعلی 57 فایل regression test وجود دارد. مستند checkpoint 11.3 نتیجه 57/57 PASS را ثبت می‌کند، ولی bootstrap حاضر QA را روی latest HEAD اجرا نکرده است.
+Core presets شامل mobile، landline، national ID، postal code، bank card و 24-digit IBAN است. Mask فقط presentation/UX است؛ PHP قبل validation/duplicate/action/storage normalize می‌کند. در HEAD فعلی preset IBAN بدون فاصله است.
 
-## Read Next Only When Needed
+## Numeric Direction / Presentation
 
-Primary module state:
-- `../../wp-content/plugins/alavi-form-engine/docs/PROJECT_STATE.md`
+- numeric/tel/date-like controls LTR و left-aligned هستند.
+- label/layout کلی RTL می‌ماند.
+- Preview و Repeater numeric values نیز LTR هستند.
+- Admin submission presentation/editing normalized raw value را حفظ می‌کند؛ mask presentation در frontend/preview opt-in است.
+- generic `.afe-form .afe-control` نباید forced right alignment داشته باشد.
 
-Architecture:
-- `../../wp-content/plugins/alavi-form-engine/docs/ARCHITECTURE.md`
+## Uploads
 
-Developer details:
-- `../../wp-content/plugins/alavi-form-engine/docs/DEVELOPER.md`
+- native file input برای FormData/server باقی است ولی UX dropzone اختصاصی دارد.
+- file events داخل AFE isolate می‌شوند.
+- existing file ownership با submission + field relationship enforce می‌شود.
+- keep/remove manifest server-side validate می‌شود.
+- single-file replacement rollback protection دارد.
+- generic validator نباید FileField validation را duplicate کند.
+- Preview saved file را با attachment متعلق به همان submission/field یا safe URL resolve می‌کند؛ new selection می‌تواند blob preview داشته باشد.
 
-Release/acceptance:
-- `../../wp-content/plugins/alavi-form-engine/docs/ACCEPTANCE-1.0.28.md`
-- `../../wp-content/plugins/alavi-form-engine/BUILD-REPORT.md`
+## Select UI and Style Isolation
 
-Historical handoff:
-- `../../wp-content/plugins/alavi-form-engine/handoff.md`
+Custom Select default است؛ native select همچنان submission/validation source است. Search، keyboard، multiple، dependent Ajax، repeater و disabled options پشتیبانی می‌شوند. Theme Select2 داخل `.afe-form` isolate/cleanup می‌شود.
 
-برای task مشخص، بعد از این router فقط فایل‌های source/test همان domain را باز کن.
+Style modes:
+- `strong` (default)
+- `default`
+- `disabled`
+
+tokens زیر `.afe-shell` scope شده‌اند و strong mode reset محدود/defensive دارد.
+
+## Submission Lifecycle
+
+- draft/resume
+- final submit + tracking
+- optional preview
+- lock after submit
+- admin edit-request/unlock flow
+- soft trash / restore
+- permanent purge فقط بعد trash
+- custom CAPTCHA refresh Ajax
+
+Lock server-side enforce می‌شود و public renderer با admin capability آن را bypass نمی‌کند.
+
+## Duplicate Detection
+
+Features:
+- multi-field fingerprint
+- Persian/Arabic digit normalization
+- whitespace/case normalization
+- drafts included
+- current edited submission excluded
+- trash excluded
+- behaviors: block/reference/custom/allow+mark
+- canonical owner promotion و dependent retarget transaction-safe
+
+Live check:
+- فقط پس از complete شدن همه fingerprint fields
+- incomplete mask/date query نمی‌زند
+- debounce حدود 450ms
+- stale request cancel
+- file bytes ارسال نمی‌شوند
+- Repeater paths پشتیبانی می‌شوند
+- submit guard authority نهایی است
+- non-duplicate **هیچ success message** نشان نمی‌دهد
+- duplicate واقعی policy message/warning نشان می‌دهد
+- index signature/rebuild باعث self-heal submissionهای قدیمی می‌شود.
+
+## Events, Actions and Tokens
+
+Core:
+- `ActionDefinition / ActionRegistry`
+- `EventRegistry`
+- `TokenRegistry / TokenResolver`
+- `ActionRuntime`
+- persisted action logs و atomic once guards
+
+Policies:
+`always`, `once_per_submission`, `first_in_cycle`.
+
+Implemented actions:
+SMS، Email، Webhook، Redirect، Create/Login/Update User، Assign Role، Update User Meta، Change Status، Internal Note، Generate/Email PDF، Create/Update/Upsert Post/CPT و custom registry action.
+
+Security:
+- external redirect و direct publish opt-in دارند.
+- Administrator یا user دارای `manage_options` برای User Actions protected target است.
+- capability/session/application-password meta keys block می‌شوند.
+- user-meta mappings قبل از write کامل prevalidate می‌شوند.
+- Retry current enabled/event/condition را دوباره resolve می‌کند.
+
+## SMS
+
+Provider داخلی MeliPayamak:
+- legacy username/password
+- Console/API token
+- free text
+- pattern/shared
+- encrypted secrets
+
+Persian WooCommerce SMS adapter:
+- credential را داخل AFE کپی نمی‌کند.
+- از `PWSMS()->send_sms()` و gateway جاری plugin خارجی استفاده می‌کند.
+- free text پشتیبانی می‌شود.
+- pattern فقط strategy شناخته‌شده/extension.
+- unknown pattern fail-closed.
+- external provider unavailable → config حفظ، runtime error واضح، بدون silent fallback.
+
+SMS master setting current/legacy keys را normalize/sync می‌کند و runtime هر action وضعیت فعلی را resolve می‌کند.
+
+Jihadi default SMS action موجود است ولی default disabled است؛ متن/pattern hard-coded نیست.
+
+## Export
+
+Contract: [ADR-006](../decisions/ADR-006-afe-export-dependency-isolation.md).
+
+PDF:
+- tc-lib-pdf 8.73.6
+- Unicode/RTL
+- HTML/CSS sanitized
+- Header/Body/Footer
+- A4/A5/Letter
+- Portrait/Landscape
+- Token Palette
+- clickable file links
+
+Excel:
+- PhpSpreadsheet 5.9.0
+- ZipStream 3.2.2
+- real XLSX
+- per-form structured profile
+- RTL/freeze/autofilter/header style
+- visible/title/width/order columns
+- identifier cells as text
+- file hyperlinks
+- multi-form = separate sheet per form
+
+Source Definition export profile default است و Admin override merge می‌شود.
+
+## Admin / Reports / Localization
+
+- list title واقعی form را نمایش می‌دهد.
+- labels از resolved schema می‌آیند.
+- Repeater readable table است.
+- authorized admin inline edit دارد.
+- `LocaleDateService` Jalali/Gregorian + WordPress timezone/UTC boundaries را مدیریت می‌کند.
+- report/list filters برای `fa_*` Jalali picker دارند.
+- per-form capabilities: view/edit/manage/export/reports/configure.
+
+## Geography / Database Tools
+
+Geography importer:
+- authenticated Ajax
+- client chunks حدود 32 KiB
+- complete rows bulk-upsert
+- incomplete trailing JSON برای chunk بعد
+- retry/idempotent
+- progress/chunk/row/state/retry UI
+
+## Brand Mark and Templates
+
+Per-form brand mark:
+- default/custom image/hidden
+- Media Library picker
+- common resolver normal/locked preview
+- token `{{brand_mark}}`
+
+Template Registry:
+- form/preview/step default templates از code
+- Admin فقط override متفاوت را persist می‌کند
+- reset override باعث برگشت به future code default می‌شود
+- whitelisted tokens؛ remote CSS/resources/raw PHP ممنوع.
+
+## Extension API
+
+برای registration hooks، REST endpoints، DSL examples و provider/validator/template extensions:
+[MODULE-AFE-EXTENSION](alavi-form-engine-extension-api.md).
+
+## Build / Deployment
+
+Composer dependencies:
+- `phpoffice/phpspreadsheet 5.9.0`
+- `maennchen/zipstream-php 3.2.2`
+- `tecnickcom/tc-lib-pdf 8.73.6`
+
+`vendor/` Git-tracked نیست. Deployment باید vendor مطابق `composer.lock` بسازد. PDF font metadata نیز باید تولید شود.
+
+Incomplete deployment preflight باید admin notice/log بدهد، نه class-not-found raw fatal.
+
+Runtime browser JS/CSS از CDN load نشود.
+
+## QA / Release Gate
+
+`tools/qa.sh` checks:
+- PHP >= 8.3
+- regression scripts
+- PHP lint
+- JS syntax در صورت Node
+- composer JSON
+- local Jalali assets
+- no runtime CDN registration
+- version consistency
+- optional export vendor/font checks با `AFE_REQUIRE_EXPORT_VENDOR=1`
+
+Historical checkpoint 11.3 evidence:
+- 57/57 regression PASS
+- 168 PHP lint PASS
+- JS syntax PASS
+- composer JSON PASS
+- no runtime CDN PASS
+- extracted ZIP QA/integrity PASS
+
+**این evidence برای checkpoint 11.3 است، نه PASS جدید برای HEAD فعلی.**
+
+Live acceptance قبل از production bump:
+1. install/upgrade + DB health
+2. Elementor/shortcode
+3. draft/submit/tracking/lock/edit request
+4. duplicate behaviors + live check
+5. action retry/redirect/user/post/PDF actions
+6. Jihadi SMS + Persian WooCommerce SMS
+7. field/repeater ordering
+8. date modes, validators, masks, numeric direction
+9. file preview/admin UX
+10. XLSX با foreign Composer vendor فعال
+11. PDF فارسی/RTL/font
+12. export profile overrides/reset/multi-form
+13. console/debug.log sanity
+
+تا PASS کامل:
+- Plugin = `1.0.28-dev`
+- DB = `1.0.5-dev.2`
+- Stable = `1.0.27`
+
+## Current Unverified Live Priorities
+
+- Excel collision fix checkpoint 11.3 با pluginهایی مثل Pinova
+- PDF فارسی پس از font build
+- PDF/Excel profile override/reset
+- live duplicate روی submission قدیمی
+
+## Package Documentation
+
+برای install/end-user package details:
+- `../../wp-content/plugins/alavi-form-engine/README.md`
+- `../../wp-content/plugins/alavi-form-engine/readme.txt`
+- `../../wp-content/plugins/alavi-form-engine/THIRD-PARTY-NOTICES.md`

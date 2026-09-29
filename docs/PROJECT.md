@@ -2,7 +2,7 @@
 
 ## Purpose
 
-این repository کد سفارشی WordPress مورد استفاده در پروژه بنیاد علوی را نگهداری می‌کند. WordPress core و اکثر dependencyهای سایت در repository نیستند؛ تمرکز فعلی روی یک افزونه اختصاصی Form Engine و یک child theme سفارشی است.
+این repository کد سفارشی WordPress پروژه بنیاد علوی را نگهداری می‌کند. WordPress core و اکثر dependencyهای سایت در repository نیستند؛ تمرکز فعلی روی Alavi Form Engine و child theme سفارشی است.
 
 ## Tracked Product Areas
 
@@ -10,34 +10,53 @@
 
 مسیر: `wp-content/plugins/alavi-form-engine/`
 
-یک WordPress plugin از نوع code-first form engine با submission lifecycle، validation، input mask، duplicate detection، actions/events/tokens، export PDF/XLSX، data sources، REST/Admin و Elementor integration.
+WordPress plugin از نوع code-first form engine با submission lifecycle، validation، input mask، duplicate detection، actions/events/tokens، PDF/XLSX export، data sources، REST/Admin و Elementor integration.
 
-نسخه development در HEAD مبنا: `1.0.28-dev` با PHP `>=8.3`. نسخه production ثبت‌شده در مستندات ماژول هنوز `1.0.27` است و promotion به 1.0.28 به live acceptance وابسته است.
+وضعیت جاری:
+- Development version: `1.0.28-dev`
+- DB checkpoint: `1.0.5-dev.2`
+- Stable baseline/tag مستند: `1.0.27`
+- PHP: `>=8.3`
+- production promotion به live acceptance وابسته است.
 
-### Ostadsho Child Theme customizations
+مرجع: [MODULE-AFE](modules/alavi-form-engine.md)
+
+### Ostadsho Child Theme
 
 مسیر: `wp-content/themes/ostadsho-child/`
 
-Child theme پروژه شامل Elementor widgets/dynamic tags، صفحه و تنظیمات بنیاد علوی، مرکز حرکت‌های مردمی و جهادی، WooCommerce participation flow، shortcodes و admin components است. خط نسخه مستند featureهای سفارشی تا `v0.6.5` ادامه دارد؛ header فایل `style.css` همچنان Theme Version `2.8` را نشان می‌دهد و این دو version scheme را نباید یکی فرض کرد.
+Integration layer پروژه برای Elementor، تنظیمات بنیاد علوی، مرکز حرکت‌های مردمی و جهادی، WooCommerce participation، رسانه محصول، shortcodes و admin components.
 
-## Users / Operational Roles
+Theme header فایل `style.css` نسخه `2.8` را نشان می‌دهد. تاریخچه featureهای سفارشی قدیمی با versionهای `v0.x` جدا از Theme header بوده و اکنون در [state-v002](state/state-v002.md) ثبت شده است.
 
-کد repository برای بازدیدکننده/متقاضی فرم، مدیران WordPress، نقش‌های دارای capabilityهای AFE، مدیر محتوای Elementor و کاربران پرداخت مشارکت طراحی شده است. جزئیات authorization هر subsystem در مستند همان module قرار دارد.
+مرجع: [MODULE-THEME](modules/ostadsho-child-theme.md)
+
+## Documentation Model
+
+از 2026-09-29 تنها ساختار `docs/` مرجع persistent project context است. handoffها، build reportها، acceptance/version docs و patch manifestهای legacy پس از migration حذف شدند.
+
+فایل‌های زیر در plugin حفظ شده‌اند چون نقش package-facing دارند، نه handoff:
+- `README.md` — معرفی/نصب/ویژگی‌های package
+- `readme.txt` — WordPress-style package metadata/changelog
+- `THIRD-PARTY-NOTICES.md` — مجوزها و third-party notices
 
 ## Repository Conventions
 
-- شاخه پیش‌فرض: `main`
+- default branch: `main`
 - WordPress core track نمی‌شود.
 - plugin اصلی track‌شده: `alavi-form-engine`
 - theme اصلی track‌شده: `ostadsho-child`
-- `vendor/` افزونه AFE در Git track نمی‌شود؛ Composer/build contract ماژول را رعایت کن.
+- `vendor/` AFE در Git track نمی‌شود.
 - ZIPها track نمی‌شوند.
-- مستندات root-level این پوشه، persistent context بین sessionها هستند.
-- مستندات تاریخی/جزئی موجود داخل plugin و theme حذف یا جایگزین نشده‌اند؛ root docs به آن‌ها route می‌کنند.
+- تغییر معنی‌دار code باید همراه update مستندات canonical باشد.
 
 ## Important Constraints
 
-- رفتار production را از test/document قدیمی حدس نزن؛ HEAD را بررسی کن.
-- برای AFE، code-defined form schema منبع پایه است و admin فقط override است؛ [ADR-001](decisions/ADR-001-code-defined-forms.md).
-- برای Quick Checkout مشارکت، cart/order isolation و gateway contract را حفظ کن؛ [ADR-002](decisions/ADR-002-participation-quick-checkout.md).
-- نتیجه تست‌های live WordPress/MySQL/Elementor را بدون اجرای واقعی یا گزارش مستند معتبر PASS اعلام نکن.
+- رفتار production را از history قدیمی حدس نزن؛ HEAD و tests را بررسی کن.
+- AFE: code-defined form schema منبع پایه است؛ [ADR-001](decisions/ADR-001-code-defined-forms.md).
+- Participation: cart/order isolation و gateway contract را حفظ کن؛ [ADR-002](decisions/ADR-002-participation-quick-checkout.md).
+- Theme settings: shared registry/AJAX persistence را حفظ کن؛ [ADR-003](decisions/ADR-003-shared-theme-settings-persistence.md).
+- Jihadi center: dual-source precedence را فقط از resolver مرکزی تغییر بده؛ [ADR-004](decisions/ADR-004-jihadi-center-source-precedence.md).
+- Admin repeaters: UI مشترک است و persistence بیرون component می‌ماند؛ [ADR-005](decisions/ADR-005-shared-admin-repeater.md).
+- AFE export: Composer dependency isolation/build contract را حفظ کن؛ [ADR-006](decisions/ADR-006-afe-export-dependency-isolation.md).
+- live WordPress/MySQL/Elementor acceptance را بدون اجرای واقعی یا گزارش مستند معتبر PASS اعلام نکن.

@@ -72,7 +72,7 @@ The package includes the "ثبت نام گروه‌های مردمی و جهاد
 * Added {{progress}} to the overall form template so the editable default source matches the standard AFE layout.
 * Renderer and admin editor now use the same default template source, including code-defined Form/Step/Preview defaults.
 * Added afe_register_templates extension hook plus TemplateDefinition, TemplateRegistry and TemplateResolver for future template types.
-* Updated README.md, readme.txt, BUILD-REPORT.md and developer architecture documentation.
+* Updated package and canonical project documentation.
 
 = 1.0.26 =
 * Reverted all custom frontend JalaliDatePicker opening and positioning logic to the library's standard watcher behavior.
@@ -85,7 +85,7 @@ The package includes the "ثبت نام گروه‌های مردمی و جهاد
 * Disabled the library autoShow path for AFE frontend fields to remove the open/position listener race condition.
 * Added frame-based positioning retries so delayed picker rendering is positioned immediately without waiting for scroll.
 * Picker dimensions now use layout size instead of the animated transformed rectangle for stable first-open placement.
-* Updated README.md, readme.txt and BUILD-REPORT.md for the release.
+* Updated package and project documentation for the release.
 
 = 1.0.24 =
 * Added per-form afe-brand-mark settings with three modes: default AFE mark, custom Media Library image, or hidden.

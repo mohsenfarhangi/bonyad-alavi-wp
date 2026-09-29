@@ -26,7 +26,7 @@
 - metadata رجیستری `supportsExecutionPolicy=false` اکنون واقعاً در sanitizer/UI enforce می‌شود.
 - پوشش Renderer برای هر سه mode تاریخ در هر دو تقویم اضافه شده است.
 - `tools/qa.sh` یک preflight یک‌دست برای regression، PHP lint، JS syntax، composer، local assets، no-runtime-CDN و consistency نسخه فراهم می‌کند.
-- ماتریس کامل وضعیت در `docs/FEATURE-COMPLETENESS-1.0.28.md` و acceptance دستی در `docs/ACCEPTANCE-1.0.28.md` است.
+- وضعیت فعلی، release gate و acceptance در `../../../docs/modules/alavi-form-engine.md` نگهداری می‌شود.
 
 موارد باقی‌مانده پیش از bump نهایی فقط acceptance عملی روی WordPress + MySQL/MariaDB + Elementor و سپس release finalization است. بعد از PASS، Plugin به `1.0.28`، DB به `1.0.5` و Stable tag به `1.0.28` تغییر خواهد کرد.
 
@@ -113,7 +113,7 @@ PHP خام از پنل ادمین اجرا نمی‌شود. مدیر دارای 
 
 ## توسعه
 
-راهنمای کامل در `docs/DEVELOPER.md` و معماری در `docs/ARCHITECTURE.md` قرار دارد.
+راهنمای توسعه در `../../../docs/modules/alavi-form-engine-extension-api.md` و معماری repository در `../../../docs/ARCHITECTURE.md` قرار دارد.
 
 
 ## تغییرات 1.0.1
@@ -254,7 +254,7 @@ Form::make('my-form')->brandMarkImage('https://example.test/logo.png', 'نشان
 Form::make('my-form')->hideBrandMark();
 ```
 
-- `README.md`، `readme.txt` و `BUILD-REPORT.md` هم‌زمان با نسخه به‌روزرسانی شدند.
+- `README.md`، `readme.txt` و مستندات canonical پروژه هم‌زمان با نسخه به‌روزرسانی شدند.
 
 
 ## تغییرات 1.0.25 — بازشدن فوری تقویم جلالی
@@ -265,7 +265,7 @@ Form::make('my-form')->hideBrandMark();
 - موقعیت تقویم تا ۳۰ frame کوتاه بررسی می‌شود تا اگر `<jdp-container>` کمی دیرتر ساخته/نمایش داده شد، بدون نیاز به Scroll در اولین فرصت کنار همان فیلد قرار بگیرد.
 - برای محاسبه ابعاد تقویم از `offsetWidth/offsetHeight` استفاده می‌شود تا animation اولیه `scale()` باعث محاسبه اشتباه مختصات نشود.
 - Scroll همچنان فقط برای reposition کردن تقویم باز استفاده می‌شود و دیگر trigger لازم برای ظاهرشدن آن نیست.
-- `README.md`، `readme.txt` و `BUILD-REPORT.md` هم‌زمان با نسخه 1.0.25 به‌روزرسانی شدند.
+- `README.md`، `readme.txt` و مستندات پروژه هم‌زمان با نسخه 1.0.25 به‌روزرسانی شدند.
 
 
 ## تغییرات 1.0.26 — بازگشت تقویم جلالی به رفتار استاندارد
@@ -289,5 +289,5 @@ Form::make('my-form')->hideBrandMark();
 - یک Normalizer یک‌باره برای 1.0.27 اضافه شد تا Overrideهای قدیمی که صرفاً کپی دقیق Default فعلی هستند پاک شوند و به‌اشتباه Defaultهای آینده را Freeze نکنند.
 - Token جدید `{{progress}}` به قالب کل فرم اضافه شد تا Source نمایش‌داده‌شده در Editor دقیقاً ساختار استاندارد AFE را بازنمایی کند.
 - Hook جدید `afe_register_templates` برای ثبت Template Definitionهای آینده اضافه شد.
-- `README.md`، `readme.txt`، `BUILD-REPORT.md` و مستندات توسعه هم‌زمان با نسخه 1.0.27 به‌روزرسانی شدند.
+- `README.md`، `readme.txt` و مستندات توسعه هم‌زمان با نسخه 1.0.27 به‌روزرسانی شدند.
 

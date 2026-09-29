@@ -4,114 +4,105 @@
 
 ## Project Phase
 
-پروژه در توسعه فعال است. دو خط اصلی کد سفارشی وجود دارد:
+پروژه در توسعه فعال است.
 
-- **Alavi Form Engine:** `1.0.28-dev`، در وضعیت feature-complete/pre-acceptance طبق مستندات داخلی؛ stable production baseline هنوز `1.0.27` است.
-- **Ostadsho child theme customizations:** آخرین feature patch مستند `v0.6.5` است؛ Theme header فایل `style.css` نسخه `2.8` دارد و version scheme داخلی featureها جداست.
-
-Baseline code HEAD قبل از bootstrap مستندات:
-`2b7cc8fecb8be39d40c2562349ea8c0b6adce12e` روی `main`.
+- **Alavi Form Engine:** `1.0.28-dev`، DB `1.0.5-dev.2`، stable baseline/tag `1.0.27`; production bump هنوز به live acceptance وابسته است.
+- **Ostadsho child theme:** custom integration layer روی Theme header `2.8`; version docs legacy v0.x به state history مهاجرت کرده‌اند.
 
 ## Current Goal
 
-هدف جاری repository-level این است که توسعه theme/plugin بدون وابستگی به history گفتگو قابل ادامه باشد. سیستم persistent context راه‌اندازی شده و task محصولی بعدی باید از این snapshot و module routerها شروع شود.
+ساختار مستندات project-level canonical شده است. task بعدی باید فقط از root `docs/` و module مربوط شروع شود؛ handoff/build/version docs قدیمی دیگر source of truth نیستند و حذف شده‌اند.
 
-برای AFE، هدف release همچنان تکمیل live acceptance نسخه 1.0.28 و رفع هر blocker واقعی قبل از promotion به stable است. برای theme، آخرین مسئله مستند Quick Checkout در v0.6.5 اصلاح JavaScript country/state initialization بوده است.
+AFE release goal همچنان live acceptance نسخه 1.0.28 و رفع blocker واقعی پیش از production promotion است.
 
 ## Recently Completed
 
-### Alavi Form Engine — latest repository commit
+### Persistent documentation migration
+- دانش AFE legacy از Project State، Architecture، Developer، Acceptance، Feature Completeness، Build Report و Handoff به module/ADR/state canonical منتقل شد.
+- دانش theme legacy از Handoff، Admin Repeater guide، v0.1.0→v0.6.5 version docs و Patch Manifests منتقل شد.
+- legacy duplicate docs حذف شدند.
+- package-facing AFE `README.md`, `readme.txt`, `THIRD-PARTY-NOTICES.md` حفظ شدند و README references به docs canonical هدایت شدند.
 
-Commit `2b7cc8f` تغییرات زیر را ثبت کرده است:
+### Latest product baseline before documentation-only commits
+`2b7cc8fecb8be39d40c2562349ea8c0b6adce12e`
 
-- نمایش/ویرایش admin برای داده‌های maskدار به raw normalized value نزدیک شده و mask فقط روی presentation فرانت اعمال می‌شود.
-- preset شبا 24 رقمی بدون فاصله شده است.
-- Preview فرانت می‌تواند mask را صریحاً برای نمایش اعمال کند.
-- per-form custom CSS مستقیماً همراه render form/locked preview به `<style>` خروجی داده می‌شود تا به style handle نامرتبط وابسته نباشد.
-- regression tests مربوط به input mask به‌روزرسانی شده‌اند.
-- `docs/PROJECT_STATE.md` ماژول AFE به repository اضافه شده است.
-
-### Child Theme
-
-Feature patch `v0.6.5` Trigger دستی eventهای داخلی WooCommerce برای country/state را حذف و initialization را به `change` واقعی billing country داخل Quick Checkout محدود کرده است.
+AFE changes در آن baseline:
+- admin masked data به normalized/raw presentation نزدیک شد.
+- frontend preview می‌تواند mask presentation را اعمال کند.
+- 24-digit IBAN preset بدون فاصله شد.
+- per-form custom CSS همراه render form/locked preview output می‌شود.
+- mask regression tests به‌روزرسانی شدند.
 
 ## Currently In Progress
 
-هیچ feature branch یا task نیمه‌تمام قابل اثبات از وضعیت repository دیده نشد. کار باز اصلی AFE طبق مستندات داخلی **live acceptance** نسخه 1.0.28 است، نه توسعه یک feature مشخص جدید.
+هیچ feature task نیمه‌تمام قابل اثبات در repository ثبت نشده است.
+
+Open release work برای AFE:
+- live acceptance WordPress/MySQL/Elementor
+- Excel collision verification در سایت واقعی با foreign Composer vendor
+- PDF فارسی/font runtime verification
+- export override/reset verification
+- live duplicate verification روی legacy submission
 
 ## Blocked / Known Issues
 
-- AFE production promotion به `1.0.28` تا PASS شدن acceptance واقعی WordPress + MySQL/MariaDB + browser + Elementor انجام نشود.
-- مستند `PROJECT_STATE.md` ماژول AFE هنوز live checks مهمی را برای Excel collision در حضور pluginهای دیگر، PDF فارسی و export template overrides در اولویت می‌داند.
-- `vendor/` AFE در Git track نمی‌شود؛ deployment/export به build صحیح Composer و PDF font metadata وابسته است.
-- نتیجه QA checkpoint 11.3 برای آخرین HEAD پس از commit `2b7cc8f` دوباره در این bootstrap اجرا نشده است. PASS جدید برای HEAD فعلی ادعا نشود.
-- WordPress core، parent theme و third-party plugins در این repo موجود نیستند؛ برای integration testing محیط کامل لازم است.
+- AFE به `1.0.28` / DB `1.0.5` / Stable `1.0.28` تا PASS acceptance زنده bump نشود.
+- `vendor/` AFE در Git نیست؛ export deployment به Composer build و PDF font metadata وابسته است.
+- documented checkpoint 11.3 QA یک PASS تاریخی است؛ بعد از product commit `2b7cc8f` full QA در این documentation migration اجرا نشده، پس HEAD فعلی **unverified** است.
+- WordPress core، parent theme و third-party plugins در repo نیستند؛ integration tests محیط کامل می‌خواهند.
 
 ## Important Active Decisions
 
-- [ADR-001 — Code-defined forms remain source of truth](../decisions/ADR-001-code-defined-forms.md)
-- [ADR-002 — Isolated participation quick checkout](../decisions/ADR-002-participation-quick-checkout.md)
+- [ADR-001 — Code-defined forms](../decisions/ADR-001-code-defined-forms.md)
+- [ADR-002 — Isolated participation checkout](../decisions/ADR-002-participation-quick-checkout.md)
+- [ADR-003 — Shared theme settings persistence](../decisions/ADR-003-shared-theme-settings-persistence.md)
+- [ADR-004 — Jihadi Center source precedence](../decisions/ADR-004-jihadi-center-source-precedence.md)
+- [ADR-005 — Shared admin Repeater](../decisions/ADR-005-shared-admin-repeater.md)
+- [ADR-006 — AFE export dependency isolation](../decisions/ADR-006-afe-export-dependency-isolation.md)
 
-Constraints مهم:
-- AFE runtime assets از CDN ثبت نشوند.
-- admin UI فرم نباید raw PHP/JS executable را به‌عنوان schema extension بپذیرد.
-- gateway id مشارکت case-sensitive است و persist آن نباید با `sanitize_key()` case را تغییر دهد.
-- Quick Checkout فعلی فقط billing fields را نمایش/validate می‌کند و CSS force width باید scope شده بماند.
+## Relevant Modules
 
-## Relevant Files
-
-### Repository context
-- [../../AGENTS.md](../../AGENTS.md)
-- [../INDEX.md](../INDEX.md)
-- [../ARCHITECTURE.md](../ARCHITECTURE.md)
-
-### AFE
-- `../../wp-content/plugins/alavi-form-engine/alavi-form-engine.php`
-- `../../wp-content/plugins/alavi-form-engine/docs/PROJECT_STATE.md`
-- `../../wp-content/plugins/alavi-form-engine/docs/ARCHITECTURE.md`
-- `../../wp-content/plugins/alavi-form-engine/handoff.md`
-- `../../wp-content/plugins/alavi-form-engine/tools/qa.sh`
-
-### Theme
-- `../../wp-content/themes/ostadsho-child/functions.php`
-- `../../wp-content/themes/ostadsho-child/docs/handoff.md`
-- `../../wp-content/themes/ostadsho-child/docs/versions/v0.6.5.md`
+- [MODULE-AFE](../modules/alavi-form-engine.md)
+- [MODULE-AFE-EXTENSION](../modules/alavi-form-engine-extension-api.md)
+- [MODULE-THEME](../modules/ostadsho-child-theme.md)
+- [MODULE-THEME-ADMIN](../modules/theme-admin-settings.md)
+- [MODULE-THEME-MEDIA](../modules/theme-product-media.md)
+- [MODULE-PARTICIPATION](../modules/participation-payments.md)
+- [MODULE-JIHADI-CENTER](../modules/jihadi-center.md)
 
 ## Tests Status
 
-### AFE
-
-Repository documentation for checkpoint 11.3 records:
-
-- 57/57 regression tests PASS
-- 168 PHP files lint PASS
-- JavaScript syntax PASS
-- composer.json PASS
+Historical AFE checkpoint 11.3:
+- 57/57 regression PASS
+- 168 PHP lint PASS
+- JS syntax PASS
+- composer JSON PASS
 - runtime CDN check PASS
 - extracted ZIP QA/integrity PASS
 
-این نتایج checkpoint 11.3 هستند. آخرین repository commit بعداً input-mask/custom-CSS code را تغییر داده؛ این bootstrap تست‌ها را execute نکرده است، بنابراین وضعیت full QA برای HEAD فعلی **unverified** است.
+Real MeliPayamak test: PASS reported by project administrator on 2026-09-04.
 
-### Theme
+Theme legacy v0.6.5 docs recorded PHP/JS syntax + ZIP checks for that patch.
 
-مستند v0.6.5 اجرای `node --check` روی JavaScriptها، `php -l` روی PHPها و ZIP checks را به‌عنوان تست آن patch ثبت می‌کند. در bootstrap حاضر دوباره اجرا نشده‌اند.
+**No product test suite was rerun during this documentation-only consolidation.**
 
 ## Next Actions
 
-1. برای هر task جدید ابتدا domain را از [modules/INDEX.md](../modules/INDEX.md) انتخاب کن.
-2. اگر task AFE است، قبل از patch علاوه بر module guide، `docs/PROJECT_STATE.md` و فقط مستند تخصصی مرتبط را بخوان.
-3. پس از تغییر AFE، `tools/qa.sh` و تست‌های domain مرتبط را اجرا کن؛ اگر export در scope است build/vendor checks را هم لحاظ کن.
-4. اگر task theme است، `docs/handoff.md` و version/component مرتبط را بخوان و syntax/integration checks مناسب را اجرا کن.
-5. بعد از کار معنی‌دار CURRENT، state history و module/ADR مرتبط را به‌روزرسانی کن.
+1. task domain را از [modules/INDEX.md](../modules/INDEX.md) انتخاب کن.
+2. فقط module + ADR مرتبط + source/test files همان subsystem را load کن.
+3. AFE code change → domain tests + `tools/qa.sh`; export scope → vendor/font checks.
+4. Theme code change → PHP/JS syntax + integration-specific checks.
+5. بعد از تغییر مهم، CURRENT + state active + module/ADR/index متاثر را update کن.
+6. parallel handoff/version documentation tree دوباره ایجاد نکن.
 
 ## Next Agent Handoff
 
-**Current task:** هیچ task محصولی باز به‌طور قابل اثبات در repository ثبت نشده؛ persistent context آماده است تا task بعدی از روی repo ادامه یابد.
+**Current task:** documentation consolidation complete؛ feature task بازی وجود ندارد.
 
-**Start here:** [../INDEX.md](../INDEX.md) سپس [../modules/INDEX.md](../modules/INDEX.md).
+**Start here:** [../INDEX.md](../INDEX.md) → [../modules/INDEX.md](../modules/INDEX.md).
 
-**Already decided:** قرارداد Source Definition/Overrides در AFE و cart isolation پرداخت مشارکت را بدون شواهد یا requirement جدید redesign نکن.
+**Do not reconsider without new evidence:** AFE source-definition override model، participation cart isolation، theme shared settings persistence، Jihadi source precedence، shared admin Repeater، export autoload isolation.
 
-**Do not assume:** PASS بودن QA روی آخرین HEAD، availability بودن vendor در deployment، یا PASS شدن acceptance زنده.
+**Do not assume:** current HEAD QA PASS، live export acceptance، vendor availability یا production readiness.
 
-**Immediate handoff rule:** فقط context مربوط به subsystem درخواستی را load کن؛ تاریخچه کامل AFE/theme یا همه stateها را به‌صورت پیش‌فرض نخوان.
+**History lookup:** [INDEX.md](INDEX.md) → `state-v002.md` برای legacy milestones.
