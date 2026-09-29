@@ -1,0 +1,177 @@
+/* Homepage Live Stats widget.
+ * Baseline is intentionally kept in sync with the final ba-live-stats rules
+ * in bonyad-alavi-redesign/redesign/assets/css/home.css.
+ * Elementor Style controls are empty by default and only override these rules after explicit edits.
+ */
+
+.ba-home-live-stats-widget {
+  --green: #069043;
+  --ink: #163027;
+  --max: 1280px;
+  padding: 24px 0 0;
+  color: var(--ink);
+  font-family: YekanBakh, IRANSans, "Vazirmatn", Tahoma, Arial, sans-serif;
+  line-height: 1.8;
+}
+
+.ba-home-live-stats-widget,
+.ba-home-live-stats-widget * {
+  box-sizing: border-box;
+}
+
+.ba-home-live-stats-widget .ba-container {
+  width: min(var(--max), calc(100% - 40px));
+  margin: auto;
+}
+
+.ba-home-live-stats-widget .ba-live-stats__panel {
+  overflow: hidden;
+  display: grid;
+  grid-template-columns: 158px minmax(0, 1fr);
+  min-height: 96px;
+  padding: 4px;
+  gap: 4px;
+  margin-top: 0;
+  background: var(--green);
+  border: 2px solid var(--green);
+  border-radius: 22px;
+  box-shadow: none;
+}
+
+.ba-home-live-stats-widget .ba-live-stats__title {
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  padding: 10px 14px;
+  gap: 2px;
+  background: transparent;
+}
+
+.ba-home-live-stats-widget .ba-live-stats__title-line {
+  display: block;
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1.45;
+  white-space: nowrap;
+}
+
+.ba-home-live-stats-widget .ba-live-stats__grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  align-items: stretch;
+  background: #fff;
+  border-radius: 18px;
+  overflow: hidden;
+}
+
+.ba-home-live-stats-widget .ba-live-stats__item {
+  min-width: 0;
+  text-align: center;
+  position: relative;
+  padding: 12px 6px 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.ba-home-live-stats-widget .ba-live-stats__item:not(:last-child)::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 18%;
+  height: 64%;
+  width: 1px;
+  background: #dfe8e3;
+}
+
+.ba-home-live-stats-widget .ba-live-stats__value {
+  display: block;
+  color: var(--green);
+  font-size: clamp(19px, 1.55vw, 24px);
+  font-weight: 800;
+  line-height: 1.25;
+  font-variant-numeric: tabular-nums;
+}
+
+.ba-home-live-stats-widget .ba-live-stats__label {
+  display: block;
+  color: #5f7168;
+  font-size: 12px;
+  margin-top: 7px;
+  line-height: 1.55;
+  white-space: nowrap;
+}
+
+@media (max-width: 1080px) {
+  .ba-home-live-stats-widget {
+    padding-top: 20px;
+  }
+}
+
+@media (max-width: 1080px) and (min-width: 761px) {
+  .ba-home-live-stats-widget .ba-live-stats__panel {
+    grid-template-columns: 148px minmax(0, 1fr);
+  }
+
+  .ba-home-live-stats-widget .ba-live-stats__grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .ba-home-live-stats-widget .ba-live-stats__item {
+    min-height: 78px;
+  }
+
+  .ba-home-live-stats-widget .ba-live-stats__item:nth-child(3)::after {
+    display: none;
+  }
+}
+
+@media (max-width: 760px) {
+  .ba-home-live-stats-widget {
+    padding-top: 18px;
+  }
+
+  .ba-home-live-stats-widget .ba-container {
+    width: min(100% - 24px, var(--max));
+  }
+
+  .ba-home-live-stats-widget .ba-live-stats__panel {
+    grid-template-columns: 1fr;
+    border-radius: 18px;
+    padding: 4px;
+    gap: 4px;
+  }
+
+  .ba-home-live-stats-widget .ba-live-stats__title {
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 10px 14px;
+  }
+
+  .ba-home-live-stats-widget .ba-live-stats__title-line {
+    font-size: 15px;
+  }
+
+  .ba-home-live-stats-widget .ba-live-stats__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    border-radius: 14px;
+  }
+
+  .ba-home-live-stats-widget .ba-live-stats__item:nth-child(3)::after {
+    display: block;
+  }
+
+  .ba-home-live-stats-widget .ba-live-stats__item:nth-child(even)::after {
+    display: none;
+  }
+
+  .ba-home-live-stats-widget .ba-live-stats__label {
+    white-space: normal;
+  }
+}
