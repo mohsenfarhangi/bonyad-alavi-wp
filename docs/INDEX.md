@@ -16,6 +16,7 @@
 
 - AFE عمومی → [modules/INDEX.md](modules/INDEX.md) → `MODULE-AFE`
 - توسعه hook/form/action در AFE → `MODULE-AFE-EXTENSION`
+- فرم تماس با ما → `MODULE-CONTACT-FORM`
 - تنظیمات مدیریت قالب → `MODULE-THEME-ADMIN`
 - media/gallery محصول → `MODULE-THEME-MEDIA`
 - پرداخت مشارکت → `MODULE-PARTICIPATION`

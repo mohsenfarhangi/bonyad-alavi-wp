@@ -11,11 +11,21 @@
 
 ## Current Goal
 
-Hero بازطراحی‌شده صفحه اصلی به یک ویجت مستقل Elementor در child theme تبدیل شده است. مسیر ادامه برای این بخش `MODULE-HOME-HERO` است؛ پذیرش بصری/رفتاری نهایی باید در Elementor و صفحه اصلی واقعی انجام شود.
+فرم تک‌مرحله‌ای `contact-us` در child theme تعریف و از طریق `afe_register_forms` ثبت شده است. مرحله بعدی این subsystem، پذیرش زنده فرم در WordPress و بررسی ارسال ایمیل مدیر/Geo province در محیط واقعی است.
 
 AFE release goal همچنان live acceptance نسخه 1.0.28 و رفع blocker واقعی پیش از production promotion است.
 
 ## Recently Completed
+
+### Contact form in child theme
+- Source Definition جدید `contact-us` در `ostadsho-child/inc/forms/class-ba-contact-form.php` اضافه شد و از `functions.php` روی `afe_register_forms` ثبت می‌شود.
+- فرم تک‌مرحله‌ای شامل نام و نام خانوادگی، شماره همراه، ایمیل، استان، موضوع و متن پیام است.
+- فیلد `province` از Data Source استاندارد AFE با `type=geo` و `level=province` تغذیه می‌شود و لیست استان‌ها در قالب hard-code نشده است.
+- شماره همراه از validator `mobile_09` و mask `mobile_ir` استفاده می‌کند.
+- Wizard/Progress/Save Draft خاموش، CAPTCHA سفارشی فعال و rate limit برابر 5 است.
+- اکشن `notify_admin_email_on_submit` بعد از `submission.submitted` یک‌بار برای ایمیل مدیر سایت اجرا می‌شود و از field tokens برای موضوع/بدنه استفاده می‌کند.
+- shortcode استفاده: `[alavi_form id="contact-us"]`.
+- source commit: `5f181fe082f5879072262f15ba3e420c58a7b4b7`.
 
 ### Homepage Hero Elementor widget
 - بخش `ba-hero__grid` از reference repository `bonyad-alavi-redesign/redesign/index.html` به ویجت `bonyad_alavi_home_hero` در child theme تبدیل شد.
@@ -87,6 +97,7 @@ Open release work برای AFE:
 - [MODULE-PARTICIPATION](../modules/participation-payments.md)
 - [MODULE-JIHADI-CENTER](../modules/jihadi-center.md)
 - [MODULE-JIHADI-FORM](../modules/jihadi-group-registration-form.md)
+- [MODULE-CONTACT-FORM](../modules/contact-form.md)
 - [MODULE-HOME-HERO](../modules/theme-home-hero-widget.md)
 
 ## Tests Status
@@ -103,6 +114,8 @@ Real MeliPayamak test: PASS reported by project administrator on 2026-09-04.
 
 Theme legacy v0.6.5 docs recorded PHP/JS syntax + ZIP checks for that patch.
 
+برای فرم تماس با ما regression `tests/contact-form-definition.php` اضافه شده است؛ source/test روی draft محلی PHP lint شدند و نسخه commit‌شده از GitHub برای slug، Geo province، required fields، admin email action و theme registration بازبینی استاتیک شد. **اجرای regression در checkout کامل repository و live WordPress هنوز در این session انجام نشده است.**
+
 برای Hero صفحه اصلی فایل regression contract جدید `tests/home-hero-widget-contract.php` اضافه شده است. روی draft محلی معادل این implementation، PHP lint، JavaScript syntax و contract checks PASS شدند؛ نسخه commit‌شده نیز از GitHub برای registration، Query reuse، link contract، نبود تصاویر پیش‌فرض، scope CSS و Elementor JS hook بازبینی استاتیک شد. **اجرای live WordPress/Elementor روی HEAD جدید هنوز تأیید نشده است.**
 
 Historical PASSهای AFE/Theme به HEAD جدید تعمیم داده نمی‌شوند.
@@ -118,7 +131,7 @@ Historical PASSهای AFE/Theme به HEAD جدید تعمیم داده نمی‌
 
 ## Next Agent Handoff
 
-**Current task:** ویجت Hero صفحه اصلی پیاده‌سازی و ثبت شده است؛ مرحله باز بعدی، پذیرش بصری/رفتاری در Elementor واقعی و انتخاب تصاویر توسط مدیر محتوا است.
+**Current task:** فرم `contact-us` در child theme پیاده‌سازی و ثبت شده است؛ مرحله باز بعدی، تست frontend submit، بارگذاری استان‌ها و دریافت ایمیل مدیر در محیط WordPress واقعی است.
 
 **Start here:** [../INDEX.md](../INDEX.md) → [../modules/INDEX.md](../modules/INDEX.md).
 

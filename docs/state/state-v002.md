@@ -266,3 +266,22 @@ Date: 2026-09-29
 - live WordPress/Elementor acceptance هنوز انجام نشده است.
 
 Current contract: [MODULE-HOME-HERO](../modules/theme-home-hero-widget.md).
+
+## STATE-002-012 — Contact form added to child theme
+
+Date: 2026-09-29
+
+- فرم جدید `contact-us` در `wp-content/themes/ostadsho-child/inc/forms/class-ba-contact-form.php` اضافه شد.
+- ownership مطابق ADR-007 در child theme است و AFE فقط Engine/API عمومی را تأمین می‌کند.
+- `functions.php` کلاس `BA_Contact_Form` را load و با `afe_register_forms` ثبت می‌کند.
+- فرم یک Step دارد و فیلدها شامل `full_name`، `mobile`، `email`، `province`، `subject` و `message` هستند.
+- `province` از Geo Data Source AFE با level=`province` استفاده می‌کند؛ استان‌ها hard-code نشده‌اند.
+- mobile required با `mobile_09` + `mobile_ir` و prefix نمایشی/ورودی `09` است.
+- فرم Wizard/Progress/Save Draft ندارد؛ custom CAPTCHA و rate limit=5 فعال است.
+- Admin Email Action با action key `notify_admin_email_on_submit` روی `submission.submitted` و policy=`once_per_submission` تعریف شده است.
+- shortcode: `[alavi_form id="contact-us"]`.
+- regression: `wp-content/themes/ostadsho-child/tests/contact-form-definition.php`.
+- source commit: `5f181fe082f5879072262f15ba3e420c58a7b4b7`.
+- live frontend/Geo/email acceptance هنوز تأیید نشده است.
+
+Current contract: [MODULE-CONTACT-FORM](../modules/contact-form.md).

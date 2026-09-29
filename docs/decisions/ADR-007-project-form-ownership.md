@@ -13,7 +13,7 @@ A WordPress theme's `functions.php` is loaded after `plugins_loaded` and before 
 ## Decision
 
 - Alavi Form Engine no longer directly registers `JihadiGroupRegistrationForm` and does not ship a project-specific built-in form definition.
-- The Bonyad Alavi child theme owns the Source Definition at `inc/forms/class-ba-jihadi-group-registration-form.php`.
+- The Bonyad Alavi child theme owns project-specific Source Definitions under `inc/forms/`; current examples are `class-ba-jihadi-group-registration-form.php` and `class-ba-contact-form.php`.
 - The theme registers the form through the existing public hook `afe_register_forms`.
 - AFE boot is scheduled on `after_setup_theme` priority `20`, after active theme `functions.php` has loaded.
 - The form slug remains exactly `jihadi-group-registration`.
@@ -32,6 +32,7 @@ A WordPress theme's `functions.php` is loaded after `plugins_loaded` and before 
 - [MODULE-AFE](../modules/alavi-form-engine.md)
 - [MODULE-AFE-EXTENSION](../modules/alavi-form-engine-extension-api.md)
 - [MODULE-JIHADI-FORM](../modules/jihadi-group-registration-form.md)
+- [MODULE-CONTACT-FORM](../modules/contact-form.md)
 
 ## Relevant Source Files
 
@@ -39,3 +40,4 @@ A WordPress theme's `functions.php` is loaded after `plugins_loaded` and before 
 - `../../wp-content/plugins/alavi-form-engine/src/Core/Plugin.php`
 - `../../wp-content/themes/ostadsho-child/functions.php`
 - `../../wp-content/themes/ostadsho-child/inc/forms/class-ba-jihadi-group-registration-form.php`
+- `../../wp-content/themes/ostadsho-child/inc/forms/class-ba-contact-form.php`

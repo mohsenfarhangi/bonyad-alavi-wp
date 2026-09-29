@@ -10,9 +10,12 @@
 | MODULE-PARTICIPATION | Participation Payments | quick checkout, gateway, cart, billing | Isolated WooCommerce participation order/payment flow | [participation-payments.md](participation-payments.md) |
 | MODULE-JIHADI-CENTER | Jihadi Center | Elementor, center settings, news, media, cards | Dashboard + Elementor data sources with centralized resolution | [jihadi-center.md](jihadi-center.md) |
 | MODULE-JIHADI-FORM | Jihadi Group Registration Form | form definition, jihadi-group-registration, AFE registration | Project-specific form source owned by child theme and registered through `afe_register_forms` | [jihadi-group-registration-form.md](jihadi-group-registration-form.md) |
+| MODULE-CONTACT-FORM | Contact Form | contact-us, contact, province, geo, AFE registration | One-step site contact form owned by child theme with geo province field and admin email action | [contact-form.md](contact-form.md) |
 | MODULE-HOME-HERO | Homepage Hero Elementor Widget | homepage, hero, slider, mission nav, ticker, Elementor | Repeater-based Hero from redesign reference with query-driven ticker and scoped responsive assets | [theme-home-hero-widget.md](theme-home-hero-widget.md) |
 
 برای task فرم جهادی از `MODULE-JIHADI-FORM` شروع کن و در صورت تغییر Engine سپس `MODULE-AFE`/`MODULE-AFE-EXTENSION` را بخوان.
+
+برای فرم تماس با ما از `MODULE-CONTACT-FORM` شروع کن.
 
 برای تغییرات `ba-hero__grid`/Hero صفحه اصلی از `MODULE-HOME-HERO` شروع کن.
 
