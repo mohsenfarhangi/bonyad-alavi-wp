@@ -300,3 +300,20 @@ Date: 2026-09-29
 - live Elementor visual acceptance هنوز تأیید نشده است.
 
 Current contract: [MODULE-HOME-HERO](../modules/theme-home-hero-widget.md).
+
+## STATE-002-014 — Homepage Hero fidelity reset to redesign reference
+
+Date: 2026-09-29
+
+- implementation قبلی Hero از classهای مستقل `ba-home-hero__*` و defaultهای Style Tab استفاده می‌کرد که با cascade و geometry فایل reference اختلاف ایجاد می‌کرد.
+- DOM اصلی به classهای reference برگشت: `ba-hero`, `ba-container`, `ba-hero__grid`, `ba-mission-nav`, `ba-slider`, `ba-ticker` و elementهای همان blockها.
+- `ba-home-hero-widget` فقط به‌عنوان root scope باقی ماند تا CSS reference با قالب/Elementor تداخل سراسری نداشته باشد.
+- baseline CSS از مقادیر نهایی `redesign/assets/css/home.css` بازسازی شد: desktop grid 220px/.82fr + 2.25fr، rows 410/48، tablet 390/48، mobile order slider→ticker→mission و ratio 4:3.
+- Slider content به `right: clamp(24px, 5vw, 62px)` و `bottom: clamp(31px, 6vw, 68px)` برگشت؛ Mission hover به padding-right مرجع برگشت؛ CTA دوباره `ba-button ba-button--light` است.
+- Ticker default با 3 Query item + duplicate first item و animation 18s مرجع کار می‌کند؛ query countهای دیگر fallback JS scoped دارند.
+- Style controls حفظ شدند ولی visual defaultهای جداگانه حذف شدند؛ بنابراین بدون تغییر کاربر هیچ CSS تولیدشده Elementor ظاهر reference را override نمی‌کند.
+- slider title mode پیش‌فرض reference است: اسلاید اول H1 و بقیه H2.
+- source commits: `04ac3aae2287fcd2298946cc5745120b59c61479`, `59d55c680744fa34b607a59fe961fc6828ea6425`.
+- static comparison و JavaScript syntax check PASS؛ اجرای PHP regression/live Elementor هنوز باز است.
+
+Current contract: [MODULE-HOME-HERO](../modules/theme-home-hero-widget.md).

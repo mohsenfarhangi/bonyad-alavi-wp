@@ -28,7 +28,9 @@ AFE release goal همچنان live acceptance نسخه 1.0.28 و رفع blocker 
 - source commit: `5f181fe082f5879072262f15ba3e420c58a7b4b7`.
 
 ### Homepage Hero Elementor widget
-- Mission Nav defaults now use the original redesign SVGs (`briefcase-2`, `school`, `stethoscope`, `building-community`); Elementor icon selection overrides the SVG per item, and legacy Font Awesome defaults are transparently mapped back to the original SVGs.
+- Hero widget visual baseline دوباره با reference اصلی همسان شد: DOM classes به `ba-hero__grid / ba-mission-nav / ba-slider / ba-ticker` برگشت و CSS بر پایه مقادیر نهایی `redesign/assets/css/home.css` بازنویسی شد.
+- Style Tab دیگر default ظاهری تزریق نمی‌کند؛ فقط تغییر صریح کاربر CSS مرجع را override می‌کند.
+- Mission Nav defaults از SVGهای اصلی redesign (`briefcase-2`, `school`, `stethoscope`, `building-community`) استفاده می‌کند؛ Elementor icon selection همان SVG را per item جایگزین می‌کند و legacy Font Awesome defaults نیز map می‌شوند.
 - بخش `ba-hero__grid` از reference repository `bonyad-alavi-redesign/redesign/index.html` به ویجت `bonyad_alavi_home_hero` در child theme تبدیل شد.
 - Slider و Mission Nav با Elementor Repeater مدیریت می‌شوند؛ تصویر اسلاید فقط Media Control دارد و هیچ تصویر reference به قالب کپی نشده است.
 - Ticker از `BA_Content_Query_Service` استفاده می‌کند و Query کامل Elementor دارد؛ پیش‌فرض آخرین 3 نوشته است و فقط عنوان + permalink رندر می‌شود.
@@ -132,7 +134,7 @@ Historical PASSهای AFE/Theme به HEAD جدید تعمیم داده نمی‌
 
 ## Next Agent Handoff
 
-**Current task:** Hero Mission Nav اکنون SVGهای اصلی redesign را به‌عنوان آیکون پیش‌فرض استفاده می‌کند و انتخاب آیکون Elementor جای آن را می‌گیرد؛ live Elementor visual acceptance همچنان لازم است.
+**Current task:** ویجت Hero از نظر markup/CSS/JS baseline با `redesign/index.html` همسان‌سازی شده است؛ مرحله باز بعدی فقط live Elementor visual acceptance روی صفحه اصلی واقعی است.
 
 **Start here:** [../INDEX.md](../INDEX.md) → [../modules/INDEX.md](../modules/INDEX.md).
 

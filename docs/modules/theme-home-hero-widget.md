@@ -7,7 +7,7 @@
 
 ## Purpose
 
-Hero جدید صفحه اصلی را به یک ویجت مستقل Elementor تبدیل می‌کند تا ظاهر redesign حفظ شود ولی محتوای Slider، حوزه‌های اصلی فعالیت و Important News از پنل Elementor قابل مدیریت باشند.
+Hero جدید صفحه اصلی را به یک ویجت مستقل Elementor تبدیل می‌کند. قرارداد اصلی این ماژول این است که baseline مارک‌آپ و CSS دقیقاً از `redesign/index.html` و `redesign/assets/css/home.css` گرفته شود؛ Elementor فقط محتوا و overrideهای صریح کاربر را مدیریت می‌کند و نباید ظاهر مرجع را با defaultهای جداگانه تغییر دهد.
 
 Assets:
 - `assets/css/bonyad-alavi-home-hero-widget.css`
@@ -106,10 +106,11 @@ Ticker با JavaScript per-instance عمودی جابه‌جا می‌شود؛ h
 ## Responsive Contract
 
 ### Desktop > 1080px
-- Mission column + Slider
-- Ticker زیر Slider
-- default Slider height = 410px
-- Mission width قابل کنترل است.
+- Grid reference: `minmax(220px, .82fr) minmax(0, 2.25fr)`
+- Areas: `mission slider` / `mission ticker`
+- rows: `410px 48px`
+- Mission column + Slider و Ticker زیر Slider
+- Mission width فقط در صورت override صریح کاربر قابل تغییر است.
 
 ### Tablet 761–1080px
 ترتیب:
@@ -129,7 +130,7 @@ Slider ratio-driven است؛ default `4 / 3` و از Style control قابل تغ
 
 ## Style Tab Contract
 
-Style controls به‌صورت scoped روی `{{WRAPPER}} .ba-home-hero...` اعمال می‌شوند.
+Style controls به‌صورت scoped روی کلاس‌های اصلی reference (`.ba-mission-nav`, `.ba-slider`, `.ba-ticker` و ...) اعمال می‌شوند. این کنترل‌ها عمداً **visual default ندارند**؛ تا وقتی کاربر مقداری را تغییر نداده، CSS فایل مرجع authority ظاهری است.
 
 Sections:
 - Layout / dimensions
@@ -165,9 +166,9 @@ Hover states مستقل:
 
 ## BEM / Scope
 
-Block اختصاصی: `ba-home-hero`.
+کلاس‌های DOM اصلی برای fidelity با reference حفظ می‌شوند: `ba-hero`, `ba-container`, `ba-hero__grid`, `ba-mission-nav`, `ba-slider`, `ba-ticker` و elementهای همان blockها.
 
-Global selectors برای body/html/forms استفاده نمی‌شوند. CSS و JavaScript باید فقط root همان widget instance را mutate کنند.
+فقط یک scope کمکی `ba-home-hero-widget` روی root اضافه شده تا CSS مرجع بدون نشت به سایر صفحات/کامپوننت‌ها اجرا شود. Global selectors برای body/html/forms استفاده نمی‌شوند. JavaScript نیز فقط root همان widget instance را mutate می‌کند.
 
 ## Shared Dependencies
 
@@ -198,7 +199,7 @@ Regression contract:
 - multi-instance root scoping
 - reduced-motion
 
-در session ایجاد ویجت، draft محلی معادل implementation با PHP lint، `node --check` و contract test بررسی شد. پس از commit، فایل‌های HEAD از GitHub برای contractهای اصلی بازبینی استاتیک شدند. Live WordPress/Elementor acceptance همچنان باز است.
+پس از refactor fidelity، فایل‌های HEAD با reference برای class structure، grid/rows، slider content clamp، mobile order، ticker dimensions، mobile ratio و SVG defaults مقایسه استاتیک شدند؛ JavaScript نیز با parser V8 syntax-check شد و brace balance PHP/CSS بررسی شد. اجرای PHP regression و Live WordPress/Elementor acceptance همچنان باز است.
 
 ## Live Acceptance Checklist
 
