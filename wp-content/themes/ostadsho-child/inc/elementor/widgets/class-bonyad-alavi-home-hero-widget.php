@@ -131,7 +131,8 @@ final class Bonyad_Alavi_Home_Hero_Widget extends Widget_Base {
 		$this->start_controls_section( 'content_missions', array( 'label' => 'حوزه‌های اصلی فعالیت', 'tab' => Controls_Manager::TAB_CONTENT ) );
 
 		$repeater = new Repeater();
-		$repeater->add_control( 'icon', array( 'label' => 'آیکون', 'type' => Controls_Manager::ICONS ) );
+		$repeater->add_control( 'icon', array( 'label' => 'آیکون جایگزین', 'type' => Controls_Manager::ICONS, 'description' => 'در صورت انتخاب آیکون، SVG پیش‌فرض این آیتم جایگزین می‌شود.' ) );
+		$repeater->add_control( 'default_icon_key', array( 'type' => Controls_Manager::HIDDEN, 'default' => '' ) );
 		$repeater->add_control( 'title', array( 'label' => 'عنوان', 'type' => Controls_Manager::TEXT, 'label_block' => true ) );
 		$repeater->add_control( 'description', array( 'label' => 'توضیحات', 'type' => Controls_Manager::TEXTAREA, 'rows' => 2 ) );
 		$repeater->add_control(
@@ -153,28 +154,32 @@ final class Bonyad_Alavi_Home_Hero_Widget extends Widget_Base {
 				'title_field' => '{{{ title || "حوزه فعالیت" }}}',
 				'default'     => array(
 					array(
-						'icon'        => array( 'value' => 'fas fa-briefcase', 'library' => 'fa-solid' ),
-						'title'       => 'معاونت توانمندسازی اقتصادی',
-						'description' => 'ایجاد فرصت‌های شغلی برای کسب درآمد پایدار',
-						'link'        => array( 'url' => 'https://bonyadalavi.ir/eghtesadi/' ),
+						'icon'             => array(),
+						'default_icon_key' => 'economic',
+						'title'            => 'معاونت توانمندسازی اقتصادی',
+						'description'      => 'ایجاد فرصت‌های شغلی برای کسب درآمد پایدار',
+						'link'             => array( 'url' => 'https://bonyadalavi.ir/eghtesadi/' ),
 					),
 					array(
-						'icon'        => array( 'value' => 'fas fa-graduation-cap', 'library' => 'fa-solid' ),
-						'title'       => 'معاونت آموزش، مهارت و پرورش',
-						'description' => 'توسعه آموزش و مهارت برای شکوفایی استعدادها',
-						'link'        => array( 'url' => 'https://bonyadalavi.ir/amoozesh/' ),
+						'icon'             => array(),
+						'default_icon_key' => 'education',
+						'title'            => 'معاونت آموزش، مهارت و پرورش',
+						'description'      => 'توسعه آموزش و مهارت برای شکوفایی استعدادها',
+						'link'             => array( 'url' => 'https://bonyadalavi.ir/amoozesh/' ),
 					),
 					array(
-						'icon'        => array( 'value' => 'fas fa-stethoscope', 'library' => 'fa-solid' ),
-						'title'       => 'معاونت بهداشت و درمان',
-						'description' => 'گسترش خدمات سلامت با هدف پیشگیری و درمان',
-						'link'        => array( 'url' => 'https://bonyadalavi.ir/salamat/' ),
+						'icon'             => array(),
+						'default_icon_key' => 'health',
+						'title'            => 'معاونت بهداشت و درمان',
+						'description'      => 'گسترش خدمات سلامت با هدف پیشگیری و درمان',
+						'link'             => array( 'url' => 'https://bonyadalavi.ir/salamat/' ),
 					),
 					array(
-						'icon'        => array( 'value' => 'fas fa-building', 'library' => 'fa-solid' ),
-						'title'       => 'معاونت عمرانی و زیرساختی',
-						'description' => 'توسعه زیرساخت‌های ضروری برای دسترسی بهتر و ایمن تر',
-						'link'        => array( 'url' => 'https://bonyadalavi.ir/eskan/' ),
+						'icon'             => array(),
+						'default_icon_key' => 'infrastructure',
+						'title'            => 'معاونت عمرانی و زیرساختی',
+						'description'      => 'توسعه زیرساخت‌های ضروری برای دسترسی بهتر و ایمن تر',
+						'link'             => array( 'url' => 'https://bonyadalavi.ir/eskan/' ),
 					),
 				),
 			)
@@ -508,17 +513,25 @@ final class Bonyad_Alavi_Home_Hero_Widget extends Widget_Base {
 	}
 
 	private function render_mission_item( array $mission ) {
-		$title       = trim( (string) ( $mission['title'] ?? '' ) );
-		$description = trim( (string) ( $mission['description'] ?? '' ) );
-		$icon        = is_array( $mission['icon'] ?? null ) ? $mission['icon'] : array();
-		$link        = is_array( $mission['link'] ?? null ) ? $mission['link'] : array();
-		$has_link    = ! empty( $link['url'] );
-		$tag         = $has_link ? 'a' : 'div';
-		$attrs       = $has_link ? $this->build_link_attributes( $link ) : '';
+		$title            = trim( (string) ( $mission['title'] ?? '' ) );
+		$description      = trim( (string) ( $mission['description'] ?? '' ) );
+		$icon             = is_array( $mission['icon'] ?? null ) ? $mission['icon'] : array();
+		$default_icon_key = $this->resolve_mission_default_icon_key( $mission );
+		$has_custom_icon  = ! empty( $icon['value'] ) && ! $this->is_legacy_default_mission_icon( $icon, $default_icon_key );
+		$link             = is_array( $mission['link'] ?? null ) ? $mission['link'] : array();
+		$has_link         = ! empty( $link['url'] );
+		$tag              = $has_link ? 'a' : 'div';
+		$attrs            = $has_link ? $this->build_link_attributes( $link ) : '';
 		?>
 		<<?php echo esc_attr( $tag ); ?> class="ba-home-hero__mission-item"<?php echo $attrs; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
-			<?php if ( ! empty( $icon['value'] ) ) : ?>
-				<span class="ba-home-hero__mission-icon" aria-hidden="true"><?php Icons_Manager::render_icon( $icon, array( 'aria-hidden' => 'true' ) ); ?></span>
+			<?php if ( $has_custom_icon || '' !== $default_icon_key ) : ?>
+				<span class="ba-home-hero__mission-icon" aria-hidden="true">
+					<?php if ( $has_custom_icon ) : ?>
+						<?php Icons_Manager::render_icon( $icon, array( 'aria-hidden' => 'true' ) ); ?>
+					<?php else : ?>
+						<?php echo $this->get_mission_default_svg( $default_icon_key ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+					<?php endif; ?>
+				</span>
 			<?php endif; ?>
 			<?php if ( '' !== $title || '' !== $description ) : ?>
 				<span class="ba-home-hero__mission-copy">
@@ -528,6 +541,79 @@ final class Bonyad_Alavi_Home_Hero_Widget extends Widget_Base {
 			<?php endif; ?>
 		</<?php echo esc_attr( $tag ); ?>>
 		<?php
+	}
+
+	/**
+	 * کلید SVG پیش‌فرض آیتم Mission را برمی‌گرداند.
+	 *
+	 * default_icon_key برای آیتم‌های جدید مرجع است. map آیکون‌های Font Awesome قدیمی
+	 * باعث می‌شود نمونه‌هایی که پیش از این تغییر ذخیره شده‌اند نیز بدون Migration دستی
+	 * به SVGهای اصلی redesign برگردند.
+	 */
+	private function resolve_mission_default_icon_key( array $mission ): string {
+		$allowed = array( 'economic', 'education', 'health', 'infrastructure' );
+		$key     = sanitize_key( (string) ( $mission['default_icon_key'] ?? '' ) );
+
+		if ( in_array( $key, $allowed, true ) ) {
+			return $key;
+		}
+
+		$icon       = is_array( $mission['icon'] ?? null ) ? $mission['icon'] : array();
+		$icon_value = is_string( $icon['value'] ?? null ) ? trim( $icon['value'] ) : '';
+		$legacy     = array(
+			'fas fa-briefcase'      => 'economic',
+			'fas fa-graduation-cap' => 'education',
+			'fas fa-stethoscope'    => 'health',
+			'fas fa-building'       => 'infrastructure',
+		);
+
+		if ( isset( $legacy[ $icon_value ] ) ) {
+			return $legacy[ $icon_value ];
+		}
+
+		if ( '' !== $icon_value ) {
+			return '';
+		}
+
+		$title_map = array(
+			'معاونت توانمندسازی اقتصادی'    => 'economic',
+			'معاونت آموزش، مهارت و پرورش'   => 'education',
+			'معاونت بهداشت و درمان'          => 'health',
+			'معاونت عمرانی و زیرساختی'       => 'infrastructure',
+		);
+
+		return $title_map[ trim( (string) ( $mission['title'] ?? '' ) ) ] ?? '';
+	}
+
+	/**
+	 * تشخیص می‌دهد آیکون ذخیره‌شده همان default قدیمی ویجت است یا انتخاب جدید کاربر.
+	 */
+	private function is_legacy_default_mission_icon( array $icon, string $default_icon_key ): bool {
+		$icon_value = is_string( $icon['value'] ?? null ) ? trim( $icon['value'] ) : '';
+		$legacy     = array(
+			'economic'       => 'fas fa-briefcase',
+			'education'      => 'fas fa-graduation-cap',
+			'health'         => 'fas fa-stethoscope',
+			'infrastructure' => 'fas fa-building',
+		);
+
+		return '' !== $default_icon_key
+			&& isset( $legacy[ $default_icon_key ] )
+			&& $legacy[ $default_icon_key ] === $icon_value;
+	}
+
+	/**
+	 * SVGهای اصلی ba-mission-nav در reference redesign را بدون وابستگی خارجی برمی‌گرداند.
+	 */
+	private function get_mission_default_svg( string $key ): string {
+		$icons = array(
+			'economic' => '<svg aria-hidden="true" class="ba-home-hero__mission-glyph ba-home-hero__mission-glyph--default" data-icon="tabler:briefcase-2" focusable="false" viewBox="0 0 24 24"><path d="M3 9a2 2 0 0 1 2 -2h14a2 2 0 0 1 2 2v9a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2v-9"/><path d="M8 7v-2a2 2 0 0 1 2 -2h4a2 2 0 0 1 2 2v2"/></svg>',
+			'education' => '<svg aria-hidden="true" class="ba-home-hero__mission-glyph ba-home-hero__mission-glyph--default" data-icon="tabler:school" focusable="false" viewBox="0 0 24 24"><path d="M22 9l-10 -4l-10 4l10 4l10 -4v6"/><path d="M6 10.6v5.4a6 3 0 0 0 12 0v-5.4"/></svg>',
+			'health' => '<svg aria-hidden="true" class="ba-home-hero__mission-glyph ba-home-hero__mission-glyph--default" data-icon="tabler:stethoscope" focusable="false" viewBox="0 0 24 24"><path d="M6 4h-1a2 2 0 0 0 -2 2v3.5a5.5 5.5 0 0 0 11 0v-3.5a2 2 0 0 0 -2 -2h-1"/><path d="M8 15a6 6 0 1 0 12 0v-3"/><path d="M11 3v2"/><path d="M6 3v2"/><path d="M18 10a2 2 0 1 0 4 0a2 2 0 1 0 -4 0"/></svg>',
+			'infrastructure' => '<svg aria-hidden="true" class="ba-home-hero__mission-glyph ba-home-hero__mission-glyph--default" data-icon="tabler:building-community" focusable="false" viewBox="0 0 24 24"><path d="M8 9l5 5v7h-5v-4m0 4h-5v-7l5 -5m1 1v-6a1 1 0 0 1 1 -1h10a1 1 0 0 1 1 1v17h-8"/><path d="M13 7l0 .01"/><path d="M17 7l0 .01"/><path d="M17 11l0 .01"/><path d="M17 15l0 .01"/></svg>',
+		);
+
+		return $icons[ $key ] ?? '';
 	}
 
 	private function render_slide( array $slide, $index, array $settings ) {

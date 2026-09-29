@@ -118,6 +118,14 @@
   color: currentColor;
 }
 
+.ba-home-hero__mission-icon .ba-home-hero__mission-glyph--default {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
 .ba-home-hero__mission-copy {
   position: relative;
   z-index: 1;
