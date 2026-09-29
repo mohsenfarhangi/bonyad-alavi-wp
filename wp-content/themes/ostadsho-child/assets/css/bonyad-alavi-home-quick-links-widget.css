@@ -98,14 +98,6 @@
   flex: none;
 }
 
-.ba-home-quick-links-widget svg.ba-quick-links__icon {
-  fill: none;
-  stroke: currentColor;
-  stroke-width: 2;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
-
 .ba-home-quick-links-widget i.ba-quick-links__icon {
   font-size: 29px;
   line-height: 29px;
