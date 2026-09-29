@@ -1,174 +1,206 @@
-.ba-home-hero {
-  --ba-home-hero-max-width: 1280px;
-  --ba-home-hero-gap: 10px;
-  --ba-home-hero-mission-width: 27%;
-  --ba-home-hero-slider-height: 410px;
-  --ba-home-hero-mobile-aspect: 4 / 3;
-  --ba-home-hero-ticker-height: 48px;
-  direction: rtl;
-  width: min(var(--ba-home-hero-max-width), 100%);
-  min-width: 0;
-  margin-inline: auto;
+/* Homepage Hero widget.
+ * Visual baseline is intentionally kept in sync with bonyad-alavi-redesign/redesign/index.html.
+ * Elementor Style controls have no visual defaults and only override these rules after explicit user edits.
+ */
+
+.ba-home-hero-widget {
+  --green: #069043;
+  --green-700: #06783a;
+  --green-900: #074c2c;
+  --green-050: #f2faf6;
+  --gold: #b79254;
+  --ink: #163027;
+  --muted: #67766f;
+  --line: #dde8e2;
+  --paper: #fff;
+  --soft: #f6f8f7;
+  --max: 1280px;
+  --radius: 18px;
+  --ba-mobile-slider-aspect-ratio: 4 / 3;
+  --shadow: 0 12px 32px rgba(7, 76, 44, .07);
+  padding: 24px 0 0;
+  padding-top: 22px;
 }
 
-.ba-home-hero,
-.ba-home-hero * {
+.ba-home-hero-widget,
+.ba-home-hero-widget * {
   box-sizing: border-box;
 }
 
-.ba-home-hero a {
+.ba-home-hero-widget a {
+  color: inherit;
   text-decoration: none;
 }
 
-.ba-home-hero__grid {
+.ba-home-hero-widget img {
+  display: block;
+  max-width: 100%;
+}
+
+.ba-home-hero-widget button {
+  font: inherit;
+  color: inherit;
+}
+
+.ba-home-hero-widget .ba-container {
+  width: min(var(--max), calc(100% - 40px));
+  margin: auto;
+}
+
+.ba-home-hero-widget .ba-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 900;
+  border: var(--ba-button-border, 1px solid transparent);
+  border-radius: var(--ba-button-radius, 10px);
+  padding: var(--ba-button-padding, 9px 14px);
+  background: var(--ba-button-bg, transparent);
+  color: var(--ba-button-color, inherit);
+  box-shadow: var(--ba-button-shadow, none);
+}
+
+.ba-home-hero-widget .ba-button--light {
+  --ba-button-border: 0;
+  --ba-button-radius: 12px;
+  --ba-button-padding: 10px 16px;
+  --ba-button-bg: #fff;
+  --ba-button-color: var(--green-900);
+}
+
+.ba-home-hero-widget .ba-hero__grid {
   direction: ltr;
   display: grid;
-  grid-template-columns: minmax(220px, var(--ba-home-hero-mission-width)) minmax(0, 1fr);
+  grid-template-columns: minmax(220px, var(--ba-mission-column-width, .82fr)) minmax(0, 2.25fr);
   grid-template-areas: "mission slider" "mission ticker";
-  grid-template-rows: var(--ba-home-hero-slider-height) var(--ba-home-hero-ticker-height);
-  gap: var(--ba-home-hero-gap);
+  grid-template-rows: var(--ba-custom-slider-height, 410px) 48px;
+  gap: 10px;
   min-width: 0;
+  max-width: 1280px;
   min-height: 0;
+  margin-inline: auto;
   align-items: stretch;
 }
 
-.ba-home-hero--no-ticker .ba-home-hero__grid {
-  grid-template-areas: "mission slider";
-  grid-template-rows: var(--ba-home-hero-slider-height);
-}
-
-.ba-home-hero--no-missions .ba-home-hero__grid {
-  grid-template-columns: minmax(0, 1fr);
-  grid-template-areas: "slider" "ticker";
-}
-
-.ba-home-hero--no-missions.ba-home-hero--no-ticker .ba-home-hero__grid {
-  grid-template-areas: "slider";
-}
-
-.ba-home-hero--no-slider .ba-home-hero__grid {
-  grid-template-columns: minmax(0, 1fr);
-  grid-template-areas: "mission" "ticker";
-  grid-template-rows: auto var(--ba-home-hero-ticker-height);
-}
-
-.ba-home-hero--no-slider.ba-home-hero--no-ticker .ba-home-hero__grid {
-  grid-template-areas: "mission";
-  grid-template-rows: auto;
-}
-
-.ba-home-hero__mission-nav {
+.ba-home-hero-widget .ba-mission-nav {
   grid-area: mission;
   direction: rtl;
   display: grid;
-  grid-template-rows: repeat(4, minmax(0, 1fr));
+  grid-template-rows: repeat(4, 1fr);
   min-width: 0;
-  overflow: hidden;
+  align-self: stretch;
   border: 1px solid #a9cdb8;
-  border-radius: 18px 7px 7px 18px;
+  overflow: hidden;
   background: #fff;
+  border-radius: 18px 7px 7px 18px;
   box-shadow: 0 8px 24px rgba(7, 76, 44, .045);
 }
 
-.ba-home-hero--no-slider .ba-home-hero__mission-nav {
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  grid-template-rows: auto;
-}
-
-.ba-home-hero__mission-item {
-  position: relative;
+.ba-home-hero-widget .ba-mission-nav__item {
   display: flex;
   align-items: center;
   gap: 14px;
-  min-width: 0;
-  padding: 16px 20px;
-  border: 0;
   border-bottom: 1px solid #bdd9c7;
-  color: inherit;
-  transition: background-color .3s ease, transform .3s ease;
+  position: relative;
+  transition: .3s;
+  padding: 16px 20px;
 }
 
-.ba-home-hero__mission-item:last-child {
+.ba-home-hero-widget .ba-mission-nav__item:last-child {
   border-bottom: 0;
 }
 
-.ba-home-hero__mission-icon {
-  position: relative;
-  z-index: 1;
+.ba-home-hero-widget .ba-mission-nav__item::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, var(--green-050));
+  opacity: 0;
+  transition: .3s;
+}
+
+.ba-home-hero-widget .ba-mission-nav__item:hover {
+  padding-right: 25px;
+}
+
+.ba-home-hero-widget .ba-mission-nav__item:hover::before {
+  opacity: 1;
+}
+
+.ba-home-hero-widget .ba-mission-nav__icon {
   width: 47px;
   height: 47px;
   flex: none;
+  background: var(--green-050);
+  border: 1px solid #cae3d3;
   display: grid;
   place-items: center;
-  overflow: hidden;
-  border: 1px solid #cae3d3;
+  position: relative;
+  z-index: 1;
   border-radius: 12px;
-  background: #eef8f2;
-  color: #078541;
-  transition: color .3s ease, background-color .3s ease, border-color .3s ease;
+  color: var(--green-700);
 }
 
-.ba-home-hero__mission-icon i,
-.ba-home-hero__mission-icon svg {
-  display: block;
+.ba-home-hero-widget .ba-mission-nav__glyph,
+.ba-home-hero-widget .ba-mission-nav__icon > i,
+.ba-home-hero-widget .ba-mission-nav__icon > svg {
   width: 28px;
   height: 28px;
-  font-size: 28px;
-  fill: currentColor;
+  display: block;
+  flex: none;
+  stroke-width: 1.85;
   color: currentColor;
 }
 
-.ba-home-hero__mission-icon .ba-home-hero__mission-glyph--default {
+.ba-home-hero-widget .ba-mission-nav__glyph {
   fill: none;
   stroke: currentColor;
-  stroke-width: 2;
   stroke-linecap: round;
   stroke-linejoin: round;
 }
 
-.ba-home-hero__mission-copy {
+.ba-home-hero-widget .ba-mission-nav__icon > i {
+  font-size: 28px;
+  line-height: 1;
+}
+
+.ba-home-hero-widget .ba-mission-nav__copy {
   position: relative;
   z-index: 1;
-  min-width: 0;
 }
 
-.ba-home-hero__mission-title {
+.ba-home-hero-widget .ba-mission-nav__title {
   display: block;
-  color: #173329;
   font-size: 16px;
-  line-height: 1.55;
-  transition: color .3s ease;
 }
 
-.ba-home-hero__mission-description {
+.ba-home-hero-widget .ba-mission-nav__description {
   display: block;
   margin-top: 2px;
-  color: #67736b;
+  color: var(--muted);
   font-size: 11px;
-  line-height: 1.75;
-  transition: color .3s ease;
 }
 
-.ba-home-hero__slider {
+.ba-home-hero-widget .ba-slider {
   grid-area: slider;
   direction: rtl;
   position: relative;
-  min-width: 0;
-  min-height: 0;
-  height: var(--ba-home-hero-slider-height);
   overflow: hidden;
+  background: var(--green-900);
+  box-shadow: var(--shadow);
+  min-width: 0;
+  min-height: var(--ba-custom-slider-height, 410px);
   border-radius: 7px 18px 18px 7px;
-  background: #073d27;
-  box-shadow: 0 10px 28px rgba(7, 76, 44, .1);
 }
 
-.ba-home-hero__slider-track {
-  position: relative;
-  width: 100%;
+.ba-home-hero-widget .ba-slider__track {
   height: 100%;
+  position: relative;
 }
 
-.ba-home-hero__slide {
+.ba-home-hero-widget .ba-slider__slide {
   position: absolute;
   inset: 0;
   opacity: 0;
@@ -176,101 +208,64 @@
   transition: opacity .65s ease;
 }
 
-.ba-home-hero__slide.is-active {
-  z-index: 1;
+.ba-home-hero-widget .ba-slider__slide.is-active {
   opacity: 1;
   pointer-events: auto;
 }
 
-.ba-home-hero__slide::after {
-  content: "";
-  position: absolute;
-  z-index: 1;
-  inset: 0;
-  pointer-events: none;
-  background: linear-gradient(90deg, rgba(5, 42, 26, .07) 8%, rgba(4, 52, 29, .30) 50%, rgba(4, 35, 24, .78) 100%);
-}
-
-.ba-home-hero__slide-image {
-  display: block;
+.ba-home-hero-widget .ba-slider__slide img {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: center;
 }
 
-.ba-home-hero__slide-whole-link {
+.ba-home-hero-widget .ba-slider__slide::after {
+  content: "";
   position: absolute;
   inset: 0;
-  display: block;
-  color: inherit;
+  background: linear-gradient(90deg, rgba(5, 42, 26, .07) 8%, rgba(4, 52, 29, .30) 50%, rgba(4, 35, 24, .78) 100%);
 }
 
-.ba-home-hero__slide-whole-link > .ba-home-hero__slide-image {
+.ba-home-hero-widget .ba-slider__whole-link {
   position: absolute;
   inset: 0;
+  z-index: 3;
 }
 
-.ba-home-hero__slider-content {
+.ba-home-hero-widget .ba-slider__content {
   position: absolute;
   z-index: 2;
-  right: 42px;
-  bottom: 48px;
+  right: clamp(24px, 5vw, 62px);
+  bottom: clamp(31px, 6vw, 68px);
   width: min(570px, 75%);
   color: #fff;
 }
 
-.ba-home-hero__slider-tag {
+.ba-home-hero-widget .ba-slider__tag {
   display: inline-flex;
-  padding: 5px 11px;
-  border: 1px solid rgba(255,255,255,.25);
-  border-radius: 20px;
-  background: rgba(255,255,255,.14);
-  color: #fff;
-  font-size: 11px;
-  line-height: 1.5;
+  background: rgba(255, 255, 255, .14);
+  border: 1px solid rgba(255, 255, 255, .25);
   backdrop-filter: blur(7px);
+  padding: 5px 11px;
+  border-radius: 20px;
+  font-size: 11px;
 }
 
-.ba-home-hero__slider-title {
-  margin: 12px 0 7px;
-  color: #fff;
+.ba-home-hero-widget .ba-slider__slide h1,
+.ba-home-hero-widget .ba-slider__slide h2 {
   font-size: clamp(26px, 3.2vw, 46px);
-  font-weight: 800;
   line-height: 1.55;
+  margin: 12px 0 7px;
   letter-spacing: -.8px;
 }
 
-.ba-home-hero__slider-description {
+.ba-home-hero-widget .ba-slider__text {
   margin: 0 0 18px;
-  color: rgba(255,255,255,.82);
+  color: rgba(255, 255, 255, .82);
   font-size: 14px;
-  line-height: 1.8;
 }
 
-.ba-home-hero__slider-button {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  padding: 9px 14px;
-  border: 1px solid #b9d7c5;
-  border-radius: 10px;
-  background: #fff;
-  color: #075433;
-  font-size: 13px;
-  font-weight: 900;
-  transition: color .2s ease, background-color .2s ease, border-color .2s ease, transform .2s ease;
-}
-
-.ba-home-hero__slider-button:hover {
-  border-color: #078541;
-  background: #078541;
-  color: #fff;
-  transform: translateY(-1px);
-}
-
-.ba-home-hero__slider-controls {
+.ba-home-hero-widget .ba-slider__controls {
   position: absolute;
   z-index: 5;
   left: 22px;
@@ -281,36 +276,33 @@
   direction: ltr;
 }
 
-.ba-home-hero__slider-arrow {
+.ba-home-hero-widget .ba-slider__arrow {
   width: 37px;
   height: 37px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, .35);
+  background: rgba(5, 30, 20, .34);
+  backdrop-filter: blur(8px);
+  color: #fff;
   display: grid;
   place-items: center;
-  padding: 0;
-  border: 1px solid rgba(255,255,255,.35);
-  border-radius: 50%;
-  background: rgba(5,30,20,.34);
-  color: #fff;
   cursor: pointer;
-  backdrop-filter: blur(8px);
-  transition: color .2s ease, background-color .2s ease, border-color .2s ease;
 }
 
-.ba-home-hero__slider-arrow:hover {
-  border-color: #fff;
+.ba-home-hero-widget .ba-slider__arrow:hover {
   background: #fff;
-  color: #073d27;
+  color: var(--green-900);
 }
 
-.ba-home-hero__slider-arrow svg {
+.ba-home-hero-widget .ba-slider__arrow svg {
   width: 17px;
   height: 17px;
-  fill: none;
   stroke: currentColor;
+  fill: none;
   stroke-width: 2;
 }
 
-.ba-home-hero__slider-pagination {
+.ba-home-hero-widget .ba-slider__pagination {
   position: absolute;
   z-index: 5;
   right: 22px;
@@ -319,199 +311,334 @@
   gap: 7px;
 }
 
-.ba-home-hero__slider-dot {
+.ba-home-hero-widget .ba-slider__dot {
   width: 7px;
   height: 7px;
-  padding: 0;
   border: 0;
+  padding: 0;
   border-radius: 10px;
-  background: rgba(255,255,255,.5);
+  background: rgba(255, 255, 255, .5);
   cursor: pointer;
-  transition: width .3s ease, background-color .3s ease;
+  transition: .3s;
 }
 
-.ba-home-hero__slider-dot:hover {
-  background: rgba(255,255,255,.8);
-}
-
-.ba-home-hero__slider-dot.is-active {
+.ba-home-hero-widget .ba-slider__dot.is-active {
   width: 27px;
   background: #fff;
 }
 
-.ba-home-hero__ticker {
+.ba-home-hero-widget .ba-ticker {
   grid-area: ticker;
   direction: rtl;
   min-width: 0;
-  height: var(--ba-home-hero-ticker-height);
+  height: 48px;
+  margin-top: 0;
   display: grid;
   grid-template-columns: auto minmax(0, 1fr);
   overflow: hidden;
+  background: #fff;
   border: 1px solid #dce8e1;
   border-radius: 12px;
-  background: #fff;
-  box-shadow: 0 6px 18px rgba(7,76,44,.045);
+  box-shadow: 0 6px 18px rgba(7, 76, 44, .045);
 }
 
-.ba-home-hero__ticker--no-label {
+.ba-home-hero-widget .ba-ticker--no-label {
   grid-template-columns: minmax(0, 1fr);
 }
 
-.ba-home-hero__ticker-label {
+.ba-home-hero-widget .ba-ticker__label {
   display: flex;
   align-items: center;
   padding-inline: 16px;
-  white-space: nowrap;
-  background: #078541;
+  background: var(--green);
   color: #fff;
   font-size: 12px;
   font-weight: 900;
+  white-space: nowrap;
 }
 
-.ba-home-hero__ticker-viewport {
-  height: 100%;
+.ba-home-hero-widget .ba-ticker__viewport {
+  height: 46px;
   min-width: 0;
   overflow: hidden;
 }
 
-.ba-home-hero__ticker-track {
+.ba-home-hero-widget .ba-ticker__track {
   display: flex;
   flex-direction: column;
-  min-width: 0;
-  will-change: transform;
-  transition: transform .45s cubic-bezier(.22,1,.36,1);
+  animation: important-news-ticker 18s infinite;
 }
 
-.ba-home-hero__ticker-item {
+.ba-home-hero-widget .ba-ticker__item {
   position: relative;
-  height: var(--ba-home-hero-ticker-height);
-  flex: 0 0 var(--ba-home-hero-ticker-height);
+  height: 46px;
+  flex: 0 0 46px;
   display: flex;
   align-items: center;
   min-width: 0;
   padding-inline: 34px 16px;
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
   color: #30483d;
   font-size: 12px;
   font-weight: 750;
-  transition: color .2s ease, background-color .2s ease;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.ba-home-hero__ticker-item::before {
+.ba-home-hero-widget .ba-ticker__item::before {
   content: "";
   position: absolute;
   inset-inline-start: 17px;
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background: #f5b73b;
+  background: var(--gold);
 }
 
-.ba-home-hero__ticker-item:hover {
-  color: #075433;
+.ba-home-hero-widget .ba-ticker__item:hover {
+  color: var(--green-700);
+}
+
+.ba-home-hero-widget .ba-ticker:hover .ba-ticker__track,
+.ba-home-hero-widget .ba-ticker:focus-within .ba-ticker__track,
+.ba-home-hero-widget .ba-ticker.is-paused .ba-ticker__track {
+  animation-play-state: paused;
+}
+
+.ba-home-hero-widget .ba-ticker.is-dynamic .ba-ticker__track {
+  animation: none;
+  transition: transform .45s ease;
+}
+
+@keyframes important-news-ticker {
+  0%, 28% {
+    transform: translateY(0);
+  }
+  33%, 61% {
+    transform: translateY(-46px);
+  }
+  66%, 94% {
+    transform: translateY(-92px);
+  }
+  99.9% {
+    transform: translateY(-138px);
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+
+.ba-home-hero-widget.ba-home-hero-widget--no-ticker .ba-hero__grid {
+  grid-template-areas: "mission slider";
+  grid-template-rows: var(--ba-custom-slider-height, 410px);
+}
+
+.ba-home-hero-widget.ba-home-hero-widget--no-missions .ba-hero__grid {
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-areas: "slider" "ticker";
+}
+
+.ba-home-hero-widget.ba-home-hero-widget--no-missions.ba-home-hero-widget--no-ticker .ba-hero__grid {
+  grid-template-areas: "slider";
+  grid-template-rows: var(--ba-custom-slider-height, 410px);
 }
 
 @media (max-width: 1080px) and (min-width: 761px) {
-  .ba-home-hero__grid {
+  .ba-home-hero-widget .ba-hero__grid {
+    width: 100%;
+    min-width: 0;
     grid-template-columns: minmax(0, 1fr);
     grid-template-areas: "slider" "ticker" "mission";
-    grid-template-rows: var(--ba-home-hero-slider-height) var(--ba-home-hero-ticker-height) auto;
+    grid-template-rows: var(--ba-custom-slider-height, 390px) 48px auto;
   }
 
-  .ba-home-hero--no-ticker .ba-home-hero__grid {
-    grid-template-areas: "slider" "mission";
-    grid-template-rows: var(--ba-home-hero-slider-height) auto;
+  .ba-home-hero-widget .ba-slider {
+    min-height: var(--ba-custom-slider-height, 390px);
+    border-radius: var(--radius);
   }
 
-  .ba-home-hero__mission-nav {
+  .ba-home-hero-widget .ba-mission-nav {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     grid-template-rows: repeat(2, minmax(92px, auto));
-    grid-auto-rows: auto;
     border-radius: 18px;
   }
 
-  .ba-home-hero__mission-item:nth-child(odd) {
+  .ba-home-hero-widget .ba-mission-nav__item {
+    min-width: 0;
+    padding: 14px 18px;
+    border-bottom: 1px solid #bdd9c7;
+  }
+
+  .ba-home-hero-widget .ba-mission-nav__item:nth-child(odd) {
     border-left: 1px solid #bdd9c7;
   }
 
-  .ba-home-hero__slider {
-    border-radius: 18px;
+  .ba-home-hero-widget .ba-mission-nav__item:nth-child(3),
+  .ba-home-hero-widget .ba-mission-nav__item:nth-child(4) {
+    border-bottom: 0;
+  }
+
+  .ba-home-hero-widget .ba-mission-nav__title {
+    font-size: 14px;
+  }
+
+  .ba-home-hero-widget .ba-mission-nav__description {
+    font-size: 11px;
+    line-height: 1.75;
+  }
+
+  .ba-home-hero-widget.ba-home-hero-widget--no-ticker .ba-hero__grid {
+    grid-template-areas: "slider" "mission";
+    grid-template-rows: var(--ba-custom-slider-height, 390px) auto;
+  }
+}
+
+@media (max-width: 1080px) {
+  .ba-home-hero-widget .ba-slider {
+    border-radius: var(--radius);
   }
 }
 
 @media (max-width: 760px) {
-  .ba-home-hero__grid,
-  .ba-home-hero--no-ticker .ba-home-hero__grid,
-  .ba-home-hero--no-missions .ba-home-hero__grid,
-  .ba-home-hero--no-slider .ba-home-hero__grid {
-    display: flex;
-    flex-direction: column;
-    gap: var(--ba-home-hero-gap);
+  .ba-home-hero-widget {
+    padding-top: 14px;
   }
 
-  .ba-home-hero__slider {
+  .ba-home-hero-widget .ba-container {
+    width: min(100% - 24px, var(--max));
+  }
+
+  .ba-home-hero-widget .ba-hero__grid {
+    width: 100%;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    min-height: auto;
+    gap: 8px;
+  }
+
+  .ba-home-hero-widget .ba-slider {
     order: 1;
     width: 100%;
     height: auto;
     min-height: 0;
-    aspect-ratio: var(--ba-home-hero-mobile-aspect);
-    border-radius: 18px;
     flex: 0 0 auto;
+    aspect-ratio: var(--ba-mobile-slider-aspect-ratio);
   }
 
-  .ba-home-hero__slider-track {
+  .ba-home-hero-widget .ba-slider__track {
     position: absolute;
     inset: 0;
     height: auto;
   }
 
-  .ba-home-hero__ticker {
+  .ba-home-hero-widget .ba-ticker {
     order: 2;
     width: 100%;
+    margin-top: 0;
   }
 
-  .ba-home-hero__mission-nav,
-  .ba-home-hero--no-slider .ba-home-hero__mission-nav {
+  .ba-home-hero-widget .ba-mission-nav {
     order: 3;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     grid-template-rows: repeat(2, auto);
     grid-auto-rows: auto;
     height: auto;
     min-height: 0;
+    align-self: auto;
     border-radius: 18px;
+    overflow: hidden;
   }
 
-  .ba-home-hero__mission-description {
+  .ba-home-hero-widget .ba-mission-nav__item {
+    padding: 13px;
+    border-bottom: 1px solid #d4e4da;
+  }
+
+  .ba-home-hero-widget .ba-mission-nav__item:nth-child(odd) {
+    border-left: 1px solid #d4e4da;
+  }
+
+  .ba-home-hero-widget .ba-mission-nav__item:nth-child(3) {
+    border-bottom: 0;
+  }
+
+  .ba-home-hero-widget .ba-mission-nav__title {
+    font-size: 13px;
+  }
+
+  .ba-home-hero-widget .ba-mission-nav__description {
     display: block;
+  }
+
+  .ba-home-hero-widget .ba-mission-nav__icon {
+    width: 39px;
+    height: 39px;
+    border-radius: 12px;
+  }
+
+  .ba-home-hero-widget .ba-mission-nav__glyph,
+  .ba-home-hero-widget .ba-mission-nav__icon > svg {
+    width: 26px;
+    height: 26px;
+  }
+
+  .ba-home-hero-widget .ba-slider__content {
+    width: calc(100% - 44px);
+    right: 22px;
+    bottom: 70px;
+  }
+
+  .ba-home-hero-widget .ba-slider__text {
+    font-size: 12px;
+  }
+
+  .ba-home-hero-widget .ba-slider__pagination {
+    right: 18px;
+  }
+
+  .ba-home-hero-widget .ba-slider__controls {
+    left: 18px;
   }
 }
 
 @media (max-width: 430px) {
-  .ba-home-hero__ticker-label {
+  .ba-home-hero-widget .ba-mission-nav__item {
+    gap: 8px;
+    padding: 10px 8px;
+  }
+
+  .ba-home-hero-widget .ba-mission-nav__icon {
+    width: 34px;
+    height: 34px;
+  }
+
+  .ba-home-hero-widget .ba-mission-nav__title {
+    font-size: 11px;
+  }
+
+  .ba-home-hero-widget .ba-ticker {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .ba-home-hero-widget .ba-ticker__label {
     padding-inline: 12px;
     font-size: 11px;
   }
 
-  .ba-home-hero__ticker-item {
+  .ba-home-hero-widget .ba-ticker__item {
     padding-inline: 29px 12px;
     font-size: 11px;
   }
 
-  .ba-home-hero__ticker-item::before {
+  .ba-home-hero-widget .ba-ticker__item::before {
     inset-inline-start: 13px;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .ba-home-hero__slide,
-  .ba-home-hero__mission-item,
-  .ba-home-hero__slider-button,
-  .ba-home-hero__slider-arrow,
-  .ba-home-hero__slider-dot,
-  .ba-home-hero__ticker-track,
-  .ba-home-hero__ticker-item {
+  .ba-home-hero-widget * {
+    animation: none !important;
     transition: none !important;
   }
 }

@@ -115,8 +115,17 @@ final class Bonyad_Alavi_Home_Hero_Widget extends Widget_Base {
 			array(
 				'label'   => 'تگ HTML عنوان اسلاید',
 				'type'    => Controls_Manager::SELECT,
-				'default' => 'h2',
-				'options' => array( 'h1' => 'H1', 'h2' => 'H2', 'h3' => 'H3', 'h4' => 'H4', 'h5' => 'H5', 'h6' => 'H6', 'div' => 'DIV' ),
+				'default' => 'reference',
+				'options' => array(
+					'reference' => 'مطابق طرح مرجع (H1 برای اسلاید اول، H2 برای بقیه)',
+					'h1'        => 'H1',
+					'h2'        => 'H2',
+					'h3'        => 'H3',
+					'h4'        => 'H4',
+					'h5'        => 'H5',
+					'h6'        => 'H6',
+					'div'       => 'DIV',
+				),
 			)
 		);
 		$this->add_control( 'slider_autoplay', array( 'label' => 'پخش خودکار', 'type' => Controls_Manager::SWITCHER, 'return_value' => 'yes', 'default' => 'yes' ) );
@@ -230,106 +239,122 @@ final class Bonyad_Alavi_Home_Hero_Widget extends Widget_Base {
 				'type'       => Controls_Manager::SLIDER,
 				'size_units' => array( 'px', '%' ),
 				'range'      => array( 'px' => array( 'min' => 600, 'max' => 1800 ), '%' => array( 'min' => 50, 'max' => 100 ) ),
-				'default'    => array( 'size' => 1280, 'unit' => 'px' ),
-				'selectors'  => array( '{{WRAPPER}} .ba-home-hero' => '--ba-home-hero-max-width: {{SIZE}}{{UNIT}};' ),
+				'selectors'  => array( '{{WRAPPER}} .ba-home-hero-widget' => '--max: {{SIZE}}{{UNIT}};' ),
 			)
 		);
-		$this->add_responsive_control( 'grid_gap', array( 'label' => 'فاصله بین بخش‌ها', 'type' => Controls_Manager::SLIDER, 'size_units' => array( 'px' ), 'range' => array( 'px' => array( 'min' => 0, 'max' => 50 ) ), 'default' => array( 'size' => 10, 'unit' => 'px' ), 'mobile_default' => array( 'size' => 8, 'unit' => 'px' ), 'selectors' => array( '{{WRAPPER}} .ba-home-hero' => '--ba-home-hero-gap: {{SIZE}}{{UNIT}};' ) ) );
-		$this->add_control( 'mission_column_width', array( 'label' => 'عرض ستون حوزه‌ها در دسکتاپ', 'type' => Controls_Manager::SLIDER, 'size_units' => array( '%' ), 'range' => array( '%' => array( 'min' => 18, 'max' => 45 ) ), 'default' => array( 'size' => 27, 'unit' => '%' ), 'selectors' => array( '{{WRAPPER}} .ba-home-hero' => '--ba-home-hero-mission-width: {{SIZE}}%;' ) ) );
+		$this->add_responsive_control( 'grid_gap', array( 'label' => 'فاصله بین بخش‌ها', 'type' => Controls_Manager::SLIDER, 'size_units' => array( 'px' ), 'range' => array( 'px' => array( 'min' => 0, 'max' => 50 ) ), 'selectors' => array( '{{WRAPPER}} .ba-hero__grid' => 'gap: {{SIZE}}{{UNIT}};' ) ) );
+		$this->add_control( 'mission_column_width', array( 'label' => 'عرض ستون حوزه‌ها در دسکتاپ', 'type' => Controls_Manager::SLIDER, 'size_units' => array( '%' ), 'range' => array( '%' => array( 'min' => 18, 'max' => 45 ) ), 'selectors' => array( '{{WRAPPER}} .ba-home-hero-widget' => '--ba-mission-column-width: {{SIZE}}%;' ) ) );
 		$this->add_responsive_control(
 			'slider_height',
 			array(
-				'label'          => 'ارتفاع اسلایدر',
-				'type'           => Controls_Manager::SLIDER,
-				'size_units'     => array( 'px', 'vh' ),
-				'range'          => array( 'px' => array( 'min' => 240, 'max' => 900 ), 'vh' => array( 'min' => 20, 'max' => 100 ) ),
-				'default'        => array( 'size' => 410, 'unit' => 'px' ),
-				'tablet_default' => array( 'size' => 390, 'unit' => 'px' ),
-				'selectors'      => array( '{{WRAPPER}} .ba-home-hero' => '--ba-home-hero-slider-height: {{SIZE}}{{UNIT}};' ),
+				'label'      => 'ارتفاع اسلایدر',
+				'type'       => Controls_Manager::SLIDER,
+				'size_units' => array( 'px', 'vh' ),
+				'range'      => array( 'px' => array( 'min' => 240, 'max' => 900 ), 'vh' => array( 'min' => 20, 'max' => 100 ) ),
+				'selectors'  => array(
+					'{{WRAPPER}} .ba-slider' => 'min-height: {{SIZE}}{{UNIT}};',
+					'{{WRAPPER}} .ba-hero__grid' => '--ba-custom-slider-height: {{SIZE}}{{UNIT}};',
+				),
 			)
 		);
-		$this->add_control( 'mobile_aspect_ratio', array( 'label' => 'نسبت اسلایدر موبایل', 'type' => Controls_Manager::SELECT, 'default' => '4 / 3', 'options' => array( '1 / 1' => '1:1', '4 / 3' => '4:3', '3 / 2' => '3:2', '16 / 9' => '16:9', '3 / 4' => '3:4' ), 'selectors' => array( '{{WRAPPER}} .ba-home-hero' => '--ba-home-hero-mobile-aspect: {{VALUE}};' ) ) );
+		$this->add_control(
+			'mobile_aspect_ratio',
+			array(
+				'label'   => 'نسبت اسلایدر موبایل',
+				'type'    => Controls_Manager::SELECT,
+				'default' => '',
+				'options' => array(
+					''       => 'پیش‌فرض طرح مرجع (4:3)',
+					'1 / 1'  => '1:1',
+					'4 / 3'  => '4:3',
+					'3 / 2'  => '3:2',
+					'16 / 9' => '16:9',
+					'3 / 4'  => '3:4',
+				),
+				'selectors' => array( '{{WRAPPER}} .ba-home-hero-widget' => '--ba-mobile-slider-aspect-ratio: {{VALUE}};' ),
+			)
+		);
 		$this->end_controls_section();
 	}
 
 	private function register_mission_style_controls() {
 		$this->start_controls_section( 'style_missions', array( 'label' => 'حوزه‌های فعالیت', 'tab' => Controls_Manager::TAB_STYLE ) );
-		$this->add_color_control( 'mission_panel_background', 'پس‌زمینه پنل', '{{WRAPPER}} .ba-home-hero__mission-nav', 'background-color', '#ffffff' );
-		$this->add_color_control( 'mission_panel_border_color', 'رنگ کادر پنل', '{{WRAPPER}} .ba-home-hero__mission-nav', 'border-color', '#a9cdb8' );
-		$this->add_color_control( 'mission_divider_color', 'رنگ جداکننده‌ها', '{{WRAPPER}} .ba-home-hero__mission-item', 'border-color', '#bdd9c7' );
-		$this->add_responsive_control( 'mission_panel_radius', array( 'label' => 'گردی پنل', 'type' => Controls_Manager::DIMENSIONS, 'size_units' => array( 'px' ), 'default' => array( 'top' => 18, 'right' => 7, 'bottom' => 7, 'left' => 18, 'unit' => 'px', 'isLinked' => false ), 'tablet_default' => array( 'top' => 18, 'right' => 18, 'bottom' => 18, 'left' => 18, 'unit' => 'px', 'isLinked' => true ), 'mobile_default' => array( 'top' => 18, 'right' => 18, 'bottom' => 18, 'left' => 18, 'unit' => 'px', 'isLinked' => true ), 'selectors' => array( '{{WRAPPER}} .ba-home-hero__mission-nav' => 'border-radius: {{TOP}}{{UNIT}} {{RIGHT}}{{UNIT}} {{BOTTOM}}{{UNIT}} {{LEFT}}{{UNIT}};' ) ) );
-		$this->add_group_control( Group_Control_Box_Shadow::get_type(), array( 'name' => 'mission_panel_shadow', 'selector' => '{{WRAPPER}} .ba-home-hero__mission-nav' ) );
-		$this->add_responsive_control( 'mission_item_padding', array( 'label' => 'فاصله داخلی آیتم', 'type' => Controls_Manager::DIMENSIONS, 'size_units' => array( 'px', 'em' ), 'default' => array( 'top' => 16, 'right' => 20, 'bottom' => 16, 'left' => 20, 'unit' => 'px', 'isLinked' => false ), 'tablet_default' => array( 'top' => 14, 'right' => 18, 'bottom' => 14, 'left' => 18, 'unit' => 'px', 'isLinked' => false ), 'mobile_default' => array( 'top' => 13, 'right' => 13, 'bottom' => 13, 'left' => 13, 'unit' => 'px', 'isLinked' => true ), 'selectors' => array( '{{WRAPPER}} .ba-home-hero__mission-item' => 'padding: {{TOP}}{{UNIT}} {{RIGHT}}{{UNIT}} {{BOTTOM}}{{UNIT}} {{LEFT}}{{UNIT}};' ) ) );
-		$this->add_responsive_control( 'mission_item_gap', array( 'label' => 'فاصله آیکون و متن', 'type' => Controls_Manager::SLIDER, 'size_units' => array( 'px' ), 'range' => array( 'px' => array( 'min' => 0, 'max' => 40 ) ), 'default' => array( 'size' => 14, 'unit' => 'px' ), 'selectors' => array( '{{WRAPPER}} .ba-home-hero__mission-item' => 'gap: {{SIZE}}{{UNIT}};' ) ) );
-		$this->add_typography_control( 'mission_title_typography', 'تایپوگرافی عنوان', '{{WRAPPER}} .ba-home-hero__mission-title' );
-		$this->add_typography_control( 'mission_description_typography', 'تایپوگرافی توضیحات', '{{WRAPPER}} .ba-home-hero__mission-description' );
+		$this->add_color_control( 'mission_panel_background', 'پس‌زمینه پنل', '{{WRAPPER}} .ba-mission-nav', 'background-color' );
+		$this->add_color_control( 'mission_panel_border_color', 'رنگ کادر پنل', '{{WRAPPER}} .ba-mission-nav', 'border-color' );
+		$this->add_color_control( 'mission_divider_color', 'رنگ جداکننده‌ها', '{{WRAPPER}} .ba-mission-nav__item', 'border-color' );
+		$this->add_responsive_control( 'mission_panel_radius', array( 'label' => 'گردی پنل', 'type' => Controls_Manager::DIMENSIONS, 'size_units' => array( 'px' ), 'selectors' => array( '{{WRAPPER}} .ba-mission-nav' => 'border-radius: {{TOP}}{{UNIT}} {{RIGHT}}{{UNIT}} {{BOTTOM}}{{UNIT}} {{LEFT}}{{UNIT}};' ) ) );
+		$this->add_group_control( Group_Control_Box_Shadow::get_type(), array( 'name' => 'mission_panel_shadow', 'selector' => '{{WRAPPER}} .ba-mission-nav' ) );
+		$this->add_responsive_control( 'mission_item_padding', array( 'label' => 'فاصله داخلی آیتم', 'type' => Controls_Manager::DIMENSIONS, 'size_units' => array( 'px', 'em' ), 'selectors' => array( '{{WRAPPER}} .ba-mission-nav__item' => 'padding: {{TOP}}{{UNIT}} {{RIGHT}}{{UNIT}} {{BOTTOM}}{{UNIT}} {{LEFT}}{{UNIT}};' ) ) );
+		$this->add_responsive_control( 'mission_item_gap', array( 'label' => 'فاصله آیکون و متن', 'type' => Controls_Manager::SLIDER, 'size_units' => array( 'px' ), 'range' => array( 'px' => array( 'min' => 0, 'max' => 40 ) ), 'selectors' => array( '{{WRAPPER}} .ba-mission-nav__item' => 'gap: {{SIZE}}{{UNIT}};' ) ) );
+		$this->add_typography_control( 'mission_title_typography', 'تایپوگرافی عنوان', '{{WRAPPER}} .ba-mission-nav__title' );
+		$this->add_typography_control( 'mission_description_typography', 'تایپوگرافی توضیحات', '{{WRAPPER}} .ba-mission-nav__description' );
 
 		$this->start_controls_tabs( 'mission_state_tabs' );
 		$this->start_controls_tab( 'mission_state_normal', array( 'label' => 'عادی' ) );
-		$this->add_color_control( 'mission_item_background', 'پس‌زمینه آیتم', '{{WRAPPER}} .ba-home-hero__mission-item', 'background-color' );
-		$this->add_color_control( 'mission_title_color', 'رنگ عنوان', '{{WRAPPER}} .ba-home-hero__mission-title', 'color', '#173329' );
-		$this->add_color_control( 'mission_description_color', 'رنگ توضیحات', '{{WRAPPER}} .ba-home-hero__mission-description', 'color', '#67736b' );
-		$this->add_color_control( 'mission_icon_color', 'رنگ آیکون', '{{WRAPPER}} .ba-home-hero__mission-icon', 'color', '#078541' );
-		$this->add_color_control( 'mission_icon_background', 'پس‌زمینه آیکون', '{{WRAPPER}} .ba-home-hero__mission-icon', 'background-color', '#eef8f2' );
-		$this->add_color_control( 'mission_icon_border_color', 'رنگ کادر آیکون', '{{WRAPPER}} .ba-home-hero__mission-icon', 'border-color', '#cae3d3' );
+		$this->add_color_control( 'mission_item_background', 'پس‌زمینه آیتم', '{{WRAPPER}} .ba-mission-nav__item', 'background-color' );
+		$this->add_color_control( 'mission_title_color', 'رنگ عنوان', '{{WRAPPER}} .ba-mission-nav__title' );
+		$this->add_color_control( 'mission_description_color', 'رنگ توضیحات', '{{WRAPPER}} .ba-mission-nav__description' );
+		$this->add_color_control( 'mission_icon_color', 'رنگ آیکون', '{{WRAPPER}} .ba-mission-nav__icon' );
+		$this->add_color_control( 'mission_icon_background', 'پس‌زمینه آیکون', '{{WRAPPER}} .ba-mission-nav__icon', 'background-color' );
+		$this->add_color_control( 'mission_icon_border_color', 'رنگ کادر آیکون', '{{WRAPPER}} .ba-mission-nav__icon', 'border-color' );
 		$this->end_controls_tab();
 		$this->start_controls_tab( 'mission_state_hover', array( 'label' => 'هاور' ) );
-		$this->add_color_control( 'mission_item_hover_background', 'پس‌زمینه آیتم', '{{WRAPPER}} .ba-home-hero__mission-item:hover', 'background-color', '#f0f8f3' );
-		$this->add_color_control( 'mission_title_hover_color', 'رنگ عنوان', '{{WRAPPER}} .ba-home-hero__mission-item:hover .ba-home-hero__mission-title' );
-		$this->add_color_control( 'mission_description_hover_color', 'رنگ توضیحات', '{{WRAPPER}} .ba-home-hero__mission-item:hover .ba-home-hero__mission-description' );
-		$this->add_color_control( 'mission_icon_hover_color', 'رنگ آیکون', '{{WRAPPER}} .ba-home-hero__mission-item:hover .ba-home-hero__mission-icon' );
-		$this->add_color_control( 'mission_icon_hover_background', 'پس‌زمینه آیکون', '{{WRAPPER}} .ba-home-hero__mission-item:hover .ba-home-hero__mission-icon', 'background-color' );
-		$this->add_color_control( 'mission_icon_hover_border_color', 'رنگ کادر آیکون', '{{WRAPPER}} .ba-home-hero__mission-item:hover .ba-home-hero__mission-icon', 'border-color' );
-		$this->add_responsive_control( 'mission_hover_shift', array( 'label' => 'جابجایی افقی', 'type' => Controls_Manager::SLIDER, 'size_units' => array( 'px' ), 'range' => array( 'px' => array( 'min' => -20, 'max' => 20 ) ), 'default' => array( 'size' => -5, 'unit' => 'px' ), 'selectors' => array( '{{WRAPPER}} .ba-home-hero__mission-item:hover' => 'transform: translateX({{SIZE}}{{UNIT}});' ) ) );
+		$this->add_color_control( 'mission_item_hover_background', 'پس‌زمینه آیتم', '{{WRAPPER}} .ba-mission-nav__item:hover', 'background-color' );
+		$this->add_color_control( 'mission_title_hover_color', 'رنگ عنوان', '{{WRAPPER}} .ba-mission-nav__item:hover .ba-mission-nav__title' );
+		$this->add_color_control( 'mission_description_hover_color', 'رنگ توضیحات', '{{WRAPPER}} .ba-mission-nav__item:hover .ba-mission-nav__description' );
+		$this->add_color_control( 'mission_icon_hover_color', 'رنگ آیکون', '{{WRAPPER}} .ba-mission-nav__item:hover .ba-mission-nav__icon' );
+		$this->add_color_control( 'mission_icon_hover_background', 'پس‌زمینه آیکون', '{{WRAPPER}} .ba-mission-nav__item:hover .ba-mission-nav__icon', 'background-color' );
+		$this->add_color_control( 'mission_icon_hover_border_color', 'رنگ کادر آیکون', '{{WRAPPER}} .ba-mission-nav__item:hover .ba-mission-nav__icon', 'border-color' );
+		$this->add_responsive_control( 'mission_hover_shift', array( 'label' => 'فاصله راست در هاور', 'type' => Controls_Manager::SLIDER, 'size_units' => array( 'px' ), 'range' => array( 'px' => array( 'min' => 0, 'max' => 50 ) ), 'selectors' => array( '{{WRAPPER}} .ba-mission-nav__item:hover' => 'padding-right: {{SIZE}}{{UNIT}};' ) ) );
 		$this->end_controls_tab();
 		$this->end_controls_tabs();
 
-		$this->add_responsive_control( 'mission_icon_box_size', array( 'label' => 'اندازه کادر آیکون', 'type' => Controls_Manager::SLIDER, 'size_units' => array( 'px' ), 'range' => array( 'px' => array( 'min' => 24, 'max' => 100 ) ), 'default' => array( 'size' => 47, 'unit' => 'px' ), 'tablet_default' => array( 'size' => 42, 'unit' => 'px' ), 'mobile_default' => array( 'size' => 39, 'unit' => 'px' ), 'selectors' => array( '{{WRAPPER}} .ba-home-hero__mission-icon' => 'width: {{SIZE}}{{UNIT}}; height: {{SIZE}}{{UNIT}};' ) ) );
-		$this->add_responsive_control( 'mission_icon_size', array( 'label' => 'اندازه آیکون', 'type' => Controls_Manager::SLIDER, 'size_units' => array( 'px' ), 'range' => array( 'px' => array( 'min' => 10, 'max' => 60 ) ), 'default' => array( 'size' => 28, 'unit' => 'px' ), 'mobile_default' => array( 'size' => 26, 'unit' => 'px' ), 'selectors' => array( '{{WRAPPER}} .ba-home-hero__mission-icon i' => 'font-size: {{SIZE}}{{UNIT}};', '{{WRAPPER}} .ba-home-hero__mission-icon svg' => 'width: {{SIZE}}{{UNIT}}; height: {{SIZE}}{{UNIT}};' ) ) );
-		$this->add_responsive_control( 'mission_icon_radius', array( 'label' => 'گردی کادر آیکون', 'type' => Controls_Manager::SLIDER, 'size_units' => array( 'px', '%' ), 'range' => array( 'px' => array( 'min' => 0, 'max' => 50 ), '%' => array( 'min' => 0, 'max' => 50 ) ), 'default' => array( 'size' => 12, 'unit' => 'px' ), 'selectors' => array( '{{WRAPPER}} .ba-home-hero__mission-icon' => 'border-radius: {{SIZE}}{{UNIT}};' ) ) );
+		$this->add_responsive_control( 'mission_icon_box_size', array( 'label' => 'اندازه کادر آیکون', 'type' => Controls_Manager::SLIDER, 'size_units' => array( 'px' ), 'range' => array( 'px' => array( 'min' => 24, 'max' => 100 ) ), 'selectors' => array( '{{WRAPPER}} .ba-mission-nav__icon' => 'width: {{SIZE}}{{UNIT}}; height: {{SIZE}}{{UNIT}};' ) ) );
+		$this->add_responsive_control( 'mission_icon_size', array( 'label' => 'اندازه آیکون', 'type' => Controls_Manager::SLIDER, 'size_units' => array( 'px' ), 'range' => array( 'px' => array( 'min' => 10, 'max' => 60 ) ), 'selectors' => array( '{{WRAPPER}} .ba-mission-nav__icon i' => 'font-size: {{SIZE}}{{UNIT}};', '{{WRAPPER}} .ba-mission-nav__glyph' => 'width: {{SIZE}}{{UNIT}}; height: {{SIZE}}{{UNIT}};' ) ) );
+		$this->add_responsive_control( 'mission_icon_radius', array( 'label' => 'گردی کادر آیکون', 'type' => Controls_Manager::SLIDER, 'size_units' => array( 'px', '%' ), 'range' => array( 'px' => array( 'min' => 0, 'max' => 50 ), '%' => array( 'min' => 0, 'max' => 50 ) ), 'selectors' => array( '{{WRAPPER}} .ba-mission-nav__icon' => 'border-radius: {{SIZE}}{{UNIT}};' ) ) );
 		$this->end_controls_section();
 	}
 
 	private function register_slider_style_controls() {
 		$this->start_controls_section( 'style_slider', array( 'label' => 'اسلایدر و محتوا', 'tab' => Controls_Manager::TAB_STYLE ) );
-		$this->add_color_control( 'slider_background', 'پس‌زمینه اسلایدر', '{{WRAPPER}} .ba-home-hero__slider', 'background-color', '#073d27' );
-		$this->add_responsive_control( 'slider_radius', array( 'label' => 'گردی اسلایدر', 'type' => Controls_Manager::DIMENSIONS, 'size_units' => array( 'px' ), 'default' => array( 'top' => 7, 'right' => 18, 'bottom' => 18, 'left' => 7, 'unit' => 'px', 'isLinked' => false ), 'tablet_default' => array( 'top' => 18, 'right' => 18, 'bottom' => 18, 'left' => 18, 'unit' => 'px', 'isLinked' => true ), 'mobile_default' => array( 'top' => 18, 'right' => 18, 'bottom' => 18, 'left' => 18, 'unit' => 'px', 'isLinked' => true ), 'selectors' => array( '{{WRAPPER}} .ba-home-hero__slider' => 'border-radius: {{TOP}}{{UNIT}} {{RIGHT}}{{UNIT}} {{BOTTOM}}{{UNIT}} {{LEFT}}{{UNIT}};' ) ) );
-		$this->add_group_control( Group_Control_Box_Shadow::get_type(), array( 'name' => 'slider_shadow', 'selector' => '{{WRAPPER}} .ba-home-hero__slider' ) );
-		$this->add_group_control( Group_Control_Background::get_type(), array( 'name' => 'slider_overlay_background', 'label' => 'Overlay', 'types' => array( 'classic', 'gradient' ), 'selector' => '{{WRAPPER}} .ba-home-hero__slide::after' ) );
-		$this->add_control( 'slider_image_fit', array( 'label' => 'نحوه نمایش تصویر', 'type' => Controls_Manager::SELECT, 'default' => 'cover', 'options' => array( 'cover' => 'Cover', 'contain' => 'Contain', 'fill' => 'Fill', 'none' => 'None', 'scale-down' => 'Scale Down' ), 'selectors' => array( '{{WRAPPER}} .ba-home-hero__slide-image' => 'object-fit: {{VALUE}};' ) ) );
-		$this->add_control( 'slider_image_position', array( 'label' => 'موقعیت تصویر', 'type' => Controls_Manager::SELECT, 'default' => 'center center', 'options' => array( 'center center' => 'وسط', 'center top' => 'بالا', 'center bottom' => 'پایین', 'right center' => 'راست', 'left center' => 'چپ', 'right top' => 'بالا راست', 'left top' => 'بالا چپ', 'right bottom' => 'پایین راست', 'left bottom' => 'پایین چپ' ), 'selectors' => array( '{{WRAPPER}} .ba-home-hero__slide-image' => 'object-position: {{VALUE}};' ) ) );
-		$this->add_responsive_control( 'slider_content_width', array( 'label' => 'عرض محتوا', 'type' => Controls_Manager::SLIDER, 'size_units' => array( '%', 'px' ), 'range' => array( '%' => array( 'min' => 20, 'max' => 100 ), 'px' => array( 'min' => 200, 'max' => 570 ) ), 'default' => array( 'size' => 75, 'unit' => '%' ), 'mobile_default' => array( 'size' => 90, 'unit' => '%' ), 'selectors' => array( '{{WRAPPER}} .ba-home-hero__slider-content' => 'width: min(570px, {{SIZE}}{{UNIT}});' ) ) );
-		$this->add_responsive_control( 'slider_content_right', array( 'label' => 'فاصله محتوا از راست', 'type' => Controls_Manager::SLIDER, 'size_units' => array( 'px', '%' ), 'range' => array( 'px' => array( 'min' => 0, 'max' => 140 ), '%' => array( 'min' => 0, 'max' => 30 ) ), 'default' => array( 'size' => 42, 'unit' => 'px' ), 'mobile_default' => array( 'size' => 22, 'unit' => 'px' ), 'selectors' => array( '{{WRAPPER}} .ba-home-hero__slider-content' => 'right: {{SIZE}}{{UNIT}};' ) ) );
-		$this->add_responsive_control( 'slider_content_bottom', array( 'label' => 'فاصله محتوا از پایین', 'type' => Controls_Manager::SLIDER, 'size_units' => array( 'px', '%' ), 'range' => array( 'px' => array( 'min' => 0, 'max' => 180 ), '%' => array( 'min' => 0, 'max' => 40 ) ), 'default' => array( 'size' => 48, 'unit' => 'px' ), 'mobile_default' => array( 'size' => 70, 'unit' => 'px' ), 'selectors' => array( '{{WRAPPER}} .ba-home-hero__slider-content' => 'bottom: {{SIZE}}{{UNIT}};' ) ) );
+		$this->add_color_control( 'slider_background', 'پس‌زمینه اسلایدر', '{{WRAPPER}} .ba-slider', 'background-color' );
+		$this->add_responsive_control( 'slider_radius', array( 'label' => 'گردی اسلایدر', 'type' => Controls_Manager::DIMENSIONS, 'size_units' => array( 'px' ), 'selectors' => array( '{{WRAPPER}} .ba-slider' => 'border-radius: {{TOP}}{{UNIT}} {{RIGHT}}{{UNIT}} {{BOTTOM}}{{UNIT}} {{LEFT}}{{UNIT}};' ) ) );
+		$this->add_group_control( Group_Control_Box_Shadow::get_type(), array( 'name' => 'slider_shadow', 'selector' => '{{WRAPPER}} .ba-slider' ) );
+		$this->add_group_control( Group_Control_Background::get_type(), array( 'name' => 'slider_overlay_background', 'label' => 'Overlay', 'types' => array( 'classic', 'gradient' ), 'selector' => '{{WRAPPER}} .ba-slider__slide::after' ) );
+		$this->add_control( 'slider_image_fit', array( 'label' => 'نحوه نمایش تصویر', 'type' => Controls_Manager::SELECT, 'default' => '', 'options' => array( '' => 'پیش‌فرض طرح مرجع (Cover)', 'cover' => 'Cover', 'contain' => 'Contain', 'fill' => 'Fill', 'none' => 'None', 'scale-down' => 'Scale Down' ), 'selectors' => array( '{{WRAPPER}} .ba-slider__slide img' => 'object-fit: {{VALUE}};' ) ) );
+		$this->add_control( 'slider_image_position', array( 'label' => 'موقعیت تصویر', 'type' => Controls_Manager::SELECT, 'default' => '', 'options' => array( '' => 'پیش‌فرض طرح مرجع (وسط)', 'center center' => 'وسط', 'center top' => 'بالا', 'center bottom' => 'پایین', 'right center' => 'راست', 'left center' => 'چپ', 'right top' => 'بالا راست', 'left top' => 'بالا چپ', 'right bottom' => 'پایین راست', 'left bottom' => 'پایین چپ' ), 'selectors' => array( '{{WRAPPER}} .ba-slider__slide img' => 'object-position: {{VALUE}};' ) ) );
+		$this->add_responsive_control( 'slider_content_width', array( 'label' => 'عرض محتوا', 'type' => Controls_Manager::SLIDER, 'size_units' => array( '%', 'px' ), 'range' => array( '%' => array( 'min' => 20, 'max' => 100 ), 'px' => array( 'min' => 200, 'max' => 570 ) ), 'selectors' => array( '{{WRAPPER}} .ba-slider__content' => 'width: min(570px, {{SIZE}}{{UNIT}});' ) ) );
+		$this->add_responsive_control( 'slider_content_right', array( 'label' => 'فاصله محتوا از راست', 'type' => Controls_Manager::SLIDER, 'size_units' => array( 'px', '%' ), 'range' => array( 'px' => array( 'min' => 0, 'max' => 140 ), '%' => array( 'min' => 0, 'max' => 30 ) ), 'selectors' => array( '{{WRAPPER}} .ba-slider__content' => 'right: {{SIZE}}{{UNIT}};' ) ) );
+		$this->add_responsive_control( 'slider_content_bottom', array( 'label' => 'فاصله محتوا از پایین', 'type' => Controls_Manager::SLIDER, 'size_units' => array( 'px', '%' ), 'range' => array( 'px' => array( 'min' => 0, 'max' => 180 ), '%' => array( 'min' => 0, 'max' => 40 ) ), 'selectors' => array( '{{WRAPPER}} .ba-slider__content' => 'bottom: {{SIZE}}{{UNIT}};' ) ) );
 
 		$this->add_control( 'slider_tag_heading', array( 'label' => 'برچسب اسلاید', 'type' => Controls_Manager::HEADING, 'separator' => 'before' ) );
-		$this->add_typography_control( 'slider_tag_typography', 'تایپوگرافی برچسب', '{{WRAPPER}} .ba-home-hero__slider-tag' );
-		$this->add_color_control( 'slider_tag_color', 'رنگ متن', '{{WRAPPER}} .ba-home-hero__slider-tag', 'color', '#ffffff' );
-		$this->add_color_control( 'slider_tag_background', 'پس‌زمینه', '{{WRAPPER}} .ba-home-hero__slider-tag', 'background-color', 'rgba(255,255,255,.14)' );
-		$this->add_color_control( 'slider_tag_border_color', 'رنگ کادر', '{{WRAPPER}} .ba-home-hero__slider-tag', 'border-color', 'rgba(255,255,255,.25)' );
+		$this->add_typography_control( 'slider_tag_typography', 'تایپوگرافی برچسب', '{{WRAPPER}} .ba-slider__tag' );
+		$this->add_color_control( 'slider_tag_color', 'رنگ متن', '{{WRAPPER}} .ba-slider__tag' );
+		$this->add_color_control( 'slider_tag_background', 'پس‌زمینه', '{{WRAPPER}} .ba-slider__tag', 'background-color' );
+		$this->add_color_control( 'slider_tag_border_color', 'رنگ کادر', '{{WRAPPER}} .ba-slider__tag', 'border-color' );
 
 		$this->add_control( 'slider_title_heading', array( 'label' => 'عنوان اسلاید', 'type' => Controls_Manager::HEADING, 'separator' => 'before' ) );
-		$this->add_typography_control( 'slider_title_typography', 'تایپوگرافی عنوان', '{{WRAPPER}} .ba-home-hero__slider-title' );
-		$this->add_color_control( 'slider_title_color', 'رنگ عنوان', '{{WRAPPER}} .ba-home-hero__slider-title', 'color', '#ffffff' );
+		$this->add_typography_control( 'slider_title_typography', 'تایپوگرافی عنوان', '{{WRAPPER}} .ba-slider__title' );
+		$this->add_color_control( 'slider_title_color', 'رنگ عنوان', '{{WRAPPER}} .ba-slider__title' );
 
 		$this->add_control( 'slider_description_heading', array( 'label' => 'توضیحات اسلاید', 'type' => Controls_Manager::HEADING, 'separator' => 'before' ) );
-		$this->add_typography_control( 'slider_description_typography', 'تایپوگرافی توضیحات', '{{WRAPPER}} .ba-home-hero__slider-description' );
-		$this->add_color_control( 'slider_description_color', 'رنگ توضیحات', '{{WRAPPER}} .ba-home-hero__slider-description', 'color', 'rgba(255,255,255,.82)' );
+		$this->add_typography_control( 'slider_description_typography', 'تایپوگرافی توضیحات', '{{WRAPPER}} .ba-slider__text' );
+		$this->add_color_control( 'slider_description_color', 'رنگ توضیحات', '{{WRAPPER}} .ba-slider__text' );
 
 		$this->add_control( 'slider_button_heading', array( 'label' => 'دکمه اسلاید', 'type' => Controls_Manager::HEADING, 'separator' => 'before' ) );
-		$this->add_typography_control( 'slider_button_typography', 'تایپوگرافی دکمه', '{{WRAPPER}} .ba-home-hero__slider-button' );
-		$this->add_responsive_control( 'slider_button_padding', array( 'label' => 'فاصله داخلی دکمه', 'type' => Controls_Manager::DIMENSIONS, 'size_units' => array( 'px', 'em' ), 'default' => array( 'top' => 9, 'right' => 14, 'bottom' => 9, 'left' => 14, 'unit' => 'px', 'isLinked' => false ), 'selectors' => array( '{{WRAPPER}} .ba-home-hero__slider-button' => 'padding: {{TOP}}{{UNIT}} {{RIGHT}}{{UNIT}} {{BOTTOM}}{{UNIT}} {{LEFT}}{{UNIT}};' ) ) );
-		$this->add_responsive_control( 'slider_button_radius', array( 'label' => 'گردی دکمه', 'type' => Controls_Manager::SLIDER, 'size_units' => array( 'px' ), 'range' => array( 'px' => array( 'min' => 0, 'max' => 60 ) ), 'default' => array( 'size' => 10, 'unit' => 'px' ), 'selectors' => array( '{{WRAPPER}} .ba-home-hero__slider-button' => 'border-radius: {{SIZE}}{{UNIT}};' ) ) );
+		$this->add_typography_control( 'slider_button_typography', 'تایپوگرافی دکمه', '{{WRAPPER}} .ba-slider__cta' );
+		$this->add_responsive_control( 'slider_button_padding', array( 'label' => 'فاصله داخلی دکمه', 'type' => Controls_Manager::DIMENSIONS, 'size_units' => array( 'px', 'em' ), 'selectors' => array( '{{WRAPPER}} .ba-slider__cta' => 'padding: {{TOP}}{{UNIT}} {{RIGHT}}{{UNIT}} {{BOTTOM}}{{UNIT}} {{LEFT}}{{UNIT}};' ) ) );
+		$this->add_responsive_control( 'slider_button_radius', array( 'label' => 'گردی دکمه', 'type' => Controls_Manager::SLIDER, 'size_units' => array( 'px' ), 'range' => array( 'px' => array( 'min' => 0, 'max' => 60 ) ), 'selectors' => array( '{{WRAPPER}} .ba-slider__cta' => 'border-radius: {{SIZE}}{{UNIT}};' ) ) );
 		$this->start_controls_tabs( 'slider_button_tabs' );
 		$this->start_controls_tab( 'slider_button_normal', array( 'label' => 'عادی' ) );
-		$this->add_color_control( 'slider_button_color', 'رنگ متن', '{{WRAPPER}} .ba-home-hero__slider-button', 'color', '#075433' );
-		$this->add_color_control( 'slider_button_background', 'پس‌زمینه', '{{WRAPPER}} .ba-home-hero__slider-button', 'background-color', '#ffffff' );
-		$this->add_color_control( 'slider_button_border_color', 'رنگ کادر', '{{WRAPPER}} .ba-home-hero__slider-button', 'border-color', '#b9d7c5' );
+		$this->add_color_control( 'slider_button_color', 'رنگ متن', '{{WRAPPER}} .ba-slider__cta' );
+		$this->add_color_control( 'slider_button_background', 'پس‌زمینه', '{{WRAPPER}} .ba-slider__cta', 'background-color' );
+		$this->add_color_control( 'slider_button_border_color', 'رنگ کادر', '{{WRAPPER}} .ba-slider__cta', 'border-color' );
 		$this->end_controls_tab();
 		$this->start_controls_tab( 'slider_button_hover', array( 'label' => 'هاور' ) );
-		$this->add_color_control( 'slider_button_hover_color', 'رنگ متن', '{{WRAPPER}} .ba-home-hero__slider-button:hover', 'color', '#ffffff' );
-		$this->add_color_control( 'slider_button_hover_background', 'پس‌زمینه', '{{WRAPPER}} .ba-home-hero__slider-button:hover', 'background-color', '#078541' );
-		$this->add_color_control( 'slider_button_hover_border_color', 'رنگ کادر', '{{WRAPPER}} .ba-home-hero__slider-button:hover', 'border-color', '#078541' );
+		$this->add_color_control( 'slider_button_hover_color', 'رنگ متن', '{{WRAPPER}} .ba-slider__cta:hover' );
+		$this->add_color_control( 'slider_button_hover_background', 'پس‌زمینه', '{{WRAPPER}} .ba-slider__cta:hover', 'background-color' );
+		$this->add_color_control( 'slider_button_hover_border_color', 'رنگ کادر', '{{WRAPPER}} .ba-slider__cta:hover', 'border-color' );
 		$this->end_controls_tab();
 		$this->end_controls_tabs();
 		$this->end_controls_section();
@@ -338,57 +363,57 @@ final class Bonyad_Alavi_Home_Hero_Widget extends Widget_Base {
 	private function register_navigation_style_controls() {
 		$this->start_controls_section( 'style_navigation', array( 'label' => 'ناوبری اسلایدر', 'tab' => Controls_Manager::TAB_STYLE ) );
 		$this->add_control( 'slider_arrow_heading', array( 'label' => 'فلش‌ها', 'type' => Controls_Manager::HEADING ) );
-		$this->add_responsive_control( 'slider_arrow_size', array( 'label' => 'اندازه دکمه', 'type' => Controls_Manager::SLIDER, 'size_units' => array( 'px' ), 'range' => array( 'px' => array( 'min' => 24, 'max' => 80 ) ), 'default' => array( 'size' => 37, 'unit' => 'px' ), 'selectors' => array( '{{WRAPPER}} .ba-home-hero__slider-arrow' => 'width: {{SIZE}}{{UNIT}}; height: {{SIZE}}{{UNIT}};' ) ) );
-		$this->add_responsive_control( 'slider_arrow_icon_size', array( 'label' => 'اندازه آیکون', 'type' => Controls_Manager::SLIDER, 'size_units' => array( 'px' ), 'range' => array( 'px' => array( 'min' => 8, 'max' => 40 ) ), 'default' => array( 'size' => 17, 'unit' => 'px' ), 'selectors' => array( '{{WRAPPER}} .ba-home-hero__slider-arrow svg' => 'width: {{SIZE}}{{UNIT}}; height: {{SIZE}}{{UNIT}};' ) ) );
+		$this->add_responsive_control( 'slider_arrow_size', array( 'label' => 'اندازه دکمه', 'type' => Controls_Manager::SLIDER, 'size_units' => array( 'px' ), 'range' => array( 'px' => array( 'min' => 24, 'max' => 80 ) ), 'selectors' => array( '{{WRAPPER}} .ba-slider__arrow' => 'width: {{SIZE}}{{UNIT}}; height: {{SIZE}}{{UNIT}};' ) ) );
+		$this->add_responsive_control( 'slider_arrow_icon_size', array( 'label' => 'اندازه آیکون', 'type' => Controls_Manager::SLIDER, 'size_units' => array( 'px' ), 'range' => array( 'px' => array( 'min' => 8, 'max' => 40 ) ), 'selectors' => array( '{{WRAPPER}} .ba-slider__arrow svg' => 'width: {{SIZE}}{{UNIT}}; height: {{SIZE}}{{UNIT}};' ) ) );
 		$this->start_controls_tabs( 'slider_arrow_tabs' );
 		$this->start_controls_tab( 'slider_arrow_normal', array( 'label' => 'عادی' ) );
-		$this->add_color_control( 'slider_arrow_color', 'رنگ آیکون', '{{WRAPPER}} .ba-home-hero__slider-arrow', 'color', '#ffffff' );
-		$this->add_color_control( 'slider_arrow_background', 'پس‌زمینه', '{{WRAPPER}} .ba-home-hero__slider-arrow', 'background-color', 'rgba(5,30,20,.34)' );
-		$this->add_color_control( 'slider_arrow_border_color', 'رنگ کادر', '{{WRAPPER}} .ba-home-hero__slider-arrow', 'border-color', 'rgba(255,255,255,.35)' );
+		$this->add_color_control( 'slider_arrow_color', 'رنگ آیکون', '{{WRAPPER}} .ba-slider__arrow' );
+		$this->add_color_control( 'slider_arrow_background', 'پس‌زمینه', '{{WRAPPER}} .ba-slider__arrow', 'background-color' );
+		$this->add_color_control( 'slider_arrow_border_color', 'رنگ کادر', '{{WRAPPER}} .ba-slider__arrow', 'border-color' );
 		$this->end_controls_tab();
 		$this->start_controls_tab( 'slider_arrow_hover', array( 'label' => 'هاور' ) );
-		$this->add_color_control( 'slider_arrow_hover_color', 'رنگ آیکون', '{{WRAPPER}} .ba-home-hero__slider-arrow:hover', 'color', '#073d27' );
-		$this->add_color_control( 'slider_arrow_hover_background', 'پس‌زمینه', '{{WRAPPER}} .ba-home-hero__slider-arrow:hover', 'background-color', '#ffffff' );
-		$this->add_color_control( 'slider_arrow_hover_border_color', 'رنگ کادر', '{{WRAPPER}} .ba-home-hero__slider-arrow:hover', 'border-color', '#ffffff' );
+		$this->add_color_control( 'slider_arrow_hover_color', 'رنگ آیکون', '{{WRAPPER}} .ba-slider__arrow:hover' );
+		$this->add_color_control( 'slider_arrow_hover_background', 'پس‌زمینه', '{{WRAPPER}} .ba-slider__arrow:hover', 'background-color' );
+		$this->add_color_control( 'slider_arrow_hover_border_color', 'رنگ کادر', '{{WRAPPER}} .ba-slider__arrow:hover', 'border-color' );
 		$this->end_controls_tab();
 		$this->end_controls_tabs();
 
 		$this->add_control( 'slider_dots_heading', array( 'label' => 'Pagination', 'type' => Controls_Manager::HEADING, 'separator' => 'before' ) );
-		$this->add_responsive_control( 'slider_dot_size', array( 'label' => 'اندازه نقطه', 'type' => Controls_Manager::SLIDER, 'size_units' => array( 'px' ), 'range' => array( 'px' => array( 'min' => 3, 'max' => 20 ) ), 'default' => array( 'size' => 7, 'unit' => 'px' ), 'selectors' => array( '{{WRAPPER}} .ba-home-hero__slider-dot' => 'width: {{SIZE}}{{UNIT}}; height: {{SIZE}}{{UNIT}};' ) ) );
-		$this->add_responsive_control( 'slider_dot_active_width', array( 'label' => 'عرض نقطه فعال', 'type' => Controls_Manager::SLIDER, 'size_units' => array( 'px' ), 'range' => array( 'px' => array( 'min' => 5, 'max' => 60 ) ), 'default' => array( 'size' => 27, 'unit' => 'px' ), 'selectors' => array( '{{WRAPPER}} .ba-home-hero__slider-dot.is-active' => 'width: {{SIZE}}{{UNIT}};' ) ) );
-		$this->add_color_control( 'slider_dot_color', 'رنگ عادی', '{{WRAPPER}} .ba-home-hero__slider-dot', 'background-color', 'rgba(255,255,255,.5)' );
-		$this->add_color_control( 'slider_dot_hover_color', 'رنگ هاور', '{{WRAPPER}} .ba-home-hero__slider-dot:hover', 'background-color', 'rgba(255,255,255,.8)' );
-		$this->add_color_control( 'slider_dot_active_color', 'رنگ فعال', '{{WRAPPER}} .ba-home-hero__slider-dot.is-active', 'background-color', '#ffffff' );
+		$this->add_responsive_control( 'slider_dot_size', array( 'label' => 'اندازه نقطه', 'type' => Controls_Manager::SLIDER, 'size_units' => array( 'px' ), 'range' => array( 'px' => array( 'min' => 3, 'max' => 20 ) ), 'selectors' => array( '{{WRAPPER}} .ba-slider__dot' => 'width: {{SIZE}}{{UNIT}}; height: {{SIZE}}{{UNIT}};' ) ) );
+		$this->add_responsive_control( 'slider_dot_active_width', array( 'label' => 'عرض نقطه فعال', 'type' => Controls_Manager::SLIDER, 'size_units' => array( 'px' ), 'range' => array( 'px' => array( 'min' => 5, 'max' => 60 ) ), 'selectors' => array( '{{WRAPPER}} .ba-slider__dot.is-active' => 'width: {{SIZE}}{{UNIT}};' ) ) );
+		$this->add_color_control( 'slider_dot_color', 'رنگ عادی', '{{WRAPPER}} .ba-slider__dot', 'background-color' );
+		$this->add_color_control( 'slider_dot_hover_color', 'رنگ هاور', '{{WRAPPER}} .ba-slider__dot:hover', 'background-color' );
+		$this->add_color_control( 'slider_dot_active_color', 'رنگ فعال', '{{WRAPPER}} .ba-slider__dot.is-active', 'background-color' );
 		$this->end_controls_section();
 	}
 
 	private function register_ticker_style_controls() {
 		$this->start_controls_section( 'style_ticker', array( 'label' => 'نوار اخبار مهم', 'tab' => Controls_Manager::TAB_STYLE ) );
-		$this->add_responsive_control( 'ticker_height', array( 'label' => 'ارتفاع', 'type' => Controls_Manager::SLIDER, 'size_units' => array( 'px' ), 'range' => array( 'px' => array( 'min' => 32, 'max' => 90 ) ), 'default' => array( 'size' => 48, 'unit' => 'px' ), 'selectors' => array( '{{WRAPPER}} .ba-home-hero' => '--ba-home-hero-ticker-height: {{SIZE}}{{UNIT}};' ) ) );
-		$this->add_color_control( 'ticker_background', 'پس‌زمینه نوار', '{{WRAPPER}} .ba-home-hero__ticker', 'background-color', '#ffffff' );
-		$this->add_color_control( 'ticker_border_color', 'رنگ کادر', '{{WRAPPER}} .ba-home-hero__ticker', 'border-color', '#dce8e1' );
-		$this->add_responsive_control( 'ticker_radius', array( 'label' => 'گردی نوار', 'type' => Controls_Manager::SLIDER, 'size_units' => array( 'px' ), 'range' => array( 'px' => array( 'min' => 0, 'max' => 50 ) ), 'default' => array( 'size' => 12, 'unit' => 'px' ), 'selectors' => array( '{{WRAPPER}} .ba-home-hero__ticker' => 'border-radius: {{SIZE}}{{UNIT}};' ) ) );
-		$this->add_group_control( Group_Control_Box_Shadow::get_type(), array( 'name' => 'ticker_shadow', 'selector' => '{{WRAPPER}} .ba-home-hero__ticker' ) );
+		$this->add_responsive_control( 'ticker_height', array( 'label' => 'ارتفاع', 'type' => Controls_Manager::SLIDER, 'size_units' => array( 'px' ), 'range' => array( 'px' => array( 'min' => 32, 'max' => 90 ) ), 'selectors' => array( '{{WRAPPER}} .ba-ticker' => 'height: {{SIZE}}{{UNIT}};', '{{WRAPPER}} .ba-ticker__viewport' => 'height: {{SIZE}}{{UNIT}};', '{{WRAPPER}} .ba-ticker__item' => 'height: {{SIZE}}{{UNIT}}; flex-basis: {{SIZE}}{{UNIT}};' ) ) );
+		$this->add_color_control( 'ticker_background', 'پس‌زمینه نوار', '{{WRAPPER}} .ba-ticker', 'background-color' );
+		$this->add_color_control( 'ticker_border_color', 'رنگ کادر', '{{WRAPPER}} .ba-ticker', 'border-color' );
+		$this->add_responsive_control( 'ticker_radius', array( 'label' => 'گردی نوار', 'type' => Controls_Manager::SLIDER, 'size_units' => array( 'px' ), 'range' => array( 'px' => array( 'min' => 0, 'max' => 50 ) ), 'selectors' => array( '{{WRAPPER}} .ba-ticker' => 'border-radius: {{SIZE}}{{UNIT}};' ) ) );
+		$this->add_group_control( Group_Control_Box_Shadow::get_type(), array( 'name' => 'ticker_shadow', 'selector' => '{{WRAPPER}} .ba-ticker' ) );
 
 		$this->add_control( 'ticker_label_heading', array( 'label' => 'برچسب نوار', 'type' => Controls_Manager::HEADING, 'separator' => 'before' ) );
-		$this->add_typography_control( 'ticker_label_typography', 'تایپوگرافی برچسب', '{{WRAPPER}} .ba-home-hero__ticker-label' );
-		$this->add_color_control( 'ticker_label_color', 'رنگ متن', '{{WRAPPER}} .ba-home-hero__ticker-label', 'color', '#ffffff' );
-		$this->add_color_control( 'ticker_label_background', 'پس‌زمینه', '{{WRAPPER}} .ba-home-hero__ticker-label', 'background-color', '#078541' );
-		$this->add_responsive_control( 'ticker_label_padding', array( 'label' => 'فاصله داخلی', 'type' => Controls_Manager::DIMENSIONS, 'size_units' => array( 'px', 'em' ), 'default' => array( 'top' => 0, 'right' => 16, 'bottom' => 0, 'left' => 16, 'unit' => 'px', 'isLinked' => false ), 'selectors' => array( '{{WRAPPER}} .ba-home-hero__ticker-label' => 'padding: {{TOP}}{{UNIT}} {{RIGHT}}{{UNIT}} {{BOTTOM}}{{UNIT}} {{LEFT}}{{UNIT}};' ) ) );
+		$this->add_typography_control( 'ticker_label_typography', 'تایپوگرافی برچسب', '{{WRAPPER}} .ba-ticker__label' );
+		$this->add_color_control( 'ticker_label_color', 'رنگ متن', '{{WRAPPER}} .ba-ticker__label' );
+		$this->add_color_control( 'ticker_label_background', 'پس‌زمینه', '{{WRAPPER}} .ba-ticker__label', 'background-color' );
+		$this->add_responsive_control( 'ticker_label_padding', array( 'label' => 'فاصله داخلی', 'type' => Controls_Manager::DIMENSIONS, 'size_units' => array( 'px', 'em' ), 'selectors' => array( '{{WRAPPER}} .ba-ticker__label' => 'padding: {{TOP}}{{UNIT}} {{RIGHT}}{{UNIT}} {{BOTTOM}}{{UNIT}} {{LEFT}}{{UNIT}};' ) ) );
 
 		$this->add_control( 'ticker_item_heading', array( 'label' => 'عنوان خبر', 'type' => Controls_Manager::HEADING, 'separator' => 'before' ) );
-		$this->add_typography_control( 'ticker_item_typography', 'تایپوگرافی عنوان خبر', '{{WRAPPER}} .ba-home-hero__ticker-item' );
+		$this->add_typography_control( 'ticker_item_typography', 'تایپوگرافی عنوان خبر', '{{WRAPPER}} .ba-ticker__item' );
 		$this->start_controls_tabs( 'ticker_item_tabs' );
 		$this->start_controls_tab( 'ticker_item_normal', array( 'label' => 'عادی' ) );
-		$this->add_color_control( 'ticker_item_color', 'رنگ متن', '{{WRAPPER}} .ba-home-hero__ticker-item', 'color', '#30483d' );
-		$this->add_color_control( 'ticker_item_background', 'پس‌زمینه', '{{WRAPPER}} .ba-home-hero__ticker-item', 'background-color' );
+		$this->add_color_control( 'ticker_item_color', 'رنگ متن', '{{WRAPPER}} .ba-ticker__item' );
+		$this->add_color_control( 'ticker_item_background', 'پس‌زمینه', '{{WRAPPER}} .ba-ticker__item', 'background-color' );
 		$this->end_controls_tab();
 		$this->start_controls_tab( 'ticker_item_hover', array( 'label' => 'هاور' ) );
-		$this->add_color_control( 'ticker_item_hover_color', 'رنگ متن', '{{WRAPPER}} .ba-home-hero__ticker-item:hover', 'color', '#075433' );
-		$this->add_color_control( 'ticker_item_hover_background', 'پس‌زمینه', '{{WRAPPER}} .ba-home-hero__ticker-item:hover', 'background-color' );
+		$this->add_color_control( 'ticker_item_hover_color', 'رنگ متن', '{{WRAPPER}} .ba-ticker__item:hover' );
+		$this->add_color_control( 'ticker_item_hover_background', 'پس‌زمینه', '{{WRAPPER}} .ba-ticker__item:hover', 'background-color' );
 		$this->end_controls_tab();
 		$this->end_controls_tabs();
-		$this->add_color_control( 'ticker_bullet_color', 'رنگ نشانگر', '{{WRAPPER}} .ba-home-hero__ticker-item::before', 'background-color', '#f5b73b' );
+		$this->add_color_control( 'ticker_bullet_color', 'رنگ نشانگر', '{{WRAPPER}} .ba-ticker__item::before', 'background-color' );
 		$this->end_controls_section();
 	}
 
@@ -444,12 +469,13 @@ final class Bonyad_Alavi_Home_Hero_Widget extends Widget_Base {
 			return;
 		}
 
-		$classes   = array( 'ba-home-hero' );
-		$classes[] = $posts ? 'ba-home-hero--has-ticker' : 'ba-home-hero--no-ticker';
-		$classes[] = $missions ? 'ba-home-hero--has-missions' : 'ba-home-hero--no-missions';
-		$classes[] = $slides ? 'ba-home-hero--has-slider' : 'ba-home-hero--no-slider';
+		$classes   = array( 'ba-hero', 'ba-home-hero-widget' );
+		$classes[] = $posts ? 'ba-home-hero-widget--has-ticker' : 'ba-home-hero-widget--no-ticker';
+		$classes[] = $missions ? 'ba-home-hero-widget--has-missions' : 'ba-home-hero-widget--no-missions';
+		$classes[] = $slides ? 'ba-home-hero-widget--has-slider' : 'ba-home-hero-widget--no-slider';
 		?>
 		<section
+			aria-label="دسترسی سریع و اخبار مهم"
 			class="<?php echo esc_attr( implode( ' ', $classes ) ); ?>"
 			data-ba-home-hero
 			data-slider-autoplay="<?php echo 'yes' === ( $settings['slider_autoplay'] ?? 'yes' ) ? '1' : '0'; ?>"
@@ -458,54 +484,59 @@ final class Bonyad_Alavi_Home_Hero_Widget extends Widget_Base {
 			data-ticker-autoplay="<?php echo 'yes' === ( $settings['ticker_autoplay'] ?? 'yes' ) ? '1' : '0'; ?>"
 			data-ticker-delay="<?php echo esc_attr( (string) max( 1500, absint( $settings['ticker_delay'] ?? 6000 ) ) ); ?>"
 		>
-			<div class="ba-home-hero__grid">
-				<?php if ( $missions ) : ?>
-					<aside class="ba-home-hero__mission-nav" aria-label="حوزه‌های اصلی فعالیت">
-						<?php foreach ( $missions as $mission ) : ?>
-							<?php $this->render_mission_item( $mission ); ?>
-						<?php endforeach; ?>
-					</aside>
-				<?php endif; ?>
-
-				<?php if ( $slides ) : ?>
-					<div class="ba-home-hero__slider" data-ba-home-hero-slider role="region" aria-roledescription="carousel" aria-label="اخبار و رویدادهای شاخص" tabindex="0">
-						<div class="ba-home-hero__slider-track">
-							<?php foreach ( $slides as $index => $slide ) : ?>
-								<?php $this->render_slide( $slide, $index, $settings ); ?>
+			<div class="ba-container">
+				<div class="ba-hero__grid">
+					<?php if ( $missions ) : ?>
+						<aside aria-label="حوزه‌های اصلی فعالیت" class="ba-mission-nav">
+							<?php foreach ( $missions as $mission ) : ?>
+								<?php $this->render_mission_item( $mission ); ?>
 							<?php endforeach; ?>
-						</div>
+						</aside>
+					<?php endif; ?>
 
-						<?php if ( count( $slides ) > 1 && 'yes' === ( $settings['slider_show_dots'] ?? 'yes' ) ) : ?>
-							<div class="ba-home-hero__slider-pagination" aria-label="انتخاب اسلاید">
-								<?php foreach ( array_keys( $slides ) as $index ) : ?>
-									<button type="button" class="ba-home-hero__slider-dot<?php echo 0 === $index ? ' is-active' : ''; ?>" data-ba-home-hero-dot aria-label="<?php echo esc_attr( sprintf( 'اسلاید %d', $index + 1 ) ); ?>" aria-current="<?php echo 0 === $index ? 'true' : 'false'; ?>"></button>
+					<?php if ( $slides ) : ?>
+						<div aria-label="اخبار و رویدادهای شاخص" aria-roledescription="carousel" class="ba-slider" data-js-slider>
+							<div class="ba-slider__track">
+								<?php foreach ( $slides as $index => $slide ) : ?>
+									<?php $this->render_slide( $slide, $index, $settings ); ?>
 								<?php endforeach; ?>
 							</div>
-						<?php endif; ?>
 
-						<?php if ( count( $slides ) > 1 && 'yes' === ( $settings['slider_show_arrows'] ?? 'yes' ) ) : ?>
-							<div class="ba-home-hero__slider-controls">
-								<button type="button" class="ba-home-hero__slider-arrow" data-ba-home-hero-arrow data-dir="prev" aria-label="اسلاید قبل"><?php echo $this->arrow_svg( 'prev' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></button>
-								<button type="button" class="ba-home-hero__slider-arrow" data-ba-home-hero-arrow data-dir="next" aria-label="اسلاید بعد"><?php echo $this->arrow_svg( 'next' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></button>
-							</div>
-						<?php endif; ?>
-					</div>
-				<?php endif; ?>
+							<?php if ( count( $slides ) > 1 && 'yes' === ( $settings['slider_show_dots'] ?? 'yes' ) ) : ?>
+								<div aria-label="انتخاب اسلاید" class="ba-slider__pagination">
+									<?php foreach ( array_keys( $slides ) as $index ) : ?>
+										<button aria-label="<?php echo esc_attr( sprintf( 'اسلاید %d', $index + 1 ) ); ?>" class="ba-slider__dot<?php echo 0 === $index ? ' is-active' : ''; ?>" data-js-slider-dot type="button"></button>
+									<?php endforeach; ?>
+								</div>
+							<?php endif; ?>
 
-				<?php if ( $posts ) : ?>
-					<div class="ba-home-hero__ticker<?php echo '' === trim( (string) ( $settings['ticker_label'] ?? '' ) ) ? ' ba-home-hero__ticker--no-label' : ''; ?>" data-ba-home-hero-ticker aria-label="اخبار مهم">
-						<?php if ( '' !== trim( (string) ( $settings['ticker_label'] ?? '' ) ) ) : ?>
-							<span class="ba-home-hero__ticker-label"><?php echo esc_html( $settings['ticker_label'] ); ?></span>
-						<?php endif; ?>
-						<div class="ba-home-hero__ticker-viewport" data-ba-home-hero-ticker-viewport>
-							<div class="ba-home-hero__ticker-track" data-ba-home-hero-ticker-track>
-								<?php foreach ( $posts as $post ) : ?>
-									<a class="ba-home-hero__ticker-item" data-ba-home-hero-ticker-item href="<?php echo esc_url( get_permalink( $post ) ); ?>"><?php echo esc_html( get_the_title( $post ) ); ?></a>
-								<?php endforeach; ?>
+							<?php if ( count( $slides ) > 1 && 'yes' === ( $settings['slider_show_arrows'] ?? 'yes' ) ) : ?>
+								<div class="ba-slider__controls">
+									<button aria-label="اسلاید قبل" class="ba-slider__arrow" data-dir="prev" data-js-slider-arrow type="button"><?php echo $this->arrow_svg( 'prev' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></button>
+									<button aria-label="اسلاید بعد" class="ba-slider__arrow" data-dir="next" data-js-slider-arrow type="button"><?php echo $this->arrow_svg( 'next' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></button>
+								</div>
+							<?php endif; ?>
+						</div>
+					<?php endif; ?>
+
+					<?php if ( $posts ) : ?>
+						<div aria-label="اخبار مهم" class="ba-ticker<?php echo '' === trim( (string) ( $settings['ticker_label'] ?? '' ) ) ? ' ba-ticker--no-label' : ''; ?>" data-js-ticker>
+							<?php if ( '' !== trim( (string) ( $settings['ticker_label'] ?? '' ) ) ) : ?>
+								<span class="ba-ticker__label"><?php echo esc_html( $settings['ticker_label'] ); ?></span>
+							<?php endif; ?>
+							<div class="ba-ticker__viewport">
+								<div class="ba-ticker__track" data-js-ticker-track>
+									<?php foreach ( $posts as $post ) : ?>
+										<a class="ba-ticker__item" data-js-ticker-item href="<?php echo esc_url( get_permalink( $post ) ); ?>"><?php echo esc_html( get_the_title( $post ) ); ?></a>
+									<?php endforeach; ?>
+									<?php if ( $posts ) : ?>
+										<a aria-hidden="true" class="ba-ticker__item ba-ticker__item--clone" href="<?php echo esc_url( get_permalink( $posts[0] ) ); ?>" tabindex="-1"><?php echo esc_html( get_the_title( $posts[0] ) ); ?></a>
+									<?php endif; ?>
+								</div>
 							</div>
 						</div>
-					</div>
-				<?php endif; ?>
+					<?php endif; ?>
+				</div>
 			</div>
 		</section>
 		<?php
@@ -523,20 +554,20 @@ final class Bonyad_Alavi_Home_Hero_Widget extends Widget_Base {
 		$tag              = $has_link ? 'a' : 'div';
 		$attrs            = $has_link ? $this->build_link_attributes( $link ) : '';
 		?>
-		<<?php echo esc_attr( $tag ); ?> class="ba-home-hero__mission-item"<?php echo $attrs; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
+		<<?php echo esc_attr( $tag ); ?> class="ba-mission-nav__item"<?php echo $attrs; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
 			<?php if ( $has_custom_icon || '' !== $default_icon_key ) : ?>
-				<span class="ba-home-hero__mission-icon" aria-hidden="true">
+				<span class="ba-mission-nav__icon" aria-hidden="true">
 					<?php if ( $has_custom_icon ) : ?>
-						<?php Icons_Manager::render_icon( $icon, array( 'aria-hidden' => 'true' ) ); ?>
+						<?php Icons_Manager::render_icon( $icon, array( 'aria-hidden' => 'true', 'class' => 'ba-mission-nav__glyph' ) ); ?>
 					<?php else : ?>
 						<?php echo $this->get_mission_default_svg( $default_icon_key ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 					<?php endif; ?>
 				</span>
 			<?php endif; ?>
 			<?php if ( '' !== $title || '' !== $description ) : ?>
-				<span class="ba-home-hero__mission-copy">
-					<?php if ( '' !== $title ) : ?><strong class="ba-home-hero__mission-title"><?php echo esc_html( $title ); ?></strong><?php endif; ?>
-					<?php if ( '' !== $description ) : ?><span class="ba-home-hero__mission-description"><?php echo esc_html( $description ); ?></span><?php endif; ?>
+				<span class="ba-mission-nav__copy">
+					<?php if ( '' !== $title ) : ?><strong class="ba-mission-nav__title"><?php echo esc_html( $title ); ?></strong><?php endif; ?>
+					<?php if ( '' !== $description ) : ?><span class="ba-mission-nav__description"><?php echo esc_html( $description ); ?></span><?php endif; ?>
 				</span>
 			<?php endif; ?>
 		</<?php echo esc_attr( $tag ); ?>>
@@ -607,10 +638,10 @@ final class Bonyad_Alavi_Home_Hero_Widget extends Widget_Base {
 	 */
 	private function get_mission_default_svg( string $key ): string {
 		$icons = array(
-			'economic' => '<svg aria-hidden="true" class="ba-home-hero__mission-glyph ba-home-hero__mission-glyph--default" data-icon="tabler:briefcase-2" focusable="false" viewBox="0 0 24 24"><path d="M3 9a2 2 0 0 1 2 -2h14a2 2 0 0 1 2 2v9a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2v-9"/><path d="M8 7v-2a2 2 0 0 1 2 -2h4a2 2 0 0 1 2 2v2"/></svg>',
-			'education' => '<svg aria-hidden="true" class="ba-home-hero__mission-glyph ba-home-hero__mission-glyph--default" data-icon="tabler:school" focusable="false" viewBox="0 0 24 24"><path d="M22 9l-10 -4l-10 4l10 4l10 -4v6"/><path d="M6 10.6v5.4a6 3 0 0 0 12 0v-5.4"/></svg>',
-			'health' => '<svg aria-hidden="true" class="ba-home-hero__mission-glyph ba-home-hero__mission-glyph--default" data-icon="tabler:stethoscope" focusable="false" viewBox="0 0 24 24"><path d="M6 4h-1a2 2 0 0 0 -2 2v3.5a5.5 5.5 0 0 0 11 0v-3.5a2 2 0 0 0 -2 -2h-1"/><path d="M8 15a6 6 0 1 0 12 0v-3"/><path d="M11 3v2"/><path d="M6 3v2"/><path d="M18 10a2 2 0 1 0 4 0a2 2 0 1 0 -4 0"/></svg>',
-			'infrastructure' => '<svg aria-hidden="true" class="ba-home-hero__mission-glyph ba-home-hero__mission-glyph--default" data-icon="tabler:building-community" focusable="false" viewBox="0 0 24 24"><path d="M8 9l5 5v7h-5v-4m0 4h-5v-7l5 -5m1 1v-6a1 1 0 0 1 1 -1h10a1 1 0 0 1 1 1v17h-8"/><path d="M13 7l0 .01"/><path d="M17 7l0 .01"/><path d="M17 11l0 .01"/><path d="M17 15l0 .01"/></svg>',
+			'economic' => '<svg aria-hidden="true" class="ba-mission-nav__glyph" data-icon="tabler:briefcase-2" focusable="false" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9a2 2 0 0 1 2 -2h14a2 2 0 0 1 2 2v9a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2v-9"/><path d="M8 7v-2a2 2 0 0 1 2 -2h4a2 2 0 0 1 2 2v2"/></svg>',
+			'education' => '<svg aria-hidden="true" class="ba-mission-nav__glyph" data-icon="tabler:school" focusable="false" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 9l-10 -4l-10 4l10 4l10 -4v6"/><path d="M6 10.6v5.4a6 3 0 0 0 12 0v-5.4"/></svg>',
+			'health' => '<svg aria-hidden="true" class="ba-mission-nav__glyph" data-icon="tabler:stethoscope" focusable="false" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 4h-1a2 2 0 0 0 -2 2v3.5a5.5 5.5 0 0 0 11 0v-3.5a2 2 0 0 0 -2 -2h-1"/><path d="M8 15a6 6 0 1 0 12 0v-3"/><path d="M11 3v2"/><path d="M6 3v2"/><path d="M18 10a2 2 0 1 0 4 0a2 2 0 1 0 -4 0"/></svg>',
+			'infrastructure' => '<svg aria-hidden="true" class="ba-mission-nav__glyph" data-icon="tabler:building-community" focusable="false" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 9l5 5v7h-5v-4m0 4h-5v-7l5 -5m1 1v-6a1 1 0 0 1 1 -1h10a1 1 0 0 1 1 1v17h-8"/><path d="M13 7l0 .01"/><path d="M17 7l0 .01"/><path d="M17 11l0 .01"/><path d="M17 15l0 .01"/></svg>',
 		);
 
 		return $icons[ $key ] ?? '';
@@ -626,26 +657,26 @@ final class Bonyad_Alavi_Home_Hero_Widget extends Widget_Base {
 		$image       = is_array( $slide['image'] ?? null ) ? $slide['image'] : array();
 		$has_button  = '' !== $button_text && '' !== $link_url;
 		$whole_link  = '' !== $link_url && ! $has_button;
-		$title_tag   = $this->sanitize_heading_tag( $settings['slider_title_tag'] ?? 'h2' );
+		$title_mode  = (string) ( $settings['slider_title_tag'] ?? 'reference' );
+		$title_tag   = 'reference' === $title_mode ? ( 0 === (int) $index ? 'h1' : 'h2' ) : $this->sanitize_heading_tag( $title_mode );
 		$alt         = ! empty( $image['id'] ) ? (string) get_post_meta( absint( $image['id'] ), '_wp_attachment_image_alt', true ) : '';
 		$item        = array( 'id' => absint( $image['id'] ?? 0 ), 'url' => (string) ( $image['url'] ?? '' ), 'alt' => $alt );
-		$class       = 'ba-home-hero__slide' . ( 0 === (int) $index ? ' is-active' : '' );
+		$class       = 'ba-slider__slide' . ( 0 === (int) $index ? ' is-active' : '' );
 		?>
-		<article class="<?php echo esc_attr( $class ); ?>" data-ba-home-hero-slide aria-hidden="<?php echo 0 === (int) $index ? 'false' : 'true'; ?>">
-			<?php if ( $whole_link ) : ?><a class="ba-home-hero__slide-whole-link"<?php echo $this->build_link_attributes( $link ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?> aria-label="<?php echo esc_attr( $title ?: $tag ?: 'مشاهده اسلاید' ); ?>"><?php endif; ?>
-
-			<?php echo BA_Media_Helper::render_image( $item, 'full', array( 'class' => 'ba-home-hero__slide-image', 'loading' => 0 === (int) $index ? 'eager' : 'lazy', 'decoding' => 'async' ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
-
-			<?php if ( '' !== $tag || '' !== $title || '' !== $description || $has_button ) : ?>
-				<div class="ba-home-hero__slider-content">
-					<?php if ( '' !== $tag ) : ?><span class="ba-home-hero__slider-tag"><?php echo esc_html( $tag ); ?></span><?php endif; ?>
-					<?php if ( '' !== $title ) : ?><<?php echo esc_attr( $title_tag ); ?> class="ba-home-hero__slider-title"><?php echo esc_html( $title ); ?></<?php echo esc_attr( $title_tag ); ?>><?php endif; ?>
-					<?php if ( '' !== $description ) : ?><p class="ba-home-hero__slider-description"><?php echo esc_html( $description ); ?></p><?php endif; ?>
-					<?php if ( $has_button ) : ?><a class="ba-home-hero__slider-button"<?php echo $this->build_link_attributes( $link ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>><?php echo esc_html( $button_text ); ?><span aria-hidden="true">←</span></a><?php endif; ?>
-				</div>
+		<article class="<?php echo esc_attr( $class ); ?>" data-js-slide>
+			<?php echo BA_Media_Helper::render_image( $item, 'full', array( 'loading' => 0 === (int) $index ? 'eager' : 'lazy', 'decoding' => 'async' ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+			<?php if ( $whole_link ) : ?>
+				<a class="ba-slider__whole-link"<?php echo $this->build_link_attributes( $link ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?> aria-label="<?php echo esc_attr( $title ?: $tag ?: 'مشاهده اسلاید' ); ?>"></a>
 			<?php endif; ?>
 
-			<?php if ( $whole_link ) : ?></a><?php endif; ?>
+			<?php if ( '' !== $tag || '' !== $title || '' !== $description || $has_button ) : ?>
+				<div class="ba-slider__content">
+					<?php if ( '' !== $tag ) : ?><span class="ba-slider__tag"><?php echo esc_html( $tag ); ?></span><?php endif; ?>
+					<?php if ( '' !== $title ) : ?><<?php echo esc_attr( $title_tag ); ?> class="ba-slider__title"><?php echo esc_html( $title ); ?></<?php echo esc_attr( $title_tag ); ?>><?php endif; ?>
+					<?php if ( '' !== $description ) : ?><p class="ba-slider__text"><?php echo esc_html( $description ); ?></p><?php endif; ?>
+					<?php if ( $has_button ) : ?><a class="ba-slider__cta ba-button ba-button--light"<?php echo $this->build_link_attributes( $link ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>><?php echo esc_html( $button_text ); ?> <span aria-hidden="true">←</span></a><?php endif; ?>
+				</div>
+			<?php endif; ?>
 		</article>
 		<?php
 	}
@@ -679,7 +710,7 @@ final class Bonyad_Alavi_Home_Hero_Widget extends Widget_Base {
 
 	private function arrow_svg( $direction ) {
 		$path = 'next' === $direction ? 'm10 6 6 6-6 6' : 'm14 6-6 6 6 6';
-		return '<svg aria-hidden="true" focusable="false" viewBox="0 0 24 24"><path d="' . esc_attr( $path ) . '"></path></svg>';
+		return '<svg aria-hidden="true" focusable="false" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="' . esc_attr( $path ) . '"></path></svg>';
 	}
 
 	private function render_editor_notice() {

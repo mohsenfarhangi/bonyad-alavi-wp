@@ -3,37 +3,41 @@
 
     var states = new WeakMap();
 
-    function reducedMotion() {
-        return window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    function destroy(root) {
+        var state = states.get(root);
+        if (!state) return;
+
+        state.cleanups.forEach(function (cleanup) {
+            try {
+                cleanup();
+            } catch (error) {}
+        });
+
+        states.delete(root);
     }
 
     function initSlider(root, cleanups) {
-        var slider = root.querySelector('[data-ba-home-hero-slider]');
+        var slider = root.querySelector('[data-js-slider]');
         if (!slider) return;
 
-        var slides = Array.prototype.slice.call(slider.querySelectorAll('[data-ba-home-hero-slide]'));
-        var dots = Array.prototype.slice.call(slider.querySelectorAll('[data-ba-home-hero-dot]'));
-        var arrows = Array.prototype.slice.call(slider.querySelectorAll('[data-ba-home-hero-arrow]'));
-        if (!slides.length) return;
-
+        var slides = Array.prototype.slice.call(slider.querySelectorAll('[data-js-slide]'));
+        var dots = Array.prototype.slice.call(slider.querySelectorAll('[data-js-slider-dot]'));
+        var arrows = Array.prototype.slice.call(slider.querySelectorAll('[data-js-slider-arrow]'));
         var index = 0;
         var timer = null;
-        var autoplay = root.dataset.sliderAutoplay === '1' && slides.length > 1 && !reducedMotion();
+        var autoplay = root.dataset.sliderAutoplay === '1';
         var delay = Math.max(1500, Number(root.dataset.sliderDelay) || 6200);
-        var pauseHover = root.dataset.sliderPauseHover === '1';
+        var pauseOnHover = root.dataset.sliderPauseHover === '1';
+
+        if (!slides.length) return;
 
         function show(next) {
             index = (next + slides.length) % slides.length;
-            slides.forEach(function (slide, i) {
-                var active = i === index;
-                slide.classList.toggle('is-active', active);
-                slide.setAttribute('aria-hidden', active ? 'false' : 'true');
-                slide.querySelectorAll('a').forEach(function (link) { link.tabIndex = active ? 0 : -1; });
+            slides.forEach(function (slide, itemIndex) {
+                slide.classList.toggle('is-active', itemIndex === index);
             });
-            dots.forEach(function (dot, i) {
-                var active = i === index;
-                dot.classList.toggle('is-active', active);
-                dot.setAttribute('aria-current', active ? 'true' : 'false');
+            dots.forEach(function (dot, itemIndex) {
+                dot.classList.toggle('is-active', itemIndex === index);
             });
         }
 
@@ -44,9 +48,9 @@
             }
         }
 
-        function start() {
+        function auto() {
             stop();
-            if (!autoplay) return;
+            if (!autoplay || slides.length < 2) return;
             timer = window.setInterval(function () {
                 if (!document.documentElement.contains(root)) {
                     stop();
@@ -59,102 +63,83 @@
         arrows.forEach(function (button) {
             var handler = function () {
                 show(index + (button.dataset.dir === 'next' ? 1 : -1));
-                start();
+                auto();
             };
             button.addEventListener('click', handler);
-            cleanups.push(function () { button.removeEventListener('click', handler); });
+            cleanups.push(function () {
+                button.removeEventListener('click', handler);
+            });
         });
 
-        dots.forEach(function (dot, i) {
+        dots.forEach(function (dot, dotIndex) {
             var handler = function () {
-                show(i);
-                start();
+                show(dotIndex);
+                auto();
             };
             dot.addEventListener('click', handler);
-            cleanups.push(function () { dot.removeEventListener('click', handler); });
+            cleanups.push(function () {
+                dot.removeEventListener('click', handler);
+            });
         });
 
-        var keyHandler = function (event) {
-            if (event.key === 'ArrowLeft') {
-                event.preventDefault();
-                show(index - 1);
-                start();
-            } else if (event.key === 'ArrowRight') {
-                event.preventDefault();
-                show(index + 1);
-                start();
-            }
-        };
-        slider.addEventListener('keydown', keyHandler);
-        cleanups.push(function () { slider.removeEventListener('keydown', keyHandler); });
-
-        if (pauseHover && autoplay) {
-            var pause = function () { stop(); };
-            var resume = function (event) {
-                if (!event || !slider.contains(event.relatedTarget)) start();
+        if (pauseOnHover) {
+            var enter = function () {
+                stop();
             };
-            slider.addEventListener('mouseenter', pause);
-            slider.addEventListener('mouseleave', resume);
-            slider.addEventListener('focusin', pause);
-            slider.addEventListener('focusout', resume);
+            var leave = function () {
+                auto();
+            };
+            slider.addEventListener('mouseenter', enter);
+            slider.addEventListener('mouseleave', leave);
             cleanups.push(function () {
-                slider.removeEventListener('mouseenter', pause);
-                slider.removeEventListener('mouseleave', resume);
-                slider.removeEventListener('focusin', pause);
-                slider.removeEventListener('focusout', resume);
+                slider.removeEventListener('mouseenter', enter);
+                slider.removeEventListener('mouseleave', leave);
             });
         }
 
         cleanups.push(stop);
         show(0);
-        start();
+        auto();
     }
 
     function initTicker(root, cleanups) {
-        var ticker = root.querySelector('[data-ba-home-hero-ticker]');
-        var viewport = root.querySelector('[data-ba-home-hero-ticker-viewport]');
-        var track = root.querySelector('[data-ba-home-hero-ticker-track]');
-        if (!ticker || !viewport || !track) return;
+        var ticker = root.querySelector('[data-js-ticker]');
+        if (!ticker) return;
 
-        var items = Array.prototype.slice.call(track.querySelectorAll('[data-ba-home-hero-ticker-item]'));
-        if (items.length < 2 || root.dataset.tickerAutoplay !== '1' || reducedMotion()) return;
+        var track = ticker.querySelector('[data-js-ticker-track]');
+        var items = Array.prototype.slice.call(ticker.querySelectorAll('[data-js-ticker-item]'));
+        var autoplay = root.dataset.tickerAutoplay === '1';
+        var delay = Math.max(1500, Number(root.dataset.tickerDelay) || 6000);
+        var reducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-        var clone = items[0].cloneNode(true);
-        clone.setAttribute('aria-hidden', 'true');
-        clone.tabIndex = -1;
-        clone.removeAttribute('data-ba-home-hero-ticker-item');
-        track.appendChild(clone);
+        if (!track || items.length < 2) {
+            if (track) track.style.animation = 'none';
+            return;
+        }
 
+        if (!autoplay || reducedMotion) {
+            ticker.classList.add('is-paused');
+            track.style.animation = 'none';
+            cleanups.push(function () {
+                ticker.classList.remove('is-paused');
+                track.style.animation = '';
+            });
+            return;
+        }
+
+        // The reference HTML has 3 real items + a duplicate first item and a fixed 18s CSS animation.
+        // Keep that exact path untouched. Other query counts fall back to the same vertical-step behavior in JS.
+        if (items.length === 3 && delay === 6000) {
+            return;
+        }
+
+        ticker.classList.add('is-dynamic');
         var index = 0;
         var timer = null;
-        var resetting = false;
-        var delay = Math.max(1500, Number(root.dataset.tickerDelay) || 6000);
 
-        function height() {
-            return viewport.clientHeight || 48;
-        }
-
-        function position(animate) {
-            track.style.transition = animate ? '' : 'none';
-            track.style.transform = 'translateY(' + (-index * height()) + 'px)';
-            if (!animate) {
-                void track.offsetHeight;
-                track.style.transition = '';
-            }
-        }
-
-        function next() {
-            if (resetting) return;
-            index += 1;
-            position(true);
-            if (index === items.length) {
-                resetting = true;
-                window.setTimeout(function () {
-                    index = 0;
-                    position(false);
-                    resetting = false;
-                }, 470);
-            }
+        function position() {
+            var rowHeight = ticker.querySelector('.ba-ticker__viewport').clientHeight || 46;
+            track.style.transform = 'translateY(' + (-index * rowHeight) + 'px)';
         }
 
         function stop() {
@@ -167,52 +152,41 @@
         function start() {
             stop();
             timer = window.setInterval(function () {
-                if (!document.documentElement.contains(root)) {
-                    stop();
-                    return;
-                }
-                next();
+                index = (index + 1) % items.length;
+                position();
             }, delay);
         }
 
-        var pause = function () { stop(); };
-        var resume = function (event) {
-            if (!event || !ticker.contains(event.relatedTarget)) start();
+        var enter = function () {
+            stop();
         };
-        var resize = function () { position(false); };
+        var leave = function () {
+            start();
+        };
+        var resize = function () {
+            position();
+        };
 
-        ticker.addEventListener('mouseenter', pause);
-        ticker.addEventListener('mouseleave', resume);
-        ticker.addEventListener('focusin', pause);
-        ticker.addEventListener('focusout', resume);
+        ticker.addEventListener('mouseenter', enter);
+        ticker.addEventListener('mouseleave', leave);
         window.addEventListener('resize', resize);
-
         cleanups.push(function () {
             stop();
-            ticker.removeEventListener('mouseenter', pause);
-            ticker.removeEventListener('mouseleave', resume);
-            ticker.removeEventListener('focusin', pause);
-            ticker.removeEventListener('focusout', resume);
+            ticker.removeEventListener('mouseenter', enter);
+            ticker.removeEventListener('mouseleave', leave);
             window.removeEventListener('resize', resize);
-            if (clone.parentNode === track) track.removeChild(clone);
+            ticker.classList.remove('is-dynamic');
             track.style.transform = '';
         });
 
         start();
     }
 
-    function destroy(root) {
-        var state = states.get(root);
-        if (!state) return;
-        state.cleanups.forEach(function (cleanup) {
-            try { cleanup(); } catch (error) {}
-        });
-        states.delete(root);
-    }
-
     function init(root) {
         if (!root) return;
+
         destroy(root);
+
         var cleanups = [];
         states.set(root, { cleanups: cleanups });
         initSlider(root, cleanups);
