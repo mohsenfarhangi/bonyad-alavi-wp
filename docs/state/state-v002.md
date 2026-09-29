@@ -318,3 +318,24 @@ Date: 2026-09-29
 - static comparison و JavaScript syntax check PASS؛ اجرای PHP regression/live Elementor هنوز باز است.
 
 Current contract: [MODULE-HOME-HERO](../modules/theme-home-hero-widget.md).
+
+## STATE-002-015 — Homepage Quick Links converted to Elementor widget
+
+Date: 2026-09-29
+
+- reference: `mohsenfarhangi/bonyad-alavi-redesign/redesign/index.html`، block `ba-quick-links` + CSS/JS همان redesign.
+- ویجت جدید `Bonyad_Alavi_Home_Quick_Links_Widget` با slug Elementor برابر `bonyad_alavi_home_quick_links` به child theme اضافه شد.
+- asset handles: `bonyad-alavi-home-quick-links-widget` برای CSS و JS؛ فقط از dependencyهای widget load می‌شوند.
+- markup اصلی reference حفظ شد: `ba-quick-links`, `ba-container`, `ba-quick-links__inner`, `ba-quick-links__list`, item/media/label و More button. `ba-home-quick-links-widget` فقط scope root است.
+- anchor `id="services"` برای لینک داخلی صفحه حفظ شد؛ IDهای JS reference به data attributeهای scoped تبدیل شدند تا چند instance تداخل نداشته باشد.
+- Repeater دارای label/link/icon/media_color است. ۹ آیتم reference با همان linkها و semantic keyها default هستند.
+- SVGهای اصلی: `users-group`, `building-community`, `gavel`, `heart-handshake`, `report-analytics`, `mosque`, `award`, `route`, `tent`؛ انتخاب Elementor Icon آن‌ها را per item جایگزین می‌کند.
+- semantic colors reference: people=#0f8a57، organization=#2f6fa3، auction=#b7791f، jihadi=#b44c5e، studies=#6658a6، habib=#247a70، award=#b57b0d، hamgam=#3f7eaf، camp=#678a43. Color Control فقط در صورت تغییر کاربر inline override می‌سازد.
+- JS collapse/expand همان الگوریتم width/gap/visibleCount reference را استفاده می‌کند؛ فقط root-scoped + Elementor hook + cleanup برای multiple instances اضافه شده است.
+- responsive reference: desktop item 116px/media 58px؛ <=760 item 98px/media 57px + left-start؛ <=430 item 86px + label 10px.
+- Style controls layout/label/media/More بدون default ظاهری هستند تا reference cascade را تغییر ندهند.
+- regression: `wp-content/themes/ostadsho-child/tests/home-quick-links-widget-contract.php`.
+- static contract verification + JavaScript parse PASS؛ PHP lint و live Elementor acceptance هنوز تأیید نشده‌اند.
+- source commits: `28c2688e67d3ec3def18472f03d05eb182fd4808`, `392c26aba8959d7aa47927b7493ded9d5e9d73fb`, `d663991b83c001e5f47d992369707cd8dd939ddc`.
+
+Current contract: [MODULE-HOME-QUICK-LINKS](../modules/theme-home-quick-links-widget.md).

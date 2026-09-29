@@ -12,11 +12,14 @@
 | MODULE-JIHADI-FORM | Jihadi Group Registration Form | form definition, jihadi-group-registration, AFE registration | Project-specific form source owned by child theme and registered through `afe_register_forms` | [jihadi-group-registration-form.md](jihadi-group-registration-form.md) |
 | MODULE-CONTACT-FORM | Contact Form | contact-us, contact, province, geo, AFE registration | One-step site contact form owned by child theme with geo province field and admin email action | [contact-form.md](contact-form.md) |
 | MODULE-HOME-HERO | Homepage Hero Elementor Widget | homepage, hero, slider, mission nav, ticker, Elementor | Repeater-based Hero from redesign reference with query-driven ticker and scoped responsive assets | [theme-home-hero-widget.md](theme-home-hero-widget.md) |
+| MODULE-HOME-QUICK-LINKS | Homepage Quick Links Elementor Widget | homepage, quick links, services, overflow, more, Elementor | Reference-faithful `ba-quick-links` widget with Repeater items, original SVG/color defaults and scoped overflow JS | [theme-home-quick-links-widget.md](theme-home-quick-links-widget.md) |
 
 برای task فرم جهادی از `MODULE-JIHADI-FORM` شروع کن و در صورت تغییر Engine سپس `MODULE-AFE`/`MODULE-AFE-EXTENSION` را بخوان.
 
 برای فرم تماس با ما از `MODULE-CONTACT-FORM` شروع کن.
 
 برای تغییرات `ba-hero__grid`/Hero صفحه اصلی از `MODULE-HOME-HERO` شروع کن.
+
+برای تغییرات `ba-quick-links` صفحه اصلی از `MODULE-HOME-QUICK-LINKS` شروع کن.
 
 برای task ابتدا فقط module مرتبط را بخوان. اگر module به ADR اشاره کرد، سپس فقط همان ADR را باز کن.

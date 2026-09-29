@@ -11,11 +11,22 @@
 
 ## Current Goal
 
-فرم تک‌مرحله‌ای `contact-us` در child theme تعریف و از طریق `afe_register_forms` ثبت شده است. مرحله بعدی این subsystem، پذیرش زنده فرم در WordPress و بررسی ارسال ایمیل مدیر/Geo province در محیط واقعی است.
+ویجت Elementor جدید برای `ba-quick-links` صفحه اصلی بر اساس reference `bonyad-alavi-redesign/redesign/index.html` پیاده‌سازی شده است. مرحله باز این subsystem، پذیرش بصری/رفتاری در Elementor واقعی و بررسی overflow/«بیشتر» در عرض‌های واقعی صفحه اصلی است.
 
 AFE release goal همچنان live acceptance نسخه 1.0.28 و رفع blocker واقعی پیش از production promotion است.
 
 ## Recently Completed
+
+### Homepage Quick Links Elementor widget
+- ویجت `bonyad_alavi_home_quick_links` به child theme اضافه و در دسته «بنیاد علوی» ثبت شد.
+- baseline markup/CSS از `redesign/index.html` و `home.css` برای block `ba-quick-links` حفظ شده است؛ root اضافی `ba-home-quick-links-widget` فقط scope قالب است.
+- ۹ آیتم reference با همان label/link، SVGهای Tabler و رنگ‌های semantic پیش‌فرض تعریف شدند.
+- Repeater شامل عنوان، لینک، Elementor Icon جایگزین و Color Control برای دایره آیکون است؛ رنگ reference تا زمان تغییر کاربر بدون inline override باقی می‌ماند.
+- anchor `#services` حفظ شده است.
+- دکمه «بیشتر/جمع کردن» و محاسبه overflow همان الگوریتم reference را دارد و فقط برای multiple Elementor instances root-scoped شده است.
+- responsive reference حفظ شده: desktop item=116/media=58، <=760 item=98/media=57، <=430 item=86 و label=10px.
+- Style controls بدون visual default اضافه شدند تا baseline reference فقط با تغییر صریح کاربر override شود.
+- source commits: `28c2688e67d3ec3def18472f03d05eb182fd4808`, `392c26aba8959d7aa47927b7493ded9d5e9d73fb`, `d663991b83c001e5f47d992369707cd8dd939ddc`.
 
 ### Contact form in child theme
 - Source Definition جدید `contact-us` در `ostadsho-child/inc/forms/class-ba-contact-form.php` اضافه شد و از `functions.php` روی `afe_register_forms` ثبت می‌شود.
@@ -102,6 +113,7 @@ Open release work برای AFE:
 - [MODULE-JIHADI-FORM](../modules/jihadi-group-registration-form.md)
 - [MODULE-CONTACT-FORM](../modules/contact-form.md)
 - [MODULE-HOME-HERO](../modules/theme-home-hero-widget.md)
+- [MODULE-HOME-QUICK-LINKS](../modules/theme-home-quick-links-widget.md)
 
 ## Tests Status
 
@@ -119,6 +131,8 @@ Theme legacy v0.6.5 docs recorded PHP/JS syntax + ZIP checks for that patch.
 
 برای فرم تماس با ما regression `tests/contact-form-definition.php` اضافه شده است؛ source/test روی draft محلی PHP lint شدند و نسخه commit‌شده از GitHub برای slug، Geo province، required fields، admin email action و theme registration بازبینی استاتیک شد. **اجرای regression در checkout کامل repository و live WordPress هنوز در این session انجام نشده است.**
 
+برای Quick Links صفحه اصلی regression contract جدید `tests/home-quick-links-widget-contract.php` اضافه شده است. روی نسخه commit‌شده، contractهای markup/reference SVGs/colors/responsive/overflow/registration با GitHub source بازبینی و JavaScript با parser V8 بررسی شد. **PHP lint و live WordPress/Elementor acceptance در این session اجرا نشده‌اند.**
+
 برای Hero صفحه اصلی فایل regression contract جدید `tests/home-hero-widget-contract.php` اضافه شده است. روی draft محلی معادل این implementation، PHP lint، JavaScript syntax و contract checks PASS شدند؛ نسخه commit‌شده نیز از GitHub برای registration، Query reuse، link contract، نبود تصاویر پیش‌فرض، scope CSS و Elementor JS hook بازبینی استاتیک شد. **اجرای live WordPress/Elementor روی HEAD جدید هنوز تأیید نشده است.**
 
 Historical PASSهای AFE/Theme به HEAD جدید تعمیم داده نمی‌شوند.
@@ -134,7 +148,7 @@ Historical PASSهای AFE/Theme به HEAD جدید تعمیم داده نمی‌
 
 ## Next Agent Handoff
 
-**Current task:** ویجت Hero از نظر markup/CSS/JS baseline با `redesign/index.html` همسان‌سازی شده است؛ مرحله باز بعدی فقط live Elementor visual acceptance روی صفحه اصلی واقعی است.
+**Current task:** ویجت Quick Links صفحه اصلی مطابق `ba-quick-links` reference پیاده‌سازی شده است؛ مرحله باز بعدی live Elementor visual/overflow acceptance روی صفحه اصلی واقعی است.
 
 **Start here:** [../INDEX.md](../INDEX.md) → [../modules/INDEX.md](../modules/INDEX.md).
 

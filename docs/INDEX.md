@@ -21,6 +21,8 @@
 - media/gallery محصول → `MODULE-THEME-MEDIA`
 - پرداخت مشارکت → `MODULE-PARTICIPATION`
 - مرکز جهادی → `MODULE-JIHADI-CENTER`
+- Hero صفحه اصلی → `MODULE-HOME-HERO`
+- دسترسی‌های سریع صفحه اصلی → `MODULE-HOME-QUICK-LINKS`
 - چرایی یک contract → [decisions/INDEX.md](decisions/INDEX.md)
 - سابقه تغییر → [state/INDEX.md](state/INDEX.md)
 
