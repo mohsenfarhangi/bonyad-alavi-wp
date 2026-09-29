@@ -6,7 +6,7 @@
 
 ## Purpose
 
-Child theme بنیاد علوی روی parent `ostadsho` integrationهای اختصاصی سایت را نگه می‌دارد: Elementor widgets/dynamic tags، admin settings، WooCommerce participation، product media، center content، shortcodes و product FAQ.
+Child theme بنیاد علوی روی parent `ostadsho` integrationهای اختصاصی سایت را نگه می‌دارد: Elementor widgets/dynamic tags، Homepage Hero، admin settings، WooCommerce participation، product media، center content، shortcodes و product FAQ.
 
 ## Composition
 
@@ -14,7 +14,7 @@ Child theme بنیاد علوی روی parent `ostadsho` integrationهای اخ�
 - parent/child styles و context-specific WooCommerce assets را enqueue می‌کند.
 - shortcodeها را load می‌کند.
 - admin repeater component و product FAQ را load می‌کند.
-- Elementor widgets/dynamic tags را load می‌کند.
+- Elementor widgets/dynamic tags را load می‌کند؛ از جمله Hero صفحه اصلی با assetهای scoped و lazy registration توسط Elementor.
 - participation gateway/quick-checkout services را load می‌کند.
 - center settings service/tab را load می‌کند.
 - Source Definition فرم جهادی را از `inc/forms/` load و با `afe_register_forms` ثبت می‌کند.
@@ -48,6 +48,7 @@ Subdirectories:
 - [MODULE-PARTICIPATION](participation-payments.md) — WooCommerce participation
 - [MODULE-JIHADI-CENTER](jihadi-center.md) — صفحه مرکز
 - [MODULE-JIHADI-FORM](jihadi-group-registration-form.md) — Source Definition و registration فرم ثبت‌نام گروه‌های مردمی و جهادی
+- [MODULE-HOME-HERO](theme-home-hero-widget.md) — Hero صفحه اصلی شامل Mission Nav، Slider و Query-driven Ticker
 
 ## Version History
 

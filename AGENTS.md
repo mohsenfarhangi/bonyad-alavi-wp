@@ -42,6 +42,7 @@
 - رسانه/گالری محصول → `MODULE-THEME-MEDIA`
 - پرداخت مشارکت → `MODULE-PARTICIPATION`
 - مرکز حرکت‌های مردمی و جهادی → `MODULE-JIHADI-CENTER`
+- Hero صفحه اصلی / Elementor homepage hero → `MODULE-HOME-HERO`
 
 شناسه و لینک دقیق همه آن‌ها در [docs/modules/INDEX.md](docs/modules/INDEX.md) است.
 

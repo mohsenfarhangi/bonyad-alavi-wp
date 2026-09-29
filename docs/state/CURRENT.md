@@ -11,11 +11,20 @@
 
 ## Current Goal
 
-مالکیت فرم‌های پروژه‌ای از Engine عمومی جدا شده است. فرم `jihadi-group-registration` اکنون در child theme بنیاد علوی نگهداری و با API عمومی `afe_register_forms` ثبت می‌شود؛ slug و داده‌های موجود بدون migration حفظ شده‌اند.
+Hero بازطراحی‌شده صفحه اصلی به یک ویجت مستقل Elementor در child theme تبدیل شده است. مسیر ادامه برای این بخش `MODULE-HOME-HERO` است؛ پذیرش بصری/رفتاری نهایی باید در Elementor و صفحه اصلی واقعی انجام شود.
 
 AFE release goal همچنان live acceptance نسخه 1.0.28 و رفع blocker واقعی پیش از production promotion است.
 
 ## Recently Completed
+
+### Homepage Hero Elementor widget
+- بخش `ba-hero__grid` از reference repository `bonyad-alavi-redesign/redesign/index.html` به ویجت `bonyad_alavi_home_hero` در child theme تبدیل شد.
+- Slider و Mission Nav با Elementor Repeater مدیریت می‌شوند؛ تصویر اسلاید فقط Media Control دارد و هیچ تصویر reference به قالب کپی نشده است.
+- Ticker از `BA_Content_Query_Service` استفاده می‌کند و Query کامل Elementor دارد؛ پیش‌فرض آخرین 3 نوشته است و فقط عنوان + permalink رندر می‌شود.
+- قرارداد لینک اسلاید: دکمه فقط با متن+لینک نمایش داده می‌شود؛ لینک بدون متن دکمه کل اسلاید را clickable می‌کند.
+- Style Tab شامل Typography/Color/Background و stateهای Normal/Hover برای نقاط تعاملی است؛ CSS با block `ba-home-hero` scope شده است.
+- JS برای چند instance اسکوپ شده، با Elementor frontend hook، keyboard navigation، autoplay/pause و reduced-motion سازگار است.
+- source commit: `dc1eb832c1a3582f722dde7085bb7d945e31e537`.
 
 ### Jihadi form ownership transfer
 - Source Definition فرم `jihadi-group-registration` از `alavi-form-engine/src/Forms` به `ostadsho-child/inc/forms` منتقل شد.
@@ -78,6 +87,7 @@ Open release work برای AFE:
 - [MODULE-PARTICIPATION](../modules/participation-payments.md)
 - [MODULE-JIHADI-CENTER](../modules/jihadi-center.md)
 - [MODULE-JIHADI-FORM](../modules/jihadi-group-registration-form.md)
+- [MODULE-HOME-HERO](../modules/theme-home-hero-widget.md)
 
 ## Tests Status
 
@@ -93,7 +103,9 @@ Real MeliPayamak test: PASS reported by project administrator on 2026-09-04.
 
 Theme legacy v0.6.5 docs recorded PHP/JS syntax + ZIP checks for that patch.
 
-**برای انتقال فرم جهادی، regressionهای جدید در repository اضافه شده‌اند؛ اجرای runtime QA هنوز در این session تأیید نشده است. Historical PASSهای قبلی به این تغییر جدید تعمیم داده نمی‌شوند.**
+برای Hero صفحه اصلی فایل regression contract جدید `tests/home-hero-widget-contract.php` اضافه شده است. روی draft محلی معادل این implementation، PHP lint، JavaScript syntax و contract checks PASS شدند؛ نسخه commit‌شده نیز از GitHub برای registration، Query reuse، link contract، نبود تصاویر پیش‌فرض، scope CSS و Elementor JS hook بازبینی استاتیک شد. **اجرای live WordPress/Elementor روی HEAD جدید هنوز تأیید نشده است.**
+
+Historical PASSهای AFE/Theme به HEAD جدید تعمیم داده نمی‌شوند.
 
 ## Next Actions
 
@@ -106,7 +118,7 @@ Theme legacy v0.6.5 docs recorded PHP/JS syntax + ZIP checks for that patch.
 
 ## Next Agent Handoff
 
-**Current task:** انتقال ownership فرم جهادی از AFE به child theme انجام شده است؛ live WordPress acceptance این integration هنوز باید روی محیط کامل تأیید شود.
+**Current task:** ویجت Hero صفحه اصلی پیاده‌سازی و ثبت شده است؛ مرحله باز بعدی، پذیرش بصری/رفتاری در Elementor واقعی و انتخاب تصاویر توسط مدیر محتوا است.
 
 **Start here:** [../INDEX.md](../INDEX.md) → [../modules/INDEX.md](../modules/INDEX.md).
 

@@ -246,3 +246,23 @@ Date: 2026-09-29
 - README/readme افزونه از claim «built-in Jihadi form» به extension-based registration اصلاح شد.
 
 Related: [ADR-007](../decisions/ADR-007-project-form-ownership.md) و [MODULE-JIHADI-FORM](../modules/jihadi-group-registration-form.md).
+
+## STATE-002-011 — Homepage Hero converted to Elementor widget
+
+Date: 2026-09-29
+
+- reference اصلی: `mohsenfarhangi/bonyad-alavi-redesign/redesign/index.html`، بخش `ba-hero__grid`.
+- ویجت جدید `Bonyad_Alavi_Home_Hero_Widget` با slug Elementor برابر `bonyad_alavi_home_hero` به child theme اضافه شد.
+- سه بخش اصلی reference حفظ شدند: Mission Nav، Slider و Important News Ticker.
+- Slider دارای Repeater برای image/tag/title/description/button/link است؛ image فقط از Elementor Media Control انتخاب می‌شود و تصاویر redesign به theme منتقل نشدند.
+- متن‌های خالی render نمی‌شوند؛ Button نیازمند text + URL است؛ URL بدون button text کل slide را link می‌کند.
+- Mission Nav دارای Repeater برای icon/title/description/link است؛ URL خالی آیتم را non-clickable نگه می‌دارد.
+- Ticker از shared `BA_Content_Query_Service` استفاده می‌کند و default آن latest 3 posts است؛ title به permalink لینک می‌شود.
+- Query controls شامل post type/count/category/tag/author/include/exclude/order/orderby/offset/sticky/date range هستند.
+- Style controls برای layout، mission panel/items/icons، slider overlay/media/text/button/navigation و ticker اضافه شدند؛ همه text surfaces Typography دارند و hover surfaces state مستقل دارند.
+- responsive contract reference حفظ شد: desktop split layout، tablet slider→ticker→2-column missions، mobile flex + ratio-driven slider با default 4:3.
+- JavaScript per-instance و Elementor-aware است و reduced-motion را رعایت می‌کند.
+- source commit: `dc1eb832c1a3582f722dde7085bb7d945e31e537`.
+- live WordPress/Elementor acceptance هنوز انجام نشده است.
+
+Current contract: [MODULE-HOME-HERO](../modules/theme-home-hero-widget.md).
