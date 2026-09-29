@@ -313,7 +313,8 @@ Date: 2026-09-29
 - Ticker default با 3 Query item + duplicate first item و animation 18s مرجع کار می‌کند؛ query countهای دیگر fallback JS scoped دارند.
 - Style controls حفظ شدند ولی visual defaultهای جداگانه حذف شدند؛ بنابراین بدون تغییر کاربر هیچ CSS تولیدشده Elementor ظاهر reference را override نمی‌کند.
 - slider title mode پیش‌فرض reference است: اسلاید اول H1 و بقیه H2.
-- source commits: `04ac3aae2287fcd2298946cc5745120b59c61479`, `59d55c680744fa34b607a59fe961fc6828ea6425`.
+- برای instanceهای موجود Elementor، Style Control IDها با prefix `ref_` بازتعریف شدند تا مقادیر default اشتباه ذخیره‌شده نسخه قبلی دیگر روی baseline reference اعمال نشوند؛ title-tag control نیز reset شد تا حالت مرجع H1/H2 برقرار شود.
+- source commits: `04ac3aae2287fcd2298946cc5745120b59c61479`, `59d55c680744fa34b607a59fe961fc6828ea6425`, `29a104896013ec91fe14bba11584b94f37c5fb02`.
 - static comparison و JavaScript syntax check PASS؛ اجرای PHP regression/live Elementor هنوز باز است.
 
 Current contract: [MODULE-HOME-HERO](../modules/theme-home-hero-widget.md).

@@ -130,7 +130,7 @@ Slider ratio-driven است؛ default `4 / 3` و از Style control قابل تغ
 
 ## Style Tab Contract
 
-Style controls به‌صورت scoped روی کلاس‌های اصلی reference (`.ba-mission-nav`, `.ba-slider`, `.ba-ticker` و ...) اعمال می‌شوند. این کنترل‌ها عمداً **visual default ندارند**؛ تا وقتی کاربر مقداری را تغییر نداده، CSS فایل مرجع authority ظاهری است.
+Style controls به‌صورت scoped روی کلاس‌های اصلی reference (`.ba-mission-nav`, `.ba-slider`, `.ba-ticker` و ...) اعمال می‌شوند. این کنترل‌ها عمداً **visual default ندارند**؛ تا وقتی کاربر مقداری را تغییر نداده، CSS فایل مرجع authority ظاهری است. شناسه Style Controlها با prefix `ref_` بازتعریف شده‌اند تا defaultهای اشتباه نسخه اول که ممکن است در JSON یک widget instance ذخیره شده باشند دیگر CSS تولید نکنند.
 
 Sections:
 - Layout / dimensions

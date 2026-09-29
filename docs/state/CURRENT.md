@@ -29,7 +29,7 @@ AFE release goal همچنان live acceptance نسخه 1.0.28 و رفع blocker 
 
 ### Homepage Hero Elementor widget
 - Hero widget visual baseline دوباره با reference اصلی همسان شد: DOM classes به `ba-hero__grid / ba-mission-nav / ba-slider / ba-ticker` برگشت و CSS بر پایه مقادیر نهایی `redesign/assets/css/home.css` بازنویسی شد.
-- Style Tab دیگر default ظاهری تزریق نمی‌کند؛ فقط تغییر صریح کاربر CSS مرجع را override می‌کند.
+- Style Tab دیگر default ظاهری تزریق نمی‌کند؛ فقط تغییر صریح کاربر CSS مرجع را override می‌کند. Style control IDs نیز با prefix `ref_` migrate شدند تا overrideهای ذخیره‌شده نسخه قبلی روی instance موجود صفحه خنثی شوند.
 - Mission Nav defaults از SVGهای اصلی redesign (`briefcase-2`, `school`, `stethoscope`, `building-community`) استفاده می‌کند؛ Elementor icon selection همان SVG را per item جایگزین می‌کند و legacy Font Awesome defaults نیز map می‌شوند.
 - بخش `ba-hero__grid` از reference repository `bonyad-alavi-redesign/redesign/index.html` به ویجت `bonyad_alavi_home_hero` در child theme تبدیل شد.
 - Slider و Mission Nav با Elementor Repeater مدیریت می‌شوند؛ تصویر اسلاید فقط Media Control دارد و هیچ تصویر reference به قالب کپی نشده است.
