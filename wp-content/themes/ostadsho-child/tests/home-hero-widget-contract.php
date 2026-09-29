@@ -26,7 +26,7 @@ $checks = array(
 	'no-style-default-override'      => !str_contains($widget, "'mission_hover_shift', array( 'label' => 'جابجایی افقی'") && !str_contains($widget, "'slider_content_right', array( 'label' => 'فاصله محتوا از راست', 'type' => Controls_Manager::SLIDER, 'size_units' => array( 'px', '%' ), 'range' => array( 'px' => array( 'min' => 0, 'max' => 140 ), '%' => array( 'min' => 0, 'max' => 30 ) ), 'default'") ,
 	'ticker-shared-query-service'  => str_contains($widget, "BA_Content_Query_Service() )->create_query( \$settings, 'ticker' )"),
 	'ticker-default-three'         => str_contains($widget, "'ticker_posts_per_page'") && str_contains($widget, "'default' => 3"),
-	'whole-slide-link-contract'    => str_contains($widget, '$whole_link  =') && str_contains($widget, 'ba-home-hero__slide-whole-link'),
+	'whole-slide-link-contract'    => str_contains($widget, '$whole_link  =') && str_contains($widget, 'ba-slider__whole-link'),
 	'button-needs-text-and-link'   => str_contains($widget, "\$has_button  = '' !== \$button_text && '' !== \$link_url;"),
 	'no-bundled-default-image'     => !str_contains($widget, 'hero-mehr-alavi.jpg') && !str_contains($widget, 'hero-infrastructure.jpg') && !str_contains($widget, 'hero-event.jpg'),
 	'style-typography'             => str_contains($widget, 'mission_title_typography') && str_contains($widget, 'slider_tag_typography') && str_contains($widget, 'slider_title_typography') && str_contains($widget, 'slider_description_typography') && str_contains($widget, 'slider_button_typography') && str_contains($widget, 'ticker_label_typography') && str_contains($widget, 'ticker_item_typography'),

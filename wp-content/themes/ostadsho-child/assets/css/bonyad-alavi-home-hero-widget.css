@@ -20,6 +20,9 @@
   --shadow: 0 12px 32px rgba(7, 76, 44, .07);
   padding: 24px 0 0;
   padding-top: 22px;
+  color: var(--ink);
+  font-family: YekanBakh, IRANSans, "Vazirmatn", Tahoma, Arial, sans-serif;
+  line-height: 1.8;
 }
 
 .ba-home-hero-widget,
@@ -40,6 +43,11 @@
 .ba-home-hero-widget button {
   font: inherit;
   color: inherit;
+}
+
+.ba-home-hero-widget :focus-visible {
+  outline: 3px solid rgba(6, 144, 67, .28);
+  outline-offset: 3px;
 }
 
 .ba-home-hero-widget .ba-container {
@@ -140,7 +148,6 @@
   position: relative;
   z-index: 1;
   border-radius: 12px;
-  color: var(--green-700);
 }
 
 .ba-home-hero-widget .ba-mission-nav__glyph,
