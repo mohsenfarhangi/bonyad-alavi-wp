@@ -3,9 +3,11 @@
 # Ignore the entire WordPress installation.
 /*
 
-# Keep this ignore configuration tracked.
+# Keep repository control/context files tracked.
 !/.gitignore
-
+!/AGENTS.md
+!/docs/
+!/docs/**
 
 !/wp-content/
 /wp-content/*
@@ -23,6 +25,4 @@
 !/wp-content/themes/ostadsho-child/**
 !/wp-content/themes/PATCH-MANIFEST.md
 
-
 *.zip
-
