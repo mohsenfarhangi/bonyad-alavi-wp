@@ -81,8 +81,8 @@
 
 .ba-home-quick-links-widget .ba-quick-links__media {
   border-radius: 50%;
-  background: var(--ba-quick-link-media-color, #fff);
-  border: 1px solid var(--ba-quick-link-media-color, #e7ece9);
+  background: #fff;
+  border: 1px solid #e7ece9;
   display: grid;
   place-items: center;
   overflow: hidden;
@@ -142,56 +142,56 @@
 
 /* Quick Links semantic media themes copied from the reference CSS. */
 .ba-home-quick-links-widget .ba-quick-links__media--people {
-  background: var(--ba-quick-link-media-color, #0f8a57);
-  border-color: var(--ba-quick-link-media-color, #0f8a57);
+  background: #0f8a57;
+  border-color: #0f8a57;
   color: #fff;
 }
 
 .ba-home-quick-links-widget .ba-quick-links__media--organization {
-  background: var(--ba-quick-link-media-color, #2f6fa3);
-  border-color: var(--ba-quick-link-media-color, #2f6fa3);
+  background: #2f6fa3;
+  border-color: #2f6fa3;
   color: #fff;
 }
 
 .ba-home-quick-links-widget .ba-quick-links__media--auction {
-  background: var(--ba-quick-link-media-color, #b7791f);
-  border-color: var(--ba-quick-link-media-color, #b7791f);
+  background: #b7791f;
+  border-color: #b7791f;
   color: #fff;
 }
 
 .ba-home-quick-links-widget .ba-quick-links__media--jihadi {
-  background: var(--ba-quick-link-media-color, #b44c5e);
-  border-color: var(--ba-quick-link-media-color, #b44c5e);
+  background: #b44c5e;
+  border-color: #b44c5e;
   color: #fff;
 }
 
 .ba-home-quick-links-widget .ba-quick-links__media--studies {
-  background: var(--ba-quick-link-media-color, #6658a6);
-  border-color: var(--ba-quick-link-media-color, #6658a6);
+  background: #6658a6;
+  border-color: #6658a6;
   color: #fff;
 }
 
 .ba-home-quick-links-widget .ba-quick-links__media--habib {
-  background: var(--ba-quick-link-media-color, #247a70);
-  border-color: var(--ba-quick-link-media-color, #247a70);
+  background: #247a70;
+  border-color: #247a70;
   color: #fff;
 }
 
 .ba-home-quick-links-widget .ba-quick-links__media--award {
-  background: var(--ba-quick-link-media-color, #b57b0d);
-  border-color: var(--ba-quick-link-media-color, #b57b0d);
+  background: #b57b0d;
+  border-color: #b57b0d;
   color: #fff;
 }
 
 .ba-home-quick-links-widget .ba-quick-links__media--hamgam {
-  background: var(--ba-quick-link-media-color, #3f7eaf);
-  border-color: var(--ba-quick-link-media-color, #3f7eaf);
+  background: #3f7eaf;
+  border-color: #3f7eaf;
   color: #fff;
 }
 
 .ba-home-quick-links-widget .ba-quick-links__media--camp {
-  background: var(--ba-quick-link-media-color, #678a43);
-  border-color: var(--ba-quick-link-media-color, #678a43);
+  background: #678a43;
+  border-color: #678a43;
   color: #fff;
 }
 

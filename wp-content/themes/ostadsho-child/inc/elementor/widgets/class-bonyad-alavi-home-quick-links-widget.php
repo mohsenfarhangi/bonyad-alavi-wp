@@ -378,7 +378,7 @@ final class Bonyad_Alavi_Home_Quick_Links_Widget extends Widget_Base {
 		?>
 		<section aria-label="دسترسی‌های سریع" class="ba-quick-links ba-home-quick-links-widget" data-ba-home-quick-links>
 			<div class="ba-container">
-				<div class="ba-quick-links__inner">
+				<div class="ba-quick-links__inner" id="services">
 					<div aria-label="دسترسی‌های سریع" class="ba-quick-links__list" data-js-quick-list>
 						<?php foreach ( $items as $item ) : ?>
 							<?php $this->render_item( $item ); ?>
@@ -410,7 +410,7 @@ final class Bonyad_Alavi_Home_Quick_Links_Widget extends Widget_Base {
 		$attrs            = $has_link ? $this->build_link_attributes( $link ) : '';
 		$theme_class      = isset( $this->get_reference_colors()[ $default_icon_key ] ) ? ' ba-quick-links__media--' . $default_icon_key : '';
 		$custom_color     = $this->get_custom_media_color( $item, $default_icon_key );
-		$style_attr       = $custom_color ? ' style="--ba-quick-link-media-color:' . esc_attr( $custom_color ) . ';"' : '';
+		$style_attr       = $custom_color ? ' style="background-color:' . esc_attr( $custom_color ) . ';border-color:' . esc_attr( $custom_color ) . ';"' : '';
 		?>
 		<<?php echo esc_attr( $tag ); ?> class="ba-quick-links__item"<?php echo $attrs; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?> data-js-quick-item>
 			<span class="ba-quick-links__media<?php echo esc_attr( $theme_class ); ?>"<?php echo $style_attr; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>

@@ -60,20 +60,12 @@
             var usedWidth = moreWidth;
             var visibleCount = 0;
 
-            items.forEach(function (item) {
-                if (visibleCount < 0) return;
+            for (const item of items) {
                 var itemWidth = item.getBoundingClientRect().width;
                 var nextWidth = usedWidth + gap + itemWidth;
-                if (nextWidth > availableWidth + 1) {
-                    visibleCount = -visibleCount - 1;
-                    return;
-                }
+                if (nextWidth > availableWidth + 1) break;
                 usedWidth = nextWidth;
                 visibleCount++;
-            });
-
-            if (visibleCount < 0) {
-                visibleCount = -visibleCount - 1;
             }
 
             visibleCount = Math.max(1, visibleCount);
