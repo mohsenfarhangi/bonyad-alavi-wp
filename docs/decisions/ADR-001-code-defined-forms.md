@@ -8,39 +8,39 @@
 
 Alavi Form Engine supports code-defined forms while administrators can customize layout/field behavior. A direct mutable copy of schema would make later code updates unsafe and could allow admin configuration to alter behavior beyond supported contracts.
 
-Existing AFE architecture explicitly describes:
+Current architecture:
 
 `Code Definition -> allowed Admin Overrides -> Runtime Form`
 
-and keeps validation/security behavior server-side.
+Validation/security authority remains server-side.
 
 ## Decision
 
 - PHP form definitions are the base source of truth.
-- Admin configuration is stored/applied as an override layer, not as a replacement executable schema.
-- Only whitelisted properties/registries may be overridden.
-- Ordering override cannot create fields or move them across unsupported scopes.
-- raw PHP/callback execution is not accepted from admin configuration.
-- when code introduces a new item absent from saved ordering, runtime resolution must preserve the code definition and append/resolve it safely.
+- Admin configuration is an override layer, not replacement executable schema.
+- only whitelisted properties/registries may be overridden.
+- ordering override cannot create fields or move them across unsupported scopes.
+- raw PHP/callback execution is not accepted from Admin configuration.
+- new code-defined items absent from saved ordering are resolved/appended safely inside their original scope.
 
 ## Reasoning
 
-This preserves deployable code ownership of form behavior while allowing operational customization, and reduces the risk that upgrades destroy or silently replace admin changes.
+این مدل ownership رفتار فرم را در deployable code نگه می‌دارد، در حالی که customization عملیاتی Admin را بدون تخریب در update بعدی ممکن می‌کند.
 
 ## Consequences
 
-- Form tasks must inspect both source definition and resolver/override path.
-- migrations/backward compatibility may be required when override schema changes.
-- admin UI is not proof of server authority; normalization/validation remain server-side.
-- module docs should reference this ADR rather than duplicate full reasoning.
+- task فرم باید source definition و resolver/override path را هر دو بررسی کند.
+- تغییر override schema ممکن است migration/backward compatibility بخواهد.
+- Admin UI proof of server authority نیست؛ normalization/validation سمت PHP نهایی است.
+- module docs باید به این ADR ارجاع دهند و reasoning را duplicate نکنند.
 
 ## Related Modules
 
 - [MODULE-AFE](../modules/alavi-form-engine.md)
+- [MODULE-AFE-EXTENSION](../modules/alavi-form-engine-extension-api.md)
 
-## Relevant Files / Docs
+## Relevant Source Files
 
-- `../../wp-content/plugins/alavi-form-engine/docs/ARCHITECTURE.md`
-- `../../wp-content/plugins/alavi-form-engine/docs/PROJECT_STATE.md`
 - `../../wp-content/plugins/alavi-form-engine/src/Form/`
 - `../../wp-content/plugins/alavi-form-engine/src/Forms/`
+- `../../wp-content/plugins/alavi-form-engine/src/Admin/`
