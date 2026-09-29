@@ -285,3 +285,18 @@ Date: 2026-09-29
 - live frontend/Geo/email acceptance هنوز تأیید نشده است.
 
 Current contract: [MODULE-CONTACT-FORM](../modules/contact-form.md).
+
+## STATE-002-013 — Mission Nav original SVG defaults restored
+
+Date: 2026-09-29
+
+- چهار آیکون پیش‌فرض Mission Nav در ویجت Hero از Font Awesome به SVGهای اصلی reference redesign برگشتند: `tabler:briefcase-2`، `tabler:school`، `tabler:stethoscope` و `tabler:building-community`.
+- Repeater یک `default_icon_key` داخلی دارد؛ تا وقتی کاربر Elementor Icon جدیدی انتخاب نکند، SVG متناظر رندر می‌شود.
+- custom Elementor icon همیشه نسبت به SVG پیش‌فرض اولویت دارد.
+- برای نمونه‌های ذخیره‌شده قبل از این تغییر، چهار Font Awesome default قدیمی به SVG متناظر map می‌شوند و migration دستی لازم نیست.
+- CSS خطی SVGهای Tabler را با `fill:none` و `stroke:currentColor` حفظ می‌کند تا کنترل رنگ/اندازه Style Tab همچنان کار کند.
+- regression contract Hero برای SVG defaults، custom override و legacy compatibility به‌روزرسانی شد.
+- source commit: `25a759aa008ebcf51fe49b3c9748514a94e0bf1e`.
+- live Elementor visual acceptance هنوز تأیید نشده است.
+
+Current contract: [MODULE-HOME-HERO](../modules/theme-home-hero-widget.md).

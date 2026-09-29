@@ -27,14 +27,20 @@ Elementor Repeater:
 - Description
 - Link
 
-Defaultها چهار معاونت reference هستند.
+Defaultها چهار معاونت reference هستند. برای این چهار آیتم، SVGهای اصلی خود redesign به‌صورت fallback داخلی نگهداری می‌شوند: `tabler:briefcase-2`، `tabler:school`، `tabler:stethoscope` و `tabler:building-community`.
+
+Icon contract:
+- تا وقتی کاربر آیکون جدیدی در Elementor انتخاب نکرده باشد، SVG اصلی redesign نمایش داده می‌شود.
+- انتخاب آیکون جدید با Elementor Icons، SVG پیش‌فرض را برای همان آیتم جایگزین می‌کند.
+- چهار Font Awesome پیش‌فرض نسخه قبلی به‌عنوان legacy شناخته می‌شوند و خودکار به SVG متناظر برمی‌گردند تا نمونه‌های ذخیره‌شده قدیمی نیاز به ویرایش دستی نداشته باشند.
+- آیتم جدیدی که default key ندارد و کاربر برای آن آیکون انتخاب نکرده، آیکون تصادفی دریافت نمی‌کند.
 
 Rendering contract:
 - Title خالی → title markup رندر نمی‌شود.
 - Description خالی → description markup رندر نمی‌شود.
 - Link خالی → item با همان ساختار بصری به‌صورت non-clickable `div` رندر می‌شود.
 - Link موجود → item یک `a` امن با support برای external/nofollow است.
-- Icon با `Elementor\Icons_Manager` رندر می‌شود.
+- Icon سفارشی با `Elementor\Icons_Manager` رندر می‌شود؛ SVG پیش‌فرض از map داخلی امن ویجت رندر می‌شود.
 
 ### Slider
 
@@ -179,6 +185,7 @@ Regression contract:
 موارد guardشده:
 - widget slug
 - Slider/Mission Repeaters
+- reference SVG defaults + custom Elementor icon override + legacy default icon compatibility
 - shared ticker query
 - default 3 posts
 - whole-slide link behavior

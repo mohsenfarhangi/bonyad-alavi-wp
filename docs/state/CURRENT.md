@@ -28,6 +28,7 @@ AFE release goal همچنان live acceptance نسخه 1.0.28 و رفع blocker 
 - source commit: `5f181fe082f5879072262f15ba3e420c58a7b4b7`.
 
 ### Homepage Hero Elementor widget
+- Mission Nav defaults now use the original redesign SVGs (`briefcase-2`, `school`, `stethoscope`, `building-community`); Elementor icon selection overrides the SVG per item, and legacy Font Awesome defaults are transparently mapped back to the original SVGs.
 - بخش `ba-hero__grid` از reference repository `bonyad-alavi-redesign/redesign/index.html` به ویجت `bonyad_alavi_home_hero` در child theme تبدیل شد.
 - Slider و Mission Nav با Elementor Repeater مدیریت می‌شوند؛ تصویر اسلاید فقط Media Control دارد و هیچ تصویر reference به قالب کپی نشده است.
 - Ticker از `BA_Content_Query_Service` استفاده می‌کند و Query کامل Elementor دارد؛ پیش‌فرض آخرین 3 نوشته است و فقط عنوان + permalink رندر می‌شود.
@@ -131,7 +132,7 @@ Historical PASSهای AFE/Theme به HEAD جدید تعمیم داده نمی‌
 
 ## Next Agent Handoff
 
-**Current task:** فرم `contact-us` در child theme پیاده‌سازی و ثبت شده است؛ مرحله باز بعدی، تست frontend submit، بارگذاری استان‌ها و دریافت ایمیل مدیر در محیط WordPress واقعی است.
+**Current task:** Hero Mission Nav اکنون SVGهای اصلی redesign را به‌عنوان آیکون پیش‌فرض استفاده می‌کند و انتخاب آیکون Elementor جای آن را می‌گیرد؛ live Elementor visual acceptance همچنان لازم است.
 
 **Start here:** [../INDEX.md](../INDEX.md) → [../modules/INDEX.md](../modules/INDEX.md).
 
