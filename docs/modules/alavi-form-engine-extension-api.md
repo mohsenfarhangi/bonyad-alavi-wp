@@ -10,6 +10,8 @@ Hook:
 
 Code-defined form DSL از `Form`, `Step` و field objects استفاده می‌کند. Source Definition authority باقی می‌ماند؛ Admin فقط supported override است.
 
+Engine در `after_setup_theme` با priority 20 boot می‌شود. بنابراین active theme می‌تواند در `functions.php` یا فایل require‌شده listener `afe_register_forms` را ثبت کند و Source Definition پروژه‌ای را بدون وابستگی معکوس Engine→Theme وارد `FormRegistry` کند. slug فرم باید برای حفظ Submission/Overrideهای موجود پایدار بماند.
+
 نمونه الگو:
 
 ```php

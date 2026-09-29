@@ -101,6 +101,10 @@ if ($bootstrapErrors !== []) {
 register_activation_hook(__FILE__, [\BonyadAlavi\FormEngine\Core\Plugin::class, 'activate']);
 register_deactivation_hook(__FILE__, [\BonyadAlavi\FormEngine\Core\Plugin::class, 'deactivate']);
 
-add_action('plugins_loaded', static function (): void {
+// Form definitions may be registered by the active theme through
+// afe_register_forms. WordPress loads theme functions after plugins_loaded and
+// before after_setup_theme, so boot after the theme is loaded to provide a
+// deterministic registration window without coupling the engine to the theme.
+add_action('after_setup_theme', static function (): void {
     \BonyadAlavi\FormEngine\Core\Plugin::instance()->boot();
-});
+}, 20);

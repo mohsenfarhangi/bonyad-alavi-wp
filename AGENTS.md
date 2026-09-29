@@ -37,6 +37,7 @@
 
 - Form Engine عمومی → `MODULE-AFE`
 - API/extensionهای Form Engine → `MODULE-AFE-EXTENSION`
+- فرم ثبت‌نام گروه‌های مردمی و جهادی → `MODULE-JIHADI-FORM`
 - تنظیمات مدیریت قالب → `MODULE-THEME-ADMIN`
 - رسانه/گالری محصول → `MODULE-THEME-MEDIA`
 - پرداخت مشارکت → `MODULE-PARTICIPATION`

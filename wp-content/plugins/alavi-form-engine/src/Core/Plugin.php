@@ -34,7 +34,6 @@ use BonyadAlavi\FormEngine\Form\FormRegistry;
 use BonyadAlavi\FormEngine\Form\Renderer;
 use BonyadAlavi\FormEngine\Form\PreviewRenderer;
 use BonyadAlavi\FormEngine\Form\Validator;
-use BonyadAlavi\FormEngine\Forms\JihadiGroupRegistrationForm;
 use BonyadAlavi\FormEngine\Localization\LocaleDateService;
 use BonyadAlavi\FormEngine\InputMask\InputMaskRegistry;
 use BonyadAlavi\FormEngine\Repository\FormRepository;
@@ -86,7 +85,6 @@ final class Plugin
         $this->container = new Container();
 
         $registry = new FormRegistry();
-        $registry->register((new JihadiGroupRegistrationForm())->build());
         do_action('afe_register_forms', $registry);
 
         $formRepo = new FormRepository();

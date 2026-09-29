@@ -52,6 +52,8 @@ Extension API: [MODULE-AFE-EXTENSION](modules/alavi-form-engine-extension-api.md
 
 ورودی: `wp-content/themes/ostadsho-child/functions.php`
 
+Child theme مالک integrationهای اختصاصی سایت است. از 2026-09-29 Source Definition فرم `jihadi-group-registration` نیز اینجا نگهداری و از hook عمومی `afe_register_forms` به Engine تزریق می‌شود؛ Engine دیگر این فرم پروژه‌ای را built-in ثبت نمی‌کند.
+
 Composition شامل:
 - front/cart/checkout/thank-you assets
 - admin components و settings page
@@ -59,12 +61,13 @@ Composition شامل:
 - participation WooCommerce services
 - center settings/content services
 - product media helpers/services
+- project form definitions (`inc/forms/`)
 - shortcodes و product FAQ
 
 Subdirectories اصلی:
 `inc/admin`, `inc/elementor`, `inc/helpers`, `inc/services`, `inc/shortcodes`, `inc/woocommerce`.
 
-مرجع: [MODULE-THEME](modules/ostadsho-child-theme.md)
+مرجع: [MODULE-THEME](modules/ostadsho-child-theme.md) و [MODULE-JIHADI-FORM](modules/jihadi-group-registration-form.md)
 
 ## 3. Theme Admin Settings
 

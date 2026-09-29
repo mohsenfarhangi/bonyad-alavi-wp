@@ -121,3 +121,6 @@ require_once get_stylesheet_directory() . '/inc/admin/settings/class-ba-settings
 BA_Settings_Page::init();
 BA_Settings_Ajax_Controller::init();
 
+// فرم اختصاصی ثبت‌نام گروه‌های مردمی و جهادی؛ موتور فرم داخل Alavi Form Engine باقی می‌ماند.
+require_once get_stylesheet_directory() . '/inc/forms/class-ba-jihadi-group-registration-form.php';
+add_action( 'afe_register_forms', array( BA_Jihadi_Group_Registration_Form::class, 'register' ) );

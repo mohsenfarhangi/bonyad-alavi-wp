@@ -59,7 +59,7 @@ function register_activation_hook(string \$file, callable|array|string \$callbac
 function register_deactivation_hook(string \$file, callable|array|string \$callback): void {}
 include {$pluginFile};
 if (!isset(\$GLOBALS['afe_test_actions']['admin_notices'])) { fwrite(STDERR, 'Expected bootstrap admin notice was not registered' . PHP_EOL); exit(2); }
-if (isset(\$GLOBALS['afe_test_actions']['plugins_loaded'])) { fwrite(STDERR, 'Plugin boot hook must not be registered after failed preflight' . PHP_EOL); exit(3); }
+if (isset(\$GLOBALS['afe_test_actions']['after_setup_theme'])) { fwrite(STDERR, 'Plugin boot hook must not be registered after failed preflight' . PHP_EOL); exit(3); }
 echo 'bootstrap preflight stops incomplete deployment safely' . PHP_EOL;
 PHP_RUNNER
     );

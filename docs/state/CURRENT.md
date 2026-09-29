@@ -11,11 +11,18 @@
 
 ## Current Goal
 
-ساختار مستندات project-level canonical شده است. task بعدی باید فقط از root `docs/` و module مربوط شروع شود؛ handoff/build/version docs قدیمی دیگر source of truth نیستند و حذف شده‌اند.
+مالکیت فرم‌های پروژه‌ای از Engine عمومی جدا شده است. فرم `jihadi-group-registration` اکنون در child theme بنیاد علوی نگهداری و با API عمومی `afe_register_forms` ثبت می‌شود؛ slug و داده‌های موجود بدون migration حفظ شده‌اند.
 
 AFE release goal همچنان live acceptance نسخه 1.0.28 و رفع blocker واقعی پیش از production promotion است.
 
 ## Recently Completed
+
+### Jihadi form ownership transfer
+- Source Definition فرم `jihadi-group-registration` از `alavi-form-engine/src/Forms` به `ostadsho-child/inc/forms` منتقل شد.
+- ثبت مستقیم فرم از `Core\\Plugin` حذف و registration به `afe_register_forms` در child theme منتقل شد.
+- AFE boot از `plugins_loaded` به `after_setup_theme` priority 20 منتقل شد تا theme registration window معتبر باشد.
+- slug فرم تغییر نکرد؛ migration دیتابیس لازم نیست.
+- تست‌های اختصاصی فرم از suite افزونه خارج و regression theme جایگزین شد؛ یک regression برای bootstrap registration window نیز به AFE اضافه شد.
 
 ### Persistent documentation migration
 - دانش AFE legacy از Project State، Architecture، Developer، Acceptance، Feature Completeness، Build Report و Handoff به module/ADR/state canonical منتقل شد.
@@ -59,6 +66,7 @@ Open release work برای AFE:
 - [ADR-004 — Jihadi Center source precedence](../decisions/ADR-004-jihadi-center-source-precedence.md)
 - [ADR-005 — Shared admin Repeater](../decisions/ADR-005-shared-admin-repeater.md)
 - [ADR-006 — AFE export dependency isolation](../decisions/ADR-006-afe-export-dependency-isolation.md)
+- [ADR-007 — Project form ownership](../decisions/ADR-007-project-form-ownership.md)
 
 ## Relevant Modules
 
@@ -69,6 +77,7 @@ Open release work برای AFE:
 - [MODULE-THEME-MEDIA](../modules/theme-product-media.md)
 - [MODULE-PARTICIPATION](../modules/participation-payments.md)
 - [MODULE-JIHADI-CENTER](../modules/jihadi-center.md)
+- [MODULE-JIHADI-FORM](../modules/jihadi-group-registration-form.md)
 
 ## Tests Status
 
@@ -84,7 +93,7 @@ Real MeliPayamak test: PASS reported by project administrator on 2026-09-04.
 
 Theme legacy v0.6.5 docs recorded PHP/JS syntax + ZIP checks for that patch.
 
-**No product test suite was rerun during this documentation-only consolidation.**
+**برای انتقال فرم جهادی، regressionهای جدید در repository اضافه شده‌اند؛ اجرای runtime QA هنوز در این session تأیید نشده است. Historical PASSهای قبلی به این تغییر جدید تعمیم داده نمی‌شوند.**
 
 ## Next Actions
 
@@ -97,11 +106,11 @@ Theme legacy v0.6.5 docs recorded PHP/JS syntax + ZIP checks for that patch.
 
 ## Next Agent Handoff
 
-**Current task:** documentation consolidation complete؛ feature task بازی وجود ندارد.
+**Current task:** انتقال ownership فرم جهادی از AFE به child theme انجام شده است؛ live WordPress acceptance این integration هنوز باید روی محیط کامل تأیید شود.
 
 **Start here:** [../INDEX.md](../INDEX.md) → [../modules/INDEX.md](../modules/INDEX.md).
 
-**Do not reconsider without new evidence:** AFE source-definition override model، participation cart isolation، theme shared settings persistence، Jihadi source precedence، shared admin Repeater، export autoload isolation.
+**Do not reconsider without new evidence:** AFE source-definition override model، ownership فرم پروژه‌ای در theme، participation cart isolation، theme shared settings persistence، Jihadi source precedence، shared admin Repeater، export autoload isolation.
 
 **Do not assume:** current HEAD QA PASS، live export acceptance، vendor availability یا production readiness.
 

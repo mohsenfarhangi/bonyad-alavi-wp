@@ -19,7 +19,7 @@
 - SMS Engine اکنون Provider Router دارد: Provider پیش‌فرض سراسری + Override در هر SMS Action.
 - Integration اختیاری `Persian WooCommerce SMS` از Gateway/Credential همان افزونه استفاده می‌کند و هیچ Credential تکراری در AFE ذخیره نمی‌کند؛ capability Pattern براساس Gateway فعال تشخیص داده می‌شود.
 - Master Switch پیامک در ساختار current/legacy سازگار است و Runtime قبل از هر ارسال state فعلی تنظیمات را دوباره resolve می‌کند تا ارتقا یا snapshot قدیمی باعث خطای کاذب «غیرفعال است» نشود.
-- Template پیش‌فرض SMS فرم `jihadi-group-registration` همچنان `submission.submitted -> leader_mobile -> once_per_submission` است و عمداً بدون متن/Pattern hard-code و غیرفعال باقی مانده تا محتوای تأییدشده از Action Builder تنظیم شود.
+- فرم پروژه‌ای `jihadi-group-registration` از 1.0.28-dev در خود Engine تعریف نمی‌شود و توسط child theme بنیاد علوی از hook `afe_register_forms` ثبت می‌شود؛ slug و قراردادهای ذخیره‌شده آن ثابت مانده‌اند.
 - Release hardening روی WordPress User Actions اضافه شده است: هدف‌های Administrator/`manage_options` بدون opt-in سطح `afe_manage_settings` قابل Login/Update/Role/Meta نیستند و metaهای امنیتی capability/session/application-password در Runtime مسدودند.
 - Assign Role نقش‌های سفارشی دارای `manage_options` را نیز privileged در نظر می‌گیرد.
 - URLهای Token‌دار Action schema هنگام ذخیره Tokenهای `{{...}}` را حفظ می‌کنند و URL نهایی همچنان در Runtime sanitize می‌شود.
@@ -52,9 +52,7 @@
 2. افزونه را فعال کنید.
 3. جداول با `dbDelta()` ایجاد/بروزرسانی می‌شوند.
 4. از منوی «فرم‌های علوی → دیتابیس» دیتاست کامل تقسیمات کشوری را دریافت کنید.
-5. فرم پیش‌فرض با Shortcode زیر قابل نمایش است:
-
-`[alavi_form id="jihadi-group-registration"]`
+5. فرم‌های پروژه‌ای را از یک plugin/theme integration با hook `afe_register_forms` ثبت کنید. در سایت بنیاد علوی، child theme فرم `jihadi-group-registration` را ثبت می‌کند و Shortcode آن `[alavi_form id="jihadi-group-registration"]` است.
 
 ## ویژگی‌های نسخه 1.0.27
 
@@ -95,7 +93,7 @@
 - Excel ساختاری است: Sheet name، RTL، Freeze Header، AutoFilter، رنگ Header، ترتیب/عنوان/عرض/نمایش ستون‌ها.
 - شماره موبایل، کد ملی، شبا، کارت و سایر شناسه‌ها با `TYPE_STRING` نوشته می‌شوند تا صفر اول حذف نشود.
 - Export چندفرمی، برای هر فرم Sheet جدا با قالب همان فرم می‌سازد.
-- فرم جهادی Output Profile اختصاصی فارسی برای PDF و Excel دارد.
+- Output Profile هر فرم از Source Definition ثبت‌شده توسط همان integration resolve می‌شود؛ Engine به فرم پروژه‌ای خاصی وابسته نیست.
 - فایل‌ها در خروجی‌ها در صورت وجود URL معتبر به‌صورت hyperlink ارائه می‌شوند.
 
 Dependencyها باید در build نهایی داخل `vendor` نصب شوند. برای ساخت vendor:
@@ -190,7 +188,7 @@ The admin field override screen can switch each select between Custom and Native
 - حالت Readonly بدون Save/Submit برای فرم‌های قفل‌شده بدون Preview.
 - دکمه درخواست ویرایش قابل فعال/غیرفعال‌سازی برای هر فرم.
 - تأیید/رد درخواست و باز/بسته‌کردن دستی قفل در مدیریت Submission.
-- فرم ثبت‌نام گروه‌های مردمی و جهادی با Preview و Lock Policy فعال.
+- Preview و Lock Policy قابلیت‌های عمومی Engine هستند؛ child theme بنیاد علوی این قابلیت‌ها را برای فرم جهادی فعال می‌کند.
 
 
 ## تغییرات 1.0.21 — زباله‌دان، قفل و کپچا

@@ -17,10 +17,11 @@ Child theme بنیاد علوی روی parent `ostadsho` integrationهای اخ�
 - Elementor widgets/dynamic tags را load می‌کند.
 - participation gateway/quick-checkout services را load می‌کند.
 - center settings service/tab را load می‌کند.
+- Source Definition فرم جهادی را از `inc/forms/` load و با `afe_register_forms` ثبت می‌کند.
 - settings access/page/AJAX controller را initialize می‌کند.
 
 Subdirectories:
-`inc/admin`, `inc/elementor`, `inc/helpers`, `inc/services`, `inc/shortcodes`, `inc/woocommerce`.
+`inc/admin`, `inc/elementor`, `inc/forms`, `inc/helpers`, `inc/services`, `inc/shortcodes`, `inc/woocommerce`.
 
 ## Development Conventions Migrated from Legacy Handoff
 
@@ -46,6 +47,7 @@ Subdirectories:
 - [MODULE-THEME-MEDIA](theme-product-media.md) — product media/gallery
 - [MODULE-PARTICIPATION](participation-payments.md) — WooCommerce participation
 - [MODULE-JIHADI-CENTER](jihadi-center.md) — صفحه مرکز
+- [MODULE-JIHADI-FORM](jihadi-group-registration-form.md) — Source Definition و registration فرم ثبت‌نام گروه‌های مردمی و جهادی
 
 ## Version History
 

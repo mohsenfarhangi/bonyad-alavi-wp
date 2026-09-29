@@ -12,7 +12,7 @@ Code-first extensible form engine for WordPress.
 
 Alavi Form Engine provides code-defined forms with admin overrides, workflows, submissions, repeaters, conditional logic, flexible data sources, secure uploads, reports, optional REST API and Elementor integration.
 
-The package includes the "ثبت نام گروه‌های مردمی و جهادی" form as its first built-in form.
+Project-specific forms are registered through the afe_register_forms hook. The Bonyad Alavi child theme registers the jihadi-group-registration form; the engine itself does not ship a project-specific built-in form.
 
 == Installation ==
 
@@ -20,11 +20,12 @@ The package includes the "ثبت نام گروه‌های مردمی و جهاد
 2. Open Forms > Database and verify database health.
 3. Optionally update the Iran geography dataset.
 4. JalaliDatePicker assets are bundled locally in assets/vendor/jalalidatepicker/; verify they remain present after deployment.
-5. Use [alavi_form id="jihadi-group-registration"].
+5. Register a project form through afe_register_forms, then render it with [alavi_form id="your-form-slug"].
 
 == Changelog ==
 
 = Unreleased / 1.0.28-dev feature-complete pre-acceptance checkpoint =
+* Moved the project-specific jihadi-group-registration source definition out of the engine and into the Bonyad Alavi child theme via afe_register_forms; the slug remains unchanged so existing submissions and admin overrides continue to resolve.
 * Added registry-driven Action Builder with Persian Event labels, stable action keys, multiple actions, same-event drag/drop ordering, enable/disable controls, conditional logic and execution/error policies.
 * Added ActionRuntime / ActionRunResult for chain outputs, first-wins redirect and follow-up events without mutating submitted form data.
 * Added Redirect, Create/Login/Update User, Assign Role, Update User Meta, Change Submission Status, Internal Note, Generate PDF, Email PDF and Create/Update/Upsert Post/CPT actions.
@@ -52,7 +53,7 @@ The package includes the "ثبت نام گروه‌های مردمی و جهاد
 * Custom Regex requires afe_manage_settings, is compile-tested before save, uses restricted flags/length and runtime PCRE match/recursion limits; frontend regex checking is UX-only.
 * Added Unicode-safe length validation without requiring mbstring.
 * Added regression coverage for Validator Registry, field constraint overrides, DateField modes and ordering behavior.
-* Added a disabled, content-free default Jihadi SMS Action template for submission.submitted -> leader_mobile with once_per_submission; final message/Pattern remains an admin setting and is not hard-coded in PHP.
+* The Bonyad Alavi child-theme form definition keeps a disabled, content-free Jihadi SMS Action template for submission.submitted -> leader_mobile with once_per_submission; final message/Pattern remains an admin setting and is not hard-coded in PHP.
 * Added Elementor native-constructor registration and local runtime-asset regression coverage.
 * Added pre-acceptance security hardening for WordPress User Actions: privileged Administrator/manage_options targets require explicit afe_manage_settings opt-in, and capability/session/application-password user meta keys are blocked at runtime.
 * User meta mappings are fully prevalidated before Create User / Update User Meta writes to avoid partial side effects on rejected protected keys.

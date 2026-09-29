@@ -1,9 +1,8 @@
 <?php
 declare( strict_types=1 );
 
-namespace BonyadAlavi\FormEngine\Forms;
-
 use BonyadAlavi\FormEngine\Form\Form;
+use BonyadAlavi\FormEngine\Form\FormRegistry;
 use BonyadAlavi\FormEngine\Form\Step;
 use BonyadAlavi\FormEngine\Form\Fields\{
 	TextField,
@@ -20,7 +19,18 @@ use BonyadAlavi\FormEngine\Form\Fields\{
 	HtmlBlock
 };
 
-final class JihadiGroupRegistrationForm {
+/**
+ * تعریف اختصاصی فرم ثبت‌نام گروه‌های مردمی و جهادی بنیاد علوی.
+ *
+ * موتور فرم در افزونه Alavi Form Engine قرار دارد و این کلاس فقط Source Definition
+ * وابسته به سایت/قالب را ثبت می‌کند. slug فرم عمداً ثابت نگه داشته شده است تا
+ * Submissionها و Overrideهای مدیریتی موجود بدون Migration ادامه پیدا کنند.
+ */
+final class BA_Jihadi_Group_Registration_Form {
+	public static function register( FormRegistry $registry ): void {
+		$registry->register( ( new self() )->build() );
+	}
+
 	public function build(): Form {
 		$groupTypes = [
 			'ngo'               => 'سازمان مردم نهاد (NGO)',

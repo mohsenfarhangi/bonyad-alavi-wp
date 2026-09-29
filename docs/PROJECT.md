@@ -25,7 +25,7 @@ WordPress plugin از نوع code-first form engine با submission lifecycle، 
 
 مسیر: `wp-content/themes/ostadsho-child/`
 
-Integration layer پروژه برای Elementor، تنظیمات بنیاد علوی، مرکز حرکت‌های مردمی و جهادی، WooCommerce participation، رسانه محصول، shortcodes و admin components.
+Integration layer پروژه برای Elementor، تنظیمات بنیاد علوی، مرکز حرکت‌های مردمی و جهادی، WooCommerce participation، رسانه محصول، project form definitions، shortcodes و admin components.
 
 Theme header فایل `style.css` نسخه `2.8` را نشان می‌دهد. تاریخچه featureهای سفارشی قدیمی با versionهای `v0.x` جدا از Theme header بوده و اکنون در [state-v002](state/state-v002.md) ثبت شده است.
 
@@ -54,6 +54,7 @@ Theme header فایل `style.css` نسخه `2.8` را نشان می‌دهد. ت
 
 - رفتار production را از history قدیمی حدس نزن؛ HEAD و tests را بررسی کن.
 - AFE: code-defined form schema منبع پایه است؛ [ADR-001](decisions/ADR-001-code-defined-forms.md).
+- فرم‌های business-specific سایت در integration/theme مالکیت دارند و از public AFE hook ثبت می‌شوند؛ [ADR-007](decisions/ADR-007-project-form-ownership.md).
 - Participation: cart/order isolation و gateway contract را حفظ کن؛ [ADR-002](decisions/ADR-002-participation-quick-checkout.md).
 - Theme settings: shared registry/AJAX persistence را حفظ کن؛ [ADR-003](decisions/ADR-003-shared-theme-settings-persistence.md).
 - Jihadi center: dual-source precedence را فقط از resolver مرکزی تغییر بده؛ [ADR-004](decisions/ADR-004-jihadi-center-source-precedence.md).

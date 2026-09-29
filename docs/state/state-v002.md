@@ -231,3 +231,18 @@ After reconciliation, duplicated continuation/history docs were removed from plu
 - ADR/index only when relevant
 
 Package-facing AFE README/readme/third-party notices remain because they serve distribution/install/legal purposes rather than persistent project handoff.
+
+## STATE-002-010 — Jihadi form moved from AFE to child theme
+
+Date: 2026-09-29
+
+- Source Definition `jihadi-group-registration` از `wp-content/plugins/alavi-form-engine/src/Forms/JihadiGroupRegistrationForm.php` خارج شد.
+- ownership جدید: `wp-content/themes/ostadsho-child/inc/forms/class-ba-jihadi-group-registration-form.php`.
+- AFE دیگر هیچ فرم business-specific را مستقیم در `Core\\Plugin` register نمی‌کند؛ فقط `afe_register_forms` را روی registry عمومی dispatch می‌کند.
+- theme فرم را از `functions.php` روی همان hook register می‌کند.
+- برای اینکه listener قالب قبل از dispatch hook ثبت شده باشد، AFE boot از `plugins_loaded` به `after_setup_theme` priority 20 منتقل شد. WordPress theme functions را قبل از این hook load می‌کند.
+- slug `jihadi-group-registration` عمداً ثابت ماند؛ DB migration ایجاد نشد و submission/override/accessهای موجود باید با همان slug resolve شوند.
+- دو regression فرم جهادی از plugin suite حذف و یک regression یکپارچه در theme اضافه شد؛ regression جدید AFE زمان‌بندی boot را guard می‌کند.
+- README/readme افزونه از claim «built-in Jihadi form» به extension-based registration اصلاح شد.
+
+Related: [ADR-007](../decisions/ADR-007-project-form-ownership.md) و [MODULE-JIHADI-FORM](../modules/jihadi-group-registration-form.md).

@@ -20,7 +20,8 @@ Plugin:
 - PSR-4 fallback داخلی را مستقل از Composer ثبت می‌کند.
 - در صورت وجود `vendor/autoload.php` loader اختصاصی را نگه می‌دارد.
 - critical bootstrap files/classes را قبل از boot validate می‌کند.
-- سپس `Core\Plugin` را boot می‌کند.
+- boot اصلی را در `after_setup_theme` priority 20 اجرا می‌کند تا theme/plugin integrationها بتوانند پیش از `afe_register_forms` ثبت شوند.
+- Engine هیچ Source Definition پروژه‌ای built-in ثبت نمی‌کند؛ فرم‌های سایت از hook `afe_register_forms` وارد `FormRegistry` می‌شوند.
 
 Source domains:
 `Actions, Admin, Core, DataSource, Database, Duplicate, Elementor, Events, Export, Form, Forms, InputMask, Localization, Repository, Rest, Security, Style, Submission, Template, Validation`.
@@ -187,7 +188,7 @@ Persian WooCommerce SMS adapter:
 
 SMS master setting current/legacy keys را normalize/sync می‌کند و runtime هر action وضعیت فعلی را resolve می‌کند.
 
-Jihadi default SMS action موجود است ولی default disabled است؛ متن/pattern hard-coded نیست.
+Default Actionهای پروژه‌ای متعلق به Source Definition همان integration هستند و در Engine hard-code نمی‌شوند.
 
 ## Export
 
@@ -252,7 +253,7 @@ Template Registry:
 
 ## Extension API
 
-برای registration hooks، REST endpoints، DSL examples و provider/validator/template extensions:
+برای registration hooks، lifecycle ثبت فرم‌های بیرونی، REST endpoints، DSL examples و provider/validator/template extensions:
 [MODULE-AFE-EXTENSION](alavi-form-engine-extension-api.md).
 
 ## Build / Deployment
