@@ -22,12 +22,12 @@ AFE release goal همچنان live acceptance نسخه 1.0.28 و رفع blocker 
 - markup اصلی reference سکشن `#about` شامل intro/actions/funding donut/source cards/summary حفظ شده و root class `ba-home-about-widget` فقط برای scope اضافه شده است.
 - سه دکمه reference با Repeater آزاد مدیریت می‌شوند و نوع Primary/Secondary دارند.
 - منابع دونات Repeater آزاد هستند؛ چهار منبع reference فقط default هستند و کاربر می‌تواند منبع اضافه/حذف کند یا عنوان، مقدار و رنگ را تغییر دهد.
-- geometry نمودار از داده‌ها محاسبه می‌شود: share دو رقم اعشار، gap یک واحد pathLength، dash/offset و زاویه کارت از مقادیر جاری ساخته می‌شوند. چهار مقدار default دقیقاً geometry reference `43.85/28.09/15.36/8.70` و زوایای `78.93/212.02/293.83/340.74` را بازتولید می‌کنند.
+- redesign commit `006cd3fa167491af10cfd764e410388cf2a37c84` روی widget هم sync شد: منبع واحد داده `data-impact-value` است و JS در runtime سهم، gap تطبیقی، dash/offset، زاویه، total و accessibility description را می‌سازد.
 - مجموع منابع به‌صورت خودکار از Repeater منابع محاسبه می‌شود و مرکز دونات/summary می‌تواند از آن استفاده کند.
 - Summary دارای switch کلی و Repeater مستقل است؛ هر آیتم نیز switch نمایش، icon override، نوع مقدار `funding_total/manual`، decimal و suffix دارد. دو آیتم HTML reference default هستند.
-- JS reference برای counter animation، hover linkage، connector positioning و IntersectionObserver حفظ و فقط per-instance/Elementor-safe شده است.
+- JS reference برای counter animation، hover linkage، collision-resolved card positioning، connector-to-segment geometry، `ResizeObserver`، `MutationObserver` و `IntersectionObserver` حفظ و فقط per-instance/Elementor-safe شده است.
 - CSS نهایی reference، شامل framing نهایی `ba-impact__grid` و funding pane یکپارچه، با scope ویجت منتقل شده است.
-- source commits: `b1b38bd82dbfc35a9f722ee57278198f0a3d6429`, `b1bbf05c01452f34e321bc57ab1d8607237eabb1`.
+- source commits: `b1b38bd82dbfc35a9f722ee57278198f0a3d6429`, `b1bbf05c01452f34e321bc57ab1d8607237eabb1`, `9995a1324825ae1cb98a3102aadc0b56de5dc654`. Latest redesign reference: `006cd3fa167491af10cfd764e410388cf2a37c84`.
 
 ### Homepage Live Stats Elementor widget
 - ویجت `bonyad_alavi_home_live_stats` به child theme و دسته «بنیاد علوی» اضافه شد.
@@ -156,7 +156,7 @@ Theme legacy v0.6.5 docs recorded PHP/JS syntax + ZIP checks for that patch.
 
 برای فرم تماس با ما regression `tests/contact-form-definition.php` اضافه شده است؛ source/test روی draft محلی PHP lint شدند و نسخه commit‌شده از GitHub برای slug، Geo province، required fields، admin email action و theme registration بازبینی استاتیک شد. **اجرای regression در checkout کامل repository و live WordPress هنوز در این session انجام نشده است.**
 
-برای About/Impact صفحه اصلی regression contract جدید `tests/home-about-widget-contract.php` اضافه شده است. روی نسخه commit‌شده، Repeaterهای actions/sources/summary، geometry داینامیک، بازتولید دقیق geometry چهار مقدار reference، CSS desktop/tablet/mobile، registration و JS per-instance به‌صورت استاتیک بررسی شدند و JavaScript با parser V8 بدون خطا parse شد. **PHP lint و live WordPress/Elementor acceptance در این session اجرا نشده‌اند.**
+برای About/Impact صفحه اصلی regression contract `tests/home-about-widget-contract.php` latest data-driven contract را پوشش می‌دهد: `data-impact-value/data-impact-total`، runtime geometry، adaptive gap، collision resolver، Resize/Mutation/Intersection Observer، CSS responsive، registration و JS per-instance. JavaScript نسخه commit‌شده با parser V8 بدون خطا parse شد. **PHP lint و live WordPress/Elementor acceptance در این session اجرا نشده‌اند.**
 
 برای Live Stats صفحه اصلی regression contract جدید `tests/home-live-stats-widget-contract.php` اضافه شده است. روی نسخه commit‌شده، markup، NUMBER-only input، ۶ default، formatter frontend، desktop/tablet/mobile CSS و نبود JS dependency به‌صورت استاتیک بازبینی شد. **PHP lint و live WordPress/Elementor acceptance در این session اجرا نشده‌اند.**
 

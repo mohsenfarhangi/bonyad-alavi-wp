@@ -381,3 +381,21 @@ Date: 2026-10-01
 - source commits: `b1b38bd82dbfc35a9f722ee57278198f0a3d6429`, `b1bbf05c01452f34e321bc57ab1d8607237eabb1`.
 
 Current contract: [MODULE-HOME-ABOUT](../modules/theme-home-about-widget.md).
+
+## STATE-002-018 — About funding synced with fully data-driven redesign
+
+Date: 2026-10-01
+
+- redesign reference advanced to commit `006cd3fa167491af10cfd764e410388cf2a37c84` (`feat: make about funding donut fully data driven`).
+- widget source cards now expose raw values through `data-impact-value`; source counters no longer own the authoritative value.
+- donut center and auto-total Summary counters use `data-impact-total`; JS recalculates and synchronizes them from source values.
+- SVG description now uses `data-js-impact-desc` and is regenerated from current source labels/values.
+- segment dash/offset/angle moved from PHP to JS runtime and use the new adaptive gap formula `min(1, rawShare * .22)`.
+- fixed desktop positions for four reference source cards were removed from widget CSS.
+- source-card layout now resolves collisions independently on left/right sides before connector drawing.
+- connectors now terminate at the actual segment point rather than approximate donut outer radius subtraction.
+- `ResizeObserver` and `MutationObserver` were added per reference; theme adaptation keeps observers/listeners instance-scoped and cleans them on Elementor re-init.
+- source commit: `9995a1324825ae1cb98a3102aadc0b56de5dc654`.
+- static contract checks + JavaScript V8 parse PASS; PHP lint/live Elementor acceptance remain pending.
+
+Current contract: [MODULE-HOME-ABOUT](../modules/theme-home-about-widget.md).

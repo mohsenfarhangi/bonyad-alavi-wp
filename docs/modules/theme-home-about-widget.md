@@ -68,35 +68,27 @@ Funding header:
 
 تعداد source محدود نیست؛ add/remove/reorder مجاز است.
 
-## Dynamic Donut Geometry
+## Dynamic Donut Data Contract
 
-برای هر source:
-1. `share = round(value / total * 100, 2)`
-2. `dash = max(0, round(share - 1, 2))`
-3. `offset = -cumulativeShare`
-4. `angle = round((cumulativeShare + dash/2) * 3.6, 2)`
-5. cumulative share بعد از هر source به دو رقم اعشار round می‌شود.
+از redesign commit `006cd3fa167491af10cfd764e410388cf2a37c84`، مقدار خام هر source تنها روی `data-impact-value` کارت منبع قرار می‌گیرد و geometry در JavaScript runtime ساخته می‌شود.
 
-این دقیقاً geometry default reference را بازتولید می‌کند:
+الگوریتم reference:
+1. `rawShare = value / total * 100`
+2. `gap = rawShare > 0 ? min(1, rawShare * .22) : 0`
+3. `visibleShare = max(0, rawShare - gap)`
+4. `offset = -cumulativeShare`
+5. angle از midpoint سهم visible محاسبه می‌شود؛ اگر total صفر باشد sourceها یکنواخت دور مدار پخش می‌شوند.
 
-| Source | Dash | Offset | Angle |
-|---|---:|---:|---:|
-| Foundation | 43.85 | 0 | 78.93 |
-| Banks | 28.09 | -44.85 | 212.02 |
-| Organizations | 15.36 | -73.94 | 293.83 |
-| Stakeholders | 8.70 | -90.30 | 340.74 |
-
-CSS variables per segment:
+JS سپس این موارد را sync می‌کند:
 - `--ba-impact-segment-dash`
 - `--ba-impact-segment-offset`
-- `--ba-impact-segment-color`
-- `--ba-impact-segment-delay`
+- `data-impact-angle`
+- `data-impact-total` برای مرکز دونات و هر Summary auto-total
+- متن counter منبع
+- `aria-label` segmentها
+- `<desc data-js-impact-desc>` نمودار
 
-Source card variables:
-- `--ba-impact-source-color`
-- `--ba-impact-card-delay`
-
-اگر total صفر باشد، segmentها صفر و card angles به‌صورت یکنواخت پخش می‌شوند تا layout قابل استفاده بماند.
+PHP فقط رنگ و animation delay را در CSS custom properties می‌گذارد؛ dash/offset/angle دیگر server-side نیستند.
 
 ## Summary Contract
 
@@ -136,8 +128,11 @@ Animation JS از:
 - stagger = 55ms
 - hover بین source card و donut segment با `data-impact-source`
 - dynamic source-card positioning از angle
-- connector geometry
-- resize با requestAnimationFrame
+- collision resolution جداگانه برای کارت‌های سمت چپ/راست با gap=8px
+- connector geometry از لبه کارت تا نقطه واقعی segment
+- window resize با requestAnimationFrame
+- `ResizeObserver` برای تغییر اندازه funding visual
+- `MutationObserver` روی `data-impact-value` برای resync داده و geometry
 - reveal با IntersectionObserver threshold=.3
 - reduced-motion → مقدار نهایی بدون animation
 
@@ -201,8 +196,10 @@ Static checks cover:
 - widget/asset registration
 - reference structure/default copy
 - actions/source/summary Repeaters
-- dynamic geometry formula
-- exact default geometry
+- runtime funding data contract (`data-impact-value` / `data-impact-total`)
+- adaptive segment gap و runtime dash/offset/angle
+- collision resolver و connector-to-segment geometry
+- ResizeObserver/MutationObserver
 - dynamic CSS variables
 - default Summary SVGs
 - Persian formatting
