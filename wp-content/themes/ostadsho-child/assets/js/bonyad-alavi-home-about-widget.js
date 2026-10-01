@@ -192,6 +192,10 @@
             counterFrames.forEach(function (frame) {
                 window.cancelAnimationFrame(frame);
             });
+            impactFunding.classList.remove('is-animation-ready', 'is-visible');
+            impactSegments.concat(impactSources).forEach(function (element) {
+                element.classList.remove('is-active');
+            });
         });
     }
 

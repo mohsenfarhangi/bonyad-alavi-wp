@@ -1024,11 +1024,11 @@ final class Bonyad_Alavi_Home_About_Widget extends Widget_Base {
 		$count      = count( $sources );
 
 		foreach ( $sources as $index => $source ) {
-			$share = $total > 0 ? ( $source['value'] / $total ) * 100 : 0.0;
-			$dash  = max( 0.0, $share - 1.0 );
+			$share = $total > 0 ? round( ( $source['value'] / $total ) * 100, 2 ) : 0.0;
+			$dash  = max( 0.0, round( $share - 1.0, 2 ) );
 			$angle = $total > 0
-				? ( $cumulative + ( $dash / 2 ) ) * 3.6
-				: ( $count > 0 ? ( ( $index + 0.5 ) / $count ) * 360 : 0 );
+				? round( ( $cumulative + ( $dash / 2 ) ) * 3.6, 2 )
+				: ( $count > 0 ? round( ( ( $index + 0.5 ) / $count ) * 360, 2 ) : 0 );
 
 			$key            = $source['reference_key'];
 			$segment_class  = 'ba-impact__donut-segment';
@@ -1049,7 +1049,7 @@ final class Bonyad_Alavi_Home_About_Widget extends Widget_Base {
 				)
 			);
 
-			$cumulative += $share;
+			$cumulative = round( $cumulative + $share, 2 );
 		}
 
 		return $metrics;
