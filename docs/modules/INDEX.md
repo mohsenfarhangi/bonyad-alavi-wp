@@ -14,6 +14,7 @@
 | MODULE-HOME-HERO | Homepage Hero Elementor Widget | homepage, hero, slider, mission nav, ticker, Elementor | Repeater-based Hero from redesign reference with query-driven ticker and scoped responsive assets | [theme-home-hero-widget.md](theme-home-hero-widget.md) |
 | MODULE-HOME-QUICK-LINKS | Homepage Quick Links Elementor Widget | homepage, quick links, services, overflow, more, Elementor | Reference-faithful `ba-quick-links` widget with Repeater items, original SVG/color defaults and scoped overflow JS | [theme-home-quick-links-widget.md](theme-home-quick-links-widget.md) |
 | MODULE-HOME-LIVE-STATS | Homepage Live Stats Elementor Widget | homepage, live stats, counters, report, Elementor | Reference-faithful `ba-live-stats` widget with numeric repeater values and frontend-only Persian thousands formatting | [theme-home-live-stats-widget.md](theme-home-live-stats-widget.md) |
+| MODULE-HOME-ABOUT | Homepage About/Impact Elementor Widget | homepage, about, impact, donut, funding, summary, Elementor | Reference-faithful `ba-impact` widget with dynamic funding repeater, computed donut geometry and extensible summary | [theme-home-about-widget.md](theme-home-about-widget.md) |
 
 برای task فرم جهادی از `MODULE-JIHADI-FORM` شروع کن و در صورت تغییر Engine سپس `MODULE-AFE`/`MODULE-AFE-EXTENSION` را بخوان.
 
@@ -24,5 +25,7 @@
 برای تغییرات `ba-quick-links` صفحه اصلی از `MODULE-HOME-QUICK-LINKS` شروع کن.
 
 برای تغییرات `ba-live-stats` صفحه اصلی از `MODULE-HOME-LIVE-STATS` شروع کن.
+
+برای تغییرات سکشن `#about` / `ba-impact` صفحه اصلی از `MODULE-HOME-ABOUT` شروع کن.
 
 برای task ابتدا فقط module مرتبط را بخوان. اگر module به ADR اشاره کرد، سپس فقط همان ADR را باز کن.

@@ -46,6 +46,7 @@
 - Hero صفحه اصلی / Elementor homepage hero → `MODULE-HOME-HERO`
 - دسترسی‌های سریع صفحه اصلی / `ba-quick-links` → `MODULE-HOME-QUICK-LINKS`
 - گزارش برخط اقدامات صفحه اصلی / `ba-live-stats` → `MODULE-HOME-LIVE-STATS`
+- معرفی بنیاد صفحه اصلی / `#about` / `ba-impact` → `MODULE-HOME-ABOUT`
 
 شناسه و لینک دقیق همه آن‌ها در [docs/modules/INDEX.md](docs/modules/INDEX.md) است.
 

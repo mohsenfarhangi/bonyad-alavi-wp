@@ -24,6 +24,7 @@
 - Hero صفحه اصلی → `MODULE-HOME-HERO`
 - دسترسی‌های سریع صفحه اصلی → `MODULE-HOME-QUICK-LINKS`
 - گزارش برخط اقدامات صفحه اصلی → `MODULE-HOME-LIVE-STATS`
+- معرفی بنیاد صفحه اصلی / نمودار منابع → `MODULE-HOME-ABOUT`
 - چرایی یک contract → [decisions/INDEX.md](decisions/INDEX.md)
 - سابقه تغییر → [state/INDEX.md](state/INDEX.md)
 

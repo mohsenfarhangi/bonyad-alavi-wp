@@ -1,6 +1,6 @@
 # Current Project State
 
-آخرین بازبینی: **2026-09-29**
+آخرین بازبینی: **2026-10-01**
 
 ## Project Phase
 
@@ -11,11 +11,23 @@
 
 ## Current Goal
 
-ویجت Elementor جدید برای `ba-live-stats` صفحه اصلی بر اساس reference `bonyad-alavi-redesign/redesign/index.html` پیاده‌سازی شده است. مرحله باز این subsystem، پذیرش بصری در Elementor واقعی و مقایسه desktop/tablet/mobile با reference است.
+ویجت Elementor جدید برای سکشن `#about` / `ba-impact` صفحه اصلی بر اساس reference `bonyad-alavi-redesign/redesign/index.html` پیاده‌سازی شده است. مرحله باز این subsystem، پذیرش بصری/رفتاری در Elementor واقعی، به‌خصوص نمودار داینامیک، hover/connectorها و رفتار responsive با تعداد متغیر منابع است.
 
 AFE release goal همچنان live acceptance نسخه 1.0.28 و رفع blocker واقعی پیش از production promotion است.
 
 ## Recently Completed
+
+### Homepage About / Impact Elementor widget
+- ویجت `bonyad_alavi_home_about` به child theme و دسته «بنیاد علوی» اضافه شد.
+- markup اصلی reference سکشن `#about` شامل intro/actions/funding donut/source cards/summary حفظ شده و root class `ba-home-about-widget` فقط برای scope اضافه شده است.
+- سه دکمه reference با Repeater آزاد مدیریت می‌شوند و نوع Primary/Secondary دارند.
+- منابع دونات Repeater آزاد هستند؛ چهار منبع reference فقط default هستند و کاربر می‌تواند منبع اضافه/حذف کند یا عنوان، مقدار و رنگ را تغییر دهد.
+- geometry نمودار از داده‌ها محاسبه می‌شود: share دو رقم اعشار، gap یک واحد pathLength، dash/offset و زاویه کارت از مقادیر جاری ساخته می‌شوند. چهار مقدار default دقیقاً geometry reference `43.85/28.09/15.36/8.70` و زوایای `78.93/212.02/293.83/340.74` را بازتولید می‌کنند.
+- مجموع منابع به‌صورت خودکار از Repeater منابع محاسبه می‌شود و مرکز دونات/summary می‌تواند از آن استفاده کند.
+- Summary دارای switch کلی و Repeater مستقل است؛ هر آیتم نیز switch نمایش، icon override، نوع مقدار `funding_total/manual`، decimal و suffix دارد. دو آیتم HTML reference default هستند.
+- JS reference برای counter animation، hover linkage، connector positioning و IntersectionObserver حفظ و فقط per-instance/Elementor-safe شده است.
+- CSS نهایی reference، شامل framing نهایی `ba-impact__grid` و funding pane یکپارچه، با scope ویجت منتقل شده است.
+- source commits: `b1b38bd82dbfc35a9f722ee57278198f0a3d6429`, `b1bbf05c01452f34e321bc57ab1d8607237eabb1`.
 
 ### Homepage Live Stats Elementor widget
 - ویجت `bonyad_alavi_home_live_stats` به child theme و دسته «بنیاد علوی» اضافه شد.
@@ -126,6 +138,7 @@ Open release work برای AFE:
 - [MODULE-HOME-HERO](../modules/theme-home-hero-widget.md)
 - [MODULE-HOME-QUICK-LINKS](../modules/theme-home-quick-links-widget.md)
 - [MODULE-HOME-LIVE-STATS](../modules/theme-home-live-stats-widget.md)
+- [MODULE-HOME-ABOUT](../modules/theme-home-about-widget.md)
 
 ## Tests Status
 
@@ -142,6 +155,8 @@ Real MeliPayamak test: PASS reported by project administrator on 2026-09-04.
 Theme legacy v0.6.5 docs recorded PHP/JS syntax + ZIP checks for that patch.
 
 برای فرم تماس با ما regression `tests/contact-form-definition.php` اضافه شده است؛ source/test روی draft محلی PHP lint شدند و نسخه commit‌شده از GitHub برای slug، Geo province، required fields، admin email action و theme registration بازبینی استاتیک شد. **اجرای regression در checkout کامل repository و live WordPress هنوز در این session انجام نشده است.**
+
+برای About/Impact صفحه اصلی regression contract جدید `tests/home-about-widget-contract.php` اضافه شده است. روی نسخه commit‌شده، Repeaterهای actions/sources/summary، geometry داینامیک، بازتولید دقیق geometry چهار مقدار reference، CSS desktop/tablet/mobile، registration و JS per-instance به‌صورت استاتیک بررسی شدند و JavaScript با parser V8 بدون خطا parse شد. **PHP lint و live WordPress/Elementor acceptance در این session اجرا نشده‌اند.**
 
 برای Live Stats صفحه اصلی regression contract جدید `tests/home-live-stats-widget-contract.php` اضافه شده است. روی نسخه commit‌شده، markup، NUMBER-only input، ۶ default، formatter frontend، desktop/tablet/mobile CSS و نبود JS dependency به‌صورت استاتیک بازبینی شد. **PHP lint و live WordPress/Elementor acceptance در این session اجرا نشده‌اند.**
 
@@ -162,7 +177,7 @@ Historical PASSهای AFE/Theme به HEAD جدید تعمیم داده نمی‌
 
 ## Next Agent Handoff
 
-**Current task:** ویجت Live Stats صفحه اصلی مطابق `ba-live-stats` reference پیاده‌سازی شده است؛ مرحله باز بعدی live Elementor visual acceptance روی صفحه اصلی واقعی است.
+**Current task:** ویجت About/Impact صفحه اصلی مطابق `#about` / `ba-impact` reference پیاده‌سازی شده است؛ مرحله باز بعدی live Elementor visual/interaction acceptance روی صفحه اصلی واقعی است.
 
 **Start here:** [../INDEX.md](../INDEX.md) → [../modules/INDEX.md](../modules/INDEX.md).
 

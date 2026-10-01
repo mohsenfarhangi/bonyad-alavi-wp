@@ -359,3 +359,25 @@ Date: 2026-09-29
 - source commit: `51a6666f7fd1447075cfdd2a51afeeb946953ec1`.
 
 Current contract: [MODULE-HOME-LIVE-STATS](../modules/theme-home-live-stats-widget.md).
+
+## STATE-002-017 — Homepage About/Impact converted to Elementor widget
+
+Date: 2026-10-01
+
+- reference: `mohsenfarhangi/bonyad-alavi-redesign/redesign/index.html`، سکشن `#about` / `ba-impact` و final CSS/JS همان redesign.
+- ویجت جدید `Bonyad_Alavi_Home_About_Widget` با slug Elementor برابر `bonyad_alavi_home_about` به child theme اضافه شد.
+- intro شامل eyebrow/title/description و actions Repeater است؛ سه دکمه HTML reference default هستند.
+- funding sources از چهار آیتم ثابت خارج و به Repeater آزاد تبدیل شدند؛ defaultها همان Foundation/Banks/Organizations/Stakeholders با مقادیر 14.8/9.6/5.4/3.2 و رنگ‌های reference هستند.
+- سهم هر segment از مقدارهای جاری محاسبه می‌شود. برای fidelity reference، share به دو رقم اعشار round می‌شود، gap یک واحد pathLength کم می‌شود، offset از cumulative share و angle از midpoint visible dash محاسبه می‌شود.
+- چهار default دقیقاً dashهای 43.85/28.09/15.36/8.70، offsetهای 0/-44.85/-73.94/-90.30 و angleهای 78.93/212.02/293.83/340.74 را می‌سازند.
+- segment color، dash/offset و animation delay با CSS custom properties inline از Repeater تأمین می‌شوند؛ source-card color/card delay نیز داینامیک است.
+- total funding با جمع Repeater محاسبه می‌شود؛ Persian number formatting در initial HTML و `Intl.NumberFormat('fa-IR')` در animation reference حفظ شده است.
+- Summary دارای global visibility switch و Repeater آزاد با per-item visibility، Elementor icon override، default SVG، نوع مقدار auto funding total یا manual، decimals و suffix است.
+- دو Summary item reference default هستند: مجموع منابع با auto total و خدمات‌گیرندگان مستقیم با manual=3250000.
+- JS reference شامل hover-linked segment/card، connector positioning، resize RAF، counter animation و IntersectionObserver حفظ و به WeakMap/per-instance + Elementor hook تبدیل شد.
+- CSS final framing reference حفظ شد: one shared surface، content pane + integrated funding pane، desktop two-column، tablet stacked و mobile funding cards grid.
+- regression: `wp-content/themes/ostadsho-child/tests/home-about-widget-contract.php`.
+- static contract verification و JavaScript syntax parse PASS؛ PHP lint و live Elementor acceptance هنوز تأیید نشده‌اند.
+- source commits: `b1b38bd82dbfc35a9f722ee57278198f0a3d6429`, `b1bbf05c01452f34e321bc57ab1d8607237eabb1`.
+
+Current contract: [MODULE-HOME-ABOUT](../modules/theme-home-about-widget.md).
