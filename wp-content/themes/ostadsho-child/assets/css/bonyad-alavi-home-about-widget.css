@@ -290,27 +290,6 @@
   transform-origin: 0 50%;
   pointer-events: none;
 }
-
-.ba-home-about-widget .ba-impact__source-card--foundation {
-  left: 86%;
-  top: 47%;
-}
-
-.ba-home-about-widget .ba-impact__source-card--banks {
-  left: 28%;
-  top: 84%;
-}
-
-.ba-home-about-widget .ba-impact__source-card--organizations {
-  left: 17%;
-  top: 34%;
-}
-
-.ba-home-about-widget .ba-impact__source-card--stakeholders {
-  left: 40%;
-  top: 13%;
-}
-
 .ba-home-about-widget .ba-impact__source-card.is-active {
   transform: translate(-50%, calc(-50% - 2px));
   border-color: color-mix(in srgb, var(--ba-impact-source-color) 55%, #dce7e1);
