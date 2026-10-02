@@ -811,6 +811,17 @@ final class Bonyad_Alavi_Home_About_Widget extends Widget_Base {
 			)
 		);
 
+		$this->add_responsive_control(
+			'ref_chart_label_edge_distance',
+			array(
+				'label'      => 'فاصله لیبل از لبه نمودار',
+				'type'       => Controls_Manager::SLIDER,
+				'size_units' => array( 'px' ),
+				'range'      => array( 'px' => array( 'min' => 4, 'max' => 40 ) ),
+				'selectors'  => array( '{{WRAPPER}} .ba-impact__funding' => '--ba-impact-label-edge-distance: {{SIZE}}{{UNIT}};' ),
+			)
+		);
+
 		$this->end_controls_section();
 	}
 

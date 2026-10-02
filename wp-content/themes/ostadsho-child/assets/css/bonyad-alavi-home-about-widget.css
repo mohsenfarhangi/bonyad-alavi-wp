@@ -20,6 +20,7 @@
   --ba-impact-label-name-size: 11px;
   --ba-impact-label-value-size: 16px;
   --ba-impact-label-line-length: 8px;
+  --ba-impact-label-edge-distance: 14px;
   background: linear-gradient(180deg, #fbfdfc 0%, #f6faf8 100%);
   padding: 68px 0 64px;
   color: var(--ink);
@@ -332,6 +333,7 @@
     --ba-impact-label-name-size: 10px;
     --ba-impact-label-value-size: 15px;
     --ba-impact-label-line-length: 6px;
+    --ba-impact-label-edge-distance: 10px;
   }
 
   .ba-home-about-widget .ba-container {
@@ -388,6 +390,7 @@
     --ba-impact-label-name-size: 9px;
     --ba-impact-label-value-size: 14px;
     --ba-impact-label-line-length: 5px;
+    --ba-impact-label-edge-distance: 8px;
   }
 
   .ba-home-about-widget .ba-impact__content {

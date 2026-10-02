@@ -131,6 +131,9 @@ Main data series:
 - `avoidLabelOverlap: true`
 - external labels
 - managed `labelLine`
+- `alignTo = 'edge'` so the full label box stays inside the chart viewport
+- responsive `edgeDistance` from `--ba-impact-label-edge-distance`
+- `bleedMargin` derived from edge distance as an additional safety margin
 - `labelLayout.moveOverlap = 'shiftY'`
 - `hideOverlap = false`
 
@@ -150,7 +153,7 @@ The project does **not** calculate arc dash/offset, segment midpoint, card posit
 
 ## Label Visual Contract
 
-ECharts rich labels reproduce the existing card-like visual language:
+ECharts rich labels reproduce the existing card-like visual language. Source titles use rich-text wrapping instead of truncation, so a longer Persian title is not deliberately cut:
 - source name
 - source-colored value
 - source-colored dot
@@ -167,6 +170,7 @@ Default CSS variables:
 - `--ba-impact-label-name-size`
 - `--ba-impact-label-value-size`
 - `--ba-impact-label-line-length`
+- `--ba-impact-label-edge-distance`
 
 Elementor Style controls write these variables on `.ba-impact__funding`. JS reads computed values from the same funding pane before building the ECharts option.
 

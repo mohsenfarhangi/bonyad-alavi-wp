@@ -61,6 +61,7 @@
         var nameSize = readCssNumber(styleSource, '--ba-impact-label-name-size', 11);
         var valueSize = readCssNumber(styleSource, '--ba-impact-label-value-size', 16);
         var lineLength = readCssNumber(styleSource, '--ba-impact-label-line-length', 8);
+        var edgeDistance = readCssNumber(styleSource, '--ba-impact-label-edge-distance', 14);
         var decimals = Math.max(0, Math.min(3, Number(payload.decimals) || 0));
         var unit = String(payload.unit || '').trim();
         var sources = payload.sources
@@ -84,7 +85,7 @@
                 lineHeight: Math.round(nameSize * 1.55),
                 width: Math.max(60, labelWidth - 28),
                 align: 'right',
-                overflow: 'truncate'
+                overflow: 'break'
             }
         };
 
@@ -180,7 +181,9 @@
                     label: {
                         show: true,
                         position: 'outside',
-                        align: 'right',
+                        alignTo: 'edge',
+                        edgeDistance: edgeDistance,
+                        bleedMargin: Math.max(4, Math.round(edgeDistance / 2)),
                         distanceToLabelLine: 3,
                         backgroundColor: labelBackground,
                         borderColor: labelBorder,

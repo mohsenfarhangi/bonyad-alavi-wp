@@ -30,6 +30,7 @@ AFE release goal همچنان live acceptance نسخه 1.0.28 و رفع blocker 
 - مرکز Donut و Summary همچنان server-side محاسبه می‌شوند؛ Summary قابلیت add/remove/reorder/show/hide و auto-total/manual value را حفظ کرده است.
 - Style Controls لیبل ECharts از طریق CSS custom properties روی funding pane به JS منتقل می‌شوند.
 - اصلاح RTL لیبل‌ها: chart داخلی ECharts با `direction:ltr; unicode-bidi:isolate` ایزوله شده تا `text-anchor` SVG تحت RTL صفحه، متن فارسی را از background label بیرون نبرد.
+- اصلاح clipping لیبل‌ها: Pie labelها با `alignTo:'edge'` و edge distance responsive داخل viewport نمودار نگه داشته می‌شوند؛ عنوان source نیز به‌جای `truncate` قابلیت wrap دارد.
 - source commits: `1c2c3927af01ae662637a63aee6691e3c517f07e`, `50db6781bd473d1fd91a0f1f082bc8f85e39ed9c`.
 - latest redesign reference commit: `ed98879f770cee6a7f2ef5d034bdff7cd4bd6c94`.
 
