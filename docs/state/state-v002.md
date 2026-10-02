@@ -489,3 +489,22 @@ Date: 2026-10-02
 - PHP lint and live Elementor acceptance remain pending.
 
 Current contract: [MODULE-HOME-ABOUT](../modules/theme-home-about-widget.md).
+
+## STATE-002-024 — About funding simplified and compacted
+
+Date: 2026-10-02
+
+- removed `ba-impact__funding-head` from render and removed `funding_kicker/funding_note` controls.
+- removed the complete Summary feature from the current widget contract: Summary Repeater, global visibility switch, item visibility, summary icons/SVGs, auto-total/manual summary modes, render helper and Summary CSS.
+- added two simple controls only: `beneficiaries_label` and `beneficiaries_value`; default value remains 3,250,000.
+- beneficiaries now render as centered unboxed text below the chart with no background, border or icon.
+- total funding remains available in the Donut center, so the former duplicate “مجموع منابع” Summary item is intentionally gone.
+- ECharts radius remains `['42%', '58%']`; chart heights stay 405/430/380/350px.
+- compaction is achieved by removing funding header/Summary and reducing section/content/funding padding at desktop/tablet/mobile breakpoints.
+- section vertical spacing: 56/52 desktop, 50/48 <=1080, 40/38 <=760, 36/34 <=430.
+- code commit: `6c326cd0d5e87862ab72f89f74c59d881f778872`.
+- matching redesign commits: `70e47cf5f918fe92fc993e573057de977db87093`, `56346827a618ebd44b8a2537fdb69b102bca775b`.
+- static source checks PASS; widget and redesign JavaScript syntax parse PASS.
+- PHP lint could not run because shell DNS could not resolve raw GitHub; live Elementor acceptance remains pending.
+
+Current contract: [MODULE-HOME-ABOUT](../modules/theme-home-about-widget.md).

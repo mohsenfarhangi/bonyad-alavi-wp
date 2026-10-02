@@ -11,28 +11,25 @@
 
 ## Current Goal
 
-ویجت Elementor جدید برای سکشن `#about` / `ba-impact` صفحه اصلی بر اساس reference `bonyad-alavi-redesign/redesign/index.html` پیاده‌سازی شده است. مرحله باز این subsystem، پذیرش بصری/رفتاری در Elementor واقعی، به‌خصوص نمودار داینامیک، hover/connectorها و رفتار responsive با تعداد متغیر منابع است.
+ویجت Elementor سکشن `#about` / `ba-impact` با Apache ECharts محلی پیاده‌سازی شده است. ساختار funding اکنون بدون header و بدون Summary card است و فقط KPI خدمات‌گیرندگان مستقیم به‌صورت unboxed زیر نمودار باقی مانده؛ مرحله باز، پذیرش بصری/رفتاری در Elementor واقعی است.
 
 AFE release goal همچنان live acceptance نسخه 1.0.28 و رفع blocker واقعی پیش از production promotion است.
 
 ## Recently Completed
 
 ### Homepage About / Impact Elementor widget
-- ویجت `bonyad_alavi_home_about` در child theme فعال است و Intro / CTA / Funding Sources / Summary را از Elementor مدیریت می‌کند.
-- Donut از الگوریتم custom قبلی خارج شد و اکنون با **Apache ECharts 6.1.0** رندر می‌شود.
-- ECharts به‌صورت local vendor در `assets/vendor/echarts/` همراه `LICENSE` و `NOTICE` نگهداری می‌شود؛ runtime CDN وجود ندارد.
-- handle محلی `apache-echarts` فقط register می‌شود و اسکریپت About از طریق dependency آن را هنگام نیاز widget بارگذاری می‌کند.
-- Funding Source Repeater همچنان آزاد است و label/value/color هر منبع را نگه می‌دارد؛ چهار source reference default هستند.
-- PHP یک JSON payload امن با `unit/decimals/sources` تولید می‌کند؛ ECharts از آن Pie/Donut را می‌سازد.
-- ECharts مالک arc geometry، external label layout، labelLine، overlap handling و animation است. `avoidLabelOverlap` و `labelLayout.moveOverlap='shiftY'` فعال هستند.
-- renderer برابر SVG است؛ ResizeObserver فقط `chart.resize()` را اجرا می‌کند.
-- کدهای custom قبلی برای SVG segmentها، dash/offset، midpoint، source-card absolute positioning، collision resolver، connector geometry، MutationObserver و IntersectionObserver حذف شده‌اند.
-- مرکز Donut و Summary همچنان server-side محاسبه می‌شوند؛ Summary قابلیت add/remove/reorder/show/hide و auto-total/manual value را حفظ کرده است.
-- Style Controls لیبل ECharts از طریق CSS custom properties روی funding pane به JS منتقل می‌شوند.
-- اصلاح RTL لیبل‌ها: chart داخلی ECharts با `direction:ltr; unicode-bidi:isolate` ایزوله شده تا `text-anchor` SVG تحت RTL صفحه، متن فارسی را از background label بیرون نبرد.
-- اصلاح clipping لیبل‌ها: Pie labelها با `alignTo:'edge'` و edge distance responsive داخل viewport نمودار نگه داشته می‌شوند؛ عنوان source نیز به‌جای `truncate` قابلیت wrap دارد.
-- source commits: `1c2c3927af01ae662637a63aee6691e3c517f07e`, `50db6781bd473d1fd91a0f1f082bc8f85e39ed9c`.
-- latest redesign reference commit: `ed98879f770cee6a7f2ef5d034bdff7cd4bd6c94`.
+- ویجت `bonyad_alavi_home_about` Intro / CTA / Funding Sources / KPI خدمات‌گیرندگان را از Elementor مدیریت می‌کند.
+- Donut با Apache ECharts 6.1.0 محلی رندر می‌شود؛ runtime CDN وجود ندارد.
+- Funding Source Repeater شامل label/value/color است و چهار source reference default هستند.
+- `ba-impact__funding-head` و کنترل‌های `funding_kicker/funding_note` کامل حذف شدند.
+- Summary Repeater، show/hide Summary، iconها، auto-total/manual Summary items و DOM/CSS مربوط به `ba-impact__summary` کامل حذف شدند.
+- فقط `beneficiaries_label` و `beneficiaries_value` باقی مانده‌اند؛ خروجی به‌صورت `ba-impact__beneficiaries` بدون کادر، background، border یا icon و وسط‌چین زیر نمودار است.
+- مجموع منابع فقط در مرکز Donut نمایش داده می‌شود.
+- radius ECharts همان `['42%','58%']` است و chart heights تغییر نکرده‌اند.
+- سکشن در هر سه breakpoint متراکم‌تر شده: desktop 56/52، <=1080 50/48، <=760 40/38 و <=430 36/34؛ content/funding padding نیز کم شده است.
+- ECharts مالک arc geometry، external label layout، labelLine و overlap handling است؛ chart با RTL isolation و edge-aligned labels از clipping جلوگیری می‌کند.
+- source commit: `6c326cd0d5e87862ab72f89f74c59d881f778872`.
+- latest redesign commits: `70e47cf5f918fe92fc993e573057de977db87093`, `56346827a618ebd44b8a2537fdb69b102bca775b`.
 
 ### Homepage Live Stats Elementor widget
 - ویجت `bonyad_alavi_home_live_stats` به child theme و دسته «بنیاد علوی» اضافه شد.
@@ -161,7 +158,7 @@ Theme legacy v0.6.5 docs recorded PHP/JS syntax + ZIP checks for that patch.
 
 برای فرم تماس با ما regression `tests/contact-form-definition.php` اضافه شده است؛ source/test روی draft محلی PHP lint شدند و نسخه commit‌شده از GitHub برای slug، Geo province، required fields، admin email action و theme registration بازبینی استاتیک شد. **اجرای regression در checkout کامل repository و live WordPress هنوز در این session انجام نشده است.**
 
-برای About/Impact صفحه اصلی regression contract `tests/home-about-widget-contract.php` قرارداد ECharts را پوشش می‌دهد: local vendor/dependency، نبود runtime CDN، JSON payload، Pie/labelLine/overlap config، SVG renderer، حذف geometry/collision/connector قدیمی، responsive CSS و multi-instance cleanup. JavaScript نسخه commit‌شده با parser V8 بدون خطا parse شد. **PHP lint و live WordPress/Elementor acceptance در این session اجرا نشده‌اند.**
+برای About/Impact صفحه اصلی regression contract `tests/home-about-widget-contract.php` علاوه بر ECharts، حذف کامل funding-head/Summary، KPI ساده خدمات‌گیرندگان، density responsive و ثابت‌ماندن chart height/radius را guard می‌کند. JavaScript نسخه commit‌شده با parser V8 بدون خطا parse شد. **PHP lint به‌دلیل عدم resolve شدن raw GitHub در shell این session اجرا نشد و live WordPress/Elementor acceptance هنوز باز است.**
 
 برای Live Stats صفحه اصلی regression contract جدید `tests/home-live-stats-widget-contract.php` اضافه شده است. روی نسخه commit‌شده، markup، NUMBER-only input، ۶ default، formatter frontend، desktop/tablet/mobile CSS و نبود JS dependency به‌صورت استاتیک بازبینی شد. **PHP lint و live WordPress/Elementor acceptance در این session اجرا نشده‌اند.**
 
@@ -182,7 +179,7 @@ Historical PASSهای AFE/Theme به HEAD جدید تعمیم داده نمی‌
 
 ## Next Agent Handoff
 
-**Current task:** Donut ویجت About/Impact به Apache ECharts محلی مهاجرت کرده و کدهای layout دستی حذف شده‌اند؛ مرحله باز بعدی live Elementor visual/interaction acceptance روی صفحه اصلی واقعی است.
+**Current task:** About/Impact با ECharts محلی، بدون funding-head و بدون Summary card، و با KPI unboxed خدمات‌گیرندگان زیر نمودار پیاده‌سازی شده است؛ مرحله باز بعدی live Elementor visual/interaction acceptance است.
 
 **Start here:** [../INDEX.md](../INDEX.md) → [../modules/INDEX.md](../modules/INDEX.md).
 

@@ -7,32 +7,9 @@
 
 ## Purpose
 
-سکشن معرفی بنیاد را بدون تغییر ساختار محتوایی به یک Elementor widget مستقل تبدیل می‌کند. Intro، CTAها، Funding Sources و Summary از Elementor مدیریت می‌شوند. نمودار Donut و layout لیبل‌های بیرونی از 2026-10-02 توسط Apache ECharts مدیریت می‌شوند و الگوریتم custom قبلی برای arc geometry / source-card positioning / connector / collision حذف شده است.
+سکشن معرفی بنیاد را به Elementor widget مستقل تبدیل می‌کند. Intro، CTAها، Funding Sources، مقدار مرکز Donut و KPI «تعداد خدمات‌گیرندگان مستقیم» از Elementor مدیریت می‌شوند. Donut و لیبل‌های بیرونی توسط Apache ECharts 6.1.0 محلی رندر می‌شوند.
 
-## Assets
-
-Widget assets:
-- `assets/css/bonyad-alavi-home-about-widget.css`
-- `assets/js/bonyad-alavi-home-about-widget.js`
-
-Local third-party dependency:
-- `assets/vendor/echarts/echarts.min.js`
-- `assets/vendor/echarts/LICENSE`
-- `assets/vendor/echarts/NOTICE`
-- `assets/vendor/echarts/README.md`
-
-Vendored version: **Apache ECharts 6.1.0**.
-
-WordPress handle:
-- `apache-echarts`
-
-Widget script depends on:
-- `elementor-frontend`
-- `apache-echarts`
-
-The library is registered locally and is loaded through the widget dependency chain; there is no runtime CDN dependency.
-
-## Reference Structure
+## Current DOM Contract
 
 Project-owned DOM:
 - `ba-impact`
@@ -41,25 +18,23 @@ Project-owned DOM:
 - `ba-section-heading ba-section-heading--stack`
 - `ba-impact__actions`
 - `ba-impact__funding`
-- `ba-impact__funding-head`
 - `ba-impact__funding-visual`
 - `ba-impact__chart-wrap`
 - `ba-impact__chart`
 - `ba-impact__donut-center`
+- `ba-impact__beneficiaries`
+- `ba-impact__beneficiaries-label`
+- `ba-impact__beneficiaries-value`
+
+Removed from the current contract:
+- `ba-impact__funding-head`
+- `ba-impact__funding-kicker`
+- `ba-impact__funding-note`
 - `ba-impact__summary`
+- Summary item/icon/copy DOM
+- manual donut SVG/source-card DOM from the pre-ECharts implementation
 
 `ba-home-about-widget` فقط root scope است.
-
-Old project-owned nodes that no longer exist:
-- manual SVG donut circles
-- `ba-impact__donut-segment`
-- `ba-impact__donut-track`
-- `ba-impact__source-card`
-- connector pseudo-elements
-- `data-js-impact-source`
-- `data-js-impact-segment`
-
-ECharts creates its own SVG chart internals inside `ba-impact__chart`.
 
 ## Content Controls
 
@@ -73,54 +48,42 @@ Actions Repeater:
 - URL
 - type = primary / secondary
 
-سه action reference default هستند.
-
 Funding:
-- kicker
-- note
 - unit
 - display decimals
 - donut center caption
+- Funding Sources Repeater: label / numeric value / color
+- beneficiaries label
+- beneficiaries numeric value
 
-Funding Sources Repeater:
-- label
-- numeric value
-- color
-
-چهار default:
+Defaults:
 - Foundation: 14.8 / #06783a
 - Banks: 9.6 / #128a70
 - Organizations: 5.4 / #487e72
 - Stakeholders: 3.2 / #b28a42
+- beneficiaries: 3,250,000
 
-تعداد source محدود نیست؛ add/remove/reorder مجاز است.
+There is no Funding heading/note control and no Summary Repeater anymore.
 
-## ECharts Data Contract
+## ECharts Contract
 
-PHP داده‌های Repeater را sanitize می‌کند و یک JSON payload داخل:
+Local dependency:
+- `assets/vendor/echarts/echarts.min.js`
+- version: 6.1.0
+- license: Apache-2.0
+- no runtime CDN
 
+Widget script depends on:
+- `elementor-frontend`
+- `apache-echarts`
+
+PHP emits:
 `<script type="application/json" data-js-impact-chart-data>`
-
-رندر می‌کند.
 
 Payload:
 - `unit`
 - `decimals`
-- `sources[]`
-  - `name`
-  - `value`
-  - `color`
-
-Total funding همچنان server-side از همان source values محاسبه می‌شود و برای donut center و Summary auto-total استفاده می‌شود.
-
-JavaScript:
-1. JSON payload را parse می‌کند.
-2. ECharts را روی `[data-js-impact-chart]` با SVG renderer init می‌کند.
-3. track و data donut را با دو Pie series می‌سازد.
-4. label و labelLine را به ECharts می‌سپارد.
-5. فقط در resize واقعی chart، `chart.resize()` اجرا می‌شود.
-
-## Chart Contract
+- `sources[]`: name/value/color
 
 Main data series:
 - `type: 'pie'`
@@ -129,137 +92,89 @@ Main data series:
 - `startAngle: 90`
 - dynamic `padAngle`
 - `avoidLabelOverlap: true`
-- external labels
-- managed `labelLine`
-- `alignTo = 'edge'` so the full label box stays inside the chart viewport
-- responsive `edgeDistance` from `--ba-impact-label-edge-distance`
-- `bleedMargin` derived from edge distance as an additional safety margin
+- external rich labels
+- `alignTo: 'edge'`
+- responsive `edgeDistance`
 - `labelLayout.moveOverlap = 'shiftY'`
-- `hideOverlap = false`
+- ECharts `labelLine`
 
 Track:
 - separate silent Pie series
-- same inner/outer radius
+- same radius as data series
 - color from `--ba-impact-chart-track`
 
 Rendering:
-- `renderer: 'svg'`
-- `.ba-impact__chart` is explicitly `direction:ltr; unicode-bidi:isolate` because ECharts positions SVG rich-text tokens in LTR coordinates; this prevents inherited page RTL from pushing Persian label text outside its background card
-- Persian strings themselves remain Persian/RTL inside their rich-text tokens
-- reduced-motion disables ECharts animation
-- accessibility description is generated from current sources.
+- SVG renderer
+- chart container is `direction:ltr; unicode-bidi:isolate`
+- Persian text remains right-aligned inside rich tokens
+- source names wrap instead of truncate
+- reduced-motion disables chart animation
+- ResizeObserver only triggers `chart.resize()`
 
-The project does **not** calculate arc dash/offset, segment midpoint, card positions, collision resolution, or connector geometry itself anymore.
+The project does not calculate arc geometry, midpoint, collision or connector positions itself.
 
-## Label Visual Contract
+## Beneficiaries KPI
 
-ECharts rich labels reproduce the existing card-like visual language. Source titles use rich-text wrapping instead of truncation, so a longer Persian title is not deliberately cut:
-- source name
-- source-colored value
-- source-colored dot
-- white/near-white background
-- subtle border/radius/shadow
-- short source-colored guide line
+Only one KPI is rendered below the chart:
+- label: `تعداد خدمات‌گیرندگان مستقیم`
+- numeric value
 
-Default CSS variables:
-- `--ba-impact-label-bg`
-- `--ba-impact-label-border`
-- `--ba-impact-label-name`
-- `--ba-impact-label-width`
-- `--ba-impact-label-radius`
-- `--ba-impact-label-name-size`
-- `--ba-impact-label-value-size`
-- `--ba-impact-label-line-length`
-- `--ba-impact-label-edge-distance`
+It is:
+- server-rendered
+- centered under the chart
+- unboxed
+- without background, border, icon or card wrapper
+- formatted with Persian digits/thousands separator
 
-Elementor Style controls write these variables on `.ba-impact__funding`. JS reads computed values from the same funding pane before building the ECharts option.
+This replaces the former Summary block entirely.
 
-## Summary Contract
+## Compact Density Contract
 
-Global switch:
-- show/hide whole Summary
+Donut radius and chart heights are intentionally unchanged:
+- desktop chart min-height: 405px
+- tablet: 430px
+- mobile: 380px
+- <=430: 350px
+- ECharts radius remains `['42%', '58%']`
 
-Summary Repeater:
-- per-item visible switch
-- label
-- Elementor icon override
-- default SVG key
-- value type:
-  - `funding_total`: مجموع خودکار منابع
-  - `manual`: عدد دستی
-- decimals
-- suffix
-
-Default items:
-1. مجموع منابع (همت) → auto total
-2. تعداد خدمات‌گیرندگان مستقیم → manual 3250000
-
-Summary values are server-rendered; no client-side counter synchronization is needed.
-
-## Number Formatting
-
-PHP uses Persian digits with decimal separator `٫` and thousands separator `٬` for the center total and Summary.
-
-ECharts labels use `Intl.NumberFormat('fa-IR')`.
-
-## Responsive Contract
-
-Desktop:
-- shared About surface retained
-- funding visual min-height 405px
-- label width default 132px
-
-<=1080:
-- About frame stacks
-- funding visual/chart min-height 430px
-
-<=760:
-- funding visual/chart min-height 380px
-- label width default 116px
-- label font sizes reduced
-
-<=430:
-- funding visual/chart min-height 350px
-- label width default 104px
-- Summary becomes one column
-
-ECharts owns label overlap/layout at all breakpoints; there is no separate mobile source-card grid anymore.
+Compaction comes from removing header/Summary and reducing surrounding spacing:
+- desktop section: 56px top / 52px bottom
+- <=1080: 50px / 48px
+- <=760: 40px / 38px
+- <=430: 36px / 34px
+- content/funding padding is reduced at all breakpoints
 
 ## Style Controls
 
-Controls remain opt-in; reference CSS is authoritative until explicitly changed:
+Controls remain opt-in:
 - section/frame
 - intro
 - actions
-- funding panel/header
+- funding panel
 - donut track/center/total
-- ECharts label background/border/name color/width/radius/font sizes/guide-line length
-- Summary
+- ECharts label visual controls
+- beneficiaries label/value typography and colors
+- beneficiaries label/value gap
 
-## Third-party / License
-
-Apache ECharts 6.1.0 is vendored locally as an unmodified browser distribution. Its upstream `LICENSE` and `NOTICE` files are stored beside the vendor file.
-
-No CDN is used at runtime.
+Removed Style controls:
+- funding heading/note typography/colors
+- Summary background/radius/icon/typography controls
 
 ## QA
 
 Regression:
 `wp-content/themes/ostadsho-child/tests/home-about-widget-contract.php`
 
-Current guards include:
-- widget/source/summary Repeater contracts
-- JSON chart payload
-- local ECharts registration and dependency order
-- absence of runtime CDN URLs
-- ECharts 6.1.0 vendor/license marker
-- Pie + external label + labelLine/overlap configuration
-- SVG renderer
-- minimal ResizeObserver
-- removal of old PHP geometry helpers
-- removal of custom collision/connector/midpoint JS
-- removal of source-card/donut-segment CSS
-- Elementor frontend hook
-- multi-instance chart disposal/re-init
+Current guards cover:
+- funding/actions Repeaters
+- local ECharts contract
+- label clipping/RTL configuration
+- absence of funding-head controls/DOM/CSS
+- absence of Summary controls/render/CSS
+- simple beneficiaries controls/render
+- compact responsive spacing
+- unchanged chart heights / ECharts radius
+- no custom old donut geometry
+- multi-instance chart cleanup
 
-Static source checks and JavaScript parsing passed during the migration session. PHP lint and live WordPress/Elementor visual acceptance remain pending.
+Static source checks and JavaScript parsing passed in the implementation session. PHP lint could not be executed because the shell environment could not resolve GitHub raw content; live Elementor acceptance remains pending.
