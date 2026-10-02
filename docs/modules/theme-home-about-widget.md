@@ -130,10 +130,11 @@ Animation JS از:
 - dynamic source-card positioning از angle
 - edge-aware radial placement: شعاع مرکز هر کارت از outer radius دونات + فاصله واقعی لبه کارت در راستای segment + gap ثابت `10px` ساخته می‌شود؛ orbit ثابت برای مرکز همه کارت‌ها وجود ندارد.
 - panel inset برابر `8px` برای جلوگیری از چسبیدن/بریده‌شدن کارت در لبه funding visual.
-- collision resolution جداگانه برای کارت‌های سمت چپ/راست با gap=8px، پس از موقعیت اولیه نزدیک به دونات.
+- در اولین render ویجت، موقعیت server-side نزدیک Donut قفل می‌ماند؛ JS فقط connectorها را با همان `left/top` sync می‌کند و `ResizeObserver` حق بازچینی اولیه ندارد.
+- collision resolution جداگانه برای کارت‌های سمت چپ/راست با gap=8px، پس از موقعیت اولیه نزدیک به دونات؛ displacement عمودی نسبت به موقعیت پایه حداکثر `18px` است تا collision باعث connector بلند نشود.
 - connector geometry از لبه کارت تا نقطه واقعی segment
 - window resize با requestAnimationFrame
-- `ResizeObserver` برای تغییر اندازه funding visual
+- `ResizeObserver` برای تغییر اندازه funding visual؛ callback فقط وقتی width/height بیش از `2px` واقعاً تغییر کند layout را دوباره می‌سازد
 - `MutationObserver` روی `data-impact-value` برای resync داده و geometry
 - reveal با IntersectionObserver threshold=.3
 - reduced-motion → مقدار نهایی بدون animation

@@ -433,3 +433,19 @@ Date: 2026-10-02
 - JavaScript syntax parse PASS; full PHP lint/live Elementor acceptance still pending.
 
 Current contract: [MODULE-HOME-ABOUT](../modules/theme-home-about-widget.md).
+
+## STATE-002-021 — About label layout no longer jumps after reveal animation
+
+Date: 2026-10-02
+
+- reported behavior: cards were correctly close to the donut in the server-rendered first frame, then moved back outward when widget JS initialized/revealed the animation.
+- root cause in widget lifecycle: first `syncImpactFundingData()` and the initial `ResizeObserver` callback both rewrote `left/top` after the PHP fallback had already produced the desired position.
+- first data sync now preserves the PHP `left/top`; JS only recalculates connector geometry against those existing positions.
+- subsequent data mutations can still run full layout because angles genuinely change.
+- `ResizeObserver` now ignores callbacks unless funding-visual width or height changes by more than 2px, so reveal/paint callbacks do not trigger an unnecessary layout rewrite.
+- collision resolution remains vertical but is capped to ±18px from each card's base Y position.
+- regression contract now guards the initial-layout lock, resize threshold and collision cap.
+- source commits: `e0cc64dc92e8b28ccc004a76eb90ad83f751b33e`, `e568a60a8e83d881a92ad19927911116240d416c`.
+- JavaScript syntax parse PASS; live Elementor visual acceptance remains pending.
+
+Current contract: [MODULE-HOME-ABOUT](../modules/theme-home-about-widget.md).
