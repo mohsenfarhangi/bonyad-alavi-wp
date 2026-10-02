@@ -19,7 +19,7 @@ $checks = array(
 	'actions-repeater'         => str_contains($widget, "'actions'") && str_contains($widget, "'primary'") && str_contains($widget, "'secondary'"),
 	'funding-repeater'         => str_contains($widget, "'funding_sources'") && str_contains($widget, "'value'") && str_contains($widget, "'color'"),
 	'four-reference-sources'   => str_contains($widget, "'value'         => 14.8") && str_contains($widget, "'value'         => 9.6") && str_contains($widget, "'value'         => 5.4") && str_contains($widget, "'value'         => 3.2"),
-	'dynamic-donut-math'       => str_contains($widget, "$dash  = max( 0.0, $share - 1.0 );") && str_contains($widget, "'offset'        => -$cumulative") && str_contains($widget, "( $cumulative + ( $dash / 2 ) ) * 3.6"),
+	'runtime-donut-math'       => str_contains($js, 'rawShare = total > 0 ? item.value / total * 100 : 0') && str_contains($js, 'Math.min(impactSegmentGap, rawShare * .22)') && str_contains($js, 'visibleShare = Math.max(0, rawShare - gap)') && str_contains($js, 'angleShare * 3.6'),
 	'dynamic-css-vars'         => str_contains($widget, '--ba-impact-segment-color:') && str_contains($widget, '--ba-impact-source-color:') && str_contains($js, "'--ba-impact-segment-dash'") && str_contains($js, "'--ba-impact-segment-offset'"),
 	'server-fallback-layout'   => str_contains($widget, 'build_source_fallback_layout') && str_contains($widget, "'--ba-impact-source-color:%s;--ba-impact-card-delay:%ss;left:calc(50%% + %spx);top:calc(50%% + %spx);'") && str_contains($widget, '$card_gap     = 10.0;'),
 	'summary-repeater'         => str_contains($widget, "'summary_items'") && str_contains($widget, "'show_summary'") && str_contains($widget, "'is_visible'"),
