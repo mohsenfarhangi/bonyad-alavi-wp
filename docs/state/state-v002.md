@@ -508,3 +508,18 @@ Date: 2026-10-02
 - PHP lint could not run because shell DNS could not resolve raw GitHub; live Elementor acceptance remains pending.
 
 Current contract: [MODULE-HOME-ABOUT](../modules/theme-home-about-widget.md).
+
+## STATE-002-025 — About action buttons get branded hover motion
+
+Date: 2026-10-03
+
+- added scoped hover motion only to `ba-impact__actions .ba-button`.
+- motion follows the UI guide: 200ms transitions and maximum 2px lift.
+- hover adds a subtle green border/background/shadow response.
+- a 2px gold accent expands from the center using a pseudo-element; no extra markup or JS is required.
+- active state returns to baseline.
+- `prefers-reduced-motion: reduce` disables transition and translate movement.
+- other `ba-button` instances outside About actions are unaffected.
+- code commit: `04720f6e0287fdfb73778ef840149ad945ecf1d0`.
+
+Current contract: [MODULE-HOME-ABOUT](../modules/theme-home-about-widget.md).
