@@ -28,6 +28,9 @@
         var impactSegmentGap = 1;
         var impactCardGap = 10;
         var impactVisualInset = 8;
+        var impactMaxCollisionShift = 18;
+        var impactLastVisualWidth = null;
+        var impactLastVisualHeight = null;
         var impactUnit = impactFunding.dataset.impactUnit || '';
         var impactDecimals = Number(impactFunding.dataset.impactDecimals || 1);
         var impactLayoutFrame = null;
@@ -139,8 +142,15 @@
                 impactDesc.textContent = 'مقادیر منابع: ' + details + '. مجموع منابع ' + formatImpactNumber(total, impactDecimals) + (impactUnit ? ' ' + impactUnit : '') + '.';
             }
 
+            var wasInitialized = impactDataInitialized;
             impactDataInitialized = true;
-            positionImpactSourceCards();
+
+            if (wasInitialized) {
+                positionImpactSourceCards();
+            } else {
+                syncImpactConnectorsFromCurrentPositions();
+                rememberImpactVisualSize();
+            }
         }
 
         function setImpactSourceActive(source, active) {
@@ -166,30 +176,108 @@
                 if (!group.length) return;
 
                 group.forEach(function (item, index) {
-                    var minY = item.halfHeight + inset;
-                    if (index === 0) {
-                        item.cardCenterY = Math.max(minY, item.cardCenterY);
-                        return;
-                    }
+                    var minY = Math.max(
+                        item.halfHeight + inset,
+                        item.baseCenterY - impactMaxCollisionShift
+                    );
+                    var maxY = Math.min(
+                        visualHeight - item.halfHeight - inset,
+                        item.baseCenterY + impactMaxCollisionShift
+                    );
+
+                    item.cardCenterY = Math.max(minY, Math.min(maxY, item.cardCenterY));
+
+                    if (index === 0) return;
 
                     var previous = group[index - 1];
                     var requiredY = previous.cardCenterY + previous.halfHeight + gap + item.halfHeight;
-                    item.cardCenterY = Math.max(item.cardCenterY, requiredY);
+                    item.cardCenterY = Math.min(maxY, Math.max(item.cardCenterY, requiredY));
                 });
 
                 for (var index = group.length - 1; index >= 0; index--) {
                     var item = group[index];
-                    var maxY = visualHeight - item.halfHeight - inset;
+                    var minY = Math.max(
+                        item.halfHeight + inset,
+                        item.baseCenterY - impactMaxCollisionShift
+                    );
+                    var maxY = Math.min(
+                        visualHeight - item.halfHeight - inset,
+                        item.baseCenterY + impactMaxCollisionShift
+                    );
 
                     if (index === group.length - 1) {
-                        item.cardCenterY = Math.min(maxY, item.cardCenterY);
+                        item.cardCenterY = Math.max(minY, Math.min(maxY, item.cardCenterY));
                         continue;
                     }
 
                     var next = group[index + 1];
                     var allowedY = next.cardCenterY - next.halfHeight - gap - item.halfHeight;
-                    item.cardCenterY = Math.min(item.cardCenterY, allowedY);
+                    item.cardCenterY = Math.max(minY, Math.min(item.cardCenterY, allowedY));
                 }
+            });
+        }
+
+        function rememberImpactVisualSize() {
+            var visual = impactFunding.querySelector('.ba-impact__funding-visual');
+            if (!visual) return;
+
+            var rect = visual.getBoundingClientRect();
+            impactLastVisualWidth = rect.width;
+            impactLastVisualHeight = rect.height;
+        }
+
+        function applyImpactConnector(source, angle, halfWidth, halfHeight, cardCenterX, cardCenterY, centerX, centerY, chartOuterRadius) {
+            var segmentX = centerX + Math.sin(angle) * chartOuterRadius;
+            var segmentY = centerY - Math.cos(angle) * chartOuterRadius;
+            var dx = segmentX - cardCenterX;
+            var dy = segmentY - cardCenterY;
+            var distance = Math.hypot(dx, dy) || 1;
+            var unitX = dx / distance;
+            var unitY = dy / distance;
+            var edgeDistanceX = Math.abs(unitX) > .001 ? halfWidth / Math.abs(unitX) : Infinity;
+            var edgeDistanceY = Math.abs(unitY) > .001 ? halfHeight / Math.abs(unitY) : Infinity;
+            var cardEdgeDistance = Math.min(edgeDistanceX, edgeDistanceY);
+            var startX = halfWidth + unitX * cardEdgeDistance;
+            var startY = halfHeight + unitY * cardEdgeDistance;
+            var connectorLength = Math.max(0, distance - cardEdgeDistance);
+            var connectorAngle = Math.atan2(unitY, unitX);
+
+            source.style.setProperty('--ba-impact-connector-start-x', startX + 'px');
+            source.style.setProperty('--ba-impact-connector-start-y', startY + 'px');
+            source.style.setProperty('--ba-impact-connector-length', connectorLength + 'px');
+            source.style.setProperty('--ba-impact-connector-angle', connectorAngle + 'rad');
+        }
+
+        function syncImpactConnectorsFromCurrentPositions() {
+            var visual = impactFunding.querySelector('.ba-impact__funding-visual');
+            var chartWrap = impactFunding.querySelector('.ba-impact__chart-wrap');
+            if (!visual || !chartWrap || window.innerWidth <= 760) return;
+
+            var visualRect = visual.getBoundingClientRect();
+            var chartRect = chartWrap.getBoundingClientRect();
+            var centerX = chartRect.left - visualRect.left + chartRect.width / 2;
+            var centerY = chartRect.top - visualRect.top + chartRect.height / 2;
+            var chartOuterRadius = chartRect.width * .38;
+
+            impactSources.forEach(function (source) {
+                var angle = Number(source.dataset.impactAngle || 0) * Math.PI / 180;
+                var sourceRect = source.getBoundingClientRect();
+                var halfWidth = sourceRect.width / 2;
+                var halfHeight = sourceRect.height / 2;
+                var cardCenterX = sourceRect.left - visualRect.left + halfWidth;
+                var cardCenterY = sourceRect.top - visualRect.top + halfHeight;
+
+                applyImpactConnector(
+                    source,
+                    angle,
+                    halfWidth,
+                    halfHeight,
+                    cardCenterX,
+                    cardCenterY,
+                    centerX,
+                    centerY,
+                    chartOuterRadius
+                );
             });
         }
 
@@ -247,6 +335,7 @@
                     halfHeight: halfHeight,
                     cardCenterX: cardCenterX,
                     cardCenterY: cardCenterY,
+                    baseCenterY: cardCenterY,
                     side: radialX >= 0 ? 'right' : 'left'
                 };
             });
@@ -260,28 +349,24 @@
                 var halfHeight = item.halfHeight;
                 var cardCenterX = item.cardCenterX;
                 var cardCenterY = item.cardCenterY;
-                var segmentX = centerX + Math.sin(angle) * chartOuterRadius;
-                var segmentY = centerY - Math.cos(angle) * chartOuterRadius;
-                var dx = segmentX - cardCenterX;
-                var dy = segmentY - cardCenterY;
-                var distance = Math.hypot(dx, dy) || 1;
-                var unitX = dx / distance;
-                var unitY = dy / distance;
-                var edgeDistanceX = Math.abs(unitX) > .001 ? halfWidth / Math.abs(unitX) : Infinity;
-                var edgeDistanceY = Math.abs(unitY) > .001 ? halfHeight / Math.abs(unitY) : Infinity;
-                var cardEdgeDistance = Math.min(edgeDistanceX, edgeDistanceY);
-                var startX = halfWidth + unitX * cardEdgeDistance;
-                var startY = halfHeight + unitY * cardEdgeDistance;
-                var connectorLength = Math.max(0, distance - cardEdgeDistance);
-                var connectorAngle = Math.atan2(unitY, unitX);
-
                 source.style.left = cardCenterX + 'px';
                 source.style.top = cardCenterY + 'px';
-                source.style.setProperty('--ba-impact-connector-start-x', startX + 'px');
-                source.style.setProperty('--ba-impact-connector-start-y', startY + 'px');
-                source.style.setProperty('--ba-impact-connector-length', connectorLength + 'px');
-                source.style.setProperty('--ba-impact-connector-angle', connectorAngle + 'rad');
+
+                applyImpactConnector(
+                    source,
+                    angle,
+                    halfWidth,
+                    halfHeight,
+                    cardCenterX,
+                    cardCenterY,
+                    centerX,
+                    centerY,
+                    chartOuterRadius
+                );
             });
+
+            impactLastVisualWidth = visualRect.width;
+            impactLastVisualHeight = visualRect.height;
         }
 
         function bindHover(element) {
@@ -316,7 +401,20 @@
         });
 
         if ('ResizeObserver' in window) {
-            impactResizeObserver = new ResizeObserver(function () {
+            impactResizeObserver = new ResizeObserver(function (entries) {
+                var entry = entries && entries[0];
+                if (!entry) return;
+
+                var width = entry.contentRect.width;
+                var height = entry.contentRect.height;
+                var widthChanged = impactLastVisualWidth === null || Math.abs(width - impactLastVisualWidth) > 2;
+                var heightChanged = impactLastVisualHeight === null || Math.abs(height - impactLastVisualHeight) > 2;
+
+                if (!widthChanged && !heightChanged) return;
+
+                impactLastVisualWidth = width;
+                impactLastVisualHeight = height;
+
                 if (impactLayoutFrame) window.cancelAnimationFrame(impactLayoutFrame);
                 impactLayoutFrame = window.requestAnimationFrame(positionImpactSourceCards);
             });
