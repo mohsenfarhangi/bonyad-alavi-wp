@@ -1068,8 +1068,9 @@ final class Bonyad_Alavi_Home_About_Widget extends Widget_Base {
 		$layout       = array();
 		$cumulative   = 0.0;
 		$count        = count( $sources );
-		$outer_radius = 118.0;
-		$card_gap     = 10.0;
+		$chart_reference_width = 310.0;
+		$outer_radius          = $chart_reference_width * ( 121.0 / 320.0 );
+		$card_gap              = 10.0;
 		$half_width   = 77.0;
 		$half_height  = 34.0;
 
