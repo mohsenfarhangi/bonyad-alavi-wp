@@ -88,7 +88,7 @@ JS سپس این موارد را sync می‌کند:
 - `aria-label` segmentها
 - `<desc data-js-impact-desc>` نمودار
 
-PHP فقط رنگ و animation delay را در CSS custom properties می‌گذارد؛ dash/offset/angle دیگر server-side نیستند.
+PHP فقط رنگ و animation delay را برای segmentها می‌گذارد؛ dash/offset/angle اصلی همچنان در JS runtime محاسبه می‌شوند. برای جلوگیری از بازگشت بصری به موقعیت‌های قدیمی در صورت تأخیر/عدم اجرای JS، source cardها یک fallback اولیه server-side با همان زاویه داده، فاصله هدف 10px و `left/top` inline دریافت می‌کنند؛ JS پس از init آن را با اندازه واقعی DOM refine می‌کند.
 
 ## Summary Contract
 
@@ -128,7 +128,7 @@ Animation JS از:
 - stagger = 55ms
 - hover بین source card و donut segment با `data-impact-source`
 - dynamic source-card positioning از angle
-- edge-aware radial placement: شعاع مرکز هر کارت از outer radius دونات + فاصله واقعی لبه کارت در راستای segment + gap ثابت `16px` ساخته می‌شود؛ orbit ثابت برای مرکز همه کارت‌ها وجود ندارد.
+- edge-aware radial placement: شعاع مرکز هر کارت از outer radius دونات + فاصله واقعی لبه کارت در راستای segment + gap ثابت `10px` ساخته می‌شود؛ orbit ثابت برای مرکز همه کارت‌ها وجود ندارد.
 - panel inset برابر `8px` برای جلوگیری از چسبیدن/بریده‌شدن کارت در لبه funding visual.
 - collision resolution جداگانه برای کارت‌های سمت چپ/راست با gap=8px، پس از موقعیت اولیه نزدیک به دونات.
 - connector geometry از لبه کارت تا نقطه واقعی segment
@@ -200,7 +200,7 @@ Static checks cover:
 - actions/source/summary Repeaters
 - runtime funding data contract (`data-impact-value` / `data-impact-total`)
 - adaptive segment gap و runtime dash/offset/angle
-- edge-aware 16px card-to-donut gap و 8px visual inset
+- edge-aware 10px card-to-donut gap و 8px visual inset
 - نبود fixed `orbitRadius`
 - collision resolver و connector-to-segment geometry
 - ResizeObserver/MutationObserver

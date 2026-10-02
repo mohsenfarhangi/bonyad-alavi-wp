@@ -409,11 +409,27 @@ Date: 2026-10-02
 - Elementor widget sync: `b234215294fae2e4f78a18151f348cb4090414fa`.
 - fixed `orbitRadius = chartWidth * .68` removed.
 - each source card now computes radial edge distance from its actual width/height and segment angle.
-- target card radius = donut outer radius + radial card-edge distance + `16px`.
+- target card radius = donut outer radius + radial card-edge distance + `10px`.
 - cards are clamped with `8px` funding-visual inset before collision resolution.
 - left/right collision resolver remains enabled with 8px card-to-card gap.
 - connector still starts from actual card edge and terminates at matching segment midpoint.
 - mobile <=760 source grid remains unchanged.
 - JavaScript syntax parse PASS; live Elementor visual acceptance remains pending.
+
+Current contract: [MODULE-HOME-ABOUT](../modules/theme-home-about-widget.md).
+
+## STATE-002-020 — About widget gets server-side donut label fallback
+
+Date: 2026-10-02
+
+- after the first JS-only tightening produced no visible change on the reported page, the widget now also emits initial source-card geometry from PHP.
+- fallback uses the same source values and adaptive segment-gap formula to derive the angle.
+- default source-card dimensions (154×68 reference) are used only for initial radial edge distance; JS later refines using measured DOM dimensions.
+- inline initial `left/top` overrides stale/global per-source CSS positions even before widget JS runs.
+- target donut-to-card gap reduced to `10px`; visual inset remains `8px`.
+- mobile <=760 remains protected by the existing `left/top:auto !important` grid rules.
+- stale regression assertion for pre-runtime PHP donut math was removed; contract now guards runtime math + server fallback.
+- source commits: `310c72d20901799ecd92143636ecbbe454bff8b9`, `e3f493ef69b6258715803dbbaeacbbd16091e19e`.
+- JavaScript syntax parse PASS; full PHP lint/live Elementor acceptance still pending.
 
 Current contract: [MODULE-HOME-ABOUT](../modules/theme-home-about-widget.md).
