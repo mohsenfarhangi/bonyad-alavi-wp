@@ -128,9 +128,9 @@ Animation JS از:
 - stagger = 55ms
 - hover بین source card و donut segment با `data-impact-source`
 - dynamic source-card positioning از angle
-- edge-aware radial placement: شعاع مرکز هر کارت از outer radius دونات + فاصله واقعی لبه کارت در راستای segment + gap ثابت `10px` ساخته می‌شود؛ orbit ثابت برای مرکز همه کارت‌ها وجود ندارد.
+- exact segment-midpoint placement: نقطه اتصال از هندسه واقعی SVG محاسبه می‌شود؛ `r=104` و `stroke-width=34` یعنی outer radius دقیق برابر `121` در viewBox `320×320` است. مختصات `segmentX/segmentY` از midpoint زاویه همان segment به دست می‌آید و کارت از همان نقطه، در امتداد شعاع، با gap ثابت `10px` قرار می‌گیرد؛ هیچ ضریب تقریبی مانند `chartWidth * .38` استفاده نمی‌شود.
 - panel inset برابر `8px` برای جلوگیری از چسبیدن/بریده‌شدن کارت در لبه funding visual.
-- در اولین render ویجت، موقعیت server-side نزدیک Donut قفل می‌ماند؛ JS فقط connectorها را با همان `left/top` sync می‌کند و `ResizeObserver` حق بازچینی اولیه ندارد.
+- در اولین init، JS یک بار قبل از reveal animation موقعیت دقیق midpoint را محاسبه می‌کند و همان layout را برای کل animation نگه می‌دارد؛ `ResizeObserver` فقط تغییر واقعی ابعاد (>2px) را بازچینی می‌کند.
 - collision resolution جداگانه برای کارت‌های سمت چپ/راست با gap=8px، پس از موقعیت اولیه نزدیک به دونات؛ displacement عمودی نسبت به موقعیت پایه حداکثر `18px` است تا collision باعث connector بلند نشود.
 - connector geometry از لبه کارت تا نقطه واقعی segment
 - window resize با requestAnimationFrame
@@ -201,8 +201,10 @@ Static checks cover:
 - actions/source/summary Repeaters
 - runtime funding data contract (`data-impact-value` / `data-impact-total`)
 - adaptive segment gap و runtime dash/offset/angle
-- edge-aware 10px card-to-donut gap و 8px visual inset
-- نبود fixed `orbitRadius`
+- exact SVG outer midpoint (`104 + 34/2 = 121` در viewBox 320)
+- ثبت runtime مختصات `data-impact-segment-x/y`
+- card placement از همان midpoint با gap=10px و visual inset=8px
+- نبود fixed `orbitRadius` یا تقریب `chartRect.width * .38`
 - collision resolver و connector-to-segment geometry
 - ResizeObserver/MutationObserver
 - dynamic CSS variables
