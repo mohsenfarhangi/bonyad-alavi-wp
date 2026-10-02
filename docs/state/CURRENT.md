@@ -18,17 +18,19 @@ AFE release goal همچنان live acceptance نسخه 1.0.28 و رفع blocker 
 ## Recently Completed
 
 ### Homepage About / Impact Elementor widget
-- ویجت `bonyad_alavi_home_about` به child theme و دسته «بنیاد علوی» اضافه شد.
-- markup اصلی reference سکشن `#about` شامل intro/actions/funding donut/source cards/summary حفظ شده و root class `ba-home-about-widget` فقط برای scope اضافه شده است.
-- سه دکمه reference با Repeater آزاد مدیریت می‌شوند و نوع Primary/Secondary دارند.
-- منابع دونات Repeater آزاد هستند؛ چهار منبع reference فقط default هستند و کاربر می‌تواند منبع اضافه/حذف کند یا عنوان، مقدار و رنگ را تغییر دهد.
-- redesign commit `006cd3fa167491af10cfd764e410388cf2a37c84` روی widget هم sync شد: منبع واحد داده `data-impact-value` است و JS در runtime سهم، gap تطبیقی، dash/offset، زاویه، total و accessibility description را می‌سازد.
-- مجموع منابع به‌صورت خودکار از Repeater منابع محاسبه می‌شود و مرکز دونات/summary می‌تواند از آن استفاده کند.
-- Summary دارای switch کلی و Repeater مستقل است؛ هر آیتم نیز switch نمایش، icon override، نوع مقدار `funding_total/manual`، decimal و suffix دارد. دو آیتم HTML reference default هستند.
-- JS reference برای counter animation، hover linkage، collision-resolved card positioning، connector-to-segment geometry، `ResizeObserver`، `MutationObserver` و `IntersectionObserver` حفظ و فقط per-instance/Elementor-safe شده است.
-- بر اساس اصلاح UI مورخ 2026-10-02، fixed orbit کارت‌ها حذف شد؛ هر کارت با توجه به ابعاد خودش در فاصله هدف `10px` از لبه Donut قرار می‌گیرد و حداقل `8px` از مرز funding visual فاصله دارد. JS قبل از reveal animation یک بار مختصات دقیق midpoint لبه خارجی هر segment را از هندسه SVG (`r=104`, `stroke=34`, outer=121/viewBox320) محاسبه می‌کند و کارت را از همان نقطه با gap=10px در امتداد شعاع قرار می‌دهد. بازچینی فقط در تغییر واقعی اندازه (>2px) یا تغییر داده انجام می‌شود. collision نیز حداکثر `18px` جابه‌جایی عمودی دارد تا کارت بعد از animation دوباره از Donut دور نشود.
-- CSS نهایی reference، شامل framing نهایی `ba-impact__grid` و funding pane یکپارچه، با scope ویجت منتقل شده است.
-- source commits: `b1b38bd82dbfc35a9f722ee57278198f0a3d6429`, `b1bbf05c01452f34e321bc57ab1d8607237eabb1`, `9995a1324825ae1cb98a3102aadc0b56de5dc654`, `b234215294fae2e4f78a18151f348cb4090414fa`, `310c72d20901799ecd92143636ecbbe454bff8b9`, `e3f493ef69b6258715803dbbaeacbbd16091e19e`, `e0cc64dc92e8b28ccc004a76eb90ad83f751b33e`, `e568a60a8e83d881a92ad19927911116240d416c`, `e76f85bab8ae191fcfe8e2f315d13f7a59291a39`. Latest redesign placement reference: `cc662c871bd34182adecec11b397ad087cb5c94d`.
+- ویجت `bonyad_alavi_home_about` در child theme فعال است و Intro / CTA / Funding Sources / Summary را از Elementor مدیریت می‌کند.
+- Donut از الگوریتم custom قبلی خارج شد و اکنون با **Apache ECharts 6.1.0** رندر می‌شود.
+- ECharts به‌صورت local vendor در `assets/vendor/echarts/` همراه `LICENSE` و `NOTICE` نگهداری می‌شود؛ runtime CDN وجود ندارد.
+- handle محلی `apache-echarts` فقط register می‌شود و اسکریپت About از طریق dependency آن را هنگام نیاز widget بارگذاری می‌کند.
+- Funding Source Repeater همچنان آزاد است و label/value/color هر منبع را نگه می‌دارد؛ چهار source reference default هستند.
+- PHP یک JSON payload امن با `unit/decimals/sources` تولید می‌کند؛ ECharts از آن Pie/Donut را می‌سازد.
+- ECharts مالک arc geometry، external label layout، labelLine، overlap handling و animation است. `avoidLabelOverlap` و `labelLayout.moveOverlap='shiftY'` فعال هستند.
+- renderer برابر SVG است؛ ResizeObserver فقط `chart.resize()` را اجرا می‌کند.
+- کدهای custom قبلی برای SVG segmentها، dash/offset، midpoint، source-card absolute positioning، collision resolver، connector geometry، MutationObserver و IntersectionObserver حذف شده‌اند.
+- مرکز Donut و Summary همچنان server-side محاسبه می‌شوند؛ Summary قابلیت add/remove/reorder/show/hide و auto-total/manual value را حفظ کرده است.
+- Style Controls لیبل ECharts از طریق CSS custom properties روی funding pane به JS منتقل می‌شوند.
+- source commits: `1c2c3927af01ae662637a63aee6691e3c517f07e`, `50db6781bd473d1fd91a0f1f082bc8f85e39ed9c`.
+- latest redesign reference commit: `ed98879f770cee6a7f2ef5d034bdff7cd4bd6c94`.
 
 ### Homepage Live Stats Elementor widget
 - ویجت `bonyad_alavi_home_live_stats` به child theme و دسته «بنیاد علوی» اضافه شد.
@@ -157,7 +159,7 @@ Theme legacy v0.6.5 docs recorded PHP/JS syntax + ZIP checks for that patch.
 
 برای فرم تماس با ما regression `tests/contact-form-definition.php` اضافه شده است؛ source/test روی draft محلی PHP lint شدند و نسخه commit‌شده از GitHub برای slug، Geo province، required fields، admin email action و theme registration بازبینی استاتیک شد. **اجرای regression در checkout کامل repository و live WordPress هنوز در این session انجام نشده است.**
 
-برای About/Impact صفحه اصلی regression contract `tests/home-about-widget-contract.php` latest data-driven contract را پوشش می‌دهد: `data-impact-value/data-impact-total`، runtime geometry، adaptive segment gap، exact segment midpoint (outer radius=121/320)، `data-impact-segment-x/y`، card gap=10px، visual inset=8px، resize threshold=2px، collision shift cap=18px، حذف fixed orbit، collision resolver، Resize/Mutation/Intersection Observer، CSS responsive، registration و JS per-instance. JavaScript نسخه commit‌شده با parser V8 بدون خطا parse شد. **PHP lint و live WordPress/Elementor acceptance در این session اجرا نشده‌اند.**
+برای About/Impact صفحه اصلی regression contract `tests/home-about-widget-contract.php` قرارداد ECharts را پوشش می‌دهد: local vendor/dependency، نبود runtime CDN، JSON payload، Pie/labelLine/overlap config، SVG renderer، حذف geometry/collision/connector قدیمی، responsive CSS و multi-instance cleanup. JavaScript نسخه commit‌شده با parser V8 بدون خطا parse شد. **PHP lint و live WordPress/Elementor acceptance در این session اجرا نشده‌اند.**
 
 برای Live Stats صفحه اصلی regression contract جدید `tests/home-live-stats-widget-contract.php` اضافه شده است. روی نسخه commit‌شده، markup، NUMBER-only input، ۶ default، formatter frontend، desktop/tablet/mobile CSS و نبود JS dependency به‌صورت استاتیک بازبینی شد. **PHP lint و live WordPress/Elementor acceptance در این session اجرا نشده‌اند.**
 
@@ -178,7 +180,7 @@ Historical PASSهای AFE/Theme به HEAD جدید تعمیم داده نمی‌
 
 ## Next Agent Handoff
 
-**Current task:** ویجت About/Impact صفحه اصلی مطابق `#about` / `ba-impact` reference پیاده‌سازی شده است؛ مرحله باز بعدی live Elementor visual/interaction acceptance روی صفحه اصلی واقعی است.
+**Current task:** Donut ویجت About/Impact به Apache ECharts محلی مهاجرت کرده و کدهای layout دستی حذف شده‌اند؛ مرحله باز بعدی live Elementor visual/interaction acceptance روی صفحه اصلی واقعی است.
 
 **Start here:** [../INDEX.md](../INDEX.md) → [../modules/INDEX.md](../modules/INDEX.md).
 

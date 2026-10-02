@@ -467,3 +467,25 @@ Date: 2026-10-02
 - JavaScript syntax parse PASS; live Elementor visual acceptance remains pending.
 
 Current contract: [MODULE-HOME-ABOUT](../modules/theme-home-about-widget.md).
+
+## STATE-002-023 — About donut migrated to local Apache ECharts
+
+Date: 2026-10-02
+
+- custom SVG donut/source-card positioning implementation was retired after repeated instability in external label layout.
+- Apache ECharts 6.1.0 is vendored locally under `assets/vendor/echarts/` with upstream `LICENSE` and `NOTICE`.
+- WordPress handle `apache-echarts` is registered locally; About widget script depends on it. No runtime CDN is used.
+- Funding Source Repeater remains the canonical content source and PHP emits a JSON payload with source name/value/color plus unit/decimals.
+- ECharts now owns pie geometry, animation, external rich labels, label lines and overlap handling.
+- main series uses `avoidLabelOverlap=true` and `labelLayout.moveOverlap='shiftY'`; renderer is SVG.
+- old manual SVG circles, source-card DOM, server geometry fallback, dash/offset helpers, exact-midpoint calculations, collision resolver, connector calculations, MutationObserver and IntersectionObserver were removed.
+- only chart resize observation remains.
+- Summary continues to be server-rendered and retains auto funding total/manual item modes.
+- Elementor label style controls are bridged through CSS variables on the funding pane.
+- vendored ECharts file is the upstream browser distribution and is accompanied by local license notices.
+- code commits: `1c2c3927af01ae662637a63aee6691e3c517f07e`, `50db6781bd473d1fd91a0f1f082bc8f85e39ed9c`.
+- matching redesign commit: `ed98879f770cee6a7f2ef5d034bdff7cd4bd6c94`.
+- static architecture/contract checks PASS and widget JavaScript syntax parse PASS.
+- PHP lint and live Elementor acceptance remain pending.
+
+Current contract: [MODULE-HOME-ABOUT](../modules/theme-home-about-widget.md).

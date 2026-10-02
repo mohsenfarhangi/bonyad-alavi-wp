@@ -7,15 +7,34 @@
 
 ## Purpose
 
-سکشن معرفی بنیاد را بدون تغییر UI/UX به Elementor widget تبدیل می‌کند. ساختار final reference شامل content pane و funding pane یکپارچه حفظ شده، اما داده‌های منابع و Summary از حالت hard-coded خارج شده‌اند.
+سکشن معرفی بنیاد را بدون تغییر ساختار محتوایی به یک Elementor widget مستقل تبدیل می‌کند. Intro، CTAها، Funding Sources و Summary از Elementor مدیریت می‌شوند. نمودار Donut و layout لیبل‌های بیرونی از 2026-10-02 توسط Apache ECharts مدیریت می‌شوند و الگوریتم custom قبلی برای arc geometry / source-card positioning / connector / collision حذف شده است.
 
-Assets:
+## Assets
+
+Widget assets:
 - `assets/css/bonyad-alavi-home-about-widget.css`
 - `assets/js/bonyad-alavi-home-about-widget.js`
 
+Local third-party dependency:
+- `assets/vendor/echarts/echarts.min.js`
+- `assets/vendor/echarts/LICENSE`
+- `assets/vendor/echarts/NOTICE`
+- `assets/vendor/echarts/README.md`
+
+Vendored version: **Apache ECharts 6.1.0**.
+
+WordPress handle:
+- `apache-echarts`
+
+Widget script depends on:
+- `elementor-frontend`
+- `apache-echarts`
+
+The library is registered locally and is loaded through the widget dependency chain; there is no runtime CDN dependency.
+
 ## Reference Structure
 
-کلاس‌های اصلی:
+Project-owned DOM:
 - `ba-impact`
 - `ba-container ba-impact__grid`
 - `ba-impact__content`
@@ -24,12 +43,23 @@ Assets:
 - `ba-impact__funding`
 - `ba-impact__funding-head`
 - `ba-impact__funding-visual`
-- `ba-impact__chart-wrap / chart / donut-track / donut-segment`
+- `ba-impact__chart-wrap`
+- `ba-impact__chart`
 - `ba-impact__donut-center`
-- `ba-impact__source-card`
 - `ba-impact__summary`
 
 `ba-home-about-widget` فقط root scope است.
+
+Old project-owned nodes that no longer exist:
+- manual SVG donut circles
+- `ba-impact__donut-segment`
+- `ba-impact__donut-track`
+- `ba-impact__source-card`
+- connector pseudo-elements
+- `data-js-impact-source`
+- `data-js-impact-segment`
+
+ECharts creates its own SVG chart internals inside `ba-impact__chart`.
 
 ## Content Controls
 
@@ -45,20 +75,17 @@ Actions Repeater:
 
 سه action reference default هستند.
 
-Funding header:
+Funding:
 - kicker
 - note
 - unit
 - display decimals
 - donut center caption
 
-## Funding Sources Repeater
-
-هر source:
+Funding Sources Repeater:
 - label
 - numeric value
 - color
-- internal reference key فقط برای چهار default
 
 چهار default:
 - Foundation: 14.8 / #06783a
@@ -68,27 +95,78 @@ Funding header:
 
 تعداد source محدود نیست؛ add/remove/reorder مجاز است.
 
-## Dynamic Donut Data Contract
+## ECharts Data Contract
 
-از redesign commit `006cd3fa167491af10cfd764e410388cf2a37c84`، مقدار خام هر source تنها روی `data-impact-value` کارت منبع قرار می‌گیرد و geometry در JavaScript runtime ساخته می‌شود.
+PHP داده‌های Repeater را sanitize می‌کند و یک JSON payload داخل:
 
-الگوریتم reference:
-1. `rawShare = value / total * 100`
-2. `gap = rawShare > 0 ? min(1, rawShare * .22) : 0`
-3. `visibleShare = max(0, rawShare - gap)`
-4. `offset = -cumulativeShare`
-5. angle از midpoint سهم visible محاسبه می‌شود؛ اگر total صفر باشد sourceها یکنواخت دور مدار پخش می‌شوند.
+`<script type="application/json" data-js-impact-chart-data>`
 
-JS سپس این موارد را sync می‌کند:
-- `--ba-impact-segment-dash`
-- `--ba-impact-segment-offset`
-- `data-impact-angle`
-- `data-impact-total` برای مرکز دونات و هر Summary auto-total
-- متن counter منبع
-- `aria-label` segmentها
-- `<desc data-js-impact-desc>` نمودار
+رندر می‌کند.
 
-PHP فقط رنگ و animation delay را برای segmentها می‌گذارد؛ dash/offset/angle اصلی همچنان در JS runtime محاسبه می‌شوند. برای جلوگیری از بازگشت بصری به موقعیت‌های قدیمی در صورت تأخیر/عدم اجرای JS، source cardها یک fallback اولیه server-side با همان زاویه داده، فاصله هدف 10px و `left/top` inline دریافت می‌کنند؛ JS پس از init آن را با اندازه واقعی DOM refine می‌کند.
+Payload:
+- `unit`
+- `decimals`
+- `sources[]`
+  - `name`
+  - `value`
+  - `color`
+
+Total funding همچنان server-side از همان source values محاسبه می‌شود و برای donut center و Summary auto-total استفاده می‌شود.
+
+JavaScript:
+1. JSON payload را parse می‌کند.
+2. ECharts را روی `[data-js-impact-chart]` با SVG renderer init می‌کند.
+3. track و data donut را با دو Pie series می‌سازد.
+4. label و labelLine را به ECharts می‌سپارد.
+5. فقط در resize واقعی chart، `chart.resize()` اجرا می‌شود.
+
+## Chart Contract
+
+Main data series:
+- `type: 'pie'`
+- `radius: ['42%', '58%']`
+- `center: ['50%', '50%']`
+- `startAngle: 90`
+- dynamic `padAngle`
+- `avoidLabelOverlap: true`
+- external labels
+- managed `labelLine`
+- `labelLayout.moveOverlap = 'shiftY'`
+- `hideOverlap = false`
+
+Track:
+- separate silent Pie series
+- same inner/outer radius
+- color from `--ba-impact-chart-track`
+
+Rendering:
+- `renderer: 'svg'`
+- reduced-motion disables ECharts animation
+- accessibility description is generated from current sources.
+
+The project does **not** calculate arc dash/offset, segment midpoint, card positions, collision resolution, or connector geometry itself anymore.
+
+## Label Visual Contract
+
+ECharts rich labels reproduce the existing card-like visual language:
+- source name
+- source-colored value
+- source-colored dot
+- white/near-white background
+- subtle border/radius/shadow
+- short source-colored guide line
+
+Default CSS variables:
+- `--ba-impact-label-bg`
+- `--ba-impact-label-border`
+- `--ba-impact-label-name`
+- `--ba-impact-label-width`
+- `--ba-impact-label-radius`
+- `--ba-impact-label-name-size`
+- `--ba-impact-label-value-size`
+- `--ba-impact-label-line-length`
+
+Elementor Style controls write these variables on `.ba-impact__funding`. JS reads computed values from the same funding pane before building the ECharts option.
 
 ## Summary Contract
 
@@ -101,117 +179,81 @@ Summary Repeater:
 - Elementor icon override
 - default SVG key
 - value type:
-  - `funding_total`: مجموع خودکار source values
+  - `funding_total`: مجموع خودکار منابع
   - `manual`: عدد دستی
 - decimals
 - suffix
 
 Default items:
-1. مجموع منابع (همت) → auto total، 1 decimal، chart SVG
-2. تعداد خدمات‌گیرندگان مستقیم → manual 3250000، 0 decimal، users SVG
+1. مجموع منابع (همت) → auto total
+2. تعداد خدمات‌گیرندگان مستقیم → manual 3250000
 
-آیتم‌ها قابل add/remove/reorder هستند.
+Summary values are server-rendered; no client-side counter synchronization is needed.
 
 ## Number Formatting
 
-Initial HTML با formatter PHP از ارقام فارسی، decimal separator `٫` و thousands separator `٬` استفاده می‌کند.
+PHP uses Persian digits with decimal separator `٫` and thousands separator `٬` for the center total and Summary.
 
-Animation JS از:
-`Intl.NumberFormat('fa-IR')`
-
-استفاده می‌کند؛ بنابراین static و animated state از نظر locale هماهنگ‌اند.
-
-## JavaScript Contract
-
-رفتار reference حفظ شده:
-- counter animation با duration 1150ms
-- stagger = 55ms
-- hover بین source card و donut segment با `data-impact-source`
-- dynamic source-card positioning از angle
-- exact segment-midpoint placement: نقطه اتصال از هندسه واقعی SVG محاسبه می‌شود؛ `r=104` و `stroke-width=34` یعنی outer radius دقیق برابر `121` در viewBox `320×320` است. مختصات `segmentX/segmentY` از midpoint زاویه همان segment به دست می‌آید و کارت از همان نقطه، در امتداد شعاع، با gap ثابت `10px` قرار می‌گیرد؛ هیچ ضریب تقریبی مانند `chartWidth * .38` استفاده نمی‌شود.
-- panel inset برابر `8px` برای جلوگیری از چسبیدن/بریده‌شدن کارت در لبه funding visual.
-- در اولین init، JS یک بار قبل از reveal animation موقعیت دقیق midpoint را محاسبه می‌کند و همان layout را برای کل animation نگه می‌دارد؛ `ResizeObserver` فقط تغییر واقعی ابعاد (>2px) را بازچینی می‌کند.
-- collision resolution جداگانه برای کارت‌های سمت چپ/راست با gap=8px، پس از موقعیت اولیه نزدیک به دونات؛ displacement عمودی نسبت به موقعیت پایه حداکثر `18px` است تا collision باعث connector بلند نشود.
-- connector geometry از لبه کارت تا نقطه واقعی segment
-- window resize با requestAnimationFrame
-- `ResizeObserver` برای تغییر اندازه funding visual؛ callback فقط وقتی width/height بیش از `2px` واقعاً تغییر کند layout را دوباره می‌سازد
-- `MutationObserver` روی `data-impact-value` برای resync داده و geometry
-- reveal با IntersectionObserver threshold=.3
-- reduced-motion → مقدار نهایی بدون animation
-
-Theme adaptation:
-- root-scoped query
-- WeakMap state/cleanup
-- Elementor frontend hook
-- no global selector assumptions
+ECharts labels use `Intl.NumberFormat('fa-IR')`.
 
 ## Responsive Contract
 
 Desktop:
-- section 68px/64px
-- frame: `1.12fr + minmax(420px,.88fr)`
-- content padding 42/42/38
-- funding padding 26/24/22
-- donut width min(68%,310px)
-- source card 154x min68
+- shared About surface retained
+- funding visual min-height 405px
+- label width default 132px
 
 <=1080:
-- section 58/56
-- frame one column
-- content padding 32/30/30
-- funding top border + 24/22/22
-- visual min-height430
-- donut min(58%,320px)
+- About frame stacks
+- funding visual/chart min-height 430px
 
 <=760:
-- section 46/44
-- frame radius18
-- content 24/20/22
-- actions two-per-row
-- funding 16/14/14
-- source cards become 2-column normal-flow grid
-- donut min(82%,320px)
+- funding visual/chart min-height 380px
+- label width default 116px
+- label font sizes reduced
 
 <=430:
-- content 20/15/18
-- buttons full width
-- funding 12/10/10
-- source cards one column
-- donut min(88%,300px)
-- summary one column
+- funding visual/chart min-height 350px
+- label width default 104px
+- Summary becomes one column
+
+ECharts owns label overlap/layout at all breakpoints; there is no separate mobile source-card grid anymore.
 
 ## Style Controls
 
-Style controls exist without visual defaults, so untouched instances keep reference CSS:
+Controls remain opt-in; reference CSS is authoritative until explicitly changed:
 - section/frame
-- intro typography/colors/content padding
-- action gap/button typography and primary/secondary colors
-- funding background/padding/kicker/note/track/center/total
-- source card background/radius/typography
-- summary background/radius/typography/icon color
+- intro
+- actions
+- funding panel/header
+- donut track/center/total
+- ECharts label background/border/name color/width/radius/font sizes/guide-line length
+- Summary
+
+## Third-party / License
+
+Apache ECharts 6.1.0 is vendored locally as an unmodified browser distribution. Its upstream `LICENSE` and `NOTICE` files are stored beside the vendor file.
+
+No CDN is used at runtime.
 
 ## QA
 
 Regression:
 `wp-content/themes/ostadsho-child/tests/home-about-widget-contract.php`
 
-Static checks cover:
-- widget/asset registration
-- reference structure/default copy
-- actions/source/summary Repeaters
-- runtime funding data contract (`data-impact-value` / `data-impact-total`)
-- adaptive segment gap و runtime dash/offset/angle
-- exact SVG outer midpoint (`104 + 34/2 = 121` در viewBox 320)
-- ثبت runtime مختصات `data-impact-segment-x/y`
-- card placement از همان midpoint با gap=10px و visual inset=8px
-- نبود fixed `orbitRadius` یا تقریب `chartRect.width * .38`
-- collision resolver و connector-to-segment geometry
-- ResizeObserver/MutationObserver
-- dynamic CSS variables
-- default Summary SVGs
-- Persian formatting
-- final framing/responsive CSS
-- reference JS behaviors
-- multi-instance/Elementor hook
+Current guards include:
+- widget/source/summary Repeater contracts
+- JSON chart payload
+- local ECharts registration and dependency order
+- absence of runtime CDN URLs
+- ECharts 6.1.0 vendor/license marker
+- Pie + external label + labelLine/overlap configuration
+- SVG renderer
+- minimal ResizeObserver
+- removal of old PHP geometry helpers
+- removal of custom collision/connector/midpoint JS
+- removal of source-card/donut-segment CSS
+- Elementor frontend hook
+- multi-instance chart disposal/re-init
 
-در session پیاده‌سازی JavaScript با parser V8 بدون خطا parse شد. PHP lint و live WordPress/Elementor visual/interaction acceptance هنوز باز هستند.
+Static source checks and JavaScript parsing passed during the migration session. PHP lint and live WordPress/Elementor visual acceptance remain pending.
