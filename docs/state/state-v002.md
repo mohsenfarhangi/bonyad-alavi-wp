@@ -399,3 +399,21 @@ Date: 2026-10-01
 - static contract checks + JavaScript V8 parse PASS; PHP lint/live Elementor acceptance remain pending.
 
 Current contract: [MODULE-HOME-ABOUT](../modules/theme-home-about-widget.md).
+
+## STATE-002-019 — About donut labels moved closer to segments
+
+Date: 2026-10-02
+
+- visual issue reproduced from live screenshot: source cards used a fixed center orbit, causing uneven apparent gaps and overly long connectors, especially around top/bottom segments.
+- redesign fix source: `9f6d01482e21e342ec5eaecb6bf3a515bf99c8fd`.
+- Elementor widget sync: `b234215294fae2e4f78a18151f348cb4090414fa`.
+- fixed `orbitRadius = chartWidth * .68` removed.
+- each source card now computes radial edge distance from its actual width/height and segment angle.
+- target card radius = donut outer radius + radial card-edge distance + `16px`.
+- cards are clamped with `8px` funding-visual inset before collision resolution.
+- left/right collision resolver remains enabled with 8px card-to-card gap.
+- connector still starts from actual card edge and terminates at matching segment midpoint.
+- mobile <=760 source grid remains unchanged.
+- JavaScript syntax parse PASS; live Elementor visual acceptance remains pending.
+
+Current contract: [MODULE-HOME-ABOUT](../modules/theme-home-about-widget.md).

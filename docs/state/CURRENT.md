@@ -1,6 +1,6 @@
 # Current Project State
 
-آخرین بازبینی: **2026-10-01**
+آخرین بازبینی: **2026-10-02**
 
 ## Project Phase
 
@@ -26,8 +26,9 @@ AFE release goal همچنان live acceptance نسخه 1.0.28 و رفع blocker 
 - مجموع منابع به‌صورت خودکار از Repeater منابع محاسبه می‌شود و مرکز دونات/summary می‌تواند از آن استفاده کند.
 - Summary دارای switch کلی و Repeater مستقل است؛ هر آیتم نیز switch نمایش، icon override، نوع مقدار `funding_total/manual`، decimal و suffix دارد. دو آیتم HTML reference default هستند.
 - JS reference برای counter animation، hover linkage، collision-resolved card positioning، connector-to-segment geometry، `ResizeObserver`، `MutationObserver` و `IntersectionObserver` حفظ و فقط per-instance/Elementor-safe شده است.
+- بر اساس اصلاح UI مورخ 2026-10-02، fixed orbit کارت‌ها حذف شد؛ هر کارت با توجه به ابعاد خودش در فاصله هدف `16px` از لبه Donut قرار می‌گیرد و حداقل `8px` از مرز funding visual فاصله دارد. این تغییر connectorهای بلند و فضای خالی نامتناسب تصویر گزارش‌شده را کاهش می‌دهد.
 - CSS نهایی reference، شامل framing نهایی `ba-impact__grid` و funding pane یکپارچه، با scope ویجت منتقل شده است.
-- source commits: `b1b38bd82dbfc35a9f722ee57278198f0a3d6429`, `b1bbf05c01452f34e321bc57ab1d8607237eabb1`, `9995a1324825ae1cb98a3102aadc0b56de5dc654`. Latest redesign reference: `006cd3fa167491af10cfd764e410388cf2a37c84`.
+- source commits: `b1b38bd82dbfc35a9f722ee57278198f0a3d6429`, `b1bbf05c01452f34e321bc57ab1d8607237eabb1`, `9995a1324825ae1cb98a3102aadc0b56de5dc654`, `b234215294fae2e4f78a18151f348cb4090414fa`. Latest redesign placement reference: `9f6d01482e21e342ec5eaecb6bf3a515bf99c8fd`.
 
 ### Homepage Live Stats Elementor widget
 - ویجت `bonyad_alavi_home_live_stats` به child theme و دسته «بنیاد علوی» اضافه شد.
@@ -156,7 +157,7 @@ Theme legacy v0.6.5 docs recorded PHP/JS syntax + ZIP checks for that patch.
 
 برای فرم تماس با ما regression `tests/contact-form-definition.php` اضافه شده است؛ source/test روی draft محلی PHP lint شدند و نسخه commit‌شده از GitHub برای slug، Geo province، required fields، admin email action و theme registration بازبینی استاتیک شد. **اجرای regression در checkout کامل repository و live WordPress هنوز در این session انجام نشده است.**
 
-برای About/Impact صفحه اصلی regression contract `tests/home-about-widget-contract.php` latest data-driven contract را پوشش می‌دهد: `data-impact-value/data-impact-total`، runtime geometry، adaptive gap، collision resolver، Resize/Mutation/Intersection Observer، CSS responsive، registration و JS per-instance. JavaScript نسخه commit‌شده با parser V8 بدون خطا parse شد. **PHP lint و live WordPress/Elementor acceptance در این session اجرا نشده‌اند.**
+برای About/Impact صفحه اصلی regression contract `tests/home-about-widget-contract.php` latest data-driven contract را پوشش می‌دهد: `data-impact-value/data-impact-total`، runtime geometry، adaptive segment gap، edge-aware card gap=16px، visual inset=8px، حذف fixed orbit، collision resolver، Resize/Mutation/Intersection Observer، CSS responsive، registration و JS per-instance. JavaScript نسخه commit‌شده با parser V8 بدون خطا parse شد. **PHP lint و live WordPress/Elementor acceptance در این session اجرا نشده‌اند.**
 
 برای Live Stats صفحه اصلی regression contract جدید `tests/home-live-stats-widget-contract.php` اضافه شده است. روی نسخه commit‌شده، markup، NUMBER-only input، ۶ default، formatter frontend، desktop/tablet/mobile CSS و نبود JS dependency به‌صورت استاتیک بازبینی شد. **PHP lint و live WordPress/Elementor acceptance در این session اجرا نشده‌اند.**
 

@@ -128,7 +128,9 @@ Animation JS از:
 - stagger = 55ms
 - hover بین source card و donut segment با `data-impact-source`
 - dynamic source-card positioning از angle
-- collision resolution جداگانه برای کارت‌های سمت چپ/راست با gap=8px
+- edge-aware radial placement: شعاع مرکز هر کارت از outer radius دونات + فاصله واقعی لبه کارت در راستای segment + gap ثابت `16px` ساخته می‌شود؛ orbit ثابت برای مرکز همه کارت‌ها وجود ندارد.
+- panel inset برابر `8px` برای جلوگیری از چسبیدن/بریده‌شدن کارت در لبه funding visual.
+- collision resolution جداگانه برای کارت‌های سمت چپ/راست با gap=8px، پس از موقعیت اولیه نزدیک به دونات.
 - connector geometry از لبه کارت تا نقطه واقعی segment
 - window resize با requestAnimationFrame
 - `ResizeObserver` برای تغییر اندازه funding visual
@@ -198,6 +200,8 @@ Static checks cover:
 - actions/source/summary Repeaters
 - runtime funding data contract (`data-impact-value` / `data-impact-total`)
 - adaptive segment gap و runtime dash/offset/angle
+- edge-aware 16px card-to-donut gap و 8px visual inset
+- نبود fixed `orbitRadius`
 - collision resolver و connector-to-segment geometry
 - ResizeObserver/MutationObserver
 - dynamic CSS variables
