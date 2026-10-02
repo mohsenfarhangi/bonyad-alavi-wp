@@ -26,7 +26,7 @@
         var impactDesc = impactFunding.querySelector('[data-js-impact-desc]');
         var reduceImpactMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
         var impactSegmentGap = 1;
-        var impactCardGap = 16;
+        var impactCardGap = 10;
         var impactVisualInset = 8;
         var impactUnit = impactFunding.dataset.impactUnit || '';
         var impactDecimals = Number(impactFunding.dataset.impactDecimals || 1);

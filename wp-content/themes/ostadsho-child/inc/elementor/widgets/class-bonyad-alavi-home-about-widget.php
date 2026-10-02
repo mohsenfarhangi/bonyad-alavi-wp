@@ -837,8 +837,9 @@ final class Bonyad_Alavi_Home_About_Widget extends Widget_Base {
 	protected function render() {
 		$settings = $this->get_settings_for_display();
 		$sources  = $this->normalize_sources( (array) ( $settings['funding_sources'] ?? array() ) );
-		$total    = array_sum( array_column( $sources, 'value' ) );
-		$decimals = $this->sanitize_decimals( $settings['funding_decimals'] ?? 1 );
+		$total           = array_sum( array_column( $sources, 'value' ) );
+		$fallback_layout = $this->build_source_fallback_layout( $sources, $total );
+		$decimals        = $this->sanitize_decimals( $settings['funding_decimals'] ?? 1 );
 		$unit     = trim( (string) ( $settings['funding_unit'] ?? 'همت' ) );
 		$uid      = 'baImpactFunding-' . sanitize_html_class( $this->get_id() );
 		?>
@@ -891,10 +892,12 @@ final class Bonyad_Alavi_Home_About_Widget extends Widget_Base {
 						</div>
 
 						<?php foreach ( $sources as $index => $source ) : ?>
+							<?php $fallback = $fallback_layout[ $index ] ?? array( 'angle' => 0, 'x' => 0, 'y' => 0 ); ?>
 							<div class="<?php echo esc_attr( $this->get_source_class( $source, 'card' ) ); ?>"
 								data-impact-source="<?php echo esc_attr( $source['source_id'] ); ?>"
-								data-impact-value="<?php echo esc_attr( $this->number_attribute( $source['value'] ) ); ?>" data-js-impact-source
-								style="<?php echo esc_attr( $this->build_source_card_style( $source, $index ) ); ?>">
+								data-impact-value="<?php echo esc_attr( $this->number_attribute( $source['value'] ) ); ?>"
+								data-impact-angle="<?php echo esc_attr( $this->number_attribute( $fallback['angle'] ) ); ?>" data-js-impact-source
+								style="<?php echo esc_attr( $this->build_source_card_style( $source, $index, $fallback ) ); ?>">
 								<span class="ba-impact__source-dot"></span>
 								<span class="ba-impact__source-copy">
 									<span class="ba-impact__source-label"><?php echo esc_html( $source['label'] ); ?></span>
@@ -1052,11 +1055,59 @@ final class Bonyad_Alavi_Home_About_Widget extends Widget_Base {
 		);
 	}
 
-	private function build_source_card_style( array $source, int $index ): string {
+	/**
+	 * fallback اولیه کارت‌ها را در PHP می‌سازد تا قبل از اجرای JS نیز کارت‌ها نزدیک Donut باشند.
+	 * JS با اندازه واقعی DOM همین موقعیت را refine و collisionها را resolve می‌کند.
+	 *
+	 * @param array $sources منابع نرمال‌شده.
+	 * @param float $total   مجموع منابع.
+	 *
+	 * @return array<int,array{angle:float,x:float,y:float}>
+	 */
+	private function build_source_fallback_layout( array $sources, float $total ): array {
+		$layout       = array();
+		$cumulative   = 0.0;
+		$count        = count( $sources );
+		$outer_radius = 118.0;
+		$card_gap     = 10.0;
+		$half_width   = 77.0;
+		$half_height  = 34.0;
+
+		foreach ( $sources as $index => $source ) {
+			$raw_share     = $total > 0 ? ( (float) $source['value'] / $total ) * 100 : 0.0;
+			$gap           = $raw_share > 0 ? min( 1.0, $raw_share * 0.22 ) : 0.0;
+			$visible_share = max( 0.0, $raw_share - $gap );
+			$angle_share   = $total > 0
+				? $cumulative + ( $visible_share / 2 )
+				: ( ( $index + 0.5 ) / max( 1, $count ) ) * 100;
+			$angle         = $angle_share * 3.6;
+			$radians       = deg2rad( $angle );
+			$radial_x      = sin( $radians );
+			$radial_y      = -cos( $radians );
+			$edge_x        = abs( $radial_x ) > 0.001 ? $half_width / abs( $radial_x ) : INF;
+			$edge_y        = abs( $radial_y ) > 0.001 ? $half_height / abs( $radial_y ) : INF;
+			$edge_distance = min( $edge_x, $edge_y );
+			$card_radius   = $outer_radius + $card_gap + $edge_distance;
+
+			$layout[] = array(
+				'angle' => $angle,
+				'x'     => $radial_x * $card_radius,
+				'y'     => $radial_y * $card_radius,
+			);
+
+			$cumulative += $raw_share;
+		}
+
+		return $layout;
+	}
+
+	private function build_source_card_style( array $source, int $index, array $fallback ): string {
 		return sprintf(
-			'--ba-impact-source-color:%s;--ba-impact-card-delay:%ss;',
+			'--ba-impact-source-color:%s;--ba-impact-card-delay:%ss;left:calc(50%% + %spx);top:calc(50%% + %spx);',
 			$source['color'],
-			$this->number_attribute( 0.34 + ( $index * 0.08 ) )
+			$this->number_attribute( 0.34 + ( $index * 0.08 ) ),
+			$this->number_attribute( $fallback['x'] ?? 0 ),
+			$this->number_attribute( $fallback['y'] ?? 0 )
 		);
 	}
 
