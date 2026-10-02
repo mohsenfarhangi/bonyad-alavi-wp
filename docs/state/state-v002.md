@@ -533,3 +533,4 @@ Date: 2026-10-03
 - the existing 2px lift and subtle green shadow remain.
 - active returns to baseline and reduced-motion still disables movement/transition.
 - no extra markup or JavaScript is used.
+- code commit: `132cfc1490c192afebacf34293fde883a6707f45`.
