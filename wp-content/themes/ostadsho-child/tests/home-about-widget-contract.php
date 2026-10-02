@@ -38,6 +38,7 @@ $checks = array(
 	'label-edge-control'       => str_contains($widget, "'ref_chart_label_edge_distance'") && str_contains($widget, "'--ba-impact-label-edge-distance: {{SIZE}}{{UNIT}};'"),
 	'beneficiaries-render'     => str_contains($widget, 'ba-impact__beneficiaries') && str_contains($widget, 'ba-impact__beneficiaries-label') && str_contains($widget, 'ba-impact__beneficiaries-value') && str_contains($css, '.ba-home-about-widget .ba-impact__beneficiaries'),
 	'compact-responsive'       => str_contains($css, 'padding: 56px 0 52px;') && str_contains($css, 'padding: 50px 0 48px;') && str_contains($css, 'padding: 40px 0 38px;') && str_contains($css, 'padding: 36px 0 34px;'),
+	'actions-hover-motion'     => str_contains($css, '.ba-home-about-widget .ba-impact__actions .ba-button:hover') && str_contains($css, 'transform: translateY(-2px);') && str_contains($css, 'background: var(--green-050);') && str_contains($css, 'box-shadow: 0 8px 18px rgba(7, 76, 44, .12);') && str_contains($css, '.ba-home-about-widget .ba-impact__actions .ba-button::after') && str_contains($css, 'background: var(--gold);') && str_contains($css, '@media (prefers-reduced-motion: reduce)'),
 	'elementor-hook'           => str_contains($js, 'frontend/element_ready/bonyad_alavi_home_about.default'),
 	'multi-instance-js'        => str_contains($js, 'WeakMap') && str_contains($js, 'chart.dispose()'),
 );

@@ -138,6 +138,52 @@
   box-shadow: none;
 }
 
+.ba-home-about-widget .ba-impact__actions .ba-button {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  transition:
+    transform 200ms ease,
+    border-color 200ms ease,
+    background-color 200ms ease,
+    color 200ms ease,
+    box-shadow 200ms ease;
+}
+
+.ba-home-about-widget .ba-impact__actions .ba-button::after {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset-inline: 14px;
+  bottom: 5px;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--gold);
+  opacity: 0;
+  transform: scaleX(0);
+  transform-origin: center;
+  transition: transform 200ms ease, opacity 160ms ease;
+  pointer-events: none;
+}
+
+.ba-home-about-widget .ba-impact__actions .ba-button:hover {
+  transform: translateY(-2px);
+  border-color: #94c7a8;
+  background: var(--green-050);
+  box-shadow: 0 8px 18px rgba(7, 76, 44, .12);
+}
+
+.ba-home-about-widget .ba-impact__actions .ba-button:hover::after,
+.ba-home-about-widget .ba-impact__actions .ba-button:focus-visible::after {
+  opacity: 1;
+  transform: scaleX(1);
+}
+
+.ba-home-about-widget .ba-impact__actions .ba-button:active {
+  transform: translateY(0);
+  box-shadow: 0 3px 9px rgba(7, 76, 44, .09);
+}
+
 .ba-home-about-widget .ba-impact__funding {
   position: relative;
   min-width: 0;
@@ -352,5 +398,17 @@
 
   .ba-home-about-widget .ba-impact__beneficiaries-value {
     font-size: 17px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ba-home-about-widget .ba-impact__actions .ba-button,
+  .ba-home-about-widget .ba-impact__actions .ba-button::after {
+    transition: none;
+  }
+
+  .ba-home-about-widget .ba-impact__actions .ba-button:hover,
+  .ba-home-about-widget .ba-impact__actions .ba-button:active {
+    transform: none;
   }
 }
