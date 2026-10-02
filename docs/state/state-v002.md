@@ -449,3 +449,21 @@ Date: 2026-10-02
 - JavaScript syntax parse PASS; live Elementor visual acceptance remains pending.
 
 Current contract: [MODULE-HOME-ABOUT](../modules/theme-home-about-widget.md).
+
+## STATE-002-022 — About labels anchored to exact segment midpoint
+
+Date: 2026-10-02
+
+- label anchor is derived from the exact outer midpoint of each SVG donut segment.
+- donut SVG geometry: viewBox 320×320, center path radius 104, stroke width 34, therefore exact outer radius = 121 SVG units.
+- runtime scale = rendered chart size / 320; anchor coordinates are center + radial vector × (121 × scale).
+- label center starts from that exact anchor and moves outward only by its measured radial edge distance + 10px gap.
+- connector endpoint is the same exact segmentX/segmentY coordinate.
+- source cards expose the calculated coordinates as data-impact-segment-x and data-impact-segment-y for debugging/verification.
+- approximate chartRect.width * .38 geometry was removed.
+- one exact runtime layout happens before reveal animation; observer callbacks do not create a second layout unless dimensions materially change.
+- PHP fallback now uses the exact 121/320 ratio against the reference 310px chart width; JS remains authoritative after init.
+- source commit: `e76f85bab8ae191fcfe8e2f315d13f7a59291a39`.
+- JavaScript syntax parse PASS; live Elementor visual acceptance remains pending.
+
+Current contract: [MODULE-HOME-ABOUT](../modules/theme-home-about-widget.md).
