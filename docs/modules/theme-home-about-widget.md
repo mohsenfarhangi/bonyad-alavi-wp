@@ -141,6 +141,8 @@ Track:
 
 Rendering:
 - `renderer: 'svg'`
+- `.ba-impact__chart` is explicitly `direction:ltr; unicode-bidi:isolate` because ECharts positions SVG rich-text tokens in LTR coordinates; this prevents inherited page RTL from pushing Persian label text outside its background card
+- Persian strings themselves remain Persian/RTL inside their rich-text tokens
 - reduced-motion disables ECharts animation
 - accessibility description is generated from current sources.
 
