@@ -16,12 +16,11 @@ use Elementor\Controls_Manager;
 use Elementor\Group_Control_Border;
 use Elementor\Group_Control_Box_Shadow;
 use Elementor\Group_Control_Typography;
-use Elementor\Icons_Manager;
 use Elementor\Repeater;
 use Elementor\Widget_Base;
 
 /**
- * سکشن About صفحه اصلی با دونات منابع، کارت‌های منبع و Summary داینامیک.
+ * سکشن About صفحه اصلی با دونات منابع ECharts و KPI خدمات‌گیرندگان.
  */
 final class Bonyad_Alavi_Home_About_Widget extends Widget_Base {
 
@@ -53,14 +52,13 @@ final class Bonyad_Alavi_Home_About_Widget extends Widget_Base {
 		$this->register_intro_controls();
 		$this->register_actions_controls();
 		$this->register_funding_controls();
-		$this->register_summary_controls();
 
 		$this->register_section_style_controls();
 		$this->register_intro_style_controls();
 		$this->register_actions_style_controls();
 		$this->register_funding_style_controls();
 		$this->register_chart_label_style_controls();
-		$this->register_summary_style_controls();
+		$this->register_beneficiaries_style_controls();
 	}
 
 	/**
@@ -194,26 +192,6 @@ final class Bonyad_Alavi_Home_About_Widget extends Widget_Base {
 		);
 
 		$this->add_control(
-			'funding_kicker',
-			array(
-				'label'       => 'عنوان پنل',
-				'type'        => Controls_Manager::TEXT,
-				'default'     => 'ترکیب منابع اثرگذاری',
-				'label_block' => true,
-			)
-		);
-
-		$this->add_control(
-			'funding_note',
-			array(
-				'label'       => 'یادداشت',
-				'type'        => Controls_Manager::TEXT,
-				'default'     => 'مقادیر فعلی آزمایشی هستند',
-				'label_block' => true,
-			)
-		);
-
-		$this->add_control(
 			'funding_unit',
 			array(
 				'label'   => 'واحد منابع',
@@ -240,6 +218,27 @@ final class Bonyad_Alavi_Home_About_Widget extends Widget_Base {
 				'label'   => 'متن مرکز نمودار',
 				'type'    => Controls_Manager::TEXT,
 				'default' => 'مجموع منابع',
+			)
+		);
+
+		$this->add_control(
+			'beneficiaries_label',
+			array(
+				'label'       => 'عنوان خدمات‌گیرندگان',
+				'type'        => Controls_Manager::TEXT,
+				'default'     => 'تعداد خدمات‌گیرندگان مستقیم',
+				'label_block' => true,
+			)
+		);
+
+		$this->add_control(
+			'beneficiaries_value',
+			array(
+				'label'   => 'تعداد خدمات‌گیرندگان مستقیم',
+				'type'    => Controls_Manager::NUMBER,
+				'min'     => 0,
+				'step'    => 1,
+				'default' => 3250000,
 			)
 		);
 
@@ -297,140 +296,6 @@ final class Bonyad_Alavi_Home_About_Widget extends Widget_Base {
 						'label'         => 'منابع خیرین و ذی‌نفعان',
 						'value'         => 3.2,
 						'color'         => '#b28a42',
-					),
-				),
-			)
-		);
-
-		$this->end_controls_section();
-	}
-
-	/**
-	 * Summary مستقل، قابل مخفی‌کردن و قابل افزودن/حذف‌کردن است.
-	 */
-	private function register_summary_controls() {
-		$this->start_controls_section(
-			'content_summary',
-			array(
-				'label' => 'جمع‌بندی',
-				'tab'   => Controls_Manager::TAB_CONTENT,
-			)
-		);
-
-		$this->add_control(
-			'show_summary',
-			array(
-				'label'        => 'نمایش بخش جمع‌بندی',
-				'type'         => Controls_Manager::SWITCHER,
-				'label_on'     => 'نمایش',
-				'label_off'    => 'مخفی',
-				'return_value' => 'yes',
-				'default'      => 'yes',
-			)
-		);
-
-		$repeater = new Repeater();
-		$repeater->add_control(
-			'is_visible',
-			array(
-				'label'        => 'نمایش آیتم',
-				'type'         => Controls_Manager::SWITCHER,
-				'label_on'     => 'نمایش',
-				'label_off'    => 'مخفی',
-				'return_value' => 'yes',
-				'default'      => 'yes',
-			)
-		);
-		$repeater->add_control(
-			'label',
-			array(
-				'label'       => 'عنوان',
-				'type'        => Controls_Manager::TEXT,
-				'label_block' => true,
-			)
-		);
-		$repeater->add_control(
-			'icon',
-			array(
-				'label'       => 'آیکون جایگزین',
-				'type'        => Controls_Manager::ICONS,
-				'description' => 'در صورت انتخاب، SVG پیش‌فرض reference جایگزین می‌شود.',
-			)
-		);
-		$repeater->add_control(
-			'default_icon_key',
-			array(
-				'type'    => Controls_Manager::HIDDEN,
-				'default' => '',
-			)
-		);
-		$repeater->add_control(
-			'value_type',
-			array(
-				'label'   => 'نوع مقدار',
-				'type'    => Controls_Manager::SELECT,
-				'default' => 'manual',
-				'options' => array(
-					'funding_total' => 'مجموع خودکار منابع دونات',
-					'manual'        => 'عدد دستی',
-				),
-			)
-		);
-		$repeater->add_control(
-			'manual_value',
-			array(
-				'label'     => 'عدد دستی',
-				'type'      => Controls_Manager::NUMBER,
-				'min'       => 0,
-				'step'      => 1,
-				'condition' => array( 'value_type' => 'manual' ),
-			)
-		);
-		$repeater->add_control(
-			'decimals',
-			array(
-				'label'   => 'رقم اعشار',
-				'type'    => Controls_Manager::NUMBER,
-				'min'     => 0,
-				'max'     => 3,
-				'step'    => 1,
-				'default' => 0,
-			)
-		);
-		$repeater->add_control(
-			'suffix',
-			array(
-				'label'       => 'پسوند',
-				'type'        => Controls_Manager::TEXT,
-				'placeholder' => 'مثلاً نفر',
-			)
-		);
-
-		$this->add_control(
-			'summary_items',
-			array(
-				'label'       => 'آیتم‌های جمع‌بندی',
-				'type'        => Controls_Manager::REPEATER,
-				'fields'      => $repeater->get_controls(),
-				'title_field' => '{{{ label || "آیتم جمع‌بندی" }}}',
-				'condition'   => array( 'show_summary' => 'yes' ),
-				'default'     => array(
-					array(
-						'is_visible'       => 'yes',
-						'label'            => 'مجموع منابع (همت)',
-						'default_icon_key' => 'funding',
-						'value_type'       => 'funding_total',
-						'decimals'         => 1,
-						'suffix'           => '',
-					),
-					array(
-						'is_visible'       => 'yes',
-						'label'            => 'تعداد خدمات‌گیرندگان مستقیم',
-						'default_icon_key' => 'beneficiaries',
-						'value_type'       => 'manual',
-						'manual_value'     => 3250000,
-						'decimals'         => 0,
-						'suffix'           => '',
 					),
 				),
 			)
@@ -660,38 +525,6 @@ final class Bonyad_Alavi_Home_About_Widget extends Widget_Base {
 				'selectors'  => array( '{{WRAPPER}} .ba-impact__funding' => 'padding: {{TOP}}{{UNIT}} {{RIGHT}}{{UNIT}} {{BOTTOM}}{{UNIT}} {{LEFT}}{{UNIT}};' ),
 			)
 		);
-		$this->add_group_control(
-			Group_Control_Typography::get_type(),
-			array(
-				'name'     => 'ref_funding_kicker_typography',
-				'label'    => 'تایپوگرافی عنوان پنل',
-				'selector' => '{{WRAPPER}} .ba-impact__funding-kicker',
-			)
-		);
-		$this->add_control(
-			'ref_funding_kicker_color',
-			array(
-				'label'     => 'رنگ عنوان پنل',
-				'type'      => Controls_Manager::COLOR,
-				'selectors' => array( '{{WRAPPER}} .ba-impact__funding-kicker' => 'color: {{VALUE}};' ),
-			)
-		);
-		$this->add_group_control(
-			Group_Control_Typography::get_type(),
-			array(
-				'name'     => 'ref_funding_note_typography',
-				'label'    => 'تایپوگرافی یادداشت',
-				'selector' => '{{WRAPPER}} .ba-impact__funding-note',
-			)
-		);
-		$this->add_control(
-			'ref_funding_note_color',
-			array(
-				'label'     => 'رنگ یادداشت',
-				'type'      => Controls_Manager::COLOR,
-				'selectors' => array( '{{WRAPPER}} .ba-impact__funding-note' => 'color: {{VALUE}};' ),
-			)
-		);
 		$this->add_control(
 			'ref_donut_track_color',
 			array(
@@ -825,55 +658,59 @@ final class Bonyad_Alavi_Home_About_Widget extends Widget_Base {
 		$this->end_controls_section();
 	}
 
-	private function register_summary_style_controls() {
+	private function register_beneficiaries_style_controls() {
 		$this->start_controls_section(
-			'style_summary',
+			'style_beneficiaries',
 			array(
-				'label' => 'جمع‌بندی',
+				'label' => 'خدمات‌گیرندگان مستقیم',
 				'tab'   => Controls_Manager::TAB_STYLE,
 			)
 		);
 
-		$this->add_control(
-			'ref_summary_background',
+		$this->add_group_control(
+			Group_Control_Typography::get_type(),
 			array(
-				'label'     => 'پس‌زمینه',
-				'type'      => Controls_Manager::COLOR,
-				'selectors' => array( '{{WRAPPER}} .ba-impact__summary' => 'background: {{VALUE}};' ),
+				'name'     => 'ref_beneficiaries_label_typography',
+				'label'    => 'تایپوگرافی عنوان',
+				'selector' => '{{WRAPPER}} .ba-impact__beneficiaries-label',
 			)
 		);
-		$this->add_responsive_control(
-			'ref_summary_radius',
+
+		$this->add_control(
+			'ref_beneficiaries_label_color',
 			array(
-				'label'      => 'گردی',
+				'label'     => 'رنگ عنوان',
+				'type'      => Controls_Manager::COLOR,
+				'selectors' => array( '{{WRAPPER}} .ba-impact__beneficiaries-label' => 'color: {{VALUE}};' ),
+			)
+		);
+
+		$this->add_group_control(
+			Group_Control_Typography::get_type(),
+			array(
+				'name'     => 'ref_beneficiaries_value_typography',
+				'label'    => 'تایپوگرافی مقدار',
+				'selector' => '{{WRAPPER}} .ba-impact__beneficiaries-value',
+			)
+		);
+
+		$this->add_control(
+			'ref_beneficiaries_value_color',
+			array(
+				'label'     => 'رنگ مقدار',
+				'type'      => Controls_Manager::COLOR,
+				'selectors' => array( '{{WRAPPER}} .ba-impact__beneficiaries-value' => 'color: {{VALUE}};' ),
+			)
+		);
+
+		$this->add_responsive_control(
+			'ref_beneficiaries_gap',
+			array(
+				'label'      => 'فاصله عنوان و مقدار',
 				'type'       => Controls_Manager::SLIDER,
 				'size_units' => array( 'px' ),
-				'range'      => array( 'px' => array( 'min' => 0, 'max' => 40 ) ),
-				'selectors'  => array( '{{WRAPPER}} .ba-impact__summary' => 'border-radius: {{SIZE}}{{UNIT}};' ),
-			)
-		);
-		$this->add_group_control(
-			Group_Control_Typography::get_type(),
-			array(
-				'name'     => 'ref_summary_label_typography',
-				'label'    => 'تایپوگرافی عنوان',
-				'selector' => '{{WRAPPER}} .ba-impact__summary-label',
-			)
-		);
-		$this->add_group_control(
-			Group_Control_Typography::get_type(),
-			array(
-				'name'     => 'ref_summary_value_typography',
-				'label'    => 'تایپوگرافی مقدار',
-				'selector' => '{{WRAPPER}} .ba-impact__summary-value',
-			)
-		);
-		$this->add_control(
-			'ref_summary_icon_color',
-			array(
-				'label'     => 'رنگ آیکون',
-				'type'      => Controls_Manager::COLOR,
-				'selectors' => array( '{{WRAPPER}} .ba-impact__summary-icon' => 'color: {{VALUE}};' ),
+				'range'      => array( 'px' => array( 'min' => 0, 'max' => 24 ) ),
+				'selectors'  => array( '{{WRAPPER}} .ba-impact__beneficiaries' => 'gap: {{SIZE}}{{UNIT}};' ),
 			)
 		);
 
@@ -885,7 +722,9 @@ final class Bonyad_Alavi_Home_About_Widget extends Widget_Base {
 		$sources  = $this->normalize_sources( (array) ( $settings['funding_sources'] ?? array() ) );
 		$total    = array_sum( array_column( $sources, 'value' ) );
 		$decimals = $this->sanitize_decimals( $settings['funding_decimals'] ?? 1 );
-		$unit     = trim( (string) ( $settings['funding_unit'] ?? 'همت' ) );
+		$unit                = trim( (string) ( $settings['funding_unit'] ?? 'همت' ) );
+		$beneficiaries_label = trim( (string) ( $settings['beneficiaries_label'] ?? 'تعداد خدمات‌گیرندگان مستقیم' ) );
+		$beneficiaries_value = max( 0, (float) ( $settings['beneficiaries_value'] ?? 3250000 ) );
 
 		$chart_payload = array(
 			'unit'     => $unit,
@@ -922,20 +761,13 @@ final class Bonyad_Alavi_Home_About_Widget extends Widget_Base {
 				</div>
 
 				<div class="ba-impact__funding">
-					<div class="ba-impact__funding-head">
-						<span class="ba-impact__funding-kicker"><?php echo esc_html( trim( (string) ( $settings['funding_kicker'] ?? '' ) ) ); ?></span>
-						<?php if ( '' !== trim( (string) ( $settings['funding_note'] ?? '' ) ) ) : ?>
-							<span class="ba-impact__funding-note"><?php echo esc_html( trim( (string) $settings['funding_note'] ) ); ?></span>
-						<?php endif; ?>
-					</div>
-
 					<div class="ba-impact__funding-visual">
 						<div class="ba-impact__chart-wrap">
 							<div
 								class="ba-impact__chart"
 								data-js-impact-chart
 								role="img"
-								aria-label="<?php echo esc_attr( trim( (string) ( $settings['funding_kicker'] ?? 'ترکیب منابع اثرگذاری' ) ) ); ?>"
+								aria-label="ترکیب منابع اثرگذاری"
 							></div>
 						</div>
 
@@ -948,11 +780,12 @@ final class Bonyad_Alavi_Home_About_Widget extends Widget_Base {
 						<script type="application/json" data-js-impact-chart-data><?php echo wp_json_encode( $chart_payload, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></script>
 					</div>
 
-					<?php
-					if ( 'yes' === ( $settings['show_summary'] ?? '' ) ) {
-						$this->render_summary( (array) ( $settings['summary_items'] ?? array() ), $total );
-					}
-					?>
+					<div class="ba-impact__beneficiaries" aria-label="<?php echo esc_attr( $beneficiaries_label ); ?>">
+						<?php if ( '' !== $beneficiaries_label ) : ?>
+							<span class="ba-impact__beneficiaries-label"><?php echo esc_html( $beneficiaries_label ); ?></span>
+						<?php endif; ?>
+						<strong class="ba-impact__beneficiaries-value"><?php echo esc_html( $this->format_number( $beneficiaries_value, 0 ) ); ?></strong>
+					</div>
 				</div>
 			</div>
 		</section>
@@ -985,54 +818,7 @@ final class Bonyad_Alavi_Home_About_Widget extends Widget_Base {
 	}
 
 	/**
-	 * Summary قابل افزایش/کاهش و قابل مخفی‌کردن است.
-	 */
-	private function render_summary( array $items, float $funding_total ) {
-		$visible = array_values(
-			array_filter(
-				$items,
-				static function ( $item ) {
-					return is_array( $item ) && 'yes' === ( $item['is_visible'] ?? '' );
-				}
-			)
-		);
-
-		if ( ! $visible ) {
-			return;
-		}
-		?>
-		<div class="ba-impact__summary" aria-label="جمع‌بندی منابع و خدمات‌گیرندگان">
-			<?php foreach ( $visible as $item ) : ?>
-				<?php
-				$decimals      = $this->sanitize_decimals( $item['decimals'] ?? 0 );
-				$is_auto_total = 'funding_total' === ( $item['value_type'] ?? '' );
-				$value         = $is_auto_total ? $funding_total : max( 0, (float) ( $item['manual_value'] ?? 0 ) );
-				$suffix        = trim( (string) ( $item['suffix'] ?? '' ) );
-				$icon          = is_array( $item['icon'] ?? null ) ? $item['icon'] : array();
-				$key           = sanitize_key( (string) ( $item['default_icon_key'] ?? '' ) );
-				?>
-				<div class="ba-impact__summary-item">
-					<?php if ( ! empty( $icon['value'] ) || '' !== $this->get_summary_default_svg( $key ) ) : ?>
-						<span class="ba-impact__summary-icon" aria-hidden="true">
-							<?php if ( ! empty( $icon['value'] ) ) : ?>
-								<?php Icons_Manager::render_icon( $icon, array( 'aria-hidden' => 'true' ) ); ?>
-							<?php else : ?>
-								<?php echo $this->get_summary_default_svg( $key ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
-							<?php endif; ?>
-						</span>
-					<?php endif; ?>
-					<span class="ba-impact__summary-copy">
-						<span class="ba-impact__summary-label"><?php echo esc_html( trim( (string) ( $item['label'] ?? '' ) ) ); ?></span>
-						<strong class="ba-impact__summary-value"><?php echo esc_html( $this->format_number( $value, $decimals ) . ( '' !== $suffix ? ' ' . $suffix : '' ) ); ?></strong>
-					</span>
-				</div>
-			<?php endforeach; ?>
-		</div>
-		<?php
-	}
-
-	/**
-	 * ورودی Repeater منابع را به داده عددی امن و شناسه یکتا تبدیل می‌کند.
+	 * ورودی Repeater منابع را به داده عددی امن تبدیل می‌کند.
 	 */
 	private function normalize_sources( array $sources ): array {
 		$normalized = array();
@@ -1077,15 +863,6 @@ final class Bonyad_Alavi_Home_About_Widget extends Widget_Base {
 				'9' => '۹',
 			)
 		);
-	}
-
-	private function get_summary_default_svg( string $key ): string {
-		$icons = array(
-			'funding'       => '<svg viewBox="0 0 24 24"><path d="M4 19h16M6 17V9m4 8V5m4 12v-6m4 6V7"></path></svg>',
-			'beneficiaries' => '<svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path></svg>',
-		);
-
-		return $icons[ $key ] ?? '';
 	}
 
 	/**

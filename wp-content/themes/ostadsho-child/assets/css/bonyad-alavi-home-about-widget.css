@@ -22,7 +22,7 @@
   --ba-impact-label-line-length: 8px;
   --ba-impact-label-edge-distance: 14px;
   background: linear-gradient(180deg, #fbfdfc 0%, #f6faf8 100%);
-  padding: 68px 0 64px;
+  padding: 56px 0 52px;
   color: var(--ink);
   font-family: YekanBakh, IRANSans, "Vazirmatn", Tahoma, Arial, sans-serif;
   line-height: 1.8;
@@ -64,7 +64,7 @@
 .ba-home-about-widget .ba-impact__content {
   min-width: 0;
   align-self: stretch;
-  padding: 42px 42px 38px;
+  padding: 34px 36px 32px;
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
@@ -111,7 +111,7 @@
 .ba-home-about-widget .ba-impact__text {
   max-width: 700px;
   color: var(--muted);
-  margin: 0 0 24px;
+  margin: 0 0 18px;
   font-size: 14px;
   line-height: 1.95;
 }
@@ -143,33 +143,15 @@
   min-width: 0;
   width: auto;
   margin: 0;
-  padding: 26px 24px 22px;
+  padding: 18px 18px 14px;
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 8px;
   background: #f5faf7;
   border: 0;
   border-inline-start: 1px solid #dfeae4;
   border-radius: 0;
   overflow: hidden;
-}
-
-.ba-home-about-widget .ba-impact__funding-head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-}
-
-.ba-home-about-widget .ba-impact__funding-kicker {
-  color: var(--ink);
-  font-size: 14px;
-  font-weight: 900;
-}
-
-.ba-home-about-widget .ba-impact__funding-note {
-  color: var(--muted);
-  font-size: 10px;
 }
 
 .ba-home-about-widget .ba-impact__funding-visual {
@@ -233,72 +215,34 @@
   font-size: 10px;
 }
 
-.ba-home-about-widget .ba-impact__summary {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  background: #fff;
-  border: 1px solid #dce9e1;
-  border-radius: 14px;
-  overflow: hidden;
-}
-
-.ba-home-about-widget .ba-impact__summary-item {
-  min-width: 0;
-  padding: 12px 13px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.ba-home-about-widget .ba-impact__summary-item + .ba-impact__summary-item {
-  border-inline-start: 1px solid #e1e9e5;
-}
-
-.ba-home-about-widget .ba-impact__summary-icon {
-  width: 34px;
-  height: 34px;
-  flex: none;
-  display: grid;
-  place-items: center;
-  border-radius: 10px;
-  background: var(--green-050);
-  color: var(--green-700);
-}
-
-.ba-home-about-widget .ba-impact__summary-icon svg {
-  width: 18px;
-  height: 18px;
-  fill: none;
-  stroke: currentColor;
-  stroke-width: 1.8;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
-
-.ba-home-about-widget .ba-impact__summary-copy {
-  min-width: 0;
+.ba-home-about-widget .ba-impact__beneficiaries {
   display: flex;
   flex-direction: column;
+  align-items: center;
+  justify-content: center;
   gap: 2px;
+  margin-top: -2px;
+  padding: 0 8px 2px;
+  text-align: center;
 }
 
-.ba-home-about-widget .ba-impact__summary-label {
+.ba-home-about-widget .ba-impact__beneficiaries-label {
   color: var(--muted);
   font-size: 11px;
   line-height: 1.55;
 }
 
-.ba-home-about-widget .ba-impact__summary-value {
+.ba-home-about-widget .ba-impact__beneficiaries-value {
   color: var(--green-700);
-  font-size: 19px;
+  font-size: 20px;
   font-weight: 900;
+  line-height: 1.35;
   direction: ltr;
-  text-align: right;
 }
 
 @media (max-width: 1080px) {
   .ba-home-about-widget {
-    padding: 58px 0 56px;
+    padding: 50px 0 48px;
   }
 
   .ba-home-about-widget .ba-impact__grid {
@@ -306,13 +250,13 @@
   }
 
   .ba-home-about-widget .ba-impact__content {
-    padding: 32px 30px 30px;
+    padding: 28px 26px 26px;
   }
 
   .ba-home-about-widget .ba-impact__funding {
     width: 100%;
     margin: 0;
-    padding: 24px 22px 22px;
+    padding: 18px 18px 14px;
     border-inline-start: 0;
     border-top: 1px solid #dfeae4;
   }
@@ -328,7 +272,7 @@
 
 @media (max-width: 760px) {
   .ba-home-about-widget {
-    padding: 46px 0 44px;
+    padding: 40px 0 38px;
     --ba-impact-label-width: 116px;
     --ba-impact-label-name-size: 10px;
     --ba-impact-label-value-size: 15px;
@@ -345,7 +289,7 @@
   }
 
   .ba-home-about-widget .ba-impact__content {
-    padding: 24px 20px 22px;
+    padding: 20px 16px 18px;
   }
 
   .ba-home-about-widget .ba-impact__actions .ba-button {
@@ -353,12 +297,8 @@
   }
 
   .ba-home-about-widget .ba-impact__funding {
-    padding: 16px 14px 14px;
-    gap: 13px;
-  }
-
-  .ba-home-about-widget .ba-impact__funding-head {
-    align-items: flex-start;
+    padding: 12px 10px 10px;
+    gap: 6px;
   }
 
   .ba-home-about-widget .ba-impact__funding-visual,
@@ -366,21 +306,12 @@
     min-height: 380px;
   }
 
-  .ba-home-about-widget .ba-impact__summary-item {
-    padding: 11px 10px;
-  }
-
-  .ba-home-about-widget .ba-impact__summary-icon {
-    width: 31px;
-    height: 31px;
-  }
-
-  .ba-home-about-widget .ba-impact__summary-label {
+  .ba-home-about-widget .ba-impact__beneficiaries-label {
     font-size: 10px;
   }
 
-  .ba-home-about-widget .ba-impact__summary-value {
-    font-size: 17px;
+  .ba-home-about-widget .ba-impact__beneficiaries-value {
+    font-size: 18px;
   }
 }
 
@@ -393,8 +324,12 @@
     --ba-impact-label-edge-distance: 8px;
   }
 
+  .ba-home-about-widget {
+    padding: 36px 0 34px;
+  }
+
   .ba-home-about-widget .ba-impact__content {
-    padding: 20px 15px 18px;
+    padding: 18px 14px 16px;
   }
 
   .ba-home-about-widget .ba-impact__actions .ba-button {
@@ -402,12 +337,7 @@
   }
 
   .ba-home-about-widget .ba-impact__funding {
-    padding: 12px 10px 10px;
-  }
-
-  .ba-home-about-widget .ba-impact__funding-head {
-    flex-direction: column;
-    gap: 2px;
+    padding: 10px 8px 8px;
   }
 
   .ba-home-about-widget .ba-impact__funding-visual,
@@ -415,12 +345,12 @@
     min-height: 350px;
   }
 
-  .ba-home-about-widget .ba-impact__summary {
-    grid-template-columns: 1fr;
+  .ba-home-about-widget .ba-impact__beneficiaries {
+    margin-top: -4px;
+    padding-bottom: 0;
   }
 
-  .ba-home-about-widget .ba-impact__summary-item + .ba-impact__summary-item {
-    border-inline-start: 0;
-    border-top: 1px solid #e1e9e5;
+  .ba-home-about-widget .ba-impact__beneficiaries-value {
+    font-size: 17px;
   }
 }
