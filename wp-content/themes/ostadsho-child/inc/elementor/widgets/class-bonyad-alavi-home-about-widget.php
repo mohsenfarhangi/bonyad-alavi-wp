@@ -910,7 +910,7 @@ final class Bonyad_Alavi_Home_About_Widget extends Widget_Base {
 					<?php $this->render_actions( (array) ( $settings['actions'] ?? array() ) ); ?>
 				</div>
 
-				<div class="ba-impact__funding" data-js-impact-funding>
+				<div class="ba-impact__funding">
 					<div class="ba-impact__funding-head">
 						<span class="ba-impact__funding-kicker"><?php echo esc_html( trim( (string) ( $settings['funding_kicker'] ?? '' ) ) ); ?></span>
 						<?php if ( '' !== trim( (string) ( $settings['funding_note'] ?? '' ) ) ) : ?>

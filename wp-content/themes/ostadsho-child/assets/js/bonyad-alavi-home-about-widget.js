@@ -49,17 +49,18 @@
     }
 
     function buildOption(root, chartElement, payload) {
+        var styleSource = chartElement.closest('.ba-impact__funding') || root;
         var computed = window.getComputedStyle(root);
         var fontFamily = computed.fontFamily || 'YekanBakh, IRANSans, Tahoma, Arial, sans-serif';
-        var trackColor = readCssValue(root, '--ba-impact-chart-track', '#e7eeea');
-        var labelBackground = readCssValue(root, '--ba-impact-label-bg', 'rgba(255,255,255,.97)');
-        var labelBorder = readCssValue(root, '--ba-impact-label-border', '#dfe8e3');
-        var labelNameColor = readCssValue(root, '--ba-impact-label-name', '#485c52');
-        var labelWidth = readCssNumber(root, '--ba-impact-label-width', 132);
-        var labelRadius = readCssNumber(root, '--ba-impact-label-radius', 13);
-        var nameSize = readCssNumber(root, '--ba-impact-label-name-size', 11);
-        var valueSize = readCssNumber(root, '--ba-impact-label-value-size', 16);
-        var lineLength = readCssNumber(root, '--ba-impact-label-line-length', 8);
+        var trackColor = readCssValue(styleSource, '--ba-impact-chart-track', '#e7eeea');
+        var labelBackground = readCssValue(styleSource, '--ba-impact-label-bg', 'rgba(255,255,255,.97)');
+        var labelBorder = readCssValue(styleSource, '--ba-impact-label-border', '#dfe8e3');
+        var labelNameColor = readCssValue(styleSource, '--ba-impact-label-name', '#485c52');
+        var labelWidth = readCssNumber(styleSource, '--ba-impact-label-width', 132);
+        var labelRadius = readCssNumber(styleSource, '--ba-impact-label-radius', 13);
+        var nameSize = readCssNumber(styleSource, '--ba-impact-label-name-size', 11);
+        var valueSize = readCssNumber(styleSource, '--ba-impact-label-value-size', 16);
+        var lineLength = readCssNumber(styleSource, '--ba-impact-label-line-length', 8);
         var decimals = Math.max(0, Math.min(3, Number(payload.decimals) || 0));
         var unit = String(payload.unit || '').trim();
         var sources = payload.sources
