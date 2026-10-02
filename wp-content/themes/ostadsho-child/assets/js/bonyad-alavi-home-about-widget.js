@@ -26,6 +26,8 @@
         var impactDesc = impactFunding.querySelector('[data-js-impact-desc]');
         var reduceImpactMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
         var impactSegmentGap = 1;
+        var impactCardGap = 16;
+        var impactVisualInset = 8;
         var impactUnit = impactFunding.dataset.impactUnit || '';
         var impactDecimals = Number(impactFunding.dataset.impactDecimals || 1);
         var impactLayoutFrame = null;
@@ -149,7 +151,7 @@
             });
         }
 
-        function resolveImpactCardCollisions(items, visualHeight) {
+        function resolveImpactCardCollisions(items, visualHeight, inset) {
             var gap = 8;
 
             ['left', 'right'].forEach(function (side) {
@@ -164,7 +166,7 @@
                 if (!group.length) return;
 
                 group.forEach(function (item, index) {
-                    var minY = item.halfHeight + 3;
+                    var minY = item.halfHeight + inset;
                     if (index === 0) {
                         item.cardCenterY = Math.max(minY, item.cardCenterY);
                         return;
@@ -177,7 +179,7 @@
 
                 for (var index = group.length - 1; index >= 0; index--) {
                     var item = group[index];
-                    var maxY = visualHeight - item.halfHeight - 3;
+                    var maxY = visualHeight - item.halfHeight - inset;
 
                     if (index === group.length - 1) {
                         item.cardCenterY = Math.min(maxY, item.cardCenterY);
@@ -213,19 +215,30 @@
             var centerX = chartRect.left - visualRect.left + chartRect.width / 2;
             var centerY = chartRect.top - visualRect.top + chartRect.height / 2;
             var chartOuterRadius = chartRect.width * .38;
-            var orbitRadius = chartRect.width * .68;
 
             var layoutItems = impactSources.map(function (source) {
                 var angle = Number(source.dataset.impactAngle || 0) * Math.PI / 180;
+                var radialX = Math.sin(angle);
+                var radialY = -Math.cos(angle);
                 var cardWidth = source.offsetWidth;
                 var cardHeight = source.offsetHeight;
                 var halfWidth = cardWidth / 2;
                 var halfHeight = cardHeight / 2;
-                var cardCenterX = centerX + Math.sin(angle) * orbitRadius;
-                var cardCenterY = centerY - Math.cos(angle) * orbitRadius;
+                var edgeDistanceX = Math.abs(radialX) > .001 ? halfWidth / Math.abs(radialX) : Infinity;
+                var edgeDistanceY = Math.abs(radialY) > .001 ? halfHeight / Math.abs(radialY) : Infinity;
+                var cardEdgeDistance = Math.min(edgeDistanceX, edgeDistanceY);
+                var cardRadius = chartOuterRadius + impactCardGap + cardEdgeDistance;
+                var cardCenterX = centerX + radialX * cardRadius;
+                var cardCenterY = centerY + radialY * cardRadius;
 
-                cardCenterX = Math.max(halfWidth + 3, Math.min(visualRect.width - halfWidth - 3, cardCenterX));
-                cardCenterY = Math.max(halfHeight + 3, Math.min(visualRect.height - halfHeight - 3, cardCenterY));
+                cardCenterX = Math.max(
+                    halfWidth + impactVisualInset,
+                    Math.min(visualRect.width - halfWidth - impactVisualInset, cardCenterX)
+                );
+                cardCenterY = Math.max(
+                    halfHeight + impactVisualInset,
+                    Math.min(visualRect.height - halfHeight - impactVisualInset, cardCenterY)
+                );
 
                 return {
                     source: source,
@@ -234,11 +247,11 @@
                     halfHeight: halfHeight,
                     cardCenterX: cardCenterX,
                     cardCenterY: cardCenterY,
-                    side: Math.sin(angle) >= 0 ? 'right' : 'left'
+                    side: radialX >= 0 ? 'right' : 'left'
                 };
             });
 
-            resolveImpactCardCollisions(layoutItems, visualRect.height);
+            resolveImpactCardCollisions(layoutItems, visualRect.height, impactVisualInset);
 
             layoutItems.forEach(function (item) {
                 var source = item.source;
