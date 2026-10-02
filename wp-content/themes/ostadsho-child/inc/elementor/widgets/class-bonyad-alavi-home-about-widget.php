@@ -59,7 +59,7 @@ final class Bonyad_Alavi_Home_About_Widget extends Widget_Base {
 		$this->register_intro_style_controls();
 		$this->register_actions_style_controls();
 		$this->register_funding_style_controls();
-		$this->register_source_style_controls();
+		$this->register_chart_label_style_controls();
 		$this->register_summary_style_controls();
 	}
 
@@ -259,7 +259,7 @@ final class Bonyad_Alavi_Home_About_Widget extends Widget_Base {
 				'type'        => Controls_Manager::NUMBER,
 				'min'         => 0,
 				'step'        => 0.1,
-				'description' => 'سهم دونات، offset و موقعیت کارت از همین مقدار محاسبه می‌شوند.',
+				'description' => 'اندازه سهم این منبع در نمودار از همین مقدار محاسبه می‌شود.',
 			)
 		);
 		$repeater->add_control(
@@ -270,14 +270,6 @@ final class Bonyad_Alavi_Home_About_Widget extends Widget_Base {
 				'default' => '#06783a',
 			)
 		);
-		$repeater->add_control(
-			'reference_key',
-			array(
-				'type'    => Controls_Manager::HIDDEN,
-				'default' => '',
-			)
-		);
-
 		$this->add_control(
 			'funding_sources',
 			array(
@@ -290,25 +282,21 @@ final class Bonyad_Alavi_Home_About_Widget extends Widget_Base {
 						'label'         => 'منابع بنیاد علوی',
 						'value'         => 14.8,
 						'color'         => '#06783a',
-						'reference_key' => 'foundation',
 					),
 					array(
 						'label'         => 'منابع بانک‌ها',
 						'value'         => 9.6,
 						'color'         => '#128a70',
-						'reference_key' => 'banks',
 					),
 					array(
 						'label'         => 'منابع سازمان‌ها',
 						'value'         => 5.4,
 						'color'         => '#487e72',
-						'reference_key' => 'organizations',
 					),
 					array(
 						'label'         => 'منابع خیرین و ذی‌نفعان',
 						'value'         => 3.2,
 						'color'         => '#b28a42',
-						'reference_key' => 'stakeholders',
 					),
 				),
 			)
@@ -709,7 +697,7 @@ final class Bonyad_Alavi_Home_About_Widget extends Widget_Base {
 			array(
 				'label'     => 'رنگ Track نمودار',
 				'type'      => Controls_Manager::COLOR,
-				'selectors' => array( '{{WRAPPER}} .ba-impact__donut-track' => 'stroke: {{VALUE}};' ),
+				'selectors' => array( '{{WRAPPER}} .ba-impact__funding' => '--ba-impact-chart-track: {{VALUE}};' ),
 			)
 		);
 		$this->add_control(
@@ -732,47 +720,94 @@ final class Bonyad_Alavi_Home_About_Widget extends Widget_Base {
 		$this->end_controls_section();
 	}
 
-	private function register_source_style_controls() {
+	private function register_chart_label_style_controls() {
 		$this->start_controls_section(
 			'style_sources',
 			array(
-				'label' => 'کارت‌های منابع',
+				'label' => 'لیبل‌های نمودار',
 				'tab'   => Controls_Manager::TAB_STYLE,
 			)
 		);
 
 		$this->add_control(
-			'ref_source_background',
+			'ref_chart_label_background',
 			array(
-				'label'     => 'پس‌زمینه کارت',
+				'label'     => 'پس‌زمینه لیبل',
 				'type'      => Controls_Manager::COLOR,
-				'selectors' => array( '{{WRAPPER}} .ba-impact__source-card' => 'background: {{VALUE}};' ),
+				'selectors' => array( '{{WRAPPER}} .ba-impact__funding' => '--ba-impact-label-bg: {{VALUE}};' ),
 			)
 		);
-		$this->add_responsive_control(
-			'ref_source_radius',
+
+		$this->add_control(
+			'ref_chart_label_border',
 			array(
-				'label'      => 'گردی کارت',
+				'label'     => 'رنگ حاشیه لیبل',
+				'type'      => Controls_Manager::COLOR,
+				'selectors' => array( '{{WRAPPER}} .ba-impact__funding' => '--ba-impact-label-border: {{VALUE}};' ),
+			)
+		);
+
+		$this->add_control(
+			'ref_chart_label_name_color',
+			array(
+				'label'     => 'رنگ عنوان منبع',
+				'type'      => Controls_Manager::COLOR,
+				'selectors' => array( '{{WRAPPER}} .ba-impact__funding' => '--ba-impact-label-name: {{VALUE}};' ),
+			)
+		);
+
+		$this->add_responsive_control(
+			'ref_chart_label_width',
+			array(
+				'label'      => 'عرض لیبل',
+				'type'       => Controls_Manager::SLIDER,
+				'size_units' => array( 'px' ),
+				'range'      => array( 'px' => array( 'min' => 90, 'max' => 220 ) ),
+				'selectors'  => array( '{{WRAPPER}} .ba-impact__funding' => '--ba-impact-label-width: {{SIZE}}{{UNIT}};' ),
+			)
+		);
+
+		$this->add_responsive_control(
+			'ref_chart_label_radius',
+			array(
+				'label'      => 'گردی لیبل',
 				'type'       => Controls_Manager::SLIDER,
 				'size_units' => array( 'px' ),
 				'range'      => array( 'px' => array( 'min' => 0, 'max' => 40 ) ),
-				'selectors'  => array( '{{WRAPPER}} .ba-impact__source-card' => 'border-radius: {{SIZE}}{{UNIT}};' ),
+				'selectors'  => array( '{{WRAPPER}} .ba-impact__funding' => '--ba-impact-label-radius: {{SIZE}}{{UNIT}};' ),
 			)
 		);
-		$this->add_group_control(
-			Group_Control_Typography::get_type(),
+
+		$this->add_responsive_control(
+			'ref_chart_label_name_size',
 			array(
-				'name'     => 'ref_source_label_typography',
-				'label'    => 'تایپوگرافی عنوان منبع',
-				'selector' => '{{WRAPPER}} .ba-impact__source-label',
+				'label'      => 'اندازه عنوان منبع',
+				'type'       => Controls_Manager::SLIDER,
+				'size_units' => array( 'px' ),
+				'range'      => array( 'px' => array( 'min' => 9, 'max' => 20 ) ),
+				'selectors'  => array( '{{WRAPPER}} .ba-impact__funding' => '--ba-impact-label-name-size: {{SIZE}}{{UNIT}};' ),
 			)
 		);
-		$this->add_group_control(
-			Group_Control_Typography::get_type(),
+
+		$this->add_responsive_control(
+			'ref_chart_label_value_size',
 			array(
-				'name'     => 'ref_source_value_typography',
-				'label'    => 'تایپوگرافی مقدار منبع',
-				'selector' => '{{WRAPPER}} .ba-impact__source-value',
+				'label'      => 'اندازه مقدار منبع',
+				'type'       => Controls_Manager::SLIDER,
+				'size_units' => array( 'px' ),
+				'range'      => array( 'px' => array( 'min' => 11, 'max' => 26 ) ),
+				'selectors'  => array( '{{WRAPPER}} .ba-impact__funding' => '--ba-impact-label-value-size: {{SIZE}}{{UNIT}};' ),
+			)
+		);
+
+		$this->add_responsive_control(
+			'ref_chart_label_line_length',
+			array(
+				'label'      => 'طول خط اتصال',
+				'type'       => Controls_Manager::SLIDER,
+				'size_units' => array( 'px' ),
+				'range'      => array( 'px' => array( 'min' => 0, 'max' => 40 ) ),
+				'selectors'  => array( '{{WRAPPER}} .ba-impact__funding' => '--ba-impact-label-line-length: {{SIZE}}{{UNIT}};' ),
 			)
 		);
 
@@ -837,11 +872,24 @@ final class Bonyad_Alavi_Home_About_Widget extends Widget_Base {
 	protected function render() {
 		$settings = $this->get_settings_for_display();
 		$sources  = $this->normalize_sources( (array) ( $settings['funding_sources'] ?? array() ) );
-		$total           = array_sum( array_column( $sources, 'value' ) );
-		$fallback_layout = $this->build_source_fallback_layout( $sources, $total );
-		$decimals        = $this->sanitize_decimals( $settings['funding_decimals'] ?? 1 );
+		$total    = array_sum( array_column( $sources, 'value' ) );
+		$decimals = $this->sanitize_decimals( $settings['funding_decimals'] ?? 1 );
 		$unit     = trim( (string) ( $settings['funding_unit'] ?? 'همت' ) );
-		$uid      = 'baImpactFunding-' . sanitize_html_class( $this->get_id() );
+
+		$chart_payload = array(
+			'unit'     => $unit,
+			'decimals' => $decimals,
+			'sources'  => array_map(
+				static function ( $source ) {
+					return array(
+						'name'  => (string) $source['label'],
+						'value' => (float) $source['value'],
+						'color' => (string) $source['color'],
+					);
+				},
+				$sources
+			),
+		);
 		?>
 		<section class="ba-impact ba-home-about-widget" id="about" data-ba-home-about>
 			<div class="ba-container ba-impact__grid">
@@ -862,9 +910,7 @@ final class Bonyad_Alavi_Home_About_Widget extends Widget_Base {
 					<?php $this->render_actions( (array) ( $settings['actions'] ?? array() ) ); ?>
 				</div>
 
-				<div class="ba-impact__funding" data-js-impact-funding
-					data-impact-unit="<?php echo esc_attr( $unit ); ?>"
-					data-impact-decimals="<?php echo esc_attr( (string) $decimals ); ?>">
+				<div class="ba-impact__funding" data-js-impact-funding>
 					<div class="ba-impact__funding-head">
 						<span class="ba-impact__funding-kicker"><?php echo esc_html( trim( (string) ( $settings['funding_kicker'] ?? '' ) ) ); ?></span>
 						<?php if ( '' !== trim( (string) ( $settings['funding_note'] ?? '' ) ) ) : ?>
@@ -874,37 +920,21 @@ final class Bonyad_Alavi_Home_About_Widget extends Widget_Base {
 
 					<div class="ba-impact__funding-visual">
 						<div class="ba-impact__chart-wrap">
-							<svg aria-labelledby="<?php echo esc_attr( $uid . '-title ' . $uid . '-desc' ); ?>" class="ba-impact__chart" role="img" viewBox="0 0 320 320">
-								<title id="<?php echo esc_attr( $uid . '-title' ); ?>"><?php echo esc_html( trim( (string) ( $settings['funding_kicker'] ?? 'ترکیب منابع اثرگذاری' ) ) ); ?></title>
-								<desc data-js-impact-desc id="<?php echo esc_attr( $uid . '-desc' ); ?>">ترکیب منابع اثرگذاری و سهم هر منبع از مجموع.</desc>
-								<circle class="ba-impact__donut-track" cx="160" cy="160" r="104" pathLength="100"></circle>
-								<?php foreach ( $sources as $index => $source ) : ?>
-									<circle class="<?php echo esc_attr( $this->get_source_class( $source, 'segment' ) ); ?>" cx="160" cy="160" r="104"
-										data-impact-source="<?php echo esc_attr( $source['source_id'] ); ?>" data-js-impact-segment pathLength="100"
-										style="<?php echo esc_attr( $this->build_segment_style( $source, $index ) ); ?>"></circle>
-								<?php endforeach; ?>
-							</svg>
-							<div class="ba-impact__donut-center" aria-hidden="true">
-								<strong class="ba-impact__donut-total" data-decimals="<?php echo esc_attr( (string) $decimals ); ?>" data-impact-counter data-impact-total><?php echo esc_html( $this->format_number( $total, $decimals ) ); ?></strong>
-								<?php if ( '' !== $unit ) : ?><span class="ba-impact__donut-unit"><?php echo esc_html( $unit ); ?></span><?php endif; ?>
-								<span class="ba-impact__donut-caption"><?php echo esc_html( trim( (string) ( $settings['donut_caption'] ?? '' ) ) ); ?></span>
-							</div>
+							<div
+								class="ba-impact__chart"
+								data-js-impact-chart
+								role="img"
+								aria-label="<?php echo esc_attr( trim( (string) ( $settings['funding_kicker'] ?? 'ترکیب منابع اثرگذاری' ) ) ); ?>"
+							></div>
 						</div>
 
-						<?php foreach ( $sources as $index => $source ) : ?>
-							<?php $fallback = $fallback_layout[ $index ] ?? array( 'angle' => 0, 'x' => 0, 'y' => 0 ); ?>
-							<div class="<?php echo esc_attr( $this->get_source_class( $source, 'card' ) ); ?>"
-								data-impact-source="<?php echo esc_attr( $source['source_id'] ); ?>"
-								data-impact-value="<?php echo esc_attr( $this->number_attribute( $source['value'] ) ); ?>"
-								data-impact-angle="<?php echo esc_attr( $this->number_attribute( $fallback['angle'] ) ); ?>" data-js-impact-source
-								style="<?php echo esc_attr( $this->build_source_card_style( $source, $index, $fallback ) ); ?>">
-								<span class="ba-impact__source-dot"></span>
-								<span class="ba-impact__source-copy">
-									<span class="ba-impact__source-label"><?php echo esc_html( $source['label'] ); ?></span>
-									<strong class="ba-impact__source-value" data-decimals="<?php echo esc_attr( (string) $decimals ); ?>" data-impact-counter data-suffix="<?php echo esc_attr( '' !== $unit ? ' ' . $unit : '' ); ?>"><?php echo esc_html( $this->format_number( $source['value'], $decimals ) . ( '' !== $unit ? ' ' . $unit : '' ) ); ?></strong>
-								</span>
-							</div>
-						<?php endforeach; ?>
+						<div class="ba-impact__donut-center" aria-hidden="true">
+							<strong class="ba-impact__donut-total"><?php echo esc_html( $this->format_number( $total, $decimals ) ); ?></strong>
+							<?php if ( '' !== $unit ) : ?><span class="ba-impact__donut-unit"><?php echo esc_html( $unit ); ?></span><?php endif; ?>
+							<span class="ba-impact__donut-caption"><?php echo esc_html( trim( (string) ( $settings['donut_caption'] ?? '' ) ) ); ?></span>
+						</div>
+
+						<script type="application/json" data-js-impact-chart-data><?php echo wp_json_encode( $chart_payload, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></script>
 					</div>
 
 					<?php
@@ -982,7 +1012,7 @@ final class Bonyad_Alavi_Home_About_Widget extends Widget_Base {
 					<?php endif; ?>
 					<span class="ba-impact__summary-copy">
 						<span class="ba-impact__summary-label"><?php echo esc_html( trim( (string) ( $item['label'] ?? '' ) ) ); ?></span>
-						<strong class="ba-impact__summary-value" data-decimals="<?php echo esc_attr( (string) $decimals ); ?>" data-impact-counter data-suffix="<?php echo esc_attr( '' !== $suffix ? ' ' . $suffix : '' ); ?>"<?php if ( $is_auto_total ) : ?> data-impact-total<?php else : ?> data-value="<?php echo esc_attr( $this->number_attribute( $value ) ); ?>"<?php endif; ?>><?php echo esc_html( $this->format_number( $value, $decimals ) . ( '' !== $suffix ? ' ' . $suffix : '' ) ); ?></strong>
+						<strong class="ba-impact__summary-value"><?php echo esc_html( $this->format_number( $value, $decimals ) . ( '' !== $suffix ? ' ' . $suffix : '' ) ); ?></strong>
 					</span>
 				</div>
 			<?php endforeach; ?>
@@ -996,129 +1026,23 @@ final class Bonyad_Alavi_Home_About_Widget extends Widget_Base {
 	private function normalize_sources( array $sources ): array {
 		$normalized = array();
 
-		foreach ( array_values( array_filter( $sources, 'is_array' ) ) as $index => $source ) {
+		foreach ( array_values( array_filter( $sources, 'is_array' ) ) as $source ) {
 			$label = trim( (string) ( $source['label'] ?? '' ) );
 			$value = max( 0, (float) ( $source['value'] ?? 0 ) );
 			$color = sanitize_hex_color( (string) ( $source['color'] ?? '' ) );
-			$key   = sanitize_key( (string) ( $source['reference_key'] ?? '' ) );
-			$id    = sanitize_html_class( (string) ( $source['_id'] ?? '' ) );
-
-			if ( '' === $id ) {
-				$id = 'source-' . ( $index + 1 );
-			}
 
 			$normalized[] = array(
-				'label'         => $label,
-				'value'         => $value,
-				'color'         => $color ?: '#06783a',
-				'reference_key' => $key,
-				'source_id'     => 'impact-' . $id,
+				'label' => $label,
+				'value' => $value,
+				'color' => $color ?: '#06783a',
 			);
 		}
 
 		return $normalized;
 	}
 
-	/**
-	 * کلاس reference چهار منبع پیش‌فرض را نگه می‌دارد؛ منابع جدید فقط کلاس پایه می‌گیرند.
-	 *
-	 * @param array  $source داده منبع.
-	 * @param string $kind   segment یا card.
-	 */
-	private function get_source_class( array $source, string $kind ): string {
-		$key = (string) ( $source['reference_key'] ?? '' );
-		if ( 'segment' === $kind ) {
-			$class = 'ba-impact__donut-segment';
-			if ( in_array( $key, array( 'foundation', 'banks', 'organizations', 'stakeholders' ), true ) ) {
-				$class .= ' ba-impact__donut-segment--' . $key;
-			}
-
-			return $class;
-		}
-
-		$class = 'ba-impact__source-card';
-		if ( in_array( $key, array( 'foundation', 'banks', 'organizations', 'stakeholders' ), true ) ) {
-			$class .= ' ba-impact__source-card--' . $key;
-		}
-
-		return $class;
-	}
-
-	/**
-	 * فقط رنگ و delay را از PHP می‌دهد؛ geometry طبق reference جدید در JS runtime محاسبه می‌شود.
-	 */
-	private function build_segment_style( array $source, int $index ): string {
-		return sprintf(
-			'--ba-impact-segment-color:%s;--ba-impact-segment-delay:%ss;',
-			$source['color'],
-			$this->number_attribute( $index * 0.1 )
-		);
-	}
-
-	/**
-	 * fallback اولیه کارت‌ها را در PHP می‌سازد تا قبل از اجرای JS نیز کارت‌ها نزدیک Donut باشند.
-	 * JS با اندازه واقعی DOM همین موقعیت را refine و collisionها را resolve می‌کند.
-	 *
-	 * @param array $sources منابع نرمال‌شده.
-	 * @param float $total   مجموع منابع.
-	 *
-	 * @return array<int,array{angle:float,x:float,y:float}>
-	 */
-	private function build_source_fallback_layout( array $sources, float $total ): array {
-		$layout       = array();
-		$cumulative   = 0.0;
-		$count        = count( $sources );
-		$chart_reference_width = 310.0;
-		$outer_radius          = $chart_reference_width * ( 121.0 / 320.0 );
-		$card_gap              = 10.0;
-		$half_width   = 77.0;
-		$half_height  = 34.0;
-
-		foreach ( $sources as $index => $source ) {
-			$raw_share     = $total > 0 ? ( (float) $source['value'] / $total ) * 100 : 0.0;
-			$gap           = $raw_share > 0 ? min( 1.0, $raw_share * 0.22 ) : 0.0;
-			$visible_share = max( 0.0, $raw_share - $gap );
-			$angle_share   = $total > 0
-				? $cumulative + ( $visible_share / 2 )
-				: ( ( $index + 0.5 ) / max( 1, $count ) ) * 100;
-			$angle         = $angle_share * 3.6;
-			$radians       = deg2rad( $angle );
-			$radial_x      = sin( $radians );
-			$radial_y      = -cos( $radians );
-			$edge_x        = abs( $radial_x ) > 0.001 ? $half_width / abs( $radial_x ) : INF;
-			$edge_y        = abs( $radial_y ) > 0.001 ? $half_height / abs( $radial_y ) : INF;
-			$edge_distance = min( $edge_x, $edge_y );
-			$card_radius   = $outer_radius + $card_gap + $edge_distance;
-
-			$layout[] = array(
-				'angle' => $angle,
-				'x'     => $radial_x * $card_radius,
-				'y'     => $radial_y * $card_radius,
-			);
-
-			$cumulative += $raw_share;
-		}
-
-		return $layout;
-	}
-
-	private function build_source_card_style( array $source, int $index, array $fallback ): string {
-		return sprintf(
-			'--ba-impact-source-color:%s;--ba-impact-card-delay:%ss;left:calc(50%% + %spx);top:calc(50%% + %spx);',
-			$source['color'],
-			$this->number_attribute( 0.34 + ( $index * 0.08 ) ),
-			$this->number_attribute( $fallback['x'] ?? 0 ),
-			$this->number_attribute( $fallback['y'] ?? 0 )
-		);
-	}
-
 	private function sanitize_decimals( $value ): int {
 		return max( 0, min( 3, (int) $value ) );
-	}
-
-	private function number_attribute( $value ): string {
-		$number = number_format( (float) $value, 4, '.', '' );
-		return rtrim( rtrim( $number, '0' ), '.' );
 	}
 
 	/**

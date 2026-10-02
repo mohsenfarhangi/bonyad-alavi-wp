@@ -116,9 +116,15 @@ final class BA_Elementor_Assets {
 		);
 
 		$this->register_script(
+			'apache-echarts',
+			'assets/vendor/echarts/echarts.min.js',
+			array()
+		);
+
+		$this->register_script(
 			'bonyad-alavi-home-about-widget',
 			'assets/js/bonyad-alavi-home-about-widget.js',
-			array( 'elementor-frontend' )
+			array( 'elementor-frontend', 'apache-echarts' )
 		);
 	}
 

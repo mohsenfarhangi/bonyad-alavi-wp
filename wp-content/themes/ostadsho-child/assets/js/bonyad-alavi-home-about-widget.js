@@ -7,460 +7,222 @@
         var state = states.get(root);
         if (!state) return;
 
-        state.cleanups.forEach(function (cleanup) {
-            try {
-                cleanup();
-            } catch (error) {}
-        });
+        if (state.resizeObserver) state.resizeObserver.disconnect();
+        if (state.resizeHandler) window.removeEventListener('resize', state.resizeHandler);
+        if (state.chart && !state.chart.isDisposed()) state.chart.dispose();
 
         states.delete(root);
     }
 
-    function initFunding(root, cleanups) {
-        var impactFunding = root.querySelector('[data-js-impact-funding]');
-        if (!impactFunding) return;
+    function readCssValue(element, name, fallback) {
+        var value = window.getComputedStyle(element).getPropertyValue(name).trim();
+        return value || fallback;
+    }
 
-        var impactSegments = Array.prototype.slice.call(impactFunding.querySelectorAll('[data-js-impact-segment]'));
-        var impactSources = Array.prototype.slice.call(impactFunding.querySelectorAll('[data-js-impact-source]'));
-        var impactTotalCounters = Array.prototype.slice.call(impactFunding.querySelectorAll('[data-impact-total]'));
-        var impactDesc = impactFunding.querySelector('[data-js-impact-desc]');
-        var reduceImpactMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-        var impactSegmentGap = 1;
-        var impactCardGap = 10;
-        var impactVisualInset = 8;
-        var impactMaxCollisionShift = 18;
-        var impactChartViewBoxSize = 320;
-        var impactDonutRadius = 104;
-        var impactDonutStrokeWidth = 34;
-        var impactDonutOuterRadius = impactDonutRadius + impactDonutStrokeWidth / 2;
-        var impactLastVisualWidth = null;
-        var impactLastVisualHeight = null;
-        var impactUnit = impactFunding.dataset.impactUnit || '';
-        var impactDecimals = Number(impactFunding.dataset.impactDecimals || 1);
-        var impactLayoutFrame = null;
-        var impactDataInitialized = false;
-        var impactResizeObserver = null;
-        var impactValueObserver = null;
-        var impactObserver = null;
-        var counterFrames = [];
-        var counterTimeouts = [];
+    function readCssNumber(element, name, fallback) {
+        var value = parseFloat(readCssValue(element, name, ''));
+        return Number.isFinite(value) ? value : fallback;
+    }
 
-        function formatImpactNumber(value, decimals) {
-            return new Intl.NumberFormat('fa-IR', {
-                minimumFractionDigits: decimals,
-                maximumFractionDigits: decimals
-            }).format(value);
+    function formatNumber(value, decimals) {
+        return new Intl.NumberFormat('fa-IR', {
+            minimumFractionDigits: decimals,
+            maximumFractionDigits: decimals
+        }).format(Number(value) || 0);
+    }
+
+    function escapeRichText(value) {
+        return String(value == null ? '' : value).replace(/[{}|]/g, '');
+    }
+
+    function parsePayload(root) {
+        var node = root.querySelector('[data-js-impact-chart-data]');
+        if (!node) return null;
+
+        try {
+            var payload = JSON.parse(node.textContent || '{}');
+            if (!payload || !Array.isArray(payload.sources)) return null;
+            return payload;
+        } catch (error) {
+            return null;
         }
+    }
 
-        function renderImpactCounter(counter, value) {
-            var decimals = Number(counter.dataset.decimals || 0);
-            var suffix = counter.dataset.suffix || '';
-            counter.textContent = formatImpactNumber(value, decimals) + suffix;
-        }
-
-        function animateImpactCounter(counter) {
-            var target = Number(counter.dataset.value || 0);
-            var duration = 1150;
-            var startedAt = performance.now();
-
-            function frame(now) {
-                var progress = Math.min(1, (now - startedAt) / duration);
-                var eased = 1 - Math.pow(1 - progress, 3);
-                renderImpactCounter(counter, target * eased);
-                if (progress < 1) {
-                    counterFrames.push(window.requestAnimationFrame(frame));
-                }
-            }
-
-            counterFrames.push(window.requestAnimationFrame(frame));
-        }
-
-        function getImpactSourceData() {
-            return impactSources.map(function (source, index) {
-                var value = Math.max(0, Number(source.dataset.impactValue) || 0);
-                var sourceId = source.dataset.impactSource;
-                var labelNode = source.querySelector('.ba-impact__source-label');
-                var label = labelNode ? labelNode.textContent.trim() : sourceId;
-                var counter = source.querySelector('[data-impact-counter]');
-                var segment = impactSegments.find(function (item) {
-                    return item.dataset.impactSource === sourceId;
-                });
-
+    function buildOption(root, chartElement, payload) {
+        var computed = window.getComputedStyle(root);
+        var fontFamily = computed.fontFamily || 'YekanBakh, IRANSans, Tahoma, Arial, sans-serif';
+        var trackColor = readCssValue(root, '--ba-impact-chart-track', '#e7eeea');
+        var labelBackground = readCssValue(root, '--ba-impact-label-bg', 'rgba(255,255,255,.97)');
+        var labelBorder = readCssValue(root, '--ba-impact-label-border', '#dfe8e3');
+        var labelNameColor = readCssValue(root, '--ba-impact-label-name', '#485c52');
+        var labelWidth = readCssNumber(root, '--ba-impact-label-width', 132);
+        var labelRadius = readCssNumber(root, '--ba-impact-label-radius', 13);
+        var nameSize = readCssNumber(root, '--ba-impact-label-name-size', 11);
+        var valueSize = readCssNumber(root, '--ba-impact-label-value-size', 16);
+        var lineLength = readCssNumber(root, '--ba-impact-label-line-length', 8);
+        var decimals = Math.max(0, Math.min(3, Number(payload.decimals) || 0));
+        var unit = String(payload.unit || '').trim();
+        var sources = payload.sources
+            .map(function (source) {
                 return {
-                    source: source,
-                    sourceId: sourceId,
-                    label: label,
-                    value: value,
-                    counter: counter,
-                    segment: segment,
-                    index: index
+                    name: String(source.name || '').trim(),
+                    value: Math.max(0, Number(source.value) || 0),
+                    color: String(source.color || '#06783a')
                 };
-            });
-        }
-
-        function syncImpactFundingData() {
-            var sourceData = getImpactSourceData();
-            var total = sourceData.reduce(function (sum, item) {
-                return sum + item.value;
-            }, 0);
-            var cumulativeShare = 0;
-
-            sourceData.forEach(function (item, index) {
-                var rawShare = total > 0 ? item.value / total * 100 : 0;
-                var gap = rawShare > 0 ? Math.min(impactSegmentGap, rawShare * .22) : 0;
-                var visibleShare = Math.max(0, rawShare - gap);
-                var angleShare = total > 0
-                    ? cumulativeShare + visibleShare / 2
-                    : (index + .5) / Math.max(1, sourceData.length) * 100;
-                var angle = angleShare * 3.6;
-
-                item.source.dataset.impactAngle = angle.toFixed(4);
-
-                if (item.segment) {
-                    item.segment.style.setProperty('--ba-impact-segment-dash', visibleShare.toFixed(4) + ' ' + (100 - visibleShare).toFixed(4));
-                    item.segment.style.setProperty('--ba-impact-segment-offset', (-cumulativeShare).toFixed(4));
-                    item.segment.dataset.impactValue = String(item.value);
-
-                    var itemDecimals = item.counter ? Number(item.counter.dataset.decimals || impactDecimals) : impactDecimals;
-                    var itemSuffix = item.counter ? (item.counter.dataset.suffix || '') : (impactUnit ? ' ' + impactUnit : '');
-                    item.segment.setAttribute('aria-label', item.label + '، ' + formatImpactNumber(item.value, itemDecimals) + itemSuffix);
-                }
-
-                if (item.counter) {
-                    item.counter.dataset.value = String(item.value);
-                    renderImpactCounter(item.counter, item.value);
-                }
-
-                cumulativeShare += rawShare;
+            })
+            .filter(function (source) {
+                return source.name || source.value > 0;
             });
 
-            impactTotalCounters.forEach(function (counter) {
-                counter.dataset.value = String(total);
-                renderImpactCounter(counter, total);
-            });
-
-            if (impactDesc) {
-                var details = sourceData.map(function (item) {
-                    return item.label + ' ' + formatImpactNumber(item.value, impactDecimals) + (impactUnit ? ' ' + impactUnit : '');
-                }).join('، ');
-                impactDesc.textContent = 'مقادیر منابع: ' + details + '. مجموع منابع ' + formatImpactNumber(total, impactDecimals) + (impactUnit ? ' ' + impactUnit : '') + '.';
+        var rich = {
+            name: {
+                color: labelNameColor,
+                fontFamily: fontFamily,
+                fontSize: nameSize,
+                fontWeight: 500,
+                lineHeight: Math.round(nameSize * 1.55),
+                width: Math.max(60, labelWidth - 28),
+                align: 'right',
+                overflow: 'truncate'
             }
-
-            impactDataInitialized = true;
-            positionImpactSourceCards();
-        }
-
-        function setImpactSourceActive(source, active) {
-            impactSegments.concat(impactSources).forEach(function (element) {
-                if (element.dataset.impactSource === source) {
-                    element.classList.toggle('is-active', active);
-                }
-            });
-        }
-
-        function resolveImpactCardCollisions(items, visualHeight, inset) {
-            var gap = 8;
-
-            ['left', 'right'].forEach(function (side) {
-                var group = items
-                    .filter(function (item) {
-                        return item.side === side;
-                    })
-                    .sort(function (a, b) {
-                        return a.cardCenterY - b.cardCenterY;
-                    });
-
-                if (!group.length) return;
-
-                group.forEach(function (item, index) {
-                    var minY = Math.max(
-                        item.halfHeight + inset,
-                        item.baseCenterY - impactMaxCollisionShift
-                    );
-                    var maxY = Math.min(
-                        visualHeight - item.halfHeight - inset,
-                        item.baseCenterY + impactMaxCollisionShift
-                    );
-
-                    item.cardCenterY = Math.max(minY, Math.min(maxY, item.cardCenterY));
-
-                    if (index === 0) return;
-
-                    var previous = group[index - 1];
-                    var requiredY = previous.cardCenterY + previous.halfHeight + gap + item.halfHeight;
-                    item.cardCenterY = Math.min(maxY, Math.max(item.cardCenterY, requiredY));
-                });
-
-                for (var index = group.length - 1; index >= 0; index--) {
-                    var item = group[index];
-                    var minY = Math.max(
-                        item.halfHeight + inset,
-                        item.baseCenterY - impactMaxCollisionShift
-                    );
-                    var maxY = Math.min(
-                        visualHeight - item.halfHeight - inset,
-                        item.baseCenterY + impactMaxCollisionShift
-                    );
-
-                    if (index === group.length - 1) {
-                        item.cardCenterY = Math.max(minY, Math.min(maxY, item.cardCenterY));
-                        continue;
-                    }
-
-                    var next = group[index + 1];
-                    var allowedY = next.cardCenterY - next.halfHeight - gap - item.halfHeight;
-                    item.cardCenterY = Math.max(minY, Math.min(item.cardCenterY, allowedY));
-                }
-            });
-        }
-
-        function getImpactSegmentAnchor(angle, chartRect, visualRect) {
-            var centerX = chartRect.left - visualRect.left + chartRect.width / 2;
-            var centerY = chartRect.top - visualRect.top + chartRect.height / 2;
-            var scale = Math.min(chartRect.width, chartRect.height) / impactChartViewBoxSize;
-            var outerRadius = impactDonutOuterRadius * scale;
-            var radialX = Math.sin(angle);
-            var radialY = -Math.cos(angle);
-
-            return {
-                centerX: centerX,
-                centerY: centerY,
-                radialX: radialX,
-                radialY: radialY,
-                outerRadius: outerRadius,
-                segmentX: centerX + radialX * outerRadius,
-                segmentY: centerY + radialY * outerRadius
-            };
-        }
-
-        function applyImpactConnector(source, halfWidth, halfHeight, cardCenterX, cardCenterY, segmentX, segmentY) {
-            var dx = segmentX - cardCenterX;
-            var dy = segmentY - cardCenterY;
-            var distance = Math.hypot(dx, dy) || 1;
-            var unitX = dx / distance;
-            var unitY = dy / distance;
-            var edgeDistanceX = Math.abs(unitX) > .001 ? halfWidth / Math.abs(unitX) : Infinity;
-            var edgeDistanceY = Math.abs(unitY) > .001 ? halfHeight / Math.abs(unitY) : Infinity;
-            var cardEdgeDistance = Math.min(edgeDistanceX, edgeDistanceY);
-            var startX = halfWidth + unitX * cardEdgeDistance;
-            var startY = halfHeight + unitY * cardEdgeDistance;
-            var connectorLength = Math.max(0, distance - cardEdgeDistance);
-            var connectorAngle = Math.atan2(unitY, unitX);
-
-            source.style.setProperty('--ba-impact-connector-start-x', startX + 'px');
-            source.style.setProperty('--ba-impact-connector-start-y', startY + 'px');
-            source.style.setProperty('--ba-impact-connector-length', connectorLength + 'px');
-            source.style.setProperty('--ba-impact-connector-angle', connectorAngle + 'rad');
-        }
-
-        function positionImpactSourceCards() {
-            var visual = impactFunding.querySelector('.ba-impact__funding-visual');
-            var chartWrap = impactFunding.querySelector('.ba-impact__chart-wrap');
-            if (!visual || !chartWrap) return;
-
-            if (window.innerWidth <= 760) {
-                impactSources.forEach(function (source) {
-                    source.style.removeProperty('left');
-                    source.style.removeProperty('top');
-                    source.style.removeProperty('--ba-impact-connector-angle');
-                    source.style.removeProperty('--ba-impact-connector-length');
-                    source.style.removeProperty('--ba-impact-connector-start-x');
-                    source.style.removeProperty('--ba-impact-connector-start-y');
-                });
-                return;
-            }
-
-            var visualRect = visual.getBoundingClientRect();
-            var chartRect = chartWrap.getBoundingClientRect();
-
-            var layoutItems = impactSources.map(function (source) {
-                var angle = Number(source.dataset.impactAngle || 0) * Math.PI / 180;
-                var anchor = getImpactSegmentAnchor(angle, chartRect, visualRect);
-                var radialX = anchor.radialX;
-                var radialY = anchor.radialY;
-                var cardWidth = source.offsetWidth;
-                var cardHeight = source.offsetHeight;
-                var halfWidth = cardWidth / 2;
-                var halfHeight = cardHeight / 2;
-                var edgeDistanceX = Math.abs(radialX) > .001 ? halfWidth / Math.abs(radialX) : Infinity;
-                var edgeDistanceY = Math.abs(radialY) > .001 ? halfHeight / Math.abs(radialY) : Infinity;
-                var cardEdgeDistance = Math.min(edgeDistanceX, edgeDistanceY);
-                var cardCenterX = anchor.segmentX + radialX * (impactCardGap + cardEdgeDistance);
-                var cardCenterY = anchor.segmentY + radialY * (impactCardGap + cardEdgeDistance);
-
-                cardCenterX = Math.max(
-                    halfWidth + impactVisualInset,
-                    Math.min(visualRect.width - halfWidth - impactVisualInset, cardCenterX)
-                );
-                cardCenterY = Math.max(
-                    halfHeight + impactVisualInset,
-                    Math.min(visualRect.height - halfHeight - impactVisualInset, cardCenterY)
-                );
-
-                return {
-                    source: source,
-                    angle: angle,
-                    halfWidth: halfWidth,
-                    halfHeight: halfHeight,
-                    cardCenterX: cardCenterX,
-                    cardCenterY: cardCenterY,
-                    baseCenterY: cardCenterY,
-                    segmentX: anchor.segmentX,
-                    segmentY: anchor.segmentY,
-                    side: radialX >= 0 ? 'right' : 'left'
-                };
-            });
-
-            resolveImpactCardCollisions(layoutItems, visualRect.height, impactVisualInset);
-
-            layoutItems.forEach(function (item) {
-                var source = item.source;
-                var halfWidth = item.halfWidth;
-                var halfHeight = item.halfHeight;
-                var cardCenterX = item.cardCenterX;
-                var cardCenterY = item.cardCenterY;
-                var segmentX = item.segmentX;
-                var segmentY = item.segmentY;
-
-                source.style.left = cardCenterX + 'px';
-                source.style.top = cardCenterY + 'px';
-                source.dataset.impactSegmentX = segmentX.toFixed(2);
-                source.dataset.impactSegmentY = segmentY.toFixed(2);
-
-                applyImpactConnector(
-                    source,
-                    halfWidth,
-                    halfHeight,
-                    cardCenterX,
-                    cardCenterY,
-                    segmentX,
-                    segmentY
-                );
-            });
-
-            impactLastVisualWidth = visualRect.width;
-            impactLastVisualHeight = visualRect.height;
-        }
-
-        function bindHover(element) {
-            var enter = function () {
-                setImpactSourceActive(element.dataset.impactSource, true);
-            };
-            var leave = function () {
-                setImpactSourceActive(element.dataset.impactSource, false);
-            };
-
-            element.addEventListener('mouseenter', enter);
-            element.addEventListener('mouseleave', leave);
-
-            cleanups.push(function () {
-                element.removeEventListener('mouseenter', enter);
-                element.removeEventListener('mouseleave', leave);
-            });
-        }
-
-        impactSegments.forEach(bindHover);
-        impactSources.forEach(bindHover);
-
-        syncImpactFundingData();
-
-        var resize = function () {
-            if (impactLayoutFrame) window.cancelAnimationFrame(impactLayoutFrame);
-            impactLayoutFrame = window.requestAnimationFrame(positionImpactSourceCards);
         };
-        window.addEventListener('resize', resize);
-        cleanups.push(function () {
-            window.removeEventListener('resize', resize);
+
+        sources.forEach(function (source, index) {
+            rich['dot' + index] = {
+                color: source.color,
+                fontFamily: fontFamily,
+                fontSize: Math.max(12, valueSize),
+                fontWeight: 900,
+                lineHeight: Math.round(valueSize * 1.25),
+                width: 14,
+                align: 'center'
+            };
+            rich['value' + index] = {
+                color: source.color,
+                fontFamily: fontFamily,
+                fontSize: valueSize,
+                fontWeight: 900,
+                lineHeight: Math.round(valueSize * 1.35),
+                width: labelWidth,
+                align: 'right'
+            };
         });
 
-        if ('ResizeObserver' in window) {
-            impactResizeObserver = new ResizeObserver(function (entries) {
-                var entry = entries && entries[0];
-                if (!entry) return;
-
-                var width = entry.contentRect.width;
-                var height = entry.contentRect.height;
-                var widthChanged = impactLastVisualWidth === null || Math.abs(width - impactLastVisualWidth) > 2;
-                var heightChanged = impactLastVisualHeight === null || Math.abs(height - impactLastVisualHeight) > 2;
-
-                if (!widthChanged && !heightChanged) return;
-
-                impactLastVisualWidth = width;
-                impactLastVisualHeight = height;
-
-                if (impactLayoutFrame) window.cancelAnimationFrame(impactLayoutFrame);
-                impactLayoutFrame = window.requestAnimationFrame(positionImpactSourceCards);
-            });
-
-            var visual = impactFunding.querySelector('.ba-impact__funding-visual');
-            if (visual) impactResizeObserver.observe(visual);
-        }
-
-        if ('MutationObserver' in window) {
-            impactValueObserver = new MutationObserver(function (mutations) {
-                var hasValueChange = mutations.some(function (mutation) {
-                    return mutation.type === 'attributes' && mutation.attributeName === 'data-impact-value';
-                });
-                if (!hasValueChange) return;
-                syncImpactFundingData();
-            });
-
-            impactSources.forEach(function (source) {
-                impactValueObserver.observe(source, {
-                    attributes: true,
-                    attributeFilter: ['data-impact-value']
-                });
-            });
-        }
-
-        function revealImpactFunding() {
-            impactFunding.classList.add('is-visible');
-            var impactCounters = Array.prototype.slice.call(impactFunding.querySelectorAll('[data-impact-counter]'));
-
-            impactCounters.forEach(function (counter, index) {
-                var timeout = window.setTimeout(function () {
-                    animateImpactCounter(counter);
-                }, index * 55);
-                counterTimeouts.push(timeout);
-            });
-        }
-
-        if (reduceImpactMotion || !('IntersectionObserver' in window)) {
-            impactFunding.classList.add('is-visible');
-        } else {
-            impactFunding.classList.add('is-animation-ready');
-            impactObserver = new IntersectionObserver(function (entries) {
-                var visible = entries.some(function (entry) {
-                    return entry.isIntersecting;
-                });
-                if (!visible || !impactDataInitialized) return;
-
-                revealImpactFunding();
-                impactObserver.disconnect();
-                impactObserver = null;
-            }, { threshold: .3 });
-
-            impactObserver.observe(impactFunding);
-        }
-
-        cleanups.push(function () {
-            if (impactLayoutFrame) window.cancelAnimationFrame(impactLayoutFrame);
-            if (impactResizeObserver) impactResizeObserver.disconnect();
-            if (impactValueObserver) impactValueObserver.disconnect();
-            if (impactObserver) impactObserver.disconnect();
-
-            counterTimeouts.forEach(function (timeout) {
-                window.clearTimeout(timeout);
-            });
-            counterFrames.forEach(function (frame) {
-                window.cancelAnimationFrame(frame);
-            });
-
-            impactFunding.classList.remove('is-animation-ready', 'is-visible');
-            impactSegments.concat(impactSources).forEach(function (element) {
-                element.classList.remove('is-active');
-            });
+        var data = sources.map(function (source) {
+            return {
+                name: source.name,
+                value: source.value,
+                itemStyle: {
+                    color: source.color
+                },
+                labelLine: {
+                    lineStyle: {
+                        color: source.color,
+                        opacity: .62,
+                        width: 1
+                    }
+                }
+            };
         });
+
+        var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+        return {
+            backgroundColor: 'transparent',
+            animation: !reduceMotion,
+            animationDuration: 850,
+            animationDurationUpdate: 350,
+            animationEasing: 'cubicOut',
+            richInheritPlainLabel: false,
+            aria: {
+                enabled: true,
+                description: sources.map(function (source) {
+                    return source.name + ' ' + formatNumber(source.value, decimals) + (unit ? ' ' + unit : '');
+                }).join('، ')
+            },
+            tooltip: {
+                show: false
+            },
+            series: [
+                {
+                    type: 'pie',
+                    silent: true,
+                    radius: ['42%', '58%'],
+                    center: ['50%', '50%'],
+                    animation: false,
+                    label: { show: false },
+                    labelLine: { show: false },
+                    data: [
+                        {
+                            value: 1,
+                            itemStyle: {
+                                color: trackColor
+                            }
+                        }
+                    ],
+                    z: 0
+                },
+                {
+                    type: 'pie',
+                    radius: ['42%', '58%'],
+                    center: ['50%', '50%'],
+                    startAngle: 90,
+                    clockwise: true,
+                    padAngle: sources.length > 1 ? 2 : 0,
+                    avoidLabelOverlap: true,
+                    stillShowZeroSum: false,
+                    selectedMode: false,
+                    minShowLabelAngle: 0,
+                    itemStyle: {
+                        borderWidth: 0
+                    },
+                    label: {
+                        show: true,
+                        position: 'outside',
+                        align: 'right',
+                        distanceToLabelLine: 3,
+                        backgroundColor: labelBackground,
+                        borderColor: labelBorder,
+                        borderWidth: 1,
+                        borderRadius: labelRadius,
+                        padding: [8, 10],
+                        width: labelWidth,
+                        shadowColor: 'rgba(7,76,44,.055)',
+                        shadowBlur: 10,
+                        shadowOffsetY: 4,
+                        fontFamily: fontFamily,
+                        formatter: function (params) {
+                            var index = params.dataIndex;
+                            var source = sources[index];
+                            if (!source) return '';
+                            var valueText = formatNumber(source.value, decimals) + (unit ? ' ' + unit : '');
+                            return '{dot' + index + '|●} {name|' + escapeRichText(source.name) + '}\n{value' + index + '|' + escapeRichText(valueText) + '}';
+                        },
+                        rich: rich
+                    },
+                    labelLine: {
+                        show: true,
+                        length: lineLength,
+                        length2: Math.max(4, Math.round(lineLength * .75)),
+                        smooth: false
+                    },
+                    labelLayout: {
+                        moveOverlap: 'shiftY',
+                        hideOverlap: false
+                    },
+                    emphasis: {
+                        scale: true,
+                        scaleSize: 4,
+                        itemStyle: {
+                            shadowBlur: 8,
+                            shadowColor: 'rgba(7,76,44,.16)'
+                        }
+                    },
+                    data: data,
+                    z: 1
+                }
+            ]
+        };
     }
 
     function init(root) {
@@ -468,9 +230,36 @@
 
         destroy(root);
 
-        var cleanups = [];
-        states.set(root, { cleanups: cleanups });
-        initFunding(root, cleanups);
+        var chartElement = root.querySelector('[data-js-impact-chart]');
+        var payload = parsePayload(root);
+
+        if (!chartElement || !payload || !window.echarts) return;
+
+        var chart = window.echarts.init(chartElement, null, {
+            renderer: 'svg'
+        });
+
+        chart.setOption(buildOption(root, chartElement, payload), true);
+
+        var state = {
+            chart: chart,
+            resizeObserver: null,
+            resizeHandler: null
+        };
+
+        if ('ResizeObserver' in window) {
+            state.resizeObserver = new ResizeObserver(function () {
+                if (!chart.isDisposed()) chart.resize();
+            });
+            state.resizeObserver.observe(chartElement);
+        } else {
+            state.resizeHandler = function () {
+                if (!chart.isDisposed()) chart.resize();
+            };
+            window.addEventListener('resize', state.resizeHandler);
+        }
+
+        states.set(root, state);
     }
 
     function initDocument() {

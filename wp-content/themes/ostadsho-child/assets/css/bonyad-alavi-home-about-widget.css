@@ -1,6 +1,6 @@
 /* Homepage About / Impact widget.
- * Baseline follows the final #about / .ba-impact cascade in the redesign reference.
- * Dynamic source values only feed CSS custom properties for donut geometry and source colors.
+ * Donut rendering and external label layout are delegated to local Apache ECharts.
+ * Elementor Style controls are empty by default and only override CSS variables after explicit edits.
  */
 
 .ba-home-about-widget {
@@ -11,6 +11,15 @@
   --ink: #163027;
   --muted: #67766f;
   --max: 1280px;
+  --ba-impact-chart-track: #e7eeea;
+  --ba-impact-label-bg: rgba(255, 255, 255, .97);
+  --ba-impact-label-border: #dfe8e3;
+  --ba-impact-label-name: #485c52;
+  --ba-impact-label-width: 132px;
+  --ba-impact-label-radius: 13px;
+  --ba-impact-label-name-size: 11px;
+  --ba-impact-label-value-size: 16px;
+  --ba-impact-label-line-length: 8px;
   background: linear-gradient(180deg, #fbfdfc 0%, #f6faf8 100%);
   padding: 68px 0 64px;
   color: var(--ink);
@@ -47,7 +56,6 @@
   overflow: hidden;
   background: #fff;
   border: 1px solid #dbe8e0;
-  border-top: 1px solid #dbe8e0;
   border-radius: 22px;
   box-shadow: 0 10px 30px rgba(7, 76, 44, .045);
 }
@@ -121,8 +129,7 @@
   gap: 8px;
   font-size: 13px;
   font-weight: 900;
-  border: 1px solid transparent;
-  border-color: #b9d7c5;
+  border: 1px solid #b9d7c5;
   color: var(--green-700);
   background: #fff;
   border-radius: 10px;
@@ -167,60 +174,28 @@
 .ba-home-about-widget .ba-impact__funding-visual {
   position: relative;
   min-height: 405px;
-  display: grid;
-  place-items: center;
 }
 
 .ba-home-about-widget .ba-impact__chart-wrap {
-  position: relative;
-  width: min(68%, 310px);
-  aspect-ratio: 1;
-  display: grid;
-  place-items: center;
+  position: absolute;
+  inset: 0;
+  min-width: 0;
+  min-height: 0;
 }
 
 .ba-home-about-widget .ba-impact__chart {
-  display: block;
   width: 100%;
   height: 100%;
-  overflow: visible;
-  transform: rotate(-90deg);
-}
-
-.ba-home-about-widget .ba-impact__donut-track,
-.ba-home-about-widget .ba-impact__donut-segment {
-  fill: none;
-  stroke-width: 34;
-}
-
-.ba-home-about-widget .ba-impact__donut-track {
-  stroke: #e7eeea;
-}
-
-.ba-home-about-widget .ba-impact__donut-segment {
-  --ba-impact-segment-dash: 0 100;
-  --ba-impact-segment-offset: 0;
-  --ba-impact-segment-color: var(--green);
-  --ba-impact-segment-delay: 0s;
-  stroke: var(--ba-impact-segment-color);
-  stroke-dasharray: var(--ba-impact-segment-dash);
-  stroke-dashoffset: var(--ba-impact-segment-offset);
-  stroke-linecap: butt;
-  transform-origin: 50% 50%;
-  transition: stroke-width .2s ease, filter .2s ease, opacity .2s ease;
-  cursor: default;
-}
-
-.ba-home-about-widget .ba-impact__donut-segment.is-active {
-  stroke-width: 40;
-  filter: drop-shadow(0 4px 5px rgba(7, 76, 44, .16));
+  min-height: 405px;
 }
 
 .ba-home-about-widget .ba-impact__donut-center {
   position: absolute;
-  inset: 50% auto auto 50%;
+  z-index: 3;
+  left: 50%;
+  top: 50%;
   transform: translate(-50%, -50%);
-  width: 48%;
+  width: clamp(112px, 30%, 148px);
   aspect-ratio: 1;
   border-radius: 50%;
   display: flex;
@@ -253,78 +228,6 @@
   margin-top: 4px;
   color: var(--muted);
   font-size: 10px;
-}
-
-.ba-home-about-widget .ba-impact__source-card {
-  --ba-impact-source-color: var(--green);
-  --ba-impact-connector-angle: 0rad;
-  --ba-impact-connector-length: 0px;
-  --ba-impact-connector-start-x: 50%;
-  --ba-impact-connector-start-y: 50%;
-  --ba-impact-card-delay: 0s;
-  position: absolute;
-  z-index: 2;
-  width: 154px;
-  min-height: 68px;
-  padding: 10px 11px;
-  display: flex;
-  align-items: center;
-  gap: 9px;
-  background: rgba(255, 255, 255, .97);
-  border: 1px solid #dfe8e3;
-  border-radius: 13px;
-  box-shadow: 0 7px 20px rgba(7, 76, 44, .055);
-  transform: translate(-50%, -50%);
-  transition: transform .2s ease, border-color .2s ease, box-shadow .2s ease, opacity .45s ease;
-}
-
-.ba-home-about-widget .ba-impact__source-card::after {
-  content: "";
-  position: absolute;
-  left: var(--ba-impact-connector-start-x);
-  top: var(--ba-impact-connector-start-y);
-  width: var(--ba-impact-connector-length);
-  height: 1px;
-  background: color-mix(in srgb, var(--ba-impact-source-color) 58%, #dce7e1);
-  transform: rotate(var(--ba-impact-connector-angle));
-  transform-origin: 0 50%;
-  pointer-events: none;
-}
-.ba-home-about-widget .ba-impact__source-card.is-active {
-  transform: translate(-50%, calc(-50% - 2px));
-  border-color: color-mix(in srgb, var(--ba-impact-source-color) 55%, #dce7e1);
-  box-shadow: 0 12px 26px rgba(7, 76, 44, .1);
-}
-
-.ba-home-about-widget .ba-impact__source-dot {
-  width: 10px;
-  height: 10px;
-  flex: none;
-  border-radius: 50%;
-  background: var(--ba-impact-source-color);
-  box-shadow: 0 0 0 4px color-mix(in srgb, var(--ba-impact-source-color) 12%, transparent);
-}
-
-.ba-home-about-widget .ba-impact__source-copy {
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-}
-
-.ba-home-about-widget .ba-impact__source-label {
-  color: #485c52;
-  font-size: 11px;
-  line-height: 1.55;
-}
-
-.ba-home-about-widget .ba-impact__source-value {
-  color: var(--ba-impact-source-color);
-  font-size: 16px;
-  font-weight: 900;
-  line-height: 1.25;
-  direction: ltr;
-  text-align: right;
 }
 
 .ba-home-about-widget .ba-impact__summary {
@@ -390,35 +293,6 @@
   text-align: right;
 }
 
-.ba-home-about-widget .ba-impact__funding.is-animation-ready .ba-impact__donut-segment {
-  stroke-dasharray: 0 100;
-}
-
-.ba-home-about-widget .ba-impact__funding.is-animation-ready .ba-impact__source-card {
-  opacity: 0;
-  transform: translate(-50%, calc(-50% + 10px));
-}
-
-.ba-home-about-widget .ba-impact__funding.is-animation-ready.is-visible .ba-impact__donut-segment {
-  animation: ba-home-about-donut-draw .85s cubic-bezier(.2, .72, .25, 1) both;
-  animation-delay: var(--ba-impact-segment-delay);
-}
-
-.ba-home-about-widget .ba-impact__funding.is-animation-ready.is-visible .ba-impact__source-card {
-  opacity: 1;
-  transform: translate(-50%, -50%);
-  transition-delay: var(--ba-impact-card-delay);
-}
-
-@keyframes ba-home-about-donut-draw {
-  from {
-    stroke-dasharray: 0 100;
-  }
-  to {
-    stroke-dasharray: var(--ba-impact-segment-dash);
-  }
-}
-
 @media (max-width: 1080px) {
   .ba-home-about-widget {
     padding: 58px 0 56px;
@@ -426,8 +300,6 @@
 
   .ba-home-about-widget .ba-impact__grid {
     grid-template-columns: 1fr;
-    gap: 0;
-    padding: 0;
   }
 
   .ba-home-about-widget .ba-impact__content {
@@ -446,14 +318,18 @@
     min-height: 430px;
   }
 
-  .ba-home-about-widget .ba-impact__chart-wrap {
-    width: min(58%, 320px);
+  .ba-home-about-widget .ba-impact__chart {
+    min-height: 430px;
   }
 }
 
 @media (max-width: 760px) {
   .ba-home-about-widget {
     padding: 46px 0 44px;
+    --ba-impact-label-width: 116px;
+    --ba-impact-label-name-size: 10px;
+    --ba-impact-label-value-size: 15px;
+    --ba-impact-label-line-length: 6px;
   }
 
   .ba-home-about-widget .ba-container {
@@ -461,8 +337,6 @@
   }
 
   .ba-home-about-widget .ba-impact__grid {
-    padding: 0;
-    gap: 0;
     border-radius: 18px;
   }
 
@@ -477,49 +351,15 @@
   .ba-home-about-widget .ba-impact__funding {
     padding: 16px 14px 14px;
     gap: 13px;
-    border-radius: 0;
   }
 
   .ba-home-about-widget .ba-impact__funding-head {
     align-items: flex-start;
   }
 
-  .ba-home-about-widget .ba-impact__funding-visual {
-    min-height: 0;
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 9px;
-  }
-
-  .ba-home-about-widget .ba-impact__chart-wrap {
-    grid-column: 1 / -1;
-    width: min(82%, 320px);
-    margin: 0 auto 5px;
-  }
-
-  .ba-home-about-widget .ba-impact__source-card {
-    position: relative;
-    left: auto !important;
-    top: auto !important;
-    width: auto;
-    min-height: 66px;
-    transform: none;
-  }
-
-  .ba-home-about-widget .ba-impact__source-card::after {
-    display: none;
-  }
-
-  .ba-home-about-widget .ba-impact__source-card.is-active {
-    transform: translateY(-2px);
-  }
-
-  .ba-home-about-widget .ba-impact__funding.is-animation-ready .ba-impact__source-card {
-    transform: translateY(10px);
-  }
-
-  .ba-home-about-widget .ba-impact__funding.is-animation-ready.is-visible .ba-impact__source-card {
-    transform: none;
+  .ba-home-about-widget .ba-impact__funding-visual,
+  .ba-home-about-widget .ba-impact__chart {
+    min-height: 380px;
   }
 
   .ba-home-about-widget .ba-impact__summary-item {
@@ -541,6 +381,13 @@
 }
 
 @media (max-width: 430px) {
+  .ba-home-about-widget {
+    --ba-impact-label-width: 104px;
+    --ba-impact-label-name-size: 9px;
+    --ba-impact-label-value-size: 14px;
+    --ba-impact-label-line-length: 5px;
+  }
+
   .ba-home-about-widget .ba-impact__content {
     padding: 20px 15px 18px;
   }
@@ -558,21 +405,9 @@
     gap: 2px;
   }
 
-  .ba-home-about-widget .ba-impact__funding-visual {
-    grid-template-columns: 1fr;
-  }
-
-  .ba-home-about-widget .ba-impact__chart-wrap {
-    grid-column: auto;
-    width: min(88%, 300px);
-  }
-
-  .ba-home-about-widget .ba-impact__source-label {
-    font-size: 10px;
-  }
-
-  .ba-home-about-widget .ba-impact__source-value {
-    font-size: 15px;
+  .ba-home-about-widget .ba-impact__funding-visual,
+  .ba-home-about-widget .ba-impact__chart {
+    min-height: 350px;
   }
 
   .ba-home-about-widget .ba-impact__summary {
@@ -582,24 +417,5 @@
   .ba-home-about-widget .ba-impact__summary-item + .ba-impact__summary-item {
     border-inline-start: 0;
     border-top: 1px solid #e1e9e5;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .ba-home-about-widget .ba-impact__funding.is-animation-ready .ba-impact__donut-segment {
-    stroke-dasharray: var(--ba-impact-segment-dash);
-    animation: none;
-  }
-
-  .ba-home-about-widget .ba-impact__funding.is-animation-ready .ba-impact__source-card {
-    opacity: 1;
-    transform: translate(-50%, -50%);
-    transition: none;
-  }
-
-  @media (max-width: 760px) {
-    .ba-home-about-widget .ba-impact__funding.is-animation-ready .ba-impact__source-card {
-      transform: none;
-    }
   }
 }
