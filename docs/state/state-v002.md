@@ -523,3 +523,13 @@ Date: 2026-10-03
 - code commit: `04720f6e0287fdfb73778ef840149ad945ecf1d0`.
 
 Current contract: [MODULE-HOME-ABOUT](../modules/theme-home-about-widget.md).
+
+## STATE-002-026 — About CTA hover simplified to solid green
+
+Date: 2026-10-03
+
+- removed the gold underline/pseudo-element hover effect completely.
+- hover now uses solid `var(--green-700)` background and border with white text.
+- the existing 2px lift and subtle green shadow remain.
+- active returns to baseline and reduced-motion still disables movement/transition.
+- no extra markup or JavaScript is used.

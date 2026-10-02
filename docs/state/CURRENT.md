@@ -28,8 +28,8 @@ AFE release goal همچنان live acceptance نسخه 1.0.28 و رفع blocker 
 - radius ECharts همان `['42%','58%']` است و chart heights تغییر نکرده‌اند.
 - سکشن در هر سه breakpoint متراکم‌تر شده: desktop 56/52، <=1080 50/48، <=760 40/38 و <=430 36/34؛ content/funding padding نیز کم شده است.
 - ECharts مالک arc geometry، external label layout، labelLine و overlap handling است؛ chart با RTL isolation و edge-aligned labels از clipping جلوگیری می‌کند.
-- دکمه‌های `ba-impact__actions` hover برندمحور دارند: lift حداکثر 2px، shadow سبز ملایم و accent طلایی؛ reduced-motion حرکت را خاموش می‌کند.
-- source commits: `6c326cd0d5e87862ab72f89f74c59d881f778872`, `04720f6e0287fdfb73778ef840149ad945ecf1d0`.
+- دکمه‌های `ba-impact__actions` در hover حداکثر 2px بالا می‌آیند، پس‌زمینه و border سبز می‌شوند و متن سفید می‌شود؛ افکت خط/زیرخط حذف شده و reduced-motion حرکت را خاموش می‌کند.
+- source commits: `6c326cd0d5e87862ab72f89f74c59d881f778872`, `04720f6e0287fdfb73778ef840149ad945ecf1d0`, `PENDING_HOVER_UPDATE`.
 - latest redesign commits: `70e47cf5f918fe92fc993e573057de977db87093`, `56346827a618ebd44b8a2537fdb69b102bca775b`.
 
 ### Homepage Live Stats Elementor widget

@@ -48,6 +48,15 @@ Actions Repeater:
 - URL
 - type = primary / secondary
 
+Action hover contract:
+- 200ms transition
+- maximum 2px lift
+- hover background/border = `var(--green-700)`
+- hover text = white
+- subtle green shadow
+- no underline/gold pseudo-element effect
+- reduced-motion disables movement/transition
+
 Funding:
 - unit
 - display decimals
