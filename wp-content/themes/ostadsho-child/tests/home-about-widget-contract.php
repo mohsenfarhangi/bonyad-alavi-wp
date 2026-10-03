@@ -30,6 +30,7 @@ $checks = array(
 	'echarts-version'          => str_contains($echarts, '6.1.0') && str_contains($echarts, 'Apache Software Foundation'),
 	'echarts-pie'              => str_contains($js, "type: 'pie'") && str_contains($js, "radius: ['42%', '58%']"),
 	'echarts-label-layout'     => str_contains($js, 'avoidLabelOverlap: true') && str_contains($js, "moveOverlap: 'shiftY'") && str_contains($js, "alignTo: 'edge'") && str_contains($js, 'edgeDistance: edgeDistance') && str_contains($js, 'bleedMargin:') && str_contains($js, 'labelLine:'),
+	'label-unit-order'         => str_contains($js, "var valueText = (unit ? unit + ' ' : '') + formatNumber(source.value, decimals);"),
 	'echarts-local-init'       => str_contains($js, 'window.echarts.init') && str_contains($js, "renderer: 'svg'"),
 	'minimal-resize'           => str_contains($js, 'ResizeObserver') && str_contains($js, 'chart.resize()'),
 	'old-layout-js-removed'    => !str_contains($js, 'resolveImpactCardCollisions') && !str_contains($js, 'positionImpactSourceCards') && !str_contains($js, 'MutationObserver') && !str_contains($js, 'IntersectionObserver') && !str_contains($js, 'impactSegmentX') && !str_contains($js, 'impactSegmentY'),
