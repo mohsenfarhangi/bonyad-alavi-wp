@@ -73,6 +73,11 @@ final class BA_Elementor_Assets {
 			'bonyad-alavi-home-about-widget',
 			'assets/css/bonyad-alavi-home-about-widget.css'
 		);
+
+		$this->register_style(
+			'bonyad-alavi-home-news-widget',
+			'assets/css/bonyad-alavi-home-news-widget.css'
+		);
 	}
 
 	/**
@@ -223,6 +228,7 @@ final class BA_Elementor_Widgets_Registrar {
 		require_once get_stylesheet_directory() . '/inc/elementor/widgets/class-bonyad-alavi-home-quick-links-widget.php';
 		require_once get_stylesheet_directory() . '/inc/elementor/widgets/class-bonyad-alavi-home-live-stats-widget.php';
 		require_once get_stylesheet_directory() . '/inc/elementor/widgets/class-bonyad-alavi-home-about-widget.php';
+		require_once get_stylesheet_directory() . '/inc/elementor/widgets/class-bonyad-alavi-home-news-widget.php';
 
 		$widgets_manager->register( new \Bonyad_Alavi_Participation_Widget() );
 		$widgets_manager->register( new \Bonyad_Alavi_Product_Gallery_Widget() );
@@ -231,6 +237,7 @@ final class BA_Elementor_Widgets_Registrar {
 		$widgets_manager->register( new \Bonyad_Alavi_Home_Quick_Links_Widget() );
 		$widgets_manager->register( new \Bonyad_Alavi_Home_Live_Stats_Widget() );
 		$widgets_manager->register( new \Bonyad_Alavi_Home_About_Widget() );
+		$widgets_manager->register( new \Bonyad_Alavi_Home_News_Widget() );
 	}
 }
 

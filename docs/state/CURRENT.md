@@ -1,6 +1,6 @@
 # Current Project State
 
-آخرین بازبینی: **2026-10-02**
+آخرین بازبینی: **2026-10-03**
 
 ## Project Phase
 
@@ -11,11 +11,25 @@
 
 ## Current Goal
 
-ویجت Elementor سکشن `#about` / `ba-impact` با Apache ECharts محلی پیاده‌سازی شده است. ساختار funding اکنون بدون header و بدون Summary card است و فقط KPI خدمات‌گیرندگان مستقیم به‌صورت unboxed زیر نمودار باقی مانده؛ مرحله باز، پذیرش بصری/رفتاری در Elementor واقعی است.
+ویجت Elementor سکشن `#news` / `ba-news` اکنون به‌صورت Query-driven و مطابق reference صفحه اصلی پیاده‌سازی شده است؛ مرحله باز، پذیرش بصری/رفتاری و Query در Elementor/WordPress واقعی است. پذیرش زنده About/Impact نیز همچنان باز است.
 
 AFE release goal همچنان live acceptance نسخه 1.0.28 و رفع blocker واقعی پیش از production promotion است.
 
 ## Recently Completed
+
+### Homepage News Elementor widget
+- ویجت `bonyad_alavi_home_news` به child theme و دسته «بنیاد علوی» اضافه شد.
+- baseline markup/CSS از `redesign/index.html#news`، `components.css` و `home.css` حفظ شده است؛ root اضافی `ba-home-news-widget` فقط scope قالب است.
+- گرید reference بدون JavaScript باقی مانده: desktop چهار ستون، tablet دو ستون و mobile یک ستون.
+- اخبار از `BA_Content_Query_Service::create_query( $settings, 'news' )` و `WP_Query` تغذیه می‌شوند؛ default چهار نوشته آخر `post` با ترتیب تاریخ DESC است.
+- Query controls شامل Post Type، تعداد، category/tag، author، search، include/exclude IDs، order/orderby، offset، sticky behavior، date range و Taxonomy Query ساختاریافته با relation/operator/field/include_children است.
+- `BA_Content_Query_Service` برای search و generic tax_query توسعه یافت؛ prefixهای قبلی بدون تنظیمات جدید همان رفتار قبلی را حفظ می‌کنند.
+- تاریخ کارت از تاریخ واقعی نوشته با `get_the_date()` تولید می‌شود؛ فرمت پیش‌فرض `F Y` است و فارسی‌ساز سایت مسئول تبدیل شمسی/ارقام است.
+- برچسب کارت به‌صورت پیش‌فرض اولین category است و taxonomy قابل تغییر/خاموش‌شدن است.
+- تصویر و عنوان هر دو به permalink متصل‌اند؛ خبر بدون featured image یک placeholder داخلی و بدون asset خارجی دارد.
+- متن/لینک «همه اخبار» کنترل مستقل دارند و اگر هرکدام خالی باشد اکشن رندر نمی‌شود.
+- Style controls بدون visual default هستند و فقط override صریح کاربر CSS reference را تغییر می‌دهد.
+- source commits: `bcf67bacac8cca89a91cc4fee3a32f9fc31dbae3`, `6ca7b8be560db0921f3655a10f4ec2ceb981d653`.
 
 ### Homepage About / Impact Elementor widget
 - ویجت `bonyad_alavi_home_about` Intro / CTA / Funding Sources / KPI خدمات‌گیرندگان را از Elementor مدیریت می‌کند.
@@ -142,6 +156,7 @@ Open release work برای AFE:
 - [MODULE-HOME-QUICK-LINKS](../modules/theme-home-quick-links-widget.md)
 - [MODULE-HOME-LIVE-STATS](../modules/theme-home-live-stats-widget.md)
 - [MODULE-HOME-ABOUT](../modules/theme-home-about-widget.md)
+- [MODULE-HOME-NEWS](../modules/theme-home-news-widget.md)
 
 ## Tests Status
 
@@ -158,6 +173,8 @@ Real MeliPayamak test: PASS reported by project administrator on 2026-09-04.
 Theme legacy v0.6.5 docs recorded PHP/JS syntax + ZIP checks for that patch.
 
 برای فرم تماس با ما regression `tests/contact-form-definition.php` اضافه شده است؛ source/test روی draft محلی PHP lint شدند و نسخه commit‌شده از GitHub برای slug، Geo province، required fields، admin email action و theme registration بازبینی استاتیک شد. **اجرای regression در checkout کامل repository و live WordPress هنوز در این session انجام نشده است.**
+
+برای News صفحه اصلی regression contract `tests/home-news-widget-contract.php` اضافه شده است. روی نسخه commit‌شده، registration، نبود JS dependency، shared WP_Query service، کنترل‌های core/advanced Query، فرمت تاریخ، clickable title، placeholder، شرط نمایش «همه اخبار»، markup/CSS reference و responsive 4/2/1 به‌صورت استاتیک از GitHub بررسی و همگی PASS شدند. **PHP lint و اجرای regression در checkout کامل repository و live WordPress/Elementor در این session اجرا نشده‌اند.**
 
 برای About/Impact صفحه اصلی regression contract `tests/home-about-widget-contract.php` علاوه بر ECharts، حذف کامل funding-head/Summary، KPI ساده خدمات‌گیرندگان، density responsive و ثابت‌ماندن chart height/radius را guard می‌کند. JavaScript نسخه commit‌شده با parser V8 بدون خطا parse شد. **PHP lint به‌دلیل عدم resolve شدن raw GitHub در shell این session اجرا نشد و live WordPress/Elementor acceptance هنوز باز است.**
 
@@ -180,7 +197,7 @@ Historical PASSهای AFE/Theme به HEAD جدید تعمیم داده نمی‌
 
 ## Next Agent Handoff
 
-**Current task:** About/Impact با ECharts محلی، بدون funding-head و بدون Summary card، و با KPI unboxed خدمات‌گیرندگان زیر نمودار پیاده‌سازی شده است؛ مرحله باز بعدی live Elementor visual/interaction acceptance است.
+**Current task:** News صفحه اصلی به ویجت مستقل Query-driven تبدیل شده و reference 4/2/1، تاریخ قابل‌فرمت، category label، placeholder و لینک‌های کارت را حفظ می‌کند؛ مرحله باز بعدی live Elementor visual/query acceptance است. About/Impact نیز همچنان live acceptance باز دارد.
 
 **Start here:** [../INDEX.md](../INDEX.md) → [../modules/INDEX.md](../modules/INDEX.md).
 

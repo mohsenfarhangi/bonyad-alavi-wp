@@ -37,8 +37,10 @@ final class BA_Content_Query_Service {
 		$categories  = array_map( 'absint', (array) $this->value( $settings, $prefix . '_categories', array() ) );
 		$tags        = array_map( 'absint', (array) $this->value( $settings, $prefix . '_tags', array() ) );
 		$authors     = array_map( 'absint', (array) $this->value( $settings, $prefix . '_authors', array() ) );
-		$after       = sanitize_text_field( $this->value( $settings, $prefix . '_date_after', '' ) );
-		$before      = sanitize_text_field( $this->value( $settings, $prefix . '_date_before', '' ) );
+		$search      = sanitize_text_field( (string) $this->value( $settings, $prefix . '_search', '' ) );
+		$after       = sanitize_text_field( (string) $this->value( $settings, $prefix . '_date_after', '' ) );
+		$before      = sanitize_text_field( (string) $this->value( $settings, $prefix . '_date_before', '' ) );
+		$tax_query   = $this->build_tax_query( $settings, $prefix );
 
 		if ( $include_ids ) {
 			$args['post__in'] = $include_ids;
@@ -60,6 +62,10 @@ final class BA_Content_Query_Service {
 			$args['author__in'] = array_values( array_filter( $authors ) );
 		}
 
+		if ( '' !== $search ) {
+			$args['s'] = $search;
+		}
+
 		if ( $after || $before ) {
 			$date_clause = array( 'inclusive' => true );
 			if ( $after ) {
@@ -71,7 +77,95 @@ final class BA_Content_Query_Service {
 			$args['date_query'] = array( $date_clause );
 		}
 
+		if ( $tax_query ) {
+			$args['tax_query'] = $tax_query;
+		}
+
 		return new WP_Query( $args );
+	}
+
+	/**
+	 * Taxonomy Query ساختاریافته Elementor را به قرارداد WP_Query تبدیل می‌کند.
+	 *
+	 * @param array  $settings تنظیمات ویجت.
+	 * @param string $prefix   پیشوند کنترل‌ها.
+	 * @return array
+	 */
+	private function build_tax_query( array $settings, $prefix ) {
+		$rows = $this->value( $settings, $prefix . '_tax_query', array() );
+		if ( ! is_array( $rows ) || ! $rows ) {
+			return array();
+		}
+
+		$clauses = array();
+
+		foreach ( $rows as $row ) {
+			if ( ! is_array( $row ) ) {
+				continue;
+			}
+
+			$taxonomy = sanitize_key( (string) ( $row['taxonomy'] ?? '' ) );
+			$field    = (string) ( $row['field'] ?? 'term_id' );
+			$operator = strtoupper( (string) ( $row['operator'] ?? 'IN' ) );
+
+			if ( ! taxonomy_exists( $taxonomy ) ) {
+				continue;
+			}
+
+			if ( ! in_array( $field, array( 'term_id', 'slug', 'name' ), true ) ) {
+				$field = 'term_id';
+			}
+
+			if ( ! in_array( $operator, array( 'IN', 'NOT IN', 'AND' ), true ) ) {
+				$operator = 'IN';
+			}
+
+			$terms = $this->parse_terms( $row['terms'] ?? '', $field );
+			if ( ! $terms ) {
+				continue;
+			}
+
+			$clauses[] = array(
+				'taxonomy'         => $taxonomy,
+				'field'            => $field,
+				'terms'            => $terms,
+				'operator'         => $operator,
+				'include_children' => 'yes' === ( $row['include_children'] ?? 'yes' ),
+			);
+		}
+
+		if ( ! $clauses ) {
+			return array();
+		}
+
+		$relation = 'OR' === strtoupper( (string) $this->value( $settings, $prefix . '_tax_relation', 'AND' ) ) ? 'OR' : 'AND';
+
+		return array_merge( array( 'relation' => $relation ), $clauses );
+	}
+
+	/**
+	 * مقدار terms را با توجه به field انتخابی normalize می‌کند.
+	 *
+	 * @param mixed  $value مقدار کنترل.
+	 * @param string $field field مربوط به tax_query.
+	 * @return array
+	 */
+	private function parse_terms( $value, $field ) {
+		$pattern = 'term_id' === $field ? '/[\s,]+/u' : '/[\r\n,]+/u';
+		$values  = is_array( $value ) ? $value : preg_split( $pattern, (string) $value );
+		$values  = is_array( $values ) ? array_filter( array_map( 'trim', $values ), 'strlen' ) : array();
+
+		if ( 'term_id' === $field ) {
+			return array_values( array_unique( array_filter( array_map( 'absint', $values ) ) ) );
+		}
+
+		if ( 'slug' === $field ) {
+			$values = array_map( 'sanitize_title', $values );
+		} else {
+			$values = array_map( 'sanitize_text_field', $values );
+		}
+
+		return array_values( array_unique( array_filter( $values, 'strlen' ) ) );
 	}
 
 	/**
@@ -85,7 +179,6 @@ final class BA_Content_Query_Service {
 	private function value( array $settings, $key, $default = '' ) {
 		return isset( $settings[ $key ] ) ? $settings[ $key ] : $default;
 	}
-
 
 	/**
 	 * مقدار مرتب‌سازی را به گزینه‌های امن WP_Query محدود می‌کند.
