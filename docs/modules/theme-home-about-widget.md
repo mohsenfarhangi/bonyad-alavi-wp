@@ -116,7 +116,7 @@ Rendering:
 - SVG renderer
 - chart container is `direction:ltr; unicode-bidi:isolate`
 - Persian text remains right-aligned inside rich tokens
-- value labels render as `واحد + عدد` in the isolated LTR chart context so the unit appears visually on the left side of the number
+- هر لیبل در دو خط رندر می‌شود: **مقدار عددی در خط بالا** و **نقطه رنگی + عنوان منبع در خط پایین**.
 - source names wrap instead of truncate
 - reduced-motion disables chart animation
 - ResizeObserver only triggers `chart.resize()`

@@ -200,7 +200,7 @@
                             var source = sources[index];
                             if (!source) return '';
                             var valueText = formatNumber(source.value, decimals);
-                            return '{dot' + index + '|●} {name|' + escapeRichText(source.name) + '}\n{value' + index + '|' + escapeRichText(valueText) + '}';
+                            return '{value' + index + '|' + escapeRichText(valueText) + '}\n{dot' + index + '|●} {name|' + escapeRichText(source.name) + '}';
                         },
                         rich: rich
                     },

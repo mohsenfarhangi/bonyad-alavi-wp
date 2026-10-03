@@ -556,3 +556,16 @@ Date: 2026-10-03
 - code commits: `bcf67bacac8cca89a91cc4fee3a32f9fc31dbae3`, `6ca7b8be560db0921f3655a10f4ec2ceb981d653`.
 
 Current contract: [MODULE-HOME-NEWS](../modules/theme-home-news-widget.md).
+
+
+## STATE-002-029 — About donut labels show value above source name
+
+Date: 2026-10-03
+
+- visual order of ECharts external labels changed without changing donut geometry or labelLine ownership.
+- each label now renders the numeric value on the first line.
+- colored dot + source name render on the second line.
+- existing label edge alignment, overlap handling, colors, typography controls and responsive chart dimensions remain unchanged.
+- regression contract now guards the value-first formatter order.
+
+Current contract: [MODULE-HOME-ABOUT](../modules/theme-home-about-widget.md).
