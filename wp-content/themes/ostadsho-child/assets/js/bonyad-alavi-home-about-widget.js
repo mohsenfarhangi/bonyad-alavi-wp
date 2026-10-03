@@ -9,7 +9,6 @@
 
         if (state.resizeObserver) state.resizeObserver.disconnect();
         if (state.resizeHandler) window.removeEventListener('resize', state.resizeHandler);
-        if (state.chart && state.syncValueRows) state.chart.off('rendered', state.syncValueRows);
         if (state.chart && !state.chart.isDisposed()) state.chart.dispose();
 
         states.delete(root);
@@ -47,55 +46,6 @@
         } catch (error) {
             return null;
         }
-    }
-
-    function compactText(value) {
-        return String(value == null ? '' : value).replace(/\s+/g, '');
-    }
-
-    function syncHtmlValueRows(chartElement, payload) {
-        var chartWrap = chartElement.parentElement;
-        var overlay = chartWrap && chartWrap.querySelector('[data-js-impact-chart-values]');
-        var svg = chartElement.querySelector('svg');
-        if (!overlay || !svg || !payload || !Array.isArray(payload.sources)) return;
-
-        var chartRect = chartElement.getBoundingClientRect();
-        var styleSource = chartElement.closest('.ba-impact__funding') || chartElement;
-        var labelWidth = readCssNumber(styleSource, '--ba-impact-label-width', 132);
-        var valueSize = readCssNumber(styleSource, '--ba-impact-label-value-size', 16);
-        var valueLineHeight = Math.round(valueSize * 1.35);
-        var textNodes = Array.prototype.slice.call(svg.querySelectorAll('text'));
-        var usedNodes = [];
-
-        payload.sources.forEach(function (source, index) {
-            var row = overlay.querySelector('[data-impact-value-index="' + index + '"]');
-            if (!row) return;
-
-            var sourceKey = compactText(source && source.name);
-            var labelNode = null;
-
-            for (var nodeIndex = 0; nodeIndex < textNodes.length; nodeIndex++) {
-                if (usedNodes.indexOf(nodeIndex) !== -1) continue;
-
-                var nodeText = compactText(textNodes[nodeIndex].textContent);
-                if (sourceKey && nodeText.indexOf(sourceKey) !== -1) {
-                    labelNode = textNodes[nodeIndex];
-                    usedNodes.push(nodeIndex);
-                    break;
-                }
-            }
-
-            if (!labelNode) {
-                row.style.opacity = '0';
-                return;
-            }
-
-            var labelRect = labelNode.getBoundingClientRect();
-            row.style.left = (labelRect.left - chartRect.left) + 'px';
-            row.style.top = (labelRect.bottom - chartRect.top - valueLineHeight) + 'px';
-            row.style.width = Math.max(labelWidth, labelRect.width) + 'px';
-            row.style.opacity = '1';
-        });
     }
 
     function buildOption(root, chartElement, payload) {
@@ -136,16 +86,6 @@
                 width: Math.max(60, labelWidth - 28),
                 align: 'right',
                 overflow: 'break'
-            },
-            valueSpace: {
-                color: 'transparent',
-                fontFamily: fontFamily,
-                fontSize: valueSize,
-                fontWeight: 900,
-                lineHeight: Math.round(valueSize * 1.35),
-                height: Math.round(valueSize * 1.35),
-                width: labelWidth,
-                align: 'right'
             }
         };
 
@@ -158,6 +98,15 @@
                 lineHeight: Math.round(valueSize * 1.25),
                 width: 14,
                 align: 'center'
+            };
+            rich['value' + index] = {
+                color: source.color,
+                fontFamily: fontFamily,
+                fontSize: valueSize,
+                fontWeight: 900,
+                lineHeight: Math.round(valueSize * 1.35),
+                width: labelWidth,
+                align: 'right'
             };
         });
 
@@ -250,7 +199,8 @@
                             var index = params.dataIndex;
                             var source = sources[index];
                             if (!source) return '';
-                            return '{dot' + index + '|●} {name|' + escapeRichText(source.name) + '}\n{valueSpace| }';
+                            var valueText = formatNumber(source.value, decimals);
+                            return '{dot' + index + '|●} {name|' + escapeRichText(source.name) + '}\n{value' + index + '|' + escapeRichText(valueText) + '}';
                         },
                         rich: rich
                     },
@@ -293,19 +243,12 @@
             renderer: 'svg'
         });
 
-        var syncValueRows = function () {
-            syncHtmlValueRows(chartElement, payload);
-        };
-
-        chart.on('rendered', syncValueRows);
         chart.setOption(buildOption(root, chartElement, payload), true);
-        window.requestAnimationFrame(syncValueRows);
 
         var state = {
             chart: chart,
             resizeObserver: null,
-            resizeHandler: null,
-            syncValueRows: syncValueRows
+            resizeHandler: null
         };
 
         if ('ResizeObserver' in window) {
