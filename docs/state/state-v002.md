@@ -534,3 +534,25 @@ Date: 2026-10-03
 - active returns to baseline and reduced-motion still disables movement/transition.
 - no extra markup or JavaScript is used.
 - code commit: `132cfc1490c192afebacf34293fde883a6707f45`.
+
+
+## STATE-002-028 — Homepage News converted to Query-driven Elementor widget
+
+Date: 2026-10-03
+
+- reference source: `bonyad-alavi-redesign/redesign/index.html#news` plus shared `components.css` and `home.css`.
+- new Elementor widget: `bonyad_alavi_home_news`.
+- DOM keeps `ba-news`, `ba-section-heading`, `ba-news__grid`, `ba-news-card` and `ba-card--news`; `ba-home-news-widget` is only a CSS scope.
+- default query is four latest published `post` items ordered by date DESC via `BA_Content_Query_Service`.
+- query UI covers post type/count/category/tag/author/search/include/exclude/order/orderby/offset/sticky/date range plus structured generic Taxonomy Query.
+- shared query service gained search and generic `tax_query` parsing; prior widget prefixes keep their previous behavior when these settings are absent.
+- card date uses `get_the_date()` with configurable format and default `F Y`; the site's Persian date plugin remains responsible for Jalali conversion.
+- first category is the default card label; display taxonomy is configurable and may be disabled.
+- featured image and title both link to the post; missing image renders an internal placeholder while preserving 16:9 geometry.
+- «همه اخبار» is rendered only when both its text and URL are present.
+- no widget JavaScript was added; reference responsive grid remains 4 columns desktop, 2 tablet, 1 mobile.
+- regression contract added at `wp-content/themes/ostadsho-child/tests/home-news-widget-contract.php`.
+- static contract checks against committed GitHub sources: PASS; live WordPress/Elementor acceptance and PHP runtime checks remain pending.
+- code commit: `bcf67bacac8cca89a91cc4fee3a32f9fc31dbae3`.
+
+Current contract: [MODULE-HOME-NEWS](../modules/theme-home-news-widget.md).
