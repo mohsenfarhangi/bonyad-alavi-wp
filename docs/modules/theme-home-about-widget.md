@@ -116,9 +116,7 @@ Rendering:
 - SVG renderer
 - chart container is `direction:ltr; unicode-bidi:isolate`
 - Persian text remains right-aligned inside rich tokens
-- ECharts SVG label keeps only the source title and a transparent reserved second line. The visible value line is real HTML in `ba-impact__chart-values`.
-- each value row contains two actual spans: `ba-impact__chart-value-number` and `ba-impact__chart-value-unit`.
-- the row uses `display:flex; direction:ltr`; CSS `order` keeps the unit at the visual left (`unit:1`, `number:2`) independently of bidi text behavior.
+- value labels render as `واحد + عدد` in the isolated LTR chart context so the unit appears visually on the left side of the number
 - source names wrap instead of truncate
 - reduced-motion disables chart animation
 - ResizeObserver only triggers `chart.resize()`
