@@ -151,8 +151,9 @@ final class BA_Content_Query_Service {
 	 * @return array
 	 */
 	private function parse_terms( $value, $field ) {
-		$values = is_array( $value ) ? $value : preg_split( '/[\s,]+/u', (string) $value );
-		$values = is_array( $values ) ? array_filter( array_map( 'trim', $values ), 'strlen' ) : array();
+		$pattern = 'term_id' === $field ? '/[\s,]+/u' : '/[\r\n,]+/u';
+		$values  = is_array( $value ) ? $value : preg_split( $pattern, (string) $value );
+		$values  = is_array( $values ) ? array_filter( array_map( 'trim', $values ), 'strlen' ) : array();
 
 		if ( 'term_id' === $field ) {
 			return array_values( array_unique( array_filter( array_map( 'absint', $values ) ) ) );

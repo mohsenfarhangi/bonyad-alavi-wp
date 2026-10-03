@@ -697,11 +697,12 @@ final class Bonyad_Alavi_Home_News_Widget extends Widget_Base {
 		$this->add_control(
 			'ref_image_hover_scale',
 			array(
-				'label'      => 'Zoom تصویر در Hover',
-				'type'       => Controls_Manager::SLIDER,
-				'size_units' => array(),
-				'range'      => array( 'px' => array( 'min' => 1, 'max' => 1.2, 'step' => 0.01 ) ),
-				'selectors'  => array( '{{WRAPPER}} .ba-home-news-widget .ba-news-card:hover .ba-news-card__media img' => 'transform: scale({{SIZE}});' ),
+				'label'     => 'Zoom تصویر در Hover',
+				'type'      => Controls_Manager::NUMBER,
+				'min'       => 1,
+				'max'       => 1.2,
+				'step'      => 0.01,
+				'selectors' => array( '{{WRAPPER}} .ba-home-news-widget .ba-news-card:hover .ba-news-card__media img' => 'transform: scale({{VALUE}});' ),
 			)
 		);
 		$this->add_responsive_control(
