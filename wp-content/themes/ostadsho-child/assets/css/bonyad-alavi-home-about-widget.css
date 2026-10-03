@@ -198,6 +198,44 @@
   unicode-bidi: isolate;
 }
 
+.ba-home-about-widget .ba-impact__chart-values {
+  position: absolute;
+  z-index: 2;
+  inset: 0;
+  pointer-events: none;
+  direction: ltr;
+}
+
+.ba-home-about-widget .ba-impact__chart-value-row {
+  position: absolute;
+  display: flex;
+  flex-direction: row;
+  align-items: baseline;
+  justify-content: flex-end;
+  gap: 4px;
+  color: var(--ba-impact-source-color);
+  font-family: inherit;
+  font-size: var(--ba-impact-label-value-size);
+  font-weight: 900;
+  line-height: 1.35;
+  white-space: nowrap;
+  direction: ltr;
+  opacity: 0;
+}
+
+.ba-home-about-widget .ba-impact__chart-value-number {
+  order: 2;
+  direction: ltr;
+  unicode-bidi: isolate;
+}
+
+.ba-home-about-widget .ba-impact__chart-value-unit {
+  order: 1;
+  direction: rtl;
+  unicode-bidi: isolate;
+  font-weight: 800;
+}
+
 .ba-home-about-widget .ba-impact__donut-center {
   position: absolute;
   z-index: 3;

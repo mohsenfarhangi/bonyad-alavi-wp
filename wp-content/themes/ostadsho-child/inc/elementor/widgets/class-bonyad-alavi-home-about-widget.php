@@ -769,6 +769,18 @@ final class Bonyad_Alavi_Home_About_Widget extends Widget_Base {
 								role="img"
 								aria-label="ترکیب منابع اثرگذاری"
 							></div>
+							<div class="ba-impact__chart-values" data-js-impact-chart-values aria-hidden="true">
+								<?php foreach ( $sources as $source_index => $source ) : ?>
+									<div
+										class="ba-impact__chart-value-row"
+										data-impact-value-index="<?php echo esc_attr( (string) $source_index ); ?>"
+										style="--ba-impact-source-color:<?php echo esc_attr( $source['color'] ); ?>;"
+									>
+										<span class="ba-impact__chart-value-number"><?php echo esc_html( $this->format_number( $source['value'], $decimals ) ); ?></span>
+										<span class="ba-impact__chart-value-unit"><?php echo esc_html( $unit ); ?></span>
+									</div>
+								<?php endforeach; ?>
+							</div>
 						</div>
 
 						<div class="ba-impact__donut-center" aria-hidden="true">
