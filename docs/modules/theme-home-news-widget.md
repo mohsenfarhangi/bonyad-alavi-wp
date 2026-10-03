@@ -162,4 +162,4 @@ Guards:
 
 Static contract checks on the committed GitHub source passed after implementation. PHP lint/full regression and live WordPress/Elementor visual/query acceptance remain pending.
 
-**Source commit:** `bcf67bacac8cca89a91cc4fee3a32f9fc31dbae3`
+**Source commits:** `bcf67bacac8cca89a91cc4fee3a32f9fc31dbae3`, `6ca7b8be560db0921f3655a10f4ec2ceb981d653`

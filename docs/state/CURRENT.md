@@ -29,7 +29,7 @@ AFE release goal همچنان live acceptance نسخه 1.0.28 و رفع blocker 
 - تصویر و عنوان هر دو به permalink متصل‌اند؛ خبر بدون featured image یک placeholder داخلی و بدون asset خارجی دارد.
 - متن/لینک «همه اخبار» کنترل مستقل دارند و اگر هرکدام خالی باشد اکشن رندر نمی‌شود.
 - Style controls بدون visual default هستند و فقط override صریح کاربر CSS reference را تغییر می‌دهد.
-- source commit: `bcf67bacac8cca89a91cc4fee3a32f9fc31dbae3`.
+- source commits: `bcf67bacac8cca89a91cc4fee3a32f9fc31dbae3`, `6ca7b8be560db0921f3655a10f4ec2ceb981d653`.
 
 ### Homepage About / Impact Elementor widget
 - ویجت `bonyad_alavi_home_about` Intro / CTA / Funding Sources / KPI خدمات‌گیرندگان را از Elementor مدیریت می‌کند.

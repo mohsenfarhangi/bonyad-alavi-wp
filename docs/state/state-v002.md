@@ -553,6 +553,6 @@ Date: 2026-10-03
 - no widget JavaScript was added; reference responsive grid remains 4 columns desktop, 2 tablet, 1 mobile.
 - regression contract added at `wp-content/themes/ostadsho-child/tests/home-news-widget-contract.php`.
 - static contract checks against committed GitHub sources: PASS; live WordPress/Elementor acceptance and PHP runtime checks remain pending.
-- code commit: `bcf67bacac8cca89a91cc4fee3a32f9fc31dbae3`.
+- code commits: `bcf67bacac8cca89a91cc4fee3a32f9fc31dbae3`, `6ca7b8be560db0921f3655a10f4ec2ceb981d653`.
 
 Current contract: [MODULE-HOME-NEWS](../modules/theme-home-news-widget.md).
