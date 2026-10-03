@@ -1,51 +1,51 @@
 # MODULE-HOME-NEWS — Homepage News Elementor Widget
 
 **Status:** implemented / live acceptance pending  
-**Path:** \`wp-content/themes/ostadsho-child/inc/elementor/widgets/class-bonyad-alavi-home-news-widget.php\`  
-**Elementor name:** \`bonyad_alavi_home_news\`  
-**Reference:** \`mohsenfarhangi/bonyad-alavi-redesign/redesign/index.html\` → \`#news / .ba-news\`
+**Path:** `wp-content/themes/ostadsho-child/inc/elementor/widgets/class-bonyad-alavi-home-news-widget.php`  
+**Elementor name:** `bonyad_alavi_home_news`  
+**Reference:** `mohsenfarhangi/bonyad-alavi-redesign/redesign/index.html` → `#news / .ba-news`
 
 ## Purpose
 
-سکشن «آخرین اخبار» صفحه اصلی را به ویجت مستقل Elementor تبدیل می‌کند. ظاهر مرجع حفظ می‌شود اما آیتم‌ها به‌جای داده ثابت HTML مستقیماً از \`WP_Query\` و سرویس مشترک Query قالب خوانده می‌شوند.
+سکشن «آخرین اخبار» صفحه اصلی را به ویجت مستقل Elementor تبدیل می‌کند. ظاهر مرجع حفظ می‌شود اما آیتم‌ها به‌جای داده ثابت HTML مستقیماً از `WP_Query` و سرویس مشترک Query قالب خوانده می‌شوند.
 
 Assets:
-- \`assets/css/bonyad-alavi-home-news-widget.css\`
+- `assets/css/bonyad-alavi-home-news-widget.css`
 - JavaScript اختصاصی ندارد.
 
 Registration:
-- \`inc/elementor/elementor-widgets.php\`
-- CSS فقط register می‌شود و از \`get_style_depends()\` هنگام استفاده ویجت load می‌شود.
+- `inc/elementor/elementor-widgets.php`
+- CSS فقط register می‌شود و از `get_style_depends()` هنگام استفاده ویجت load می‌شود.
 
 ## Reference DOM Contract
 
 کلاس‌های اصلی reference حفظ شده‌اند:
-- \`ba-news\`
-- \`ba-container\`
-- \`ba-section-heading\`
-- \`ba-section-heading__copy\`
-- \`ba-section-heading__eyebrow\`
-- \`ba-section-heading__title\`
-- \`ba-section-heading__lead\`
-- \`ba-section-heading__action\`
-- \`ba-news__grid\`
-- \`ba-news-card ba-card ba-card--news\`
-- \`ba-news-card__media\`
-- \`ba-news-card__body\`
-- \`ba-news-card__category\`
-- \`ba-news-card__title\`
-- \`ba-news-card__meta\`
-- \`ba-news-card__date\`
-- \`ba-news-card__more\`
+- `ba-news`
+- `ba-container`
+- `ba-section-heading`
+- `ba-section-heading__copy`
+- `ba-section-heading__eyebrow`
+- `ba-section-heading__title`
+- `ba-section-heading__lead`
+- `ba-section-heading__action`
+- `ba-news__grid`
+- `ba-news-card ba-card ba-card--news`
+- `ba-news-card__media`
+- `ba-news-card__body`
+- `ba-news-card__category`
+- `ba-news-card__title`
+- `ba-news-card__meta`
+- `ba-news-card__date`
+- `ba-news-card__more`
 
-\`ba-home-news-widget\` فقط root scope است. anchor مرجع \`id="news"\` حفظ شده است.
+`ba-home-news-widget` فقط root scope است. anchor مرجع `id="news"` حفظ شده است.
 
 ## Content Controls
 
 Heading:
-- eyebrow؛ default = \`روایت اقدامات\`
-- title؛ default = \`آخرین اخبار\`
-- title HTML tag؛ default = \`h2\`
+- eyebrow؛ default = `روایت اقدامات`
+- title؛ default = `آخرین اخبار`
+- title HTML tag؛ default = `h2`
 - lead
 - «همه اخبار» text
 - «همه اخبار» URL
@@ -53,11 +53,11 @@ Heading:
 اکشن «همه اخبار» فقط وقتی رندر می‌شود که **هم متن و هم URL** غیرخالی باشند.
 
 Card presentation:
-- taxonomy برچسب کارت؛ default = \`category\`
-- date format؛ default = \`F Y\`
-- card more text؛ default = \`مشاهده\`
+- taxonomy برچسب کارت؛ default = `category`
+- date format؛ default = `F Y`
+- card more text؛ default = `مشاهده`
 
-تاریخ از خود نوشته با \`get_the_date( $date_format, $post )\` می‌آید. ویجت هیچ تبدیل Gregorian/Jalali انجام نمی‌دهد؛ فیلتر/افزونه فارسی‌ساز سایت authority تاریخ شمسی است.
+تاریخ از خود نوشته با `get_the_date( $date_format, $post )` می‌آید. ویجت هیچ تبدیل Gregorian/Jalali انجام نمی‌دهد؛ فیلتر/افزونه فارسی‌ساز سایت authority تاریخ شمسی است.
 
 برچسب کارت اولین term از taxonomy انتخابی است. با انتخاب گزینه «بدون برچسب» این قسمت رندر نمی‌شود.
 
@@ -67,15 +67,15 @@ Card presentation:
 
 Query از shared service ساخته می‌شود:
 
-\`BA_Content_Query_Service::create_query( $settings, 'news' )\`
+`BA_Content_Query_Service::create_query( $settings, 'news' )`
 
 Default:
-- post type = \`post\`
+- post type = `post`
 - posts per page = 4
-- orderby = \`date\`
-- order = \`DESC\`
+- orderby = `date`
+- order = `DESC`
 - ignore sticky = yes
-- post status در service ثابت = \`publish\`
+- post status در service ثابت = `publish`
 
 Controls:
 - Post Type
@@ -100,14 +100,14 @@ Controls:
   - operator = IN / NOT IN / AND
   - include_children
 
-Raw PHP args و \`post_status\` از UI قابل تزریق نیستند.
+Raw PHP args و `post_status` از UI قابل تزریق نیستند.
 
 ## Shared Query Service Extension
 
-\`class-ba-content-query-service.php\` اکنون علاوه بر contract قبلی، این keyهای اختیاری را می‌شناسد:
-- \`{prefix}_search\`
-- \`{prefix}_tax_relation\`
-- \`{prefix}_tax_query\`
+`class-ba-content-query-service.php` اکنون علاوه بر contract قبلی، این keyهای اختیاری را می‌شناسد:
+- `{prefix}_search`
+- `{prefix}_tax_relation`
+- `{prefix}_tax_query`
 
 نبود این keyها به معنی empty search/tax_query است؛ بنابراین Hero ticker و مصرف‌کننده‌های قبلی service بدون migration رفتار سابق را حفظ می‌کنند.
 
@@ -127,7 +127,7 @@ Reference baseline:
 - <=1080 = 58 / 62
 - <=760 = 48 / 50
 
-\`prefers-reduced-motion\` حرکت و transitionهای hover را خاموش می‌کند.
+`prefers-reduced-motion` حرکت و transitionهای hover را خاموش می‌کند.
 
 ## Style Controls
 
@@ -142,7 +142,7 @@ Sections:
 ## QA
 
 Regression:
-\`wp-content/themes/ostadsho-child/tests/home-news-widget-contract.php\`
+`wp-content/themes/ostadsho-child/tests/home-news-widget-contract.php`
 
 Guards:
 - widget slug / asset registration
@@ -151,7 +151,7 @@ Guards:
 - default 4 posts
 - core + advanced Query controls
 - service search/tax_query support
-- default \`F Y\` date format
+- default `F Y` date format
 - first-term label
 - clickable title
 - missing-image placeholder
@@ -162,4 +162,4 @@ Guards:
 
 Static contract checks on the committed GitHub source passed after implementation. PHP lint/full regression and live WordPress/Elementor visual/query acceptance remain pending.
 
-**Source commit:** \`bcf67bacac8cca89a91cc4fee3a32f9fc31dbae3\`
+**Source commit:** `bcf67bacac8cca89a91cc4fee3a32f9fc31dbae3`
