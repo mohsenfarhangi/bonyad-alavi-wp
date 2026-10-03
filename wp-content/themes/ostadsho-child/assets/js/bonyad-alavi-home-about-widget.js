@@ -199,7 +199,7 @@
                             var index = params.dataIndex;
                             var source = sources[index];
                             if (!source) return '';
-                            var valueText = formatNumber(source.value, decimals) + (unit ? ' ' + unit : '');
+                            var valueText = (unit ? unit + ' ' : '') + formatNumber(source.value, decimals);
                             return '{dot' + index + '|●} {name|' + escapeRichText(source.name) + '}\n{value' + index + '|' + escapeRichText(valueText) + '}';
                         },
                         rich: rich
