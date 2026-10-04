@@ -16,6 +16,7 @@
 | MODULE-HOME-LIVE-STATS | Homepage Live Stats Elementor Widget | homepage, live stats, counters, report, Elementor | Reference-faithful `ba-live-stats` widget with numeric repeater values and frontend-only Persian thousands formatting | [theme-home-live-stats-widget.md](theme-home-live-stats-widget.md) |
 | MODULE-HOME-ABOUT | Homepage About/Impact Elementor Widget | homepage, about, impact, donut, funding, summary, Elementor | Reference-faithful `ba-impact` widget with dynamic funding repeater, computed donut geometry and extensible summary | [theme-home-about-widget.md](theme-home-about-widget.md) |
 | MODULE-HOME-NEWS | Homepage News Elementor Widget | homepage, news, WP_Query, taxonomy, cards, Elementor | Reference-faithful `ba-news` widget with shared WP_Query service, configurable date/card metadata and responsive 4/2/1 grid | [theme-home-news-widget.md](theme-home-news-widget.md) |
+| MODULE-SECTION-HEADING | Reusable Section Heading Elementor Widget | section heading, eyebrow, title, lead, action, Elementor | Standalone reference-faithful `ba-section-heading` widget with Default/Stack/Card variants and scoped style controls | [theme-section-heading-widget.md](theme-section-heading-widget.md) |
 
 برای task فرم جهادی از `MODULE-JIHADI-FORM` شروع کن و در صورت تغییر Engine سپس `MODULE-AFE`/`MODULE-AFE-EXTENSION` را بخوان.
 
@@ -30,5 +31,7 @@
 برای تغییرات سکشن `#about` / `ba-impact` صفحه اصلی از `MODULE-HOME-ABOUT` شروع کن.
 
 برای تغییرات سکشن `#news` / `ba-news` صفحه اصلی از `MODULE-HOME-NEWS` شروع کن.
+
+برای ویجت عمومی `ba-section-heading` از `MODULE-SECTION-HEADING` شروع کن.
 
 برای task ابتدا فقط module مرتبط را بخوان. اگر module به ADR اشاره کرد، سپس فقط همان ADR را باز کن.

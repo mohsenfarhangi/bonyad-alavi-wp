@@ -6,7 +6,7 @@
 
 ## Purpose
 
-Child theme بنیاد علوی روی parent `ostadsho` integrationهای اختصاصی سایت را نگه می‌دارد: Elementor widgets/dynamic tags، Homepage Hero، Quick Links، Live Stats و About/Impact، admin settings، WooCommerce participation، product media، center content، shortcodes و product FAQ.
+Child theme بنیاد علوی روی parent `ostadsho` integrationهای اختصاصی سایت را نگه می‌دارد: Elementor widgets/dynamic tags، Homepage Hero، Quick Links، Live Stats، About/Impact و Section Heading عمومی، admin settings، WooCommerce participation، product media، center content، shortcodes و product FAQ.
 
 ## Composition
 
@@ -14,7 +14,7 @@ Child theme بنیاد علوی روی parent `ostadsho` integrationهای اخ�
 - parent/child styles و context-specific WooCommerce assets را enqueue می‌کند.
 - shortcodeها را load می‌کند.
 - admin repeater component و product FAQ را load می‌کند.
-- Elementor widgets/dynamic tags را load می‌کند؛ از جمله Hero، Quick Links، Live Stats، About/Impact و News صفحه اصلی با assetهای scoped و lazy registration توسط Elementor.
+- Elementor widgets/dynamic tags را load می‌کند؛ از جمله Hero، Quick Links، Live Stats، About/Impact، News صفحه اصلی و Section Heading عمومی با assetهای scoped و lazy registration توسط Elementor.
 - participation gateway/quick-checkout services را load می‌کند.
 - center settings service/tab را load می‌کند.
 - Source Definition فرم‌های پروژه‌ای شامل فرم جهادی و فرم تماس با ما را از `inc/forms/` load و با `afe_register_forms` ثبت می‌کند.
@@ -54,6 +54,7 @@ Subdirectories:
 - [MODULE-HOME-LIVE-STATS](theme-home-live-stats-widget.md) — گزارش برخط اقدامات با layout و typography دقیق reference
 - [MODULE-HOME-ABOUT](theme-home-about-widget.md) — معرفی بنیاد و نمودار منابع داینامیک مطابق `ba-impact` reference
 - [MODULE-HOME-NEWS](theme-home-news-widget.md) — آخرین اخبار Query-driven مطابق `ba-news` reference
+- [MODULE-SECTION-HEADING](theme-section-heading-widget.md) — ویجت عمومی عنوان سکشن مطابق `ba-section-heading` reference
 
 ## Version History
 

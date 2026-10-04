@@ -569,3 +569,23 @@ Date: 2026-10-03
 - regression contract now guards the value-first formatter order.
 
 Current contract: [MODULE-HOME-ABOUT](../modules/theme-home-about-widget.md).
+
+
+## STATE-002-030 — Reusable Section Heading Elementor widget added
+
+Date: 2026-10-04
+
+- new standalone Elementor widget: `bonyad_alavi_section_heading`.
+- intended for use anywhere in Elementor; existing News/About widgets intentionally remain unchanged.
+- reference contract comes from `redesign/assets/css/components.css` → `.ba-section-heading`.
+- content controls: eyebrow, title, title HTML tag, lead, action text and action URL.
+- empty content parts are omitted; action renders only when both text and URL exist.
+- action icon is the fixed reference arrow SVG; no Elementor Icon Control is exposed.
+- layout control has `Default`, `Stack` and `Card`; Card emits both `ba-section-heading--stack` and `ba-section-heading--card` to match the reference.
+- Style controls cover responsive spacing/alignment, eyebrow typography/line, title, lead/max-width and action normal/hover/icon size without injecting visual defaults.
+- CSS is scoped by `ba-section-heading-widget`; no JavaScript dependency was added.
+- regression contract: `wp-content/themes/ostadsho-child/tests/section-heading-widget-contract.php`.
+- static source checks PASS; PHP runtime lint and live Elementor visual acceptance remain pending.
+- code commit: `62090c810d12c849d6e588a30641534281f763af`.
+
+Current contract: [MODULE-SECTION-HEADING](../modules/theme-section-heading-widget.md).

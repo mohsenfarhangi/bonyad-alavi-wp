@@ -48,6 +48,7 @@
 - گزارش برخط اقدامات صفحه اصلی / `ba-live-stats` → `MODULE-HOME-LIVE-STATS`
 - معرفی بنیاد صفحه اصلی / `#about` / `ba-impact` → `MODULE-HOME-ABOUT`
 - آخرین اخبار صفحه اصلی / `#news` / `ba-news` → `MODULE-HOME-NEWS`
+- عنوان سکشن عمومی Elementor / `ba-section-heading` → `MODULE-SECTION-HEADING`
 
 شناسه و لینک دقیق همه آن‌ها در [docs/modules/INDEX.md](docs/modules/INDEX.md) است.
 

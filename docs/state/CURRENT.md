@@ -1,6 +1,6 @@
 # Current Project State
 
-آخرین بازبینی: **2026-10-03**
+آخرین بازبینی: **2026-10-04**
 
 ## Project Phase
 
@@ -11,11 +11,24 @@
 
 ## Current Goal
 
-ویجت Elementor سکشن `#news` / `ba-news` اکنون به‌صورت Query-driven و مطابق reference صفحه اصلی پیاده‌سازی شده است؛ مرحله باز، پذیرش بصری/رفتاری و Query در Elementor/WordPress واقعی است. پذیرش زنده About/Impact نیز همچنان باز است.
+ویجت عمومی Elementor برای `ba-section-heading` اکنون به‌صورت مستقل و قابل استفاده در هر جای Elementor پیاده‌سازی شده است؛ مرحله باز، پذیرش بصری در Elementor واقعی است. News و About/Impact implementation داخلی خودشان را بدون تغییر حفظ می‌کنند و live acceptance آن‌ها نیز همچنان باز است.
 
 AFE release goal همچنان live acceptance نسخه 1.0.28 و رفع blocker واقعی پیش از production promotion است.
 
 ## Recently Completed
+
+### Reusable Section Heading Elementor widget
+- ویجت مستقل `bonyad_alavi_section_heading` به دسته «بنیاد علوی» اضافه شد و در هر جای Elementor قابل استفاده است.
+- markup و baseline CSS از `ba-section-heading` در redesign reference گرفته شده است.
+- سه layout دارد: `Default`، `Stack` و `Card`؛ حالت Card همان contract مرجع `--stack + --card` را تولید می‌کند.
+- محتوا شامل eyebrow، title، title HTML tag، lead، action text و action URL است؛ هر بخش خالی رندر نمی‌شود.
+- اکشن فقط وقتی رندر می‌شود که متن و لینک هر دو موجود باشند؛ SVG فلش reference ثابت است و Icon Control اضافه نشده است.
+- Style controls برای layout/alignment/gap، eyebrow/line، title، lead/max-width و action/hover/icon size بدون visual default اضافه شده‌اند.
+- widget JavaScript ندارد و CSS با root `ba-section-heading-widget` scope شده است.
+- طبق تصمیم پروژه، News/About و سایر ویجت‌های موجود برای استفاده از این ویجت refactor نشده‌اند.
+- regression contract: `tests/section-heading-widget-contract.php`.
+- static contract verification روی source commit‌شده PASS شد؛ PHP lint و live Elementor acceptance هنوز اجرا نشده‌اند.
+- source commit: `62090c810d12c849d6e588a30641534281f763af`.
 
 ### Homepage News Elementor widget
 - ویجت `bonyad_alavi_home_news` به child theme و دسته «بنیاد علوی» اضافه شد.
@@ -157,6 +170,7 @@ Open release work برای AFE:
 - [MODULE-HOME-LIVE-STATS](../modules/theme-home-live-stats-widget.md)
 - [MODULE-HOME-ABOUT](../modules/theme-home-about-widget.md)
 - [MODULE-HOME-NEWS](../modules/theme-home-news-widget.md)
+- [MODULE-SECTION-HEADING](../modules/theme-section-heading-widget.md)
 
 ## Tests Status
 
@@ -173,6 +187,8 @@ Real MeliPayamak test: PASS reported by project administrator on 2026-09-04.
 Theme legacy v0.6.5 docs recorded PHP/JS syntax + ZIP checks for that patch.
 
 برای فرم تماس با ما regression `tests/contact-form-definition.php` اضافه شده است؛ source/test روی draft محلی PHP lint شدند و نسخه commit‌شده از GitHub برای slug، Geo province، required fields، admin email action و theme registration بازبینی استاتیک شد. **اجرای regression در checkout کامل repository و live WordPress هنوز در این session انجام نشده است.**
+
+برای Section Heading عمومی regression contract `tests/section-heading-widget-contract.php` اضافه شده است. registration، نبود JS dependency، سه variant، content controls، شرط اکشن، SVG ثابت، markup/CSS reference، responsive mobile و scope CSS به‌صورت استاتیک از GitHub بررسی و PASS شدند. **PHP lint و live WordPress/Elementor acceptance در این session اجرا نشده‌اند.**
 
 برای News صفحه اصلی regression contract `tests/home-news-widget-contract.php` اضافه شده است. روی نسخه commit‌شده، registration، نبود JS dependency، shared WP_Query service، کنترل‌های core/advanced Query، فرمت تاریخ، clickable title، placeholder، شرط نمایش «همه اخبار»، markup/CSS reference و responsive 4/2/1 به‌صورت استاتیک از GitHub بررسی و همگی PASS شدند. **PHP lint و اجرای regression در checkout کامل repository و live WordPress/Elementor در این session اجرا نشده‌اند.**
 
@@ -197,7 +213,7 @@ Historical PASSهای AFE/Theme به HEAD جدید تعمیم داده نمی‌
 
 ## Next Agent Handoff
 
-**Current task:** News صفحه اصلی به ویجت مستقل Query-driven تبدیل شده و reference 4/2/1، تاریخ قابل‌فرمت، category label، placeholder و لینک‌های کارت را حفظ می‌کند؛ مرحله باز بعدی live Elementor visual/query acceptance است. About/Impact نیز همچنان live acceptance باز دارد.
+**Current task:** ویجت عمومی `bonyad_alavi_section_heading` با سه variant مرجع ساخته شده و آماده live Elementor visual acceptance است. News/About عمداً refactor نشده‌اند و contract داخلی خودشان را حفظ می‌کنند.
 
 **Start here:** [../INDEX.md](../INDEX.md) → [../modules/INDEX.md](../modules/INDEX.md).
 
