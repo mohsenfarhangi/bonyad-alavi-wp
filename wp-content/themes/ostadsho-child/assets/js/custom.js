@@ -87,7 +87,8 @@
 
       .pweb_menu ul.alavi-overflow > li.alavi-more > ul.alavi-more-list {
         position: absolute !important;
-        top: calc(100% + 10px) !important;
+        top: 100% !important;
+        transition: none !important;
         right: auto !important;
         left: 0 !important;
         display: block;
@@ -232,15 +233,24 @@
       setOpen(dropdown.hidden);
     });
 
+    let closeTimer;
+
     more.addEventListener('mouseenter', () => {
+      clearTimeout(closeTimer);
       setOpen(true);
     });
 
     more.addEventListener('mouseleave', () => {
-      // هنگام استفاده از صفحه‌کلید، منو باز بماند.
-      if (!more.contains(document.activeElement)) {
-        setOpen(false);
-      }
+      clearTimeout(closeTimer);
+
+      closeTimer = setTimeout(() => {
+        if (
+            !more.matches(':hover') &&
+            !more.contains(document.activeElement)
+        ) {
+          setOpen(false);
+        }
+      }, 250);
     });
 
     button.addEventListener('keydown', event => {
