@@ -17,6 +17,15 @@ function my_theme_enqueue_styles()
         wp_get_theme()->get('Version')
     );
 
+    // Front-end custom behavior shared across all site pages.
+    wp_enqueue_script(
+        'ba-global-custom',
+        get_stylesheet_directory_uri() . '/assets/js/custom.js',
+        array(),
+        filemtime( get_stylesheet_directory() . '/assets/js/custom.js' ),
+        true
+    );
+
     if ( function_exists( 'is_cart' ) && is_cart() ) {
         wp_enqueue_style(
             'ba-participation-cart',
