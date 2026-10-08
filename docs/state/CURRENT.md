@@ -1,6 +1,6 @@
 # Current Project State
 
-آخرین بازبینی: **2026-10-04**
+آخرین بازبینی: **2026-10-08**
 
 ## Project Phase
 
@@ -16,6 +16,14 @@
 AFE release goal همچنان live acceptance نسخه 1.0.28 و رفع blocker واقعی پیش از production promotion است.
 
 ## Recently Completed
+
+### Global custom JavaScript in child theme
+- فایل `wp-content/themes/ostadsho-child/assets/js/custom.js` برای کدهای JS عمومی فرانت‌اند اضافه شد.
+- رفتار overflow منوی Elementor header با selector مشخص‌شده، بدون تغییر عملکردی، در این فایل قرار گرفت.
+- `functions.php` فایل را با handle `ba-global-custom` روی hook عمومی `wp_enqueue_scripts` و نسخه `filemtime` در فوتر بارگذاری می‌کند.
+- syntax فایل JS بررسی شد؛ تست مرورگری در سایت واقعی هنوز انجام نشده است.
+- source commits: `617e81aa85b9f53007b300c7d8c39e8c81ab7437`, `b95a58a83d382431bdef385bbcc57ca5328498f4`.
+
 
 ### Reusable Section Heading Elementor widget
 - ویجت مستقل `bonyad_alavi_section_heading` به دسته «بنیاد علوی» اضافه شد و در هر جای Elementor قابل استفاده است.
