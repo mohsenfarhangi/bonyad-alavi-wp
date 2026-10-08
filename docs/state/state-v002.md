@@ -616,3 +616,25 @@ Date: 2026-10-08
 - Local child-theme assets only; no server deployment, physical-phone toolbar test or full Elementor editor acceptance.
 
 Current contract: [MODULE-HOME-QUICK-LINKS](../modules/theme-home-quick-links-widget.md).
+
+## STATE-002-033 — Quick Links fill section with equal spacing
+
+Date: 2026-10-08
+
+- User requested first/last Quick Links items at the section edges and equal interior spacing.
+- CSS-only change: container width 100%, no max-width cap or internal side gutters; desktop flex list uses space-between. Six-column mobile grid and More row remain intact; JS unchanged.
+- Temporary live preview measured zero outer item/container gaps at 1369 and 900px, with equal interior spacing. At 390px six equal columns and the full-width More row had no internal horizontal overflow.
+- All 18 Quick Links contract checks and git diff --check PASS. Local child-theme CSS saved; server deployment not performed.
+
+Current contract: [MODULE-HOME-QUICK-LINKS](../modules/theme-home-quick-links-widget.md).
+
+## STATE-002-034 — Quick Links spacing constrained to original container
+
+Date: 2026-10-08
+
+- User clarified that items must remain within their own container rather than fill the entire section.
+- Restored original centered desktop container width min(1280px, 100% - 40px); space-between still distributes fixed-width items equally inside it. Mobile six-column rules and JavaScript unchanged.
+- Live preview at 1440px: 1280px container, zero outer item gaps relative to that container and eight equal 47.5px interior gaps.
+- Local CSS saved; no server deployment.
+
+Current contract: [MODULE-HOME-QUICK-LINKS](../modules/theme-home-quick-links-widget.md).

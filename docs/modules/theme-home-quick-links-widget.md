@@ -83,7 +83,8 @@ Expansion is the user's choice: scrolling, height-only resize, width resize, fon
 - icon = 29px
 - label = 11px
 - min list height = 100px
-- centered list
+- desktop container retains its original centered width: min(1280px, 100% - 40px)
+- list uses `justify-content: space-between`; first/last item boxes align to the container edges and remaining space is shared equally between items
 
 ### <= 1080px
 - section padding-top = 24px
@@ -138,6 +139,8 @@ Guards:
 - scoped CSS
 
 2026-10-08 verification:
+- User correction: full-section container width was reverted; equal spacing stays inside the original desktop container. Live preview at 1440px measured a 1280px container, zero item gaps at its edges and eight equal 47.5px interior gaps. Mobile rules and JS unchanged.
+- Follow-up equal-spacing CSS preview: at 1369px, container and outer item gaps were 0px with eight equal 56.75px interior gaps; at 900px, seven links plus More had equal ~12.14px gaps and zero outer gaps. At 390px, six 62.5px columns and More below remained intact with no horizontal overflow. All 18 contract checks PASS after the CSS-only follow-up.
 - PHP lint and all 18 existing contract checks PASS. The existing malformed PHP string for the custom color markup was escaped so the test could execute; the old 98/86px mobile assertion now checks the approved six-column layout.
 - JavaScript parsed successfully using Chrome V8 `Runtime.compileScript`.
 - Saved CSS/JS were injected as a temporary preview in the live Chrome page, using a clone of the existing widget to isolate the original script's listeners.

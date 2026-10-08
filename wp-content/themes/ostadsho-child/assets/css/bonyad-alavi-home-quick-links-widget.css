@@ -46,7 +46,7 @@
 .ba-home-quick-links-widget .ba-quick-links__list {
   display: flex;
   align-items: start;
-  justify-content: center;
+  justify-content: space-between;
   overflow: hidden;
   transition: .35s;
   min-height: 100px;
