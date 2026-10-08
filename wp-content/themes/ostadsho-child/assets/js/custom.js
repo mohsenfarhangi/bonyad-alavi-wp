@@ -232,6 +232,17 @@
       setOpen(dropdown.hidden);
     });
 
+    more.addEventListener('mouseenter', () => {
+      setOpen(true);
+    });
+
+    more.addEventListener('mouseleave', () => {
+      // هنگام استفاده از صفحه‌کلید، منو باز بماند.
+      if (!more.contains(document.activeElement)) {
+        setOpen(false);
+      }
+    });
+
     button.addEventListener('keydown', event => {
       if (event.key !== 'ArrowDown') return;
       event.preventDefault();
