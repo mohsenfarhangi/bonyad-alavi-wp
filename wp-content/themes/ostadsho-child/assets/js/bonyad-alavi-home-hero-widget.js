@@ -102,7 +102,7 @@
         auto();
     }
 
-    function initTicker(root, cleanups) {
+    function initVerticalTicker(root, cleanups) {
         var ticker = root.querySelector('[data-js-ticker]');
         if (!ticker) return;
 
@@ -180,6 +180,155 @@
         });
 
         start();
+    }
+
+    function initMobileTicker(root, cleanups) {
+        var ticker = root.querySelector('[data-js-ticker]');
+        var original = ticker && ticker.querySelector('[data-js-ticker-track]');
+        var viewport = ticker && ticker.querySelector('.ba-ticker__viewport');
+        if (!original || !viewport) return;
+
+        var source = Array.prototype.slice.call(original.querySelectorAll('[data-js-ticker-item]'))
+            .filter(function (item) { return !item.classList.contains('ba-ticker__item--clone'); });
+        if (!source.length) return;
+
+        var autoplay = root.dataset.tickerAutoplay === '1';
+        var speed = Math.min(120, Math.max(10, Number(root.dataset.tickerMobileSpeed) || 32));
+        var media = window.matchMedia('(prefers-reduced-motion: reduce)');
+        var track = document.createElement('div');
+        track.className = 'ba-ticker__mobile-track';
+        track.setAttribute('data-js-ticker-mobile-track', '');
+        viewport.appendChild(track);
+        ticker.classList.add('is-mobile-ticker');
+
+        var animation = null;
+        var resizeObserver = null;
+        var frame = 0;
+        var hovered = false;
+        var focused = false;
+        var pausedByTab = document.hidden;
+
+        function clearAnimation() {
+            if (animation) {
+                animation.cancel();
+                animation = null;
+            }
+        }
+
+        function build() {
+            clearAnimation();
+            track.replaceChildren();
+            var group = document.createElement('div');
+            group.className = 'ba-ticker__mobile-group';
+            source.forEach(function (item) {
+                var copy = item.cloneNode(true);
+                copy.classList.remove('ba-ticker__item--clone');
+                copy.removeAttribute('data-js-ticker-item');
+                group.appendChild(copy);
+            });
+            track.appendChild(group);
+            var baseWidth = group.getBoundingClientRect().width;
+            var repeat = Math.max(1, Math.ceil(viewport.clientWidth / Math.max(1, baseWidth)));
+            for (var i = 1; i < repeat; i++) {
+                source.forEach(function (item) {
+                    var copy = item.cloneNode(true);
+                    copy.classList.remove('ba-ticker__item--clone');
+                    copy.removeAttribute('data-js-ticker-item');
+                    group.appendChild(copy);
+                });
+            }
+            var groupWidth = group.getBoundingClientRect().width;
+            if (!autoplay || media.matches || !groupWidth) {
+                track.style.transform = '';
+                return;
+            }
+            var duplicate = group.cloneNode(true);
+            duplicate.setAttribute('aria-hidden', 'true');
+            duplicate.querySelectorAll('a,button,[tabindex]').forEach(function (element) {
+                element.setAttribute('tabindex', '-1');
+            });
+            track.insertBefore(duplicate, group);
+            animation = track.animate([
+                { transform: 'translateX(' + (-groupWidth) + 'px)' },
+                { transform: 'translateX(0px)' }
+            ], {
+                duration: (groupWidth / speed) * 1000,
+                iterations: Infinity,
+                easing: 'linear'
+            });
+            syncPause();
+        }
+
+        function syncPause() {
+            if (animation) animation.playbackRate = hovered || focused || pausedByTab ? 0 : 1;
+        }
+        function onEnter() { hovered = true; syncPause(); }
+        function onLeave() { hovered = false; syncPause(); }
+        function onFocusIn() { focused = true; syncPause(); }
+        function onFocusOut(event) {
+            focused = !!(event.relatedTarget && ticker.contains(event.relatedTarget));
+            syncPause();
+        }
+        function onVisibility() { pausedByTab = document.hidden; syncPause(); }
+        function schedule() {
+            cancelAnimationFrame(frame);
+            frame = requestAnimationFrame(build);
+        }
+
+        ticker.addEventListener('mouseenter', onEnter);
+        ticker.addEventListener('mouseleave', onLeave);
+        ticker.addEventListener('focusin', onFocusIn);
+        ticker.addEventListener('focusout', onFocusOut);
+        document.addEventListener('visibilitychange', onVisibility);
+        window.addEventListener('resize', schedule);
+        if (media.addEventListener) media.addEventListener('change', schedule);
+        if (window.ResizeObserver) {
+            resizeObserver = new ResizeObserver(schedule);
+            resizeObserver.observe(viewport);
+        }
+        if (document.fonts) document.fonts.ready.then(function () {
+            if (track.isConnected) schedule();
+        });
+        build();
+
+        cleanups.push(function () {
+            cancelAnimationFrame(frame);
+            clearAnimation();
+            if (resizeObserver) resizeObserver.disconnect();
+            ticker.removeEventListener('mouseenter', onEnter);
+            ticker.removeEventListener('mouseleave', onLeave);
+            ticker.removeEventListener('focusin', onFocusIn);
+            ticker.removeEventListener('focusout', onFocusOut);
+            document.removeEventListener('visibilitychange', onVisibility);
+            window.removeEventListener('resize', schedule);
+            if (media.removeEventListener) media.removeEventListener('change', schedule);
+            track.remove();
+            ticker.classList.remove('is-mobile-ticker');
+        });
+    }
+
+    function initTicker(root, cleanups) {
+        var breakpoint = window.matchMedia('(max-width: 760px)');
+        var modeCleanups = [];
+        var currentMode = null;
+
+        function switchMode() {
+            var mobile = breakpoint.matches;
+            if (currentMode === mobile) return;
+            modeCleanups.forEach(function (cleanup) { cleanup(); });
+            modeCleanups = [];
+            currentMode = mobile;
+            if (mobile) initMobileTicker(root, modeCleanups);
+            else initVerticalTicker(root, modeCleanups);
+        }
+        switchMode();
+        if (breakpoint.addEventListener) breakpoint.addEventListener('change', switchMode);
+        else breakpoint.addListener(switchMode);
+        cleanups.push(function () {
+            if (breakpoint.removeEventListener) breakpoint.removeEventListener('change', switchMode);
+            else breakpoint.removeListener(switchMode);
+            modeCleanups.forEach(function (cleanup) { cleanup(); });
+        });
     }
 
     function init(root) {

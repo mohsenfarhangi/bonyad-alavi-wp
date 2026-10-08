@@ -101,7 +101,7 @@ Output هر item:
 - Post title
 - Permalink
 
-Ticker با JavaScript per-instance عمودی جابه‌جا می‌شود؛ hover/focus آن را pause می‌کند.
+Ticker در عرض‌های ۷۶۱ پیکسل به بالا رفتار عمودی قبلی را دارد. در عرض‌های حداکثر ۷۶۰ پیکسل، عنوان‌های واقعی WP_Query به‌صورت یک ردیف افقی RTL در track مستقل با حرکت چپ به راست نمایش داده می‌شوند. گروه‌ها برای پوشش viewport تکرار و با سرعت پیش‌فرض ۳۲ پیکسل‌برثانیه انیمیت می‌شوند؛ `data-ticker-mobile-speed` سرعت را در ۱۰–۱۲۰ تغییر می‌دهد. autoplay خاموش یا reduced-motion، نمایش دستی بدون انیمیشن دارد. pause روی hover/focus/hidden tab و cleanup در تغییر breakpoint پشتیبانی می‌شود.
 
 ## Responsive Contract
 

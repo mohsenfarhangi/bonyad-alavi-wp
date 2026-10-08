@@ -649,3 +649,49 @@
     transition: none !important;
   }
 }
+
+/* Mobile horizontal news ticker — 760px and below. */
+@media (max-width: 760px) {
+  .ba-home-hero-widget .ba-ticker__viewport {
+    position: relative;
+    overflow: hidden;
+    min-width: 0;
+  }
+  .ba-home-hero-widget .ba-ticker.is-mobile-ticker .ba-ticker__track {
+    display: none !important;
+    animation: none !important;
+  }
+  .ba-home-hero-widget .ba-ticker__mobile-track {
+    display: flex;
+    flex-flow: row nowrap;
+    width: max-content;
+    max-width: none;
+    height: 46px;
+    direction: ltr;
+    align-items: stretch;
+    will-change: transform;
+  }
+  .ba-home-hero-widget .ba-ticker__mobile-group {
+    display: flex;
+    align-items: stretch;
+    flex: 0 0 auto;
+    direction: ltr;
+  }
+  .ba-home-hero-widget .ba-ticker__mobile-group .ba-ticker__item {
+    direction: rtl;
+    text-align: right;
+    flex: 0 0 auto;
+    width: max-content;
+    max-width: none;
+    height: 46px;
+    overflow: visible;
+    text-overflow: clip;
+    white-space: nowrap;
+  }
+  .ba-home-hero-widget .ba-ticker.is-mobile-ticker.is-paused .ba-ticker__mobile-track {
+    animation-play-state: paused;
+  }
+  .ba-home-hero-widget .ba-ticker.is-mobile-ticker:has(.ba-ticker__mobile-group:only-child) .ba-ticker__viewport {
+    overflow-x: auto;
+  }
+}

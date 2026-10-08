@@ -17,6 +17,14 @@ AFE release goal همچنان live acceptance نسخه 1.0.28 و رفع blocker 
 
 ## Recently Completed
 
+### Hero mobile ticker
+- تیکر ویجت Hero برای `max-width:760px` به track افقی مستقل و حرکت چپ به راست تبدیل شد؛ متن لینک‌ها RTL و label ثابت است.
+- منطق عمودی قبلی به `initVerticalTicker` انتقال یافت و با switch/cleanup در breakpoint 760 مدیریت می‌شود.
+- CSS فقط به انتهای asset موجود اضافه شده؛ PHP، Query و Elementor controls تغییری نکردند.
+- بررسی ساختار JS/CSS و قراردادها انجام شد؛ آزمون مرورگری زنده در محیط وردپرس انجام نشده است.
+
+
+
 ### Mobile menu JS integration
 - Added `ostadsho-child/assets/js/alavi-mobile-menu.js` with supplied mobile Elementor menu behaviors, null guards and accessible keyboard support.
 - Enqueued in footer globally via `functions.php`, handle `ba-mobile-menu`, versioned by `filemtime`.
