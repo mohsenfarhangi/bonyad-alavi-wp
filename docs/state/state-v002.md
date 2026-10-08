@@ -589,3 +589,17 @@ Date: 2026-10-04
 - code commit: `62090c810d12c849d6e588a30641534281f763af`.
 
 Current contract: [MODULE-SECTION-HEADING](../modules/theme-section-heading-widget.md).
+
+## STATE-002-031 — Hero Mission Nav responsive layout integrated
+
+Date: 2026-10-08
+
+- User-approved live layout integrated into the child theme's existing Hero CSS media queries.
+- Tablet 761–1080: two RTL columns; mobile <=760: four full-width rows, 13px titles and fixed 40px icon frames; descriptions remain visible.
+- Removed conflicting <=430 Mission rules and repaired horizontal/vertical separators; no new markup, JavaScript or PHP.
+- Preserved pre-existing ticker direction correction and unrelated worktree changes.
+- Saved local CSS injected temporarily into the live Chrome tab and verified at actual widths 320, 390, 900 and 1366; CSSOM comparison confirmed all 70 non-Mission rules unchanged.
+- Existing Hero contract test failed before/after at `reference-mobile-order` because it searches single-quoted literal `\n`; test file unchanged.
+- No server deployment or full Elementor editor acceptance performed.
+
+Current contract: [MODULE-HOME-HERO](../modules/theme-home-hero-widget.md).

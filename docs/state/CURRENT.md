@@ -17,6 +17,12 @@ AFE release goal همچنان live acceptance نسخه 1.0.28 و رفع blocker 
 
 ## Recently Completed
 
+### Hero Mission Nav responsive integration
+- اصلاح تأییدشده رسپانسیو در `assets/css/bonyad-alavi-home-hero-widget.css` ادغام شد: تبلت 761–1080 دو ستون، موبایل <=760 چهار ردیف تک‌ستونه؛ جداکننده‌ها، فونت و قاب آیکون اصلاح شدند.
+- قواعد قدیمی Mission برای <=430 حذف شدند؛ PHP/JS و قواعد CSS اسلایدر و تیکر تغییر نکردند و اصلاح محلی قبلی جهت تیکر حفظ شد.
+- CSS ذخیره‌شده به‌صورت preview موقت در Chrome و عرض‌های 320/390/900/1366 بررسی شد؛ انتشار فایل روی سرور انجام نشده است.
+- تست قرارداد Hero قبل/بعد در `reference-mobile-order` همان خطای literal `\n` را داشت. جزئیات قرارداد و شواهد در [MODULE-HOME-HERO](../modules/theme-home-hero-widget.md) ثبت شده است.
+
 ### Hero mobile ticker
 - تیکر ویجت Hero برای `max-width:760px` به track افقی مستقل و حرکت چپ به راست تبدیل شد؛ متن لینک‌ها RTL و label ثابت است.
 - منطق عمودی قبلی به `initVerticalTicker` انتقال یافت و با switch/cleanup در breakpoint 760 مدیریت می‌شود.
@@ -243,6 +249,8 @@ Historical PASSهای AFE/Theme به HEAD جدید تعمیم داده نمی‌
 6. parallel handoff/version documentation tree دوباره ایجاد نکن.
 
 ## Next Agent Handoff
+
+**Latest Hero task:** CSS رسپانسیو Mission Nav در قالب محلی ادغام شده و با تزریق موقت همان asset در مرورگر بررسی شده است. بعد از انتشار، load شدن asset جدید و responsive rendering در وردپرس واقعی بررسی شود؛ full Elementor acceptance و خطای قدیمی تست `reference-mobile-order` همچنان باز هستند.
 
 **Current task:** ویجت عمومی `bonyad_alavi_section_heading` با سه variant مرجع ساخته شده و آماده live Elementor visual acceptance است. News/About عمداً refactor نشده‌اند و contract داخلی خودشان را حفظ می‌کنند.
 

@@ -118,7 +118,7 @@ Ticker در عرض‌های ۷۶۱ پیکسل به بالا رفتار عمود�
 2. Ticker
 3. Mission Nav
 
-Mission Nav به grid دو ستونه تبدیل می‌شود.
+Mission Nav به grid دو ستونه و دو ردیفه RTL تبدیل می‌شود. ردیف‌ها حداقل ۹۲ پیکسل، عنوان‌ها ۱۴ پیکسل و قاب آیکون‌ها ۴۲ پیکسل هستند. خط افقی فقط زیر دو آیتم نخست و خط عمودی در سمت چپ آیتم‌های فرد نمایش داده می‌شود.
 
 ### Mobile <= 760px
 flex order:
@@ -126,7 +126,9 @@ flex order:
 2. Ticker
 3. Mission Nav
 
-Slider ratio-driven است؛ default `4 / 3` و از Style control قابل تغییر است. Mission description در موبایل مخفی نمی‌شود.
+Slider ratio-driven است؛ default `4 / 3` و از Style control قابل تغییر است. Mission Nav چهار ردیف تک‌ستونه با ارتفاع حداقل ۷۲ پیکسل، عنوان ۱۳ پیکسلی، توضیح ۱۱ پیکسلی و قاب آیکون ثابت ۴۰ پیکسلی دارد. توضیحات نمایش داده می‌شوند و در عرض باریک متن می‌تواند چندخطی شود؛ خط افقی بین ردیف‌ها و بدون خط عمودی است.
+
+اصلاح تأییدشده کاربر در 2026-10-08 داخل media queryهای asset اصلی ادغام شد؛ override جداگانه لازم نیست. در عرض‌های <=1080 اندازه عنوان/توضیح/گلیف و فاصله و padding آیتم‌ها با `!important` اعمال می‌شوند تا تنظیم ذخیره‌شده المنتور، اندازه‌های تأییدشده رسپانسیو را خنثی نکند. قواعد متناقض Mission برای <=430 حذف شدند. Desktop و قواعد Slider/Ticker در این تغییر حفظ شدند.
 
 ## Style Tab Contract
 
@@ -202,6 +204,13 @@ Regression contract:
 پس از refactor fidelity، فایل‌های HEAD با reference برای class structure، grid/rows، slider content clamp، mobile order، ticker dimensions، mobile ratio و SVG defaults مقایسه استاتیک شدند؛ JavaScript نیز با parser V8 syntax-check شد و brace balance PHP/CSS بررسی شد. اجرای PHP regression و Live WordPress/Elementor acceptance همچنان باز است.
 
 ## Live Acceptance Checklist
+
+### Mission responsive verification — 2026-10-08
+
+- همان CSS ذخیره‌شده قالب محلی به‌صورت موقت در تب `https://bonyadalavi.ir/#semnan` تزریق و در عرض‌های واقعی 320، 390، 900 و 1366 پیکسل بررسی شد؛ تک‌ستونه/دوستونه، اندازه متن و آیکون، جداکننده‌ها و عدم overflow پنل تأیید شدند.
+- مقایسه CSSOM قبل/بعد، ثابت‌ماندن تمام ۷۰ قاعده غیر Mission را تأیید کرد. PHP، JavaScript، markup، Query و تنظیمات Elementor تغییر نکردند.
+- این بررسی، انتشار asset محلی روی سرور را اثبات نمی‌کند؛ deploy و full Elementor acceptance همچنان باز هستند.
+- اجرای تست موجود `home-hero-widget-contract.php` قبل و بعد از تغییر در `reference-mobile-order` شکست خورد؛ عبارت single-quoted تست، `\n` را به‌صورت literal جستجو می‌کند. ترتیب واقعی CSS همچنان Slider=1، Ticker=2، Mission=3 است. فایل تست در این task تغییر نکرد.
 
 1. Widget در دسته «بنیاد علوی» دیده شود.
 2. Repeater اسلاید و Mission در Editor بدون console error کار کند.
