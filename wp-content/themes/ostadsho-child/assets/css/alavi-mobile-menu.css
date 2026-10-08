@@ -1,0 +1,127 @@
+@media (max-width: 1024px) {
+  .alavi-mobile-redesign { z-index: 100001 !important; }
+  .alavi-mobile-redesign .bg { background: rgba(13,35,24,.48) !important; backdrop-filter: blur(5px); }
+  .alavi-mobile-redesign .hambmenu-menus {
+    position: fixed !important; right: 0 !important; left: auto !important; top: 0 !important;
+    width: min(380px,calc(100vw - 24px)) !important; height: 100dvh !important; max-height: 100dvh !important;
+    box-sizing: border-box !important; background: #fff !important; padding: 24px 20px 16px !important;
+    border-radius: 24px 0 0 24px !important; overflow-y: auto !important; overscroll-behavior: contain;
+    scrollbar-width: thin; scrollbar-color: #d7e5d9 transparent; box-shadow: -20px 0 80px #0e2c2330;
+    display: flex !important; flex-direction: column; gap: 0;
+  }
+  body.admin-bar .alavi-mobile-redesign .hambmenu-menus {
+    top: 46px !important; height: calc(100dvh - 46px) !important; max-height: calc(100dvh - 46px) !important;
+  }
+  .alavi-mobile-redesign .headline {
+    display: flex !important; align-items: center !important; justify-content: space-between !important;
+    margin: 0 0 20px !important; padding: 0 !important; flex-shrink: 0;
+  }
+  .alavi-mobile-redesign .logo { width: auto !important; }
+  .alavi-mobile-redesign .logo .dark { display: none !important; }
+  .alavi-mobile-redesign .logo .light { display: block !important; }
+  .alavi-mobile-redesign .logo img {
+    width: 142px !important; height: auto !important; max-height: 48px; object-fit: contain;
+  }
+  .alavi-mobile-redesign button.close {
+    display: flex !important; align-items: center; justify-content: center; width: 44px !important;
+    height: 44px !important; padding: 13px !important; border: 1px solid #e4ece6 !important;
+    border-radius: 14px !important; background: #f6f9f6 !important; opacity: 1 !important; float: none !important;
+  }
+  .alavi-mobile-redesign .close svg { height: 14px; width: 14px; }
+  .alavi-mobile-redesign .am-intro {
+    background: #f0f7f1; border: 1px solid #e1eee3; border-radius: 16px; padding: 15px 16px; margin-bottom: 16px;
+  }
+  .alavi-mobile-redesign .am-intro strong {
+    display: block; color: #245b36; font-size: 16px; line-height: 26px; font-weight: 700;
+  }
+  .alavi-mobile-redesign .am-intro p {
+    font-size: 12px; color: #68816d; margin: 3px 0 0; line-height: 22px;
+  }
+  .alavi-mobile-redesign ul.menu {
+    padding: 0 !important; margin: 0 !important; border: 0 !important; display: block !important; flex: 0 0 auto;
+  }
+  .alavi-mobile-redesign ul.menu > li {
+    position: relative !important; border: 0 !important; border-bottom: 1px solid #eef2ee !important;
+    margin: 0 !important; padding: 0 !important; background: transparent !important; list-style: none;
+  }
+  .alavi-mobile-redesign ul.menu > li > a {
+    display: flex !important; align-items: center !important; min-height: 52px !important; box-sizing: border-box;
+    line-height: 24px !important; padding: 12px 14px !important; margin: 3px 0 !important;
+    border-radius: 12px !important; background: transparent !important; color: #34433a !important;
+    font-size: 14px !important; font-weight: 500;
+  }
+  .alavi-mobile-redesign ul.menu > li > a:after { display: none !important; }
+  .alavi-mobile-redesign ul.menu > li.am-current > a {
+    color: #287a3e !important; background: #edf7ef !important; font-weight: 700;
+    border-inline-start: 3px solid #52ac66;
+  }
+  .alavi-mobile-redesign ul.menu > li.menu-item-has-children > a { padding-left: 60px !important; }
+  .alavi-mobile-redesign ul.menu > li.am-expanded { background: #f8fbf8 !important; border-radius: 12px; }
+  .alavi-mobile-redesign .open-btn { display: none !important; }
+  .alavi-mobile-redesign .am-toggle {
+    position: absolute; top: 7px; left: 3px; height: 44px; width: 44px; display: flex;
+    align-items: center; justify-content: center; border: 0; border-radius: 12px;
+    background: transparent; color: #67866e; cursor: pointer; font-family: inherit;
+  }
+  .alavi-mobile-redesign .am-toggle i { font-size: 11px; transition: transform .2s; }
+  .alavi-mobile-redesign .am-toggle[aria-expanded=true] { background: #e9f3eb; color: #2d7f40; }
+  .alavi-mobile-redesign .am-toggle[aria-expanded=true] i { transform: rotate(180deg); }
+  .alavi-mobile-redesign ul.menu .sub-menu {
+    position: static !important; width: auto !important; max-height: none !important;
+    margin: 0 16px 12px 8px !important; padding: 0 12px 0 0 !important;
+    background: transparent !important; border: 0 !important;
+    border-inline-start: 2px solid #d4e6d7 !important; border-radius: 0 !important;
+    box-shadow: none !important; opacity: 1 !important; visibility: visible !important;
+  }
+  .alavi-mobile-redesign ul.menu .sub-menu[hidden] { display: none !important; }
+  .alavi-mobile-redesign ul.menu .sub-menu li {
+    border: 0 !important; background: transparent !important; margin: 0 !important; padding: 0 !important;
+  }
+  .alavi-mobile-redesign ul.menu .sub-menu a {
+    display: block !important; min-height: 44px; box-sizing: border-box; padding: 11px 10px !important;
+    font-size: 12px !important; line-height: 22px !important; border: 0 !important;
+    background: transparent !important; color: #52665a !important; border-radius: 8px;
+  }
+  .alavi-mobile-redesign ul.menu a:hover { background: #edf5ef !important; color: #287a3e !important; }
+  .alavi-mobile-redesign button:focus-visible, .alavi-mobile-redesign a:focus-visible {
+    outline: 2px solid #36844a !important; outline-offset: 2px;
+  }
+  .alavi-mobile-redesign .mobile-search { display: none !important; }
+  .alavi-mobile-redesign .am-footer { margin-top: auto; padding-top: 20px; flex: 0 0 auto; }
+  .alavi-mobile-redesign .am-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .alavi-mobile-redesign .am-actions a {
+    display: flex; align-items: center; justify-content: center; min-height: 48px;
+    border: 1px solid #dce9df; border-radius: 12px; background: #f7faf7;
+    color: #366642; font-size: 12px; font-weight: 500; text-decoration: none;
+  }
+  .alavi-mobile-redesign .am-actions a:first-child {
+    background: #328448; color: #fff; border-color: #328448;
+  }
+  .alavi-mobile-redesign .am-languages {
+    display: flex; align-items: center; justify-content: center; gap: 18px;
+    padding: 19px 0 2px; font-size: 12px;
+  }
+  .alavi-mobile-redesign .am-languages a { color: #75817a; text-decoration: none; }
+  .alavi-mobile-redesign .am-languages a[aria-current] { color: #2d7f40; font-weight: 700; }
+}
+@media (min-width: 783px) and (max-width: 1024px) {
+  body.admin-bar .alavi-mobile-redesign .hambmenu-menus {
+    top: 32px !important; height: calc(100dvh - 32px) !important;
+    max-height: calc(100dvh - 32px) !important;
+  }
+}
+@media (max-width: 1024px) {
+  .alavi-mobile-redesign ul.menu > li > a { width: 100% !important; }
+  .alavi-mobile-redesign ul.menu > li { display: block !important; }
+  .alavi-mobile-redesign ul.menu {
+    max-height: none !important; height: auto !important; overflow: visible !important;
+  }
+  .alavi-mobile-redesign .hambmenu-menus {
+    min-width: 0 !important; transition: transform .25s ease !important;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .alavi-mobile-redesign .hambmenu-menus, .alavi-mobile-redesign .am-toggle i {
+    transition: none !important;
+  }
+}

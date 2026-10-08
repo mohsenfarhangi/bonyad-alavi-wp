@@ -17,6 +17,14 @@ AFE release goal همچنان live acceptance نسخه 1.0.28 و رفع blocker 
 
 ## Recently Completed
 
+### Mobile menu CSS asset
+- استایل سفارشی منوی موبایل در `wp-content/themes/ostadsho-child/assets/css/alavi-mobile-menu.css` مستقل قرار گرفت.
+- بلوک CSS ارسالی تکراری بود؛ فقط یک نسخه با همان selectorها و مقادیر CSS ثبت شد.
+- فایل با handle `ba-mobile-menu` در `functions.php` روی همه صفحات فرانت‌اند enqueue می‌شود؛ خود قوانین به `max-width:1024px` و `prefers-reduced-motion` محدود هستند.
+- تست ساختاری selector/brace و enqueue انجام شد؛ تست بصری در وردپرس زنده هنوز انجام نشده است.
+
+
+
 ### Global custom JavaScript in child theme
 - فایل `wp-content/themes/ostadsho-child/assets/js/custom.js` برای کدهای JS عمومی فرانت‌اند اضافه شد.
 - رفتار overflow منوی Elementor header با selector مشخص‌شده، بدون تغییر عملکردی، در این فایل قرار گرفت.

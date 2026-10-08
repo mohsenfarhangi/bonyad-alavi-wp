@@ -121,3 +121,8 @@ Dashboard و Elementor هر دو content/query inputs دارند، اما `BA_Ce
 ## Architecture History
 
 تاریخچه legacy که قبلاً در build/handoff/version docs پراکنده بود در [state-v002](state/state-v002.md) خلاصه و index شده است.
+
+
+## Mobile menu styling
+
+Child theme asset `wp-content/themes/ostadsho-child/assets/css/alavi-mobile-menu.css` contains the responsive `.alavi-mobile-redesign` rules and is globally enqueued by `functions.php` using `filemtime` versioning.

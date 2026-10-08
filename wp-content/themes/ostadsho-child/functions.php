@@ -17,6 +17,14 @@ function my_theme_enqueue_styles()
         wp_get_theme()->get('Version')
     );
 
+    // Mobile navigation styling (scoped to the custom mobile menu).
+    wp_enqueue_style(
+        'ba-mobile-menu',
+        get_stylesheet_directory_uri() . '/assets/css/alavi-mobile-menu.css',
+        array('child-style'),
+        filemtime( get_stylesheet_directory() . '/assets/css/alavi-mobile-menu.css' )
+    );
+
     // Front-end custom behavior shared across all site pages.
     wp_enqueue_script(
         'ba-global-custom',
