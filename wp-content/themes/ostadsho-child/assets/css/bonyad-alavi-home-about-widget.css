@@ -415,6 +415,104 @@
   }
 }
 
+/* Funding sources become a readable list below the donut on mobile. */
+.ba-home-about-widget .ba-impact__funding-sources {
+  display: none;
+}
+
+@media (min-width: 761px) and (max-width: 1080px) {
+  .ba-home-about-widget .ba-impact__funding-visual {
+    width: 100%;
+    max-width: 640px;
+    margin-inline: auto;
+    min-height: 380px;
+  }
+
+  .ba-home-about-widget .ba-impact__chart {
+    min-height: 380px;
+  }
+}
+
+@media (max-width: 760px) {
+  .ba-home-about-widget .ba-impact__funding {
+    gap: 16px;
+  }
+
+  .ba-home-about-widget .ba-impact__funding-visual {
+    width: 100%;
+    max-width: 360px;
+    height: clamp(240px, 70vw, 280px);
+    min-height: 0 !important;
+    margin-inline: auto;
+  }
+
+  .ba-home-about-widget .ba-impact__chart {
+    min-height: 0 !important;
+  }
+
+  .ba-home-about-widget .ba-impact__chart-values {
+    display: none;
+  }
+
+  .ba-home-about-widget .ba-impact__funding-sources {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    direction: rtl;
+  }
+
+  .ba-home-about-widget .ba-impact__funding-source {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+    padding: 10px 6px;
+    border: 1px solid #e3ece8;
+    border-radius: 12px;
+    background: #fff;
+    text-align: center;
+  }
+
+  .ba-home-about-widget .ba-impact__funding-source-name {
+    font-size: 12px;
+    line-height: 1.7;
+    color: var(--ba-impact-label-name);
+    overflow-wrap: anywhere;
+  }
+
+  .ba-home-about-widget .ba-impact__funding-source-amount {
+    display: flex;
+    align-items: baseline;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 4px;
+    line-height: 1.4;
+  }
+
+  .ba-home-about-widget .ba-impact__funding-source-value {
+    color: var(--ba-impact-source-color);
+    font-size: 16px;
+    font-weight: 900;
+    direction: ltr;
+    unicode-bidi: isolate;
+  }
+
+  .ba-home-about-widget .ba-impact__funding-source-unit {
+    color: var(--muted);
+    font-size: 11px;
+  }
+
+  .ba-home-about-widget .ba-impact__beneficiaries {
+    margin-top: 0;
+    padding-bottom: 6px;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .ba-home-about-widget .ba-impact__actions .ba-button {
     transition: none;

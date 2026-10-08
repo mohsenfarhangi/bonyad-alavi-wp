@@ -22,6 +22,7 @@ Project-owned DOM:
 - `ba-impact__chart-wrap`
 - `ba-impact__chart`
 - `ba-impact__donut-center`
+- `ba-impact__funding-sources` / `ba-impact__funding-source` (mobile source list)
 - `ba-impact__beneficiaries`
 - `ba-impact__beneficiaries-label`
 - `ba-impact__beneficiaries-value`
@@ -96,12 +97,12 @@ Payload:
 
 Main data series:
 - `type: 'pie'`
-- `radius: ['42%', '58%']`
+- desktop/tablet `radius: ['42%', '58%']`; mobile <=760 `['60%', '82%']`
 - `center: ['50%', '50%']`
 - `startAngle: 90`
 - dynamic `padAngle`
 - `avoidLabelOverlap: true`
-- external rich labels
+- external rich labels only above 760px; mobile uses a server-rendered source list
 - `alignTo: 'edge'`
 - responsive `edgeDistance`
 - `labelLayout.moveOverlap = 'shiftY'`
@@ -116,10 +117,10 @@ Rendering:
 - SVG renderer
 - chart container is `direction:ltr; unicode-bidi:isolate`
 - Persian text remains right-aligned inside rich tokens
-- هر لیبل در دو خط رندر می‌شود: **مقدار عددی در خط بالا** و **نقطه رنگی + عنوان منبع در خط پایین**.
+- لیبل desktop/tablet مقدار رنگی را در خط بالا و عنوان را در خط پایین نمایش می‌دهد؛ نقطه رنگی حذف شده است.
 - source names wrap instead of truncate
 - reduced-motion disables chart animation
-- ResizeObserver only triggers `chart.resize()`
+- ResizeObserver plus window resize batch updates with requestAnimationFrame. CSS style signature and mobile breakpoint determine whether to rebuild chart options; geometry-only changes call chart.resize(). Font loading forces a style refresh. Re-init/dispose cleans listeners, observer, pending frame and chart instance.
 
 The project does not calculate arc geometry, midpoint, collision or connector positions itself.
 
@@ -140,12 +141,16 @@ This replaces the former Summary block entirely.
 
 ## Compact Density Contract
 
-Donut radius and chart heights are intentionally unchanged:
-- desktop chart min-height: 405px
-- tablet: 430px
-- mobile: 380px
-- <=430: 350px
-- ECharts radius remains `['42%', '58%']`
+Funding responsive contract approved on 2026-10-08:
+- desktop chart min-height: 405px (existing styles/Elementor controls retained)
+- tablet 761–1080: visual centered at max-width 640px, chart min-height 380px
+- mobile <=760: visual max-width 360px, height clamp(240px, 70vw, 280px), chart min-height reset to 0; mobile radius ['60%', '82%']
+- desktop/tablet ECharts radius remains ['42%', '58%']; both track and data use the same responsive radius
+- mobile external ECharts labels/lines and the legacy hidden chart-values overlay are hidden
+- mobile sources are an RTL two-column HTML list between the visual and beneficiaries KPI; only the numeric value uses the corresponding source color, with no dot
+- source label 12px, value 16px, unit 11px; long names wrap; no new Elementor controls
+- list is rendered from normalized funding_sources with existing decimals/unit formatting and escaping, omitted for no sources and CSS-hidden above 760px
+- beneficiaries remain an unboxed KPI below the source list
 
 Compaction comes from removing header/Summary and reducing surrounding spacing:
 - desktop section: 56px top / 52px bottom
@@ -183,8 +188,15 @@ Current guards cover:
 - absence of Summary controls/render/CSS
 - simple beneficiaries controls/render
 - compact responsive spacing
-- unchanged chart heights / ECharts radius
+- responsive ECharts radius and existing desktop/tablet label behavior
 - no custom old donut geometry
 - multi-instance chart cleanup
 
-Static source checks and JavaScript parsing passed in the implementation session. PHP lint could not be executed because the shell environment could not resolve GitHub raw content; live Elementor acceptance remains pending.
+2026-10-08 responsive verification:
+- Widget/test PHP lint and all 29 existing contract checks PASS. The stale label-value-first assertion was updated from its removed dot formatter to the current no-dot formatter; baseline failed this assertion before the change.
+- Production JS parsed with Chrome V8 Runtime.compileScript.
+- Temporary preview injected saved CSS/JS plus equivalent new legend markup into a clone of the live widget using its real JSON payload. No server deployment performed.
+- Actual widths 320/390/425 showed two source columns, 12px names, colored 16px amounts, hidden external labels, correct source colors and no funding horizontal overflow.
+- At 900, chart measured 640x380 and external label font returned to 11px after resizing from mobile. At 1366, external labels and radius 42/58 returned correctly; mobile list was hidden. Returning to 390 restored the mobile layout.
+- A second-instance fixture verified re-init disposes the old chart, leaves exactly one SVG, keeps the main instance alive and disposes cleanly.
+- Physical phone and full Elementor editor acceptance remain pending. PHP legend markup lint/contract were checked locally; browser preview is not a deployed PHP-rendered acceptance test.

@@ -17,6 +17,13 @@ AFE release goal همچنان live acceptance نسخه 1.0.28 و رفع blocker 
 
 ## Recently Completed
 
+### About / Impact funding responsive layout
+- موبایل <=760: نمودار وسط و جمع‌وجور، منابع زیر آن در دو ستون؛ فقط مقدار عددی با رنگ چارت، بدون نقطه رنگی. راهنما از داده واقعی Repeater در PHP رندر می‌شود و KPI زیر آن باقی است.
+- تبلت 761–1080: نمودار وسط‌چین با حداکثر عرض 640 و ارتفاع 380؛ در desktop layout قبلی حفظ شد.
+- JS هنگام تغییر breakpoint/فونت، گزینه‌های ECharts را بازخوانی می‌کند؛ فونت موبایل دیگر پس از تغییر عرض در desktop باقی نمی‌ماند. cleanup چند instance بررسی شد.
+- PHP lint، ۲۹ بررسی قرارداد و V8 syntax PASS؛ preview در 320/390/425/900/1366 بررسی شد. سرور و Elementor editor تست نشده‌اند.
+- قرارداد: [MODULE-HOME-ABOUT](../modules/theme-home-about-widget.md).
+
 ### Quick Links mobile six-item layout
 - اصلاح نهایی فاصله‌ها طبق توضیح کاربر: desktop عرض اصلی کانتینر `min(1280px, 100% - 40px)` را حفظ می‌کند؛ `space-between` اولین/آخرین آیتم را به لبه‌های همان کانتینر می‌رساند. preview در عرض 1440، کانتینر 1280 و فاصله‌های مساوی 47.5px را تأیید کرد؛ انتشار سرور انجام نشده است.
 - موبایل <=760: شش لینک اصلی در شش ستون مساوی، بدون فاصله خالی داخلی کناره‌ها؛ «بیشتر» تمام‌عرض زیر آن‌هاست و سایر لینک‌ها با کلیک نمایش داده می‌شوند.
@@ -237,7 +244,7 @@ Theme legacy v0.6.5 docs recorded PHP/JS syntax + ZIP checks for that patch.
 
 برای News صفحه اصلی regression contract `tests/home-news-widget-contract.php` اضافه شده است. روی نسخه commit‌شده، registration، نبود JS dependency، shared WP_Query service، کنترل‌های core/advanced Query، فرمت تاریخ، clickable title، placeholder، شرط نمایش «همه اخبار»، markup/CSS reference و responsive 4/2/1 به‌صورت استاتیک از GitHub بررسی و همگی PASS شدند. **PHP lint و اجرای regression در checkout کامل repository و live WordPress/Elementor در این session اجرا نشده‌اند.**
 
-برای About/Impact صفحه اصلی regression contract `tests/home-about-widget-contract.php` علاوه بر ECharts، حذف کامل funding-head/Summary، KPI ساده خدمات‌گیرندگان، density responsive و ثابت‌ماندن chart height/radius را guard می‌کند. JavaScript نسخه commit‌شده با parser V8 بدون خطا parse شد. **PHP lint به‌دلیل عدم resolve شدن raw GitHub در shell این session اجرا نشد و live WordPress/Elementor acceptance هنوز باز است.**
+برای About/Impact در 2026-10-08، PHP lint و ۲۹ بررسی `tests/home-about-widget-contract.php` PASS شدند؛ radius رسپانسیو و formatter بدون نقطه در قرارداد منعکس شدند. JS با V8 parse و طرح با preview موقت CSS/JS و راهنمای معادل PHP در Chrome بررسی شد. **انتشار سرور، رندر PHP واقعی و Elementor editor acceptance همچنان باز هستند.**
 
 برای Live Stats صفحه اصلی regression contract جدید `tests/home-live-stats-widget-contract.php` اضافه شده است. روی نسخه commit‌شده، markup، NUMBER-only input، ۶ default، formatter frontend، desktop/tablet/mobile CSS و نبود JS dependency به‌صورت استاتیک بازبینی شد. **PHP lint و live WordPress/Elementor acceptance در این session اجرا نشده‌اند.**
 
@@ -257,6 +264,8 @@ Historical PASSهای AFE/Theme به HEAD جدید تعمیم داده نمی‌
 6. parallel handoff/version documentation tree دوباره ایجاد نکن.
 
 ## Next Agent Handoff
+
+**Latest Impact task:** سه فایل CSS/JS/PHP ویجت About با منابع دو ستونه موبایل و refresh رسپانسیو ذخیره شده‌اند؛ برای انتشار هر سه فایل باید منتقل شوند. preview واقعی Chrome و تست قرارداد PASS، ولی رندر PHP روی سرور و Elementor editor هنوز پذیرش نشده‌اند.
 
 **Latest Quick Links task:** فاصله مساوی داخل کانتینر اصلی دسکتاپ محلی ذخیره و در preview بررسی شد؛ full-section width طبق توضیح کاربر برگشت داده شد. CSS/JS شش لینک موبایل و حفظ وضعیت بیشتر در قالب محلی ذخیره شد؛ بعد از انتشار، بارگذاری هر دو asset جدید را بررسی کن. تست قرارداد PASS و preview زنده تأیید شده، ولی گوشی واقعی و Elementor editor هنوز بررسی نشده‌اند.
 

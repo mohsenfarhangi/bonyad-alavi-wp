@@ -638,3 +638,17 @@ Date: 2026-10-08
 - Local CSS saved; no server deployment.
 
 Current contract: [MODULE-HOME-QUICK-LINKS](../modules/theme-home-quick-links-widget.md).
+
+## STATE-002-035 — Impact funding mobile source list and responsive chart refresh
+
+Date: 2026-10-08
+
+- User approved two-column sources below the mobile donut, no colored dots, source-colored numbers; tablet compaction and desktop font refresh were also approved.
+- PHP renders an escaped list from normalized Repeater sources with the existing decimals/unit. <=760 CSS shows it; wider layouts hide it. KPI stays below.
+- Mobile chart visual max-width 360, height clamp(240px,70vw,280px), radius 60/82 and no external labels. Tablet max-width 640 / min-height 380; desktop CSS/radius retained.
+- JS rebuilds ECharts options when the CSS signature/mobile breakpoint changes or fonts load. Geometry resize and style refresh are frame-batched; re-init cleans chart/listeners/observer/frame.
+- Baseline contract failed the stale dot formatter check; updated it to the current no-dot formatter and responsive radius. Both PHP lints and all 29 contract checks PASS; V8 syntax PASS.
+- Saved assets plus equivalent new markup previewed against real live data at 320/390/425/900/1366. Verified no mobile funding overflow, two-column text/color correctness, tablet 640x380, label font restored to 11px after mobile, and independent instance re-init/dispose.
+- Local child-theme files saved. No server deployment, physical-phone or full Elementor editor acceptance; PHP markup was not rendered by production WordPress during preview.
+
+Current contract: [MODULE-HOME-ABOUT](../modules/theme-home-about-widget.md).
