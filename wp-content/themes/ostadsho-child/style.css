@@ -1,6 +1,6 @@
 /*
 Theme Name: استاد شو
-Version: 2.8
+Version: 2.8.1
 Author: پیشتاز وب
 Author URI: https://www.rtl-theme.com/author/mmehrani
 Description: پوسته آموزشی و فروش فایل وردپرس
@@ -11,3 +11,21 @@ License URI: https://www.gnu.org/licenses/old-licenses/gpl-2.0.html
 Tags: learn theme, wordpress theme, learning template,ostadsho theme,ostad sho
 PishtazWeb Theme, (C) 2024 pishtaz-web.com
 */
+
+.header-icon a{
+    display: flex;
+    width: 32px;
+    height: 32px;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid #dde8e2 !important;
+    border-radius: 50px;
+    padding: 6px;
+    transition: .25s;
+}
+
+.header-icon:hover a{
+    border-color: #a8ceb8 !important;
+    background-color: #f2faf6;
+    transform: translateY(-2px);
+}
