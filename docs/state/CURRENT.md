@@ -17,6 +17,13 @@ AFE release goal همچنان live acceptance نسخه 1.0.28 و رفع blocker 
 
 ## Recently Completed
 
+### Quick Links mobile six-item layout
+- موبایل <=760: شش لینک اصلی در شش ستون مساوی، بدون فاصله خالی داخلی کناره‌ها؛ «بیشتر» تمام‌عرض زیر آن‌هاست و سایر لینک‌ها با کلیک نمایش داده می‌شوند.
+- اسکرول، تغییر ارتفاع/عرض و re-init باعث collapse خودکار نمی‌شوند؛ انتخاب کاربر تا کلیک «جمع کردن» حفظ می‌شود.
+- فایل‌های CSS/JS ویجت در قالب فرزند محلی به‌روزرسانی شدند. PHP/widget content و enqueue تغییر نکردند.
+- PHP lint و ۱۸ بررسی قرارداد PASS؛ preview موقت در Chrome در عرض‌های 320/390/900/1366 و حالت‌های 0/3/6/9 آیتم بررسی شد. انتشار سرور و آزمون گوشی واقعی انجام نشده است.
+- جزئیات: [MODULE-HOME-QUICK-LINKS](../modules/theme-home-quick-links-widget.md).
+
 ### Hero Mission Nav responsive integration
 - اصلاح تأییدشده رسپانسیو در `assets/css/bonyad-alavi-home-hero-widget.css` ادغام شد: تبلت 761–1080 دو ستون، موبایل <=760 چهار ردیف تک‌ستونه؛ جداکننده‌ها، فونت و قاب آیکون اصلاح شدند.
 - قواعد قدیمی Mission برای <=430 حذف شدند؛ PHP/JS و قواعد CSS اسلایدر و تیکر تغییر نکردند و اصلاح محلی قبلی جهت تیکر حفظ شد.
@@ -233,7 +240,7 @@ Theme legacy v0.6.5 docs recorded PHP/JS syntax + ZIP checks for that patch.
 
 برای Live Stats صفحه اصلی regression contract جدید `tests/home-live-stats-widget-contract.php` اضافه شده است. روی نسخه commit‌شده، markup، NUMBER-only input، ۶ default، formatter frontend، desktop/tablet/mobile CSS و نبود JS dependency به‌صورت استاتیک بازبینی شد. **PHP lint و live WordPress/Elementor acceptance در این session اجرا نشده‌اند.**
 
-برای Quick Links صفحه اصلی regression contract جدید `tests/home-quick-links-widget-contract.php` اضافه شده است. روی نسخه commit‌شده، contractهای markup/reference SVGs/colors/responsive/overflow/registration با GitHub source بازبینی و JavaScript با parser V8 بررسی شد. **PHP lint و live WordPress/Elementor acceptance در این session اجرا نشده‌اند.**
+برای Quick Links صفحه اصلی در 2026-10-08، PHP lint و ۱۸ بررسی `tests/home-quick-links-widget-contract.php` PASS شدند؛ JavaScript با V8 parse شد و assetهای جدید به‌صورت preview موقت در صفحه زنده بررسی شدند. **انتشار روی سرور، گوشی واقعی و full Elementor editor acceptance همچنان باز هستند.**
 
 برای Hero صفحه اصلی فایل regression contract جدید `tests/home-hero-widget-contract.php` اضافه شده است. روی draft محلی معادل این implementation، PHP lint، JavaScript syntax و contract checks PASS شدند؛ نسخه commit‌شده نیز از GitHub برای registration، Query reuse، link contract، نبود تصاویر پیش‌فرض، scope CSS و Elementor JS hook بازبینی استاتیک شد. **اجرای live WordPress/Elementor روی HEAD جدید هنوز تأیید نشده است.**
 
@@ -249,6 +256,8 @@ Historical PASSهای AFE/Theme به HEAD جدید تعمیم داده نمی‌
 6. parallel handoff/version documentation tree دوباره ایجاد نکن.
 
 ## Next Agent Handoff
+
+**Latest Quick Links task:** CSS/JS شش لینک موبایل و حفظ وضعیت بیشتر در قالب محلی ذخیره شد؛ بعد از انتشار، بارگذاری هر دو asset جدید را بررسی کن. تست قرارداد PASS و preview زنده تأیید شده، ولی گوشی واقعی و Elementor editor هنوز بررسی نشده‌اند.
 
 **Latest Hero task:** CSS رسپانسیو Mission Nav در قالب محلی ادغام شده و با تزریق موقت همان asset در مرورگر بررسی شده است. بعد از انتشار، load شدن asset جدید و responsive rendering در وردپرس واقعی بررسی شود؛ full Elementor acceptance و خطای قدیمی تست `reference-mobile-order` همچنان باز هستند.
 

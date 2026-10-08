@@ -7,7 +7,7 @@
 
 ## Purpose
 
-بخش «دسترسی‌های سریع» صفحه اصلی را بدون redesign به یک Elementor widget مستقل تبدیل می‌کند. baseline بصری و رفتار overflow از HTML/CSS/JS reference گرفته شده و فقط برای قواعد child theme، چند instance Elementor و مدیریت محتوا scope/parameterize شده است.
+بخش «دسترسی‌های سریع» صفحه اصلی را به یک Elementor widget مستقل تبدیل می‌کند؛ چیدمان موبایل طبق تأیید کاربر در 2026-10-08 به شش ستون و دکمه زیر لینک‌ها اصلاح شده است. baseline بصری و رفتار overflow از HTML/CSS/JS reference گرفته شده و فقط برای قواعد child theme، چند instance Elementor و مدیریت محتوا scope/parameterize شده است.
 
 Assets:
 - `assets/css/bonyad-alavi-home-quick-links-widget.css`
@@ -63,18 +63,14 @@ Default SVG داخل widget map نگهداری می‌شود. اگر Elementor I
 
 ## More / Overflow Behavior
 
-Reference algorithm حفظ شده:
-1. همه itemها موقتاً visible می‌شوند.
-2. More مخفی می‌شود و مجموع width + gap اندازه‌گیری می‌شود.
-3. اگر همه جا شوند، More مخفی می‌ماند.
-4. اگر overflow باشد، More نمایش داده و width خودش رزرو می‌شود.
-5. itemها تا اولین overflow شمرده می‌شوند؛ بقیه `is-hidden-overflow` می‌گیرند.
-6. click روی More → `is-expanded` + همه itemها visible + متن «جمع کردن».
-7. click دوباره یا resize → collapse + متن «بیشتر».
+Desktop overflow algorithm remains adaptive: measure all item widths plus gaps, reserve More only when required, and hide trailing items that do not fit. Widths from bounding rectangles are normalized to the container's CSS-pixel scale so page zoom does not mix measurement units.
 
-تغییر معماری نسبت به source فقط scope است:
-- queryها از root همان widget instance انجام می‌شوند.
-- `WeakMap` برای cleanup/re-init Elementor استفاده می‌شود.
+Mobile <=760px uses six real links in the collapsed state, or all available links when fewer than six exist. More appears only when there are additional links, spans the row below the links, and toggles «بیشتر» / «جمع کردن».
+
+Expansion is the user's choice: scrolling, height-only resize, width resize, font loading and Elementor re-init do not collapse it. Width changes and breakpoint changes recompute layout while preserving the choice. `ResizeObserver` monitors the list width; height-only changes do not trigger unnecessary recalculation.
+
+- Queries and listeners are scoped to each widget root.
+- `WeakMap` stores expansion plus cleanup; re-init removes old listeners, observer and pending animation frame before restoring the choice.
 - Elementor hook: `frontend/element_ready/bonyad_alavi_home_quick_links.default`.
 
 ## Responsive Contract
@@ -94,14 +90,13 @@ Reference algorithm حفظ شده:
 
 ### <= 760px
 - section padding-top = 20px
-- container side space equivalent reference `100% - 24px`
-- list justify-content = flex-start
-- item = 98px
-- media = 57px
-
-### <= 430px
-- item = 86px
-- label = 10px
+- container/inner use the full available width without their own side gutters
+- list uses six equal grid columns with zero column gap and 10px row gap
+- items fill their column; labels wrap at 10px / line-height 1.6
+- media size = clamp(36px, 10vw, 44px); icons = 22px
+- More spans all six columns below the links, with at least 36px height
+- expanded state shows all items on additional grid rows
+- the fixed six-column mobile geometry overrides Elementor item width, icon size and label font-size settings at this breakpoint
 
 ## Style Tab Contract
 
@@ -142,7 +137,13 @@ Guards:
 - asset registration
 - scoped CSS
 
-در session پیاده‌سازی، source commit‌شده با static contract checks بررسی و JavaScript توسط parser V8 parse شد. PHP lint و live WordPress/Elementor acceptance هنوز باز است.
+2026-10-08 verification:
+- PHP lint and all 18 existing contract checks PASS. The existing malformed PHP string for the custom color markup was escaped so the test could execute; the old 98/86px mobile assertion now checks the approved six-column layout.
+- JavaScript parsed successfully using Chrome V8 `Runtime.compileScript`.
+- Saved CSS/JS were injected as a temporary preview in the live Chrome page, using a clone of the existing widget to isolate the original script's listeners.
+- At actual viewport widths 320 and 390: six collapsed links, full-width More below, no internal horizontal overflow. At 900: adaptive desktop layout showed seven links plus More; at 1366: all nine links with More hidden.
+- Expanded nine-link state survived simulated mobile height changes, scrolling and width changes. Browser fixtures with 0/3/6/9 real items verified visibility, More availability, single-click toggling and re-init state preservation.
+- No server deployment, physical-phone toolbar test or full Elementor editor acceptance performed.
 
 ## Live Acceptance Checklist
 
@@ -151,8 +152,8 @@ Guards:
 3. desktop وقتی همه itemها جا می‌شوند More مخفی باشد.
 4. در عرض کمتر، More فقط به‌اندازه لازم itemها را مخفی کند.
 5. «بیشتر» همه itemها را wrap کند و متن «جمع کردن» شود.
-6. resize حالت را دوباره collapse و محاسبه کند.
-7. breakpointهای 1080/760/430 با reference مقایسه شوند.
+6. اسکرول و resize وضعیت باز را حفظ کنند؛ فقط کلیک «جمع کردن» آن را ببندد.
+7. موبایل <=760 شش لینک و دکمه تمام‌عرض زیر آن‌ها داشته باشد؛ desktop adaptive overflow حفظ شود.
 8. تغییر Color در Repeater فقط همان item را تغییر دهد.
 9. انتخاب Elementor Icon فقط SVG همان item را جایگزین کند.
 10. چند instance در Editor listener/state مشترک نداشته باشند.

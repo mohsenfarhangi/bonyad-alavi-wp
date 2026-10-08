@@ -603,3 +603,16 @@ Date: 2026-10-08
 - No server deployment or full Elementor editor acceptance performed.
 
 Current contract: [MODULE-HOME-HERO](../modules/theme-home-hero-widget.md).
+
+## STATE-002-032 — Quick Links mobile six-item layout and persistent expansion
+
+Date: 2026-10-08
+
+- User approved six actual mobile links with More below them.
+- <=760px CSS uses six equal grid columns, removes internal container side gutters, wraps labels and gives More a full-width row. Desktop CSS remains unchanged.
+- JS keeps the user's expansion through scroll/height resize, width/breakpoint changes, font loading and Elementor re-init. Width measurement normalizes page scale; root-scoped cleanup removes old listeners and observers.
+- Updated the existing mobile contract assertion and repaired its pre-existing unescaped PHP string. PHP lint and all 18 contract checks PASS; V8 syntax PASS.
+- Temporary live preview verified widths 320/390/900/1366. Mobile showed six collapsed links, nine expanded links, More below and no internal horizontal overflow. Expanded state survived simulated height resize/scroll/width changes; 0/3/6/9-item fixtures verified empty/short lists and re-init handling.
+- Local child-theme assets only; no server deployment, physical-phone toolbar test or full Elementor editor acceptance.
+
+Current contract: [MODULE-HOME-QUICK-LINKS](../modules/theme-home-quick-links-widget.md).
