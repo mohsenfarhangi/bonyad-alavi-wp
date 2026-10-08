@@ -17,6 +17,13 @@ AFE release goal همچنان live acceptance نسخه 1.0.28 و رفع blocker 
 
 ## Recently Completed
 
+### Mobile menu JS integration
+- Added `ostadsho-child/assets/js/alavi-mobile-menu.js` with supplied mobile Elementor menu behaviors, null guards and accessible keyboard support.
+- Enqueued in footer globally via `functions.php`, handle `ba-mobile-menu`, versioned by `filemtime`.
+- JavaScript parses, and enqueue contract is verified. Live browser acceptance is pending.
+
+
+
 ### Mobile menu CSS asset
 - استایل سفارشی منوی موبایل در `wp-content/themes/ostadsho-child/assets/css/alavi-mobile-menu.css` مستقل قرار گرفت.
 - بلوک CSS ارسالی تکراری بود؛ فقط یک نسخه با همان selectorها و مقادیر CSS ثبت شد.

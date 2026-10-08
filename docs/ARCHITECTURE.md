@@ -126,3 +126,8 @@ Dashboard و Elementor هر دو content/query inputs دارند، اما `BA_Ce
 ## Mobile menu styling
 
 Child theme asset `wp-content/themes/ostadsho-child/assets/css/alavi-mobile-menu.css` contains the responsive `.alavi-mobile-redesign` rules and is globally enqueued by `functions.php` using `filemtime` versioning.
+
+
+## Mobile menu script
+
+The child theme enqueues `assets/js/alavi-mobile-menu.js` globally. It initializes only when the matching Elementor mobile menu DOM exists.

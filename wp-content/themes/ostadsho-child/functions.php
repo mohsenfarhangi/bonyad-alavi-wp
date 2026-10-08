@@ -25,6 +25,15 @@ function my_theme_enqueue_styles()
         filemtime( get_stylesheet_directory() . '/assets/css/alavi-mobile-menu.css' )
     );
 
+    // Mobile sidebar enhancements, safe on pages without the widget.
+    wp_enqueue_script(
+        'ba-mobile-menu',
+        get_stylesheet_directory_uri() . '/assets/js/alavi-mobile-menu.js',
+        array(),
+        filemtime( get_stylesheet_directory() . '/assets/js/alavi-mobile-menu.js' ),
+        true
+    );
+
     // Front-end custom behavior shared across all site pages.
     wp_enqueue_script(
         'ba-global-custom',
