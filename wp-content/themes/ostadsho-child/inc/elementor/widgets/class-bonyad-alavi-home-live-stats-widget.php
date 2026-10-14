@@ -76,6 +76,7 @@ final class Bonyad_Alavi_Home_Live_Stats_Widget extends Widget_Base {
 				'type'        => Controls_Manager::TEXT,
 				'default'     => 'گزارش برخط',
 				'label_block' => true,
+				'dynamic'     => array( 'active' => true ),
 			)
 		);
 
@@ -86,6 +87,7 @@ final class Bonyad_Alavi_Home_Live_Stats_Widget extends Widget_Base {
 				'type'        => Controls_Manager::TEXT,
 				'default'     => 'اقدامات',
 				'label_block' => true,
+				'dynamic'     => array( 'active' => true ),
 			)
 		);
 
@@ -98,6 +100,7 @@ final class Bonyad_Alavi_Home_Live_Stats_Widget extends Widget_Base {
 				'type'        => Controls_Manager::NUMBER,
 				'min'         => 0,
 				'step'        => 1,
+				'dynamic'     => array( 'active' => true ),
 				'description' => 'عدد را بدون جداکننده وارد کنید؛ جداکننده هزارگان فقط در خروجی سایت اعمال می‌شود.',
 			)
 		);
@@ -108,6 +111,7 @@ final class Bonyad_Alavi_Home_Live_Stats_Widget extends Widget_Base {
 				'label'       => 'عنوان آمار',
 				'type'        => Controls_Manager::TEXT,
 				'label_block' => true,
+				'dynamic'     => array( 'active' => true ),
 			)
 		);
 

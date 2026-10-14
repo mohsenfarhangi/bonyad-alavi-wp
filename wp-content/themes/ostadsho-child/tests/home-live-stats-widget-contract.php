@@ -12,11 +12,37 @@ if ($widget === false || $css === false || $script === false || $bootstrap === f
 	exit(1);
 }
 
+
+/**
+ * Ensure Dynamic Tags are enabled on the individual control, including fields
+ * within Elementor Repeater; retaining the original field IDs preserves data.
+ */
+$has_dynamic_control = static function ( string $code, string $owner, string $name ): bool {
+	$anchor = $owner . "->add_control(\n\t\t\t'" . $name . "',";
+	$start = strpos( $code, $anchor );
+	if ( false === $start ) {
+		return false;
+	}
+	$end = strpos( $code, "\n\t\t);", $start );
+	if ( false === $end ) {
+		return false;
+	}
+	return 1 === preg_match(
+		"/'dynamic'\\s*=>\\s*array\\(\\s*'active'\\s*=>\\s*true\\s*\\)/",
+		substr( $code, $start, $end - $start )
+	);
+};
+
 $checks = array(
 	'widget-name'             => str_contains($widget, "return 'bonyad_alavi_home_live_stats';"),
 	'swiper-dependency'       => str_contains($widget, 'get_script_depends') && str_contains($widget, "'elementor-frontend', 'swiper', 'bonyad-alavi-home-live-stats-widget'") && str_contains($bootstrap, "assets/js/bonyad-alavi-home-live-stats-widget.js"),
 	'repeater'                => str_contains($widget, "'items'") && str_contains($widget, 'Controls_Manager::REPEATER'),
 	'numeric-value-control'   => str_contains($widget, "'type'        => Controls_Manager::NUMBER") && str_contains($widget, "'step'        => 1"),
+	'dynamic-item-value'      => $has_dynamic_control($widget, '$repeater', 'value'),
+	'dynamic-item-label'      => $has_dynamic_control($widget, '$repeater', 'label'),
+	'dynamic-header-line-one' => $has_dynamic_control($widget, '$this', 'title_line_one'),
+	'dynamic-header-line-two' => $has_dynamic_control($widget, '$this', 'title_line_two'),
+	'dynamic-values-render'   => str_contains($widget, '$settings       = $this->get_settings_for_display();') && str_contains($widget, 'format_stat_value( $item[' . "'value'" . ']') && str_contains($widget, "esc_html( trim( (string) ("),
 	'reference-title'         => str_contains($widget, "'default'     => 'گزارش برخط'") && str_contains($widget, "'default'     => 'اقدامات'"),
 	'six-reference-values'    => str_contains($widget, "'value' => 266549") && str_contains($widget, "'value' => 348969") && str_contains($widget, "'value' => 109729") && str_contains($widget, "'value' => 17939") && str_contains($widget, "'value' => 25232") && str_contains($widget, "'value' => 1163646"),
 	'reference-labels'        => str_contains($widget, 'خدمات چشم‌پزشکی') && str_contains($widget, 'خدمات دندان‌پزشکی') && str_contains($widget, 'خدمات به مادران باردار') && str_contains($widget, 'غربالگری کودکان') && str_contains($widget, 'ویزیت برخط') && str_contains($widget, 'آموزش و پیشگیری'),

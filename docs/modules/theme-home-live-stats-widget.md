@@ -37,8 +37,12 @@ Title controls:
 - line 2 default: `اقدامات`
 
 Stats Repeater:
-- `value`: Elementor NUMBER، min=0، step=1
-- `label`: Text
+- `value`: Elementor NUMBER، min=0، step=1؛ Dynamic Tags فعال برای تگ‌های عددی (مانند ACF Number).
+- `label`: Elementor TEXT؛ Dynamic Tags فعال برای تگ‌های متنی (مانند ACF Text).
+- فیلدهای `title_line_one` و `title_line_two` نیز از Dynamic Tags پشتیبانی می‌کنند.
+- داده‌های دستی قدیمی و شناسه‌های کنترل (`value` / `label`) بدون مهاجرت حفظ شده‌اند.
+- نمایش داینامیک به Elementor Pro و ارائه‌دهنده تگ (مانند ACF) وابسته است. خود ویجت فقط از مکانیزم استاندارد Elementor استفاده می‌کند؛ `get_field()` یا وابستگی سخت به ACF اضافه نشده است.
+- ACF Field در context پست/برگه فعلی انتخاب می‌شود؛ هر آیتم Repeater ویجت باید جداگانه به فیلد متناسب متصل شود. این تغییر ردیف‌های ACF Repeater را خودکار به آیتم‌های کاروسل تبدیل نمی‌کند.
 
 Default reference rows:
 - 266549 — خدمات چشم‌پزشکی
@@ -59,7 +63,7 @@ Default reference rows:
 نمونه:
 `266549` → `۲۶۶٬۵۴۹`
 
-این formatting فقط presentation است و مقدار ذخیره‌شده Elementor raw number باقی می‌ماند.
+این formatting فقط presentation است و مقدار دستی ذخیره‌شده Elementor raw number باقی می‌ماند. هنگام استفاده از Dynamic Tag مقدار resolve‌شده توسط `get_settings_for_display()` نیز همین formatter را طی می‌کند؛ شمارش‌ها عدد صحیح غیرمنفی هستند.
 
 ## Visual Contract
 
@@ -128,7 +132,9 @@ Regression:
 Guards:
 - widget slug
 - Swiper-based JS dependency and asset registration
-- NUMBER-only stat value
+- NUMBER stat value with Dynamic Tags support
+- Dynamic Tags for both stat value/label and both fixed title lines
+- ACF/Elementor Pro integration through native control support
 - reference title/default rows
 - frontend thousands/Persian digit formatter
 - Swiper wrapper/slides markup

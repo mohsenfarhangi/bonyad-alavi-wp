@@ -17,6 +17,14 @@ AFE release goal همچنان live acceptance نسخه 1.0.28 و رفع blocker 
 
 ## Recently Completed
 
+### Dynamic Tags / ACF for Live Stats (2026-10-14)
+- Dynamic Tags با `active => true` برای `value` و `label` در Repeater آمار و دو خط عنوان ثابت ویجت فعال شدند.
+- NUMBER برای مقدار و TEXT برای عنوان‌ها حفظ شدند؛ مقدار resolve‌شده توسط Elementor با همان formatter فارسی رندر می‌شود و داده‌های قدیمی نیاز به مهاجرت ندارند.
+- اتصال ACF از تگ‌های بومی Elementor Pro استفاده می‌کند، بدون فراخوانی مستقیم ACF؛ ACF Repeater به‌صورت خودکار آیتم تولید نمی‌کند.
+- regression contract مربوط به چهار کنترل داینامیک به‌روز شد؛ پذیرش در Elementor Pro/ACF واقعی همچنان لازم است.
+
+
+
 ### Live Stats Swiper carousel (2026-10-14)
 - آیتم‌های BA Home Live Stats به Swiper داخلی Elementor تبدیل شدند؛ عنوان و پوسته سبز ثابت مانده‌اند.
 - defaults: desktop 6×1، tablet 3×2، mobile 2×3؛ columns, rows, group, horizontal/vertical gap همگی responsive هستند.
