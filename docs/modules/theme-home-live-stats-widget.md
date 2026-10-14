@@ -7,12 +7,13 @@
 
 ## Purpose
 
-بخش «گزارش برخط اقدامات» صفحه اصلی را بدون redesign به Elementor widget مستقل تبدیل می‌کند. HTML و final CSS reference authoritative هستند؛ تنها تغییرات معماری، scope قالب و داینامیک‌شدن متن/آمارها است.
+بخش «گزارش برخط اقدامات» صفحه اصلی را به Elementor widget با پوسته و عنوان ثابت و نمایش آمار به‌صورت کاروسل Swiper تبدیل می‌کند. رنگ‌ها، تایپوگرافی، قالب اعداد فارسی و عنوان مرجع حفظ شده‌اند.
 
-Asset:
+Assets:
 - `assets/css/bonyad-alavi-home-live-stats-widget.css`
+- `assets/js/bonyad-alavi-home-live-stats-widget.js`
 
-JavaScript وجود ندارد چون block مرجع JS ندارد.
+Script and style depend on Elementor's bundled `swiper`; no third-party Swiper package is shipped. The Elementor asset registrar uses filemtime versions.
 
 ## Markup Contract
 
@@ -27,7 +28,7 @@ JavaScript وجود ندارد چون block مرجع JS ندارد.
 - `ba-live-stats__value`
 - `ba-live-stats__label`
 
-`ba-home-live-stats-widget` فقط root scope است.
+`ba-home-live-stats-widget` فقط root scope است. عنوان بیرون کاروسل می‌ماند؛ داخل `ba-live-stats__carousel` یک `ba-live-stats__grid.swiper` با `.swiper-wrapper` و `.ba-live-stats__item.swiper-slide` وجود دارد. Navigation و Pagination جداگانه در پوسته سفید قرار می‌گیرند و وقتی overflow وجود ندارد پنهان می‌شوند.
 
 ## Content Contract
 
@@ -63,6 +64,7 @@ Default reference rows:
 ## Visual Contract
 
 Desktop:
+- default carousel: 6 columns × 1 row
 - section top padding: 24px
 - panel: `158px minmax(0,1fr)`
 - min-height: 96px
@@ -70,23 +72,25 @@ Desktop:
 - radius: 22px
 - shell padding/gap: 4px/4px
 - title lines: 16px / 700 / 1.45
-- stats grid: white, radius18, 6 columns
+- stats viewport: white, radius18, six visible columns (Swiper grid)
 - value: `clamp(19px,1.55vw,24px)`, weight800
 - label: 12px, margin-top7
 - separator: top18%, height64%, #dfe8e3
 
 Tablet 761–1080:
+- default carousel: 3 columns × 2 rows
 - section top padding: 20px
 - title column: 148px
-- stats grid: 3 columns
+- Swiper shows 3 columns in two rows
 - item min-height: 78px
 - third separator hidden per row
 
 Mobile <=760:
+- default carousel: 2 columns × 3 rows
 - section top padding: 18px
 - panel: one column, radius18
 - title: horizontal, centered, gap8, font15
-- stats grid: 2 columns, radius14
+- Swiper shows 2 columns in three rows, radius14
 - labels wrap
 - even item separator hidden and third separator restored after tablet rule
 
@@ -104,9 +108,17 @@ Controls are available without visual defaults:
 
 Until the editor changes a control, reference CSS remains authoritative.
 
-## JavaScript Contract
+## Carousel Controls and JavaScript Contract
 
-No JavaScript file, no `get_script_depends()`, and no script registration for this widget.
+- Elementor responsive controls: slidesPerView (columns) 6/3/2; grid rows 1/2/3; columns-per-move default 1; horizontal and vertical spacing default 0.
+- Autoplay disabled by default; speed 450ms, delay 5000ms (when enabled); pause on hover and user interaction options.
+- Optional arrows (default on), pagination type, touch, grab cursor, keyboard.
+- Loop and Free Mode controls are conditionally hidden unless all responsive row settings equal 1, and runtime additionally disables incompatible modes for every multi-row viewport.
+- Direction RTL, independent per-instance Swiper state, Elementor element_ready hookup, cleanup/re-initialization on 1080px and 760px breakpoint changes and reduced-motion preference changes.
+- JS constructor uses Elementor `elementorFrontend.utils.swiper` and its promise API (with global compatibility fallback).
+- Height is calculated per breakpoint from rows and vertical gap. Swiper Grid is responsible for columns; horizontal gap uses `spaceBetween`, vertical gap uses a scoped CSS variable override.
+- Arrow and pagination controls are hidden when there is no overflow; existing default six items therefore show no inactive navigation.
+- Existing Repeater values and Persian digit/thousands formatting remain unchanged.
 
 ## QA
 
@@ -115,15 +127,15 @@ Regression:
 
 Guards:
 - widget slug
-- no JS dependency
+- Swiper-based JS dependency and asset registration
 - NUMBER-only stat value
 - reference title/default rows
 - frontend thousands/Persian digit formatter
-- reference markup
-- desktop/tablet/mobile geometry
+- Swiper wrapper/slides markup
+- responsive carousel defaults 6×1 / 3×2 / 2×3
 - separator behavior
 - style controls
 - scoped CSS
 - Elementor/style registration
 
-Static verification روی source commit‌شده انجام شده است. PHP lint و live WordPress/Elementor visual acceptance هنوز باز هستند.
+Static source validation for this change is tracked by the updated regression contract. PHP lint and live WordPress/Elementor acceptance must be reported separately according to actual execution.

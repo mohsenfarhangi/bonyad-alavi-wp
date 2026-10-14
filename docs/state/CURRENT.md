@@ -1,6 +1,6 @@
 # Current Project State
 
-آخرین بازبینی: **2026-10-08**
+آخرین بازبینی: **2026-10-14**
 
 ## Project Phase
 
@@ -17,26 +17,14 @@ AFE release goal همچنان live acceptance نسخه 1.0.28 و رفع blocker 
 
 ## Recently Completed
 
-### About / Impact funding responsive layout
-- موبایل <=760: نمودار وسط و جمع‌وجور، منابع زیر آن در دو ستون؛ فقط مقدار عددی با رنگ چارت، بدون نقطه رنگی. راهنما از داده واقعی Repeater در PHP رندر می‌شود و KPI زیر آن باقی است.
-- تبلت 761–1080: نمودار وسط‌چین با حداکثر عرض 640 و ارتفاع 380؛ در desktop layout قبلی حفظ شد.
-- JS هنگام تغییر breakpoint/فونت، گزینه‌های ECharts را بازخوانی می‌کند؛ فونت موبایل دیگر پس از تغییر عرض در desktop باقی نمی‌ماند. cleanup چند instance بررسی شد.
-- PHP lint، ۲۹ بررسی قرارداد و V8 syntax PASS؛ preview در 320/390/425/900/1366 بررسی شد. سرور و Elementor editor تست نشده‌اند.
-- قرارداد: [MODULE-HOME-ABOUT](../modules/theme-home-about-widget.md).
+### Live Stats Swiper carousel (2026-10-14)
+- آیتم‌های BA Home Live Stats به Swiper داخلی Elementor تبدیل شدند؛ عنوان و پوسته سبز ثابت مانده‌اند.
+- defaults: desktop 6×1، tablet 3×2، mobile 2×3؛ columns, rows, group, horizontal/vertical gap همگی responsive هستند.
+- controls: navigation, pagination, autoplay/delay/pause, speed, touch, grab cursor, keyboard, Loop, Free Mode؛ ناسازگاری multi-row در editor و runtime مدیریت می‌شود.
+- assetهای CSS/JS فقط در ویجت مرتبط load می‌شوند؛ فرمت اعداد فارسی و Repeater حفظ شده‌اند.
+- regression contract متناسب با کاروسل به‌روزرسانی شده است؛ تست زنده Elementor باید جداگانه انجام شود.
 
-### Quick Links mobile six-item layout
-- اصلاح نهایی فاصله‌ها طبق توضیح کاربر: desktop عرض اصلی کانتینر `min(1280px, 100% - 40px)` را حفظ می‌کند؛ `space-between` اولین/آخرین آیتم را به لبه‌های همان کانتینر می‌رساند. preview در عرض 1440، کانتینر 1280 و فاصله‌های مساوی 47.5px را تأیید کرد؛ انتشار سرور انجام نشده است.
-- موبایل <=760: شش لینک اصلی در شش ستون مساوی، بدون فاصله خالی داخلی کناره‌ها؛ «بیشتر» تمام‌عرض زیر آن‌هاست و سایر لینک‌ها با کلیک نمایش داده می‌شوند.
-- اسکرول، تغییر ارتفاع/عرض و re-init باعث collapse خودکار نمی‌شوند؛ انتخاب کاربر تا کلیک «جمع کردن» حفظ می‌شود.
-- فایل‌های CSS/JS ویجت در قالب فرزند محلی به‌روزرسانی شدند. PHP/widget content و enqueue تغییر نکردند.
-- PHP lint و ۱۸ بررسی قرارداد PASS؛ preview موقت در Chrome در عرض‌های 320/390/900/1366 و حالت‌های 0/3/6/9 آیتم بررسی شد. انتشار سرور و آزمون گوشی واقعی انجام نشده است.
-- جزئیات: [MODULE-HOME-QUICK-LINKS](../modules/theme-home-quick-links-widget.md).
 
-### Hero Mission Nav responsive integration
-- اصلاح تأییدشده رسپانسیو در `assets/css/bonyad-alavi-home-hero-widget.css` ادغام شد: تبلت 761–1080 دو ستون، موبایل <=760 چهار ردیف تک‌ستونه؛ جداکننده‌ها، فونت و قاب آیکون اصلاح شدند.
-- قواعد قدیمی Mission برای <=430 حذف شدند؛ PHP/JS و قواعد CSS اسلایدر و تیکر تغییر نکردند و اصلاح محلی قبلی جهت تیکر حفظ شد.
-- CSS ذخیره‌شده به‌صورت preview موقت در Chrome و عرض‌های 320/390/900/1366 بررسی شد؛ انتشار فایل روی سرور انجام نشده است.
-- تست قرارداد Hero قبل/بعد در `reference-mobile-order` همان خطای literal `\n` را داشت. جزئیات قرارداد و شواهد در [MODULE-HOME-HERO](../modules/theme-home-hero-widget.md) ثبت شده است.
 
 ### Hero mobile ticker
 - تیکر ویجت Hero برای `max-width:760px` به track افقی مستقل و حرکت چپ به راست تبدیل شد؛ متن لینک‌ها RTL و label ثابت است.
@@ -244,11 +232,11 @@ Theme legacy v0.6.5 docs recorded PHP/JS syntax + ZIP checks for that patch.
 
 برای News صفحه اصلی regression contract `tests/home-news-widget-contract.php` اضافه شده است. روی نسخه commit‌شده، registration، نبود JS dependency، shared WP_Query service، کنترل‌های core/advanced Query، فرمت تاریخ، clickable title، placeholder، شرط نمایش «همه اخبار»، markup/CSS reference و responsive 4/2/1 به‌صورت استاتیک از GitHub بررسی و همگی PASS شدند. **PHP lint و اجرای regression در checkout کامل repository و live WordPress/Elementor در این session اجرا نشده‌اند.**
 
-برای About/Impact در 2026-10-08، PHP lint و ۲۹ بررسی `tests/home-about-widget-contract.php` PASS شدند؛ radius رسپانسیو و formatter بدون نقطه در قرارداد منعکس شدند. JS با V8 parse و طرح با preview موقت CSS/JS و راهنمای معادل PHP در Chrome بررسی شد. **انتشار سرور، رندر PHP واقعی و Elementor editor acceptance همچنان باز هستند.**
+برای About/Impact صفحه اصلی regression contract `tests/home-about-widget-contract.php` علاوه بر ECharts، حذف کامل funding-head/Summary، KPI ساده خدمات‌گیرندگان، density responsive و ثابت‌ماندن chart height/radius را guard می‌کند. JavaScript نسخه commit‌شده با parser V8 بدون خطا parse شد. **PHP lint به‌دلیل عدم resolve شدن raw GitHub در shell این session اجرا نشد و live WordPress/Elementor acceptance هنوز باز است.**
 
 برای Live Stats صفحه اصلی regression contract جدید `tests/home-live-stats-widget-contract.php` اضافه شده است. روی نسخه commit‌شده، markup، NUMBER-only input، ۶ default، formatter frontend، desktop/tablet/mobile CSS و نبود JS dependency به‌صورت استاتیک بازبینی شد. **PHP lint و live WordPress/Elementor acceptance در این session اجرا نشده‌اند.**
 
-برای Quick Links صفحه اصلی در 2026-10-08، PHP lint و ۱۸ بررسی `tests/home-quick-links-widget-contract.php` PASS شدند؛ JavaScript با V8 parse شد و assetهای جدید به‌صورت preview موقت در صفحه زنده بررسی شدند. **انتشار روی سرور، گوشی واقعی و full Elementor editor acceptance همچنان باز هستند.**
+برای Quick Links صفحه اصلی regression contract جدید `tests/home-quick-links-widget-contract.php` اضافه شده است. روی نسخه commit‌شده، contractهای markup/reference SVGs/colors/responsive/overflow/registration با GitHub source بازبینی و JavaScript با parser V8 بررسی شد. **PHP lint و live WordPress/Elementor acceptance در این session اجرا نشده‌اند.**
 
 برای Hero صفحه اصلی فایل regression contract جدید `tests/home-hero-widget-contract.php` اضافه شده است. روی draft محلی معادل این implementation، PHP lint، JavaScript syntax و contract checks PASS شدند؛ نسخه commit‌شده نیز از GitHub برای registration، Query reuse، link contract، نبود تصاویر پیش‌فرض، scope CSS و Elementor JS hook بازبینی استاتیک شد. **اجرای live WordPress/Elementor روی HEAD جدید هنوز تأیید نشده است.**
 
@@ -264,12 +252,6 @@ Historical PASSهای AFE/Theme به HEAD جدید تعمیم داده نمی‌
 6. parallel handoff/version documentation tree دوباره ایجاد نکن.
 
 ## Next Agent Handoff
-
-**Latest Impact task:** سه فایل CSS/JS/PHP ویجت About با منابع دو ستونه موبایل و refresh رسپانسیو ذخیره شده‌اند؛ برای انتشار هر سه فایل باید منتقل شوند. preview واقعی Chrome و تست قرارداد PASS، ولی رندر PHP روی سرور و Elementor editor هنوز پذیرش نشده‌اند.
-
-**Latest Quick Links task:** فاصله مساوی داخل کانتینر اصلی دسکتاپ محلی ذخیره و در preview بررسی شد؛ full-section width طبق توضیح کاربر برگشت داده شد. CSS/JS شش لینک موبایل و حفظ وضعیت بیشتر در قالب محلی ذخیره شد؛ بعد از انتشار، بارگذاری هر دو asset جدید را بررسی کن. تست قرارداد PASS و preview زنده تأیید شده، ولی گوشی واقعی و Elementor editor هنوز بررسی نشده‌اند.
-
-**Latest Hero task:** CSS رسپانسیو Mission Nav در قالب محلی ادغام شده و با تزریق موقت همان asset در مرورگر بررسی شده است. بعد از انتشار، load شدن asset جدید و responsive rendering در وردپرس واقعی بررسی شود؛ full Elementor acceptance و خطای قدیمی تست `reference-mobile-order` همچنان باز هستند.
 
 **Current task:** ویجت عمومی `bonyad_alavi_section_heading` با سه variant مرجع ساخته شده و آماده live Elementor visual acceptance است. News/About عمداً refactor نشده‌اند و contract داخلی خودشان را حفظ می‌کنند.
 

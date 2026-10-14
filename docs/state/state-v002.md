@@ -590,65 +590,13 @@ Date: 2026-10-04
 
 Current contract: [MODULE-SECTION-HEADING](../modules/theme-section-heading-widget.md).
 
-## STATE-002-031 — Hero Mission Nav responsive layout integrated
+## 2026-10-14 — Homepage live-stats Swiper carousel
 
-Date: 2026-10-08
+- Converted the stats grid to an Elementor-bundled Swiper Grid without changing the fixed report title.
+- Responsive defaults: desktop 6 columns × 1 row, tablet 3 × 2, mobile 2 × 3.
+- Responsive controls for columns, rows, slides-per-move, horizontal and vertical gaps.
+- Optional arrows, pagination, autoplay, interaction controls; Loop/Free Mode hidden for multirow and disabled at runtime on multirow breakpoints.
+- Added widget-specific JS, registered assets, changed CSS, updated regression checks and documentation.
+- Scope excludes changing other home widgets or bundling third-party carousel assets.
 
-- User-approved live layout integrated into the child theme's existing Hero CSS media queries.
-- Tablet 761–1080: two RTL columns; mobile <=760: four full-width rows, 13px titles and fixed 40px icon frames; descriptions remain visible.
-- Removed conflicting <=430 Mission rules and repaired horizontal/vertical separators; no new markup, JavaScript or PHP.
-- Preserved pre-existing ticker direction correction and unrelated worktree changes.
-- Saved local CSS injected temporarily into the live Chrome tab and verified at actual widths 320, 390, 900 and 1366; CSSOM comparison confirmed all 70 non-Mission rules unchanged.
-- Existing Hero contract test failed before/after at `reference-mobile-order` because it searches single-quoted literal `\n`; test file unchanged.
-- No server deployment or full Elementor editor acceptance performed.
-
-Current contract: [MODULE-HOME-HERO](../modules/theme-home-hero-widget.md).
-
-## STATE-002-032 — Quick Links mobile six-item layout and persistent expansion
-
-Date: 2026-10-08
-
-- User approved six actual mobile links with More below them.
-- <=760px CSS uses six equal grid columns, removes internal container side gutters, wraps labels and gives More a full-width row. Desktop CSS remains unchanged.
-- JS keeps the user's expansion through scroll/height resize, width/breakpoint changes, font loading and Elementor re-init. Width measurement normalizes page scale; root-scoped cleanup removes old listeners and observers.
-- Updated the existing mobile contract assertion and repaired its pre-existing unescaped PHP string. PHP lint and all 18 contract checks PASS; V8 syntax PASS.
-- Temporary live preview verified widths 320/390/900/1366. Mobile showed six collapsed links, nine expanded links, More below and no internal horizontal overflow. Expanded state survived simulated height resize/scroll/width changes; 0/3/6/9-item fixtures verified empty/short lists and re-init handling.
-- Local child-theme assets only; no server deployment, physical-phone toolbar test or full Elementor editor acceptance.
-
-Current contract: [MODULE-HOME-QUICK-LINKS](../modules/theme-home-quick-links-widget.md).
-
-## STATE-002-033 — Quick Links fill section with equal spacing
-
-Date: 2026-10-08
-
-- User requested first/last Quick Links items at the section edges and equal interior spacing.
-- CSS-only change: container width 100%, no max-width cap or internal side gutters; desktop flex list uses space-between. Six-column mobile grid and More row remain intact; JS unchanged.
-- Temporary live preview measured zero outer item/container gaps at 1369 and 900px, with equal interior spacing. At 390px six equal columns and the full-width More row had no internal horizontal overflow.
-- All 18 Quick Links contract checks and git diff --check PASS. Local child-theme CSS saved; server deployment not performed.
-
-Current contract: [MODULE-HOME-QUICK-LINKS](../modules/theme-home-quick-links-widget.md).
-
-## STATE-002-034 — Quick Links spacing constrained to original container
-
-Date: 2026-10-08
-
-- User clarified that items must remain within their own container rather than fill the entire section.
-- Restored original centered desktop container width min(1280px, 100% - 40px); space-between still distributes fixed-width items equally inside it. Mobile six-column rules and JavaScript unchanged.
-- Live preview at 1440px: 1280px container, zero outer item gaps relative to that container and eight equal 47.5px interior gaps.
-- Local CSS saved; no server deployment.
-
-Current contract: [MODULE-HOME-QUICK-LINKS](../modules/theme-home-quick-links-widget.md).
-
-## STATE-002-035 — Impact funding mobile source list and responsive chart refresh
-
-Date: 2026-10-08
-
-- User approved two-column sources below the mobile donut, no colored dots, source-colored numbers; tablet compaction and desktop font refresh were also approved.
-- PHP renders an escaped list from normalized Repeater sources with the existing decimals/unit. <=760 CSS shows it; wider layouts hide it. KPI stays below.
-- Mobile chart visual max-width 360, height clamp(240px,70vw,280px), radius 60/82 and no external labels. Tablet max-width 640 / min-height 380; desktop CSS/radius retained.
-- JS rebuilds ECharts options when the CSS signature/mobile breakpoint changes or fonts load. Geometry resize and style refresh are frame-batched; re-init cleans chart/listeners/observer/frame.
-- Baseline contract failed the stale dot formatter check; updated it to the current no-dot formatter and responsive radius. Both PHP lints and all 29 contract checks PASS; V8 syntax PASS.
-- Saved assets plus equivalent new markup previewed against real live data at 320/390/425/900/1366. Verified no mobile funding overflow, two-column text/color correctness, tablet 640x380, label font restored to 11px after mobile, and independent instance re-init/dispose.
-- Local child-theme files saved. No server deployment, physical-phone or full Elementor editor acceptance; PHP markup was not rendered by production WordPress during preview.
-
-Current contract: [MODULE-HOME-ABOUT](../modules/theme-home-about-widget.md).
+Current module: [MODULE-HOME-LIVE-STATS](../modules/theme-home-live-stats-widget.md).
