@@ -600,3 +600,14 @@ Current contract: [MODULE-SECTION-HEADING](../modules/theme-section-heading-widg
 - Scope excludes changing other home widgets or bundling third-party carousel assets.
 
 Current module: [MODULE-HOME-LIVE-STATS](../modules/theme-home-live-stats-widget.md).
+
+## 2026-10-14 — Live Stats item Dynamic Tags / ACF
+
+- Enabled Elementor Dynamic Tags for the existing numeric `value` and text `label` controls inside the widget's stats Repeater.
+- Enabled the same text-based dynamic capability for both fixed report title lines.
+- Maintained original field IDs, manual values, the Swiper markup and the Persian grouping/digit formatter.
+- No ACF-specific runtime dependency; use Elementor Pro's ACF Field dynamic tags in the current post/page context.
+- The widget's Repeater is still configured manually; ACF Repeater row-to-slide conversion is out of scope.
+- Extended the widget regression contract to verify dynamic controls and parsed frontend render path.
+
+Current module: [MODULE-HOME-LIVE-STATS](../modules/theme-home-live-stats-widget.md).
