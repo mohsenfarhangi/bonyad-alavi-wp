@@ -589,3 +589,14 @@ Date: 2026-10-04
 - code commit: `62090c810d12c849d6e588a30641534281f763af`.
 
 Current contract: [MODULE-SECTION-HEADING](../modules/theme-section-heading-widget.md).
+
+## 2026-10-14 — Homepage live-stats Swiper carousel
+
+- Converted the stats grid to an Elementor-bundled Swiper Grid without changing the fixed report title.
+- Responsive defaults: desktop 6 columns × 1 row, tablet 3 × 2, mobile 2 × 3.
+- Responsive controls for columns, rows, slides-per-move, horizontal and vertical gaps.
+- Optional arrows, pagination, autoplay, interaction controls; Loop/Free Mode hidden for multirow and disabled at runtime on multirow breakpoints.
+- Added widget-specific JS, registered assets, changed CSS, updated regression checks and documentation.
+- Scope excludes changing other home widgets or bundling third-party carousel assets.
+
+Current module: [MODULE-HOME-LIVE-STATS](../modules/theme-home-live-stats-widget.md).

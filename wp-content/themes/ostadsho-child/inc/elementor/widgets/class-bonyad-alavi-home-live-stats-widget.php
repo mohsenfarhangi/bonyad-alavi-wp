@@ -41,14 +41,20 @@ final class Bonyad_Alavi_Home_Live_Stats_Widget extends Widget_Base {
 	}
 
 	public function get_style_depends() {
-		return array( 'bonyad-alavi-home-live-stats-widget' );
+		return array( 'swiper', 'bonyad-alavi-home-live-stats-widget' );
+	}
+
+	public function get_script_depends() {
+		return array( 'elementor-frontend', 'swiper', 'bonyad-alavi-home-live-stats-widget' );
 	}
 
 	protected function register_controls() {
 		$this->register_content_controls();
+		$this->register_carousel_controls();
 		$this->register_layout_style_controls();
 		$this->register_title_style_controls();
 		$this->register_stats_style_controls();
+		$this->register_carousel_style_controls();
 	}
 
 	/**
@@ -141,6 +147,235 @@ final class Bonyad_Alavi_Home_Live_Stats_Widget extends Widget_Base {
 			)
 		);
 
+		$this->end_controls_section();
+	}
+
+
+	/**
+	 * Swiper Grid: each column contains the configured number of rows.
+	 * The defaults display six items at every breakpoint (6x1 / 3x2 / 2x3).
+	 */
+	private function register_carousel_controls() {
+		$this->start_controls_section(
+			'content_stats_carousel',
+			array( 'label' => 'تنظیمات کاروسل', 'tab' => Controls_Manager::TAB_CONTENT )
+		);
+
+		$this->add_responsive_control(
+			'carousel_columns',
+			array(
+				'label'          => 'تعداد ستون قابل نمایش',
+				'type'           => Controls_Manager::NUMBER,
+				'min'            => 1,
+				'max'            => 12,
+				'step'           => 1,
+				'default'        => 6,
+				'tablet_default' => 3,
+				'mobile_default' => 2,
+			)
+		);
+		$this->add_responsive_control(
+			'carousel_rows',
+			array(
+				'label'          => 'تعداد ردیف',
+				'type'           => Controls_Manager::NUMBER,
+				'min'            => 1,
+				'max'            => 6,
+				'step'           => 1,
+				'default'        => 1,
+				'tablet_default' => 2,
+				'mobile_default' => 3,
+			)
+		);
+		$this->add_responsive_control(
+			'carousel_group',
+			array(
+				'label'          => 'تعداد ستون در هر حرکت',
+				'type'           => Controls_Manager::NUMBER,
+				'min'            => 1,
+				'max'            => 12,
+				'step'           => 1,
+				'default'        => 1,
+				'tablet_default' => 1,
+				'mobile_default' => 1,
+			)
+		);
+		$this->add_responsive_control(
+			'carousel_gap',
+			array(
+				'label'          => 'فاصله افقی آیتم‌ها',
+				'type'           => Controls_Manager::SLIDER,
+				'size_units'     => array( 'px' ),
+				'range'          => array( 'px' => array( 'min' => 0, 'max' => 48 ) ),
+				'default'        => array( 'size' => 0, 'unit' => 'px' ),
+				'tablet_default' => array( 'size' => 0, 'unit' => 'px' ),
+				'mobile_default' => array( 'size' => 0, 'unit' => 'px' ),
+			)
+		);
+		$this->add_responsive_control(
+			'carousel_row_gap',
+			array(
+				'label'          => 'فاصله عمودی ردیف‌ها',
+				'type'           => Controls_Manager::SLIDER,
+				'size_units'     => array( 'px' ),
+				'range'          => array( 'px' => array( 'min' => 0, 'max' => 48 ) ),
+				'default'        => array( 'size' => 0, 'unit' => 'px' ),
+				'tablet_default' => array( 'size' => 0, 'unit' => 'px' ),
+				'mobile_default' => array( 'size' => 0, 'unit' => 'px' ),
+			)
+		);
+		$this->add_control(
+			'carousel_navigation',
+			array(
+				'label' => 'فلش‌های ناوبری', 'type' => Controls_Manager::SWITCHER,
+				'return_value' => 'yes', 'default' => 'yes',
+			)
+		);
+		$this->add_control(
+			'carousel_pagination',
+			array(
+				'label' => 'صفحه‌بندی',
+				'type' => Controls_Manager::SELECT,
+				'options' => array(
+					'none' => 'بدون صفحه‌بندی',
+					'bullets' => 'نقطه‌ای',
+					'fraction' => 'شماره صفحات',
+					'progressbar' => 'نوار پیشرفت',
+				),
+				'default' => 'none',
+			)
+		);
+		$this->add_control(
+			'carousel_autoplay',
+			array(
+				'label' => 'حرکت خودکار', 'type' => Controls_Manager::SWITCHER,
+				'return_value' => 'yes', 'default' => '',
+			)
+		);
+		$this->add_control(
+			'carousel_delay',
+			array(
+				'label' => 'فاصله حرکت خودکار (میلی‌ثانیه)',
+				'type' => Controls_Manager::NUMBER, 'min' => 500, 'max' => 20000,
+				'step' => 100, 'default' => 5000,
+				'condition' => array( 'carousel_autoplay' => 'yes' ),
+			)
+		);
+		$this->add_control(
+			'carousel_pause_hover',
+			array(
+				'label' => 'توقف هنگام قرارگیری ماوس', 'type' => Controls_Manager::SWITCHER,
+				'return_value' => 'yes', 'default' => 'yes',
+				'condition' => array( 'carousel_autoplay' => 'yes' ),
+			)
+		);
+		$this->add_control(
+			'carousel_disable_interaction',
+			array(
+				'label' => 'توقف خودکار پس از تعامل', 'type' => Controls_Manager::SWITCHER,
+				'return_value' => 'yes', 'default' => 'yes',
+				'condition' => array( 'carousel_autoplay' => 'yes' ),
+			)
+		);
+		$this->add_control(
+			'carousel_speed',
+			array(
+				'label' => 'سرعت تغییر اسلاید (میلی‌ثانیه)',
+				'type' => Controls_Manager::NUMBER, 'min' => 100, 'max' => 4000,
+				'step' => 50, 'default' => 450,
+			)
+		);
+		// Loop and Free Mode are unsupported by Swiper Grid when rows > 1.
+		$single_row_conditions = array(
+			'terms' => array(
+				array( 'name' => 'carousel_rows', 'operator' => '==', 'value' => 1 ),
+				array( 'name' => 'carousel_rows_tablet', 'operator' => '==', 'value' => 1 ),
+				array( 'name' => 'carousel_rows_mobile', 'operator' => '==', 'value' => 1 ),
+			),
+		);
+		$this->add_control(
+			'carousel_loop',
+			array(
+				'label' => 'چرخش بی‌نهایت (فقط تک‌ردیفه)',
+				'type' => Controls_Manager::SWITCHER,
+				'return_value' => 'yes', 'default' => '',
+				'conditions' => $single_row_conditions,
+			)
+		);
+		$this->add_control(
+			'carousel_free_mode',
+			array(
+				'label' => 'حرکت آزاد (فقط تک‌ردیفه)',
+				'type' => Controls_Manager::SWITCHER,
+				'return_value' => 'yes', 'default' => '',
+				'conditions' => $single_row_conditions,
+			)
+		);
+		$this->add_control(
+			'carousel_touch',
+			array(
+				'label' => 'کشیدن با لمس و ماوس', 'type' => Controls_Manager::SWITCHER,
+				'return_value' => 'yes', 'default' => 'yes',
+			)
+		);
+		$this->add_control(
+			'carousel_grab_cursor',
+			array(
+				'label' => 'نشانگر کشیدن', 'type' => Controls_Manager::SWITCHER,
+				'return_value' => 'yes', 'default' => '',
+				'condition' => array( 'carousel_touch' => 'yes' ),
+			)
+		);
+		$this->add_control(
+			'carousel_keyboard',
+			array(
+				'label' => 'ناوبری با صفحه‌کلید', 'type' => Controls_Manager::SWITCHER,
+				'return_value' => 'yes', 'default' => 'yes',
+			)
+		);
+		$this->end_controls_section();
+	}
+
+	private function register_carousel_style_controls() {
+		$this->start_controls_section(
+			'style_stats_carousel',
+			array( 'label' => 'ناوبری کاروسل', 'tab' => Controls_Manager::TAB_STYLE )
+		);
+		$this->add_control(
+			'carousel_arrow_color',
+			array(
+				'label' => 'رنگ فلش‌ها', 'type' => Controls_Manager::COLOR,
+				'condition' => array( 'carousel_navigation' => 'yes' ),
+				'selectors' => array( '{{WRAPPER}} .ba-live-stats__arrow' => 'color: {{VALUE}};' ),
+			)
+		);
+		$this->add_control(
+			'carousel_arrow_background',
+			array(
+				'label' => 'پس‌زمینه فلش‌ها', 'type' => Controls_Manager::COLOR,
+				'condition' => array( 'carousel_navigation' => 'yes' ),
+				'selectors' => array( '{{WRAPPER}} .ba-live-stats__arrow' => 'background: {{VALUE}};' ),
+			)
+		);
+		$this->add_responsive_control(
+			'carousel_arrow_size',
+			array(
+				'label' => 'اندازه فلش‌ها', 'type' => Controls_Manager::SLIDER,
+				'size_units' => array( 'px' ), 'range' => array( 'px' => array( 'min' => 20, 'max' => 64 ) ),
+				'condition' => array( 'carousel_navigation' => 'yes' ),
+				'selectors' => array( '{{WRAPPER}} .ba-live-stats__arrow' => 'width: {{SIZE}}{{UNIT}}; height: {{SIZE}}{{UNIT}};' ),
+			)
+		);
+		$this->add_control(
+			'carousel_pagination_color',
+			array(
+				'label' => 'رنگ صفحه‌بندی', 'type' => Controls_Manager::COLOR,
+				'condition' => array( 'carousel_pagination!' => 'none' ),
+				'selectors' => array(
+					'{{WRAPPER}} .ba-live-stats__pagination' => 'color: {{VALUE}}; --swiper-pagination-color: {{VALUE}};',
+				),
+			)
+		);
 		$this->end_controls_section();
 	}
 
@@ -404,6 +639,40 @@ final class Bonyad_Alavi_Home_Live_Stats_Widget extends Widget_Base {
 		$title_line_one = trim( (string) ( $settings['title_line_one'] ?? '' ) );
 		$title_line_two = trim( (string) ( $settings['title_line_two'] ?? '' ) );
 		$items          = array_values( array_filter( (array) ( $settings['items'] ?? array() ), 'is_array' ) );
+		// Elementor responsive values are stored under suffixes _tablet and _mobile.
+		$carousel_sizes = array(
+			'desktop' => array( '', 6, 1 ),
+			'tablet'  => array( '_tablet', 3, 2 ),
+			'mobile'  => array( '_mobile', 2, 3 ),
+		);
+		$carousel_config = array(
+			'navigation'         => 'yes' === ( $settings['carousel_navigation'] ?? 'yes' ),
+			'pagination'         => in_array( $settings['carousel_pagination'] ?? 'none', array( 'bullets', 'fraction', 'progressbar' ), true ) ? $settings['carousel_pagination'] : 'none',
+			'autoplay'           => 'yes' === ( $settings['carousel_autoplay'] ?? '' ),
+			'delay'              => max( 500, min( 20000, absint( $settings['carousel_delay'] ?? 5000 ) ) ),
+			'speed'              => max( 100, min( 4000, absint( $settings['carousel_speed'] ?? 450 ) ) ),
+			'loop'               => 'yes' === ( $settings['carousel_loop'] ?? '' ),
+			'freeMode'           => 'yes' === ( $settings['carousel_free_mode'] ?? '' ),
+			'pauseHover'         => 'yes' === ( $settings['carousel_pause_hover'] ?? 'yes' ),
+			'disableInteraction' => 'yes' === ( $settings['carousel_disable_interaction'] ?? 'yes' ),
+			'touch'              => 'yes' === ( $settings['carousel_touch'] ?? 'yes' ),
+			'grabCursor'         => 'yes' === ( $settings['carousel_grab_cursor'] ?? '' ),
+			'keyboard'           => 'yes' === ( $settings['carousel_keyboard'] ?? 'yes' ),
+		);
+		foreach ( $carousel_sizes as $device => $dimensions ) {
+			list( $suffix, $fallback_columns, $fallback_rows ) = $dimensions;
+			$columns = max( 1, min( 12, absint( $settings['carousel_columns' . $suffix] ?? $fallback_columns ) ) );
+			$rows    = max( 1, min( 6, absint( $settings['carousel_rows' . $suffix] ?? $fallback_rows ) ) );
+			$gap     = $settings['carousel_gap' . $suffix]['size'] ?? 0;
+			$row_gap = $settings['carousel_row_gap' . $suffix]['size'] ?? 0;
+			$carousel_config[ $device ] = array(
+				'columns' => $columns,
+				'rows'    => $rows,
+				'group'   => max( 1, min( $columns, absint( $settings['carousel_group' . $suffix] ?? 1 ) ) ),
+				'gap'     => max( 0, min( 48, (float) $gap ) ),
+				'rowGap'  => max( 0, min( 48, (float) $row_gap ) ),
+			);
+		}
 
 		if ( ! $items ) {
 			$this->render_editor_notice();
@@ -417,13 +686,22 @@ final class Bonyad_Alavi_Home_Live_Stats_Widget extends Widget_Base {
 						<span class="ba-live-stats__title-line"><?php echo esc_html( $title_line_one ); ?></span>
 						<span class="ba-live-stats__title-line"><?php echo esc_html( $title_line_two ); ?></span>
 					</div>
-					<div class="ba-live-stats__grid">
-						<?php foreach ( $items as $item ) : ?>
-							<div class="ba-live-stats__item">
-								<b class="ba-live-stats__value"><?php echo esc_html( $this->format_stat_value( $item['value'] ?? '' ) ); ?></b>
-								<span class="ba-live-stats__label"><?php echo esc_html( trim( (string) ( $item['label'] ?? '' ) ) ); ?></span>
+					<div class="ba-live-stats__carousel">
+						<div class="ba-live-stats__grid swiper" dir="rtl" data-ba-live-stats-carousel="<?php echo esc_attr( wp_json_encode( $carousel_config ) ); ?>">
+							<div class="swiper-wrapper">
+								<?php foreach ( $items as $item ) : ?>
+									<div class="ba-live-stats__item swiper-slide">
+										<b class="ba-live-stats__value"><?php echo esc_html( $this->format_stat_value( $item['value'] ?? '' ) ); ?></b>
+										<span class="ba-live-stats__label"><?php echo esc_html( trim( (string) ( $item['label'] ?? '' ) ) ); ?></span>
+									</div>
+								<?php endforeach; ?>
 							</div>
-						<?php endforeach; ?>
+						</div>
+						<div class="ba-live-stats__controls">
+							<button class="ba-live-stats__arrow" type="button" data-ba-stats-prev aria-label="آمار قبلی"><span aria-hidden="true">&#x276F;</span></button>
+							<div class="ba-live-stats__pagination" data-ba-stats-pagination></div>
+							<button class="ba-live-stats__arrow" type="button" data-ba-stats-next aria-label="آمار بعدی"><span aria-hidden="true">&#x276E;</span></button>
+						</div>
 					</div>
 				</div>
 			</div>

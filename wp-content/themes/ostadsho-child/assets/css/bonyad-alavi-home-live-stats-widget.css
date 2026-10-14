@@ -59,9 +59,9 @@
 }
 
 .ba-home-live-stats-widget .ba-live-stats__grid {
-  display: grid;
-  grid-template-columns: repeat(6, 1fr);
-  align-items: stretch;
+  display: block;
+  position: relative;
+  min-width: 0;
   background: #fff;
   border-radius: 18px;
   overflow: hidden;
@@ -117,13 +117,7 @@
     grid-template-columns: 148px minmax(0, 1fr);
   }
 
-  .ba-home-live-stats-widget .ba-live-stats__grid {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-
-  .ba-home-live-stats-widget .ba-live-stats__item {
-    min-height: 78px;
-  }
+  /* Swiper Grid controls responsive columns and rows. */
 
   .ba-home-live-stats-widget .ba-live-stats__item:nth-child(3)::after {
     display: none;
@@ -159,7 +153,10 @@
   }
 
   .ba-home-live-stats-widget .ba-live-stats__grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    border-radius: 14px;
+  }
+
+  .ba-home-live-stats-widget .ba-live-stats__carousel {
     border-radius: 14px;
   }
 
@@ -173,5 +170,117 @@
 
   .ba-home-live-stats-widget .ba-live-stats__label {
     white-space: normal;
+  }
+}
+
+/* Swiper is supplied by Elementor. The title remains outside the carousel. */
+.ba-home-live-stats-widget .ba-live-stats__carousel {
+  min-width: 0;
+  position: relative;
+  overflow: hidden;
+  border-radius: 18px;
+  background: #fff;
+}
+
+.ba-home-live-stats-widget .ba-live-stats__grid.swiper {
+  width: 100%;
+  max-width: 100%;
+  overflow: hidden;
+}
+
+.ba-home-live-stats-widget .ba-live-stats__grid .swiper-wrapper {
+  align-items: stretch;
+}
+
+.ba-home-live-stats-widget .ba-live-stats__grid .ba-live-stats__item.swiper-slide {
+  width: auto;
+  min-width: 0;
+  margin: 0;
+  height: auto;
+}
+
+/* Swiper Grid uses spaceBetween for both axes. Override its per-row margin
+   and height to allow an independent responsive vertical gap. */
+.ba-home-live-stats-widget .ba-live-stats__grid.swiper-grid .ba-live-stats__item.swiper-slide {
+  height: calc((100% - (var(--ba-stats-rows, 1) - 1) * var(--ba-stats-row-gap, 0px)) / var(--ba-stats-rows, 1)) !important;
+}
+.ba-home-live-stats-widget .ba-live-stats__grid.swiper-grid .swiper-slide[style*="margin-top"] {
+  margin-top: var(--ba-stats-row-gap, 0px) !important;
+}
+
+.ba-home-live-stats-widget .ba-live-stats__controls {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  min-height: 32px;
+  padding: 2px 12px 7px;
+  direction: rtl;
+}
+.ba-home-live-stats-widget.has-carousel-overflow .ba-live-stats__controls {
+  display: flex;
+}
+.ba-home-live-stats-widget .ba-live-stats__arrow {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 1px solid #dfe8e3;
+  border-radius: 50%;
+  background: #f6faf7;
+  color: var(--green);
+  font-size: 17px;
+  line-height: 1;
+  cursor: pointer;
+  transition: color .2s, background .2s;
+}
+.ba-home-live-stats-widget.has-carousel-navigation .ba-live-stats__arrow {
+  display: inline-flex;
+}
+.ba-home-live-stats-widget .ba-live-stats__arrow:hover {
+  background: #e8f4ec;
+}
+.ba-home-live-stats-widget .ba-live-stats__arrow:focus-visible {
+  outline: 2px solid var(--green);
+  outline-offset: 2px;
+}
+.ba-home-live-stats-widget .ba-live-stats__arrow.swiper-button-lock,
+.ba-home-live-stats-widget .ba-live-stats__arrow.swiper-button-disabled {
+  opacity: .35;
+  pointer-events: none;
+}
+.ba-home-live-stats-widget .ba-live-stats__pagination {
+  position: static;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: auto;
+  min-width: 0;
+  color: var(--green);
+  --swiper-pagination-color: var(--green);
+}
+.ba-home-live-stats-widget.has-carousel-pagination .ba-live-stats__pagination:not(:empty) {
+  display: flex;
+}
+.ba-home-live-stats-widget .ba-live-stats__pagination:empty {
+  display: none;
+}
+.ba-home-live-stats-widget .ba-live-stats__pagination .swiper-pagination-bullet {
+  width: 6px;
+  height: 6px;
+  margin: 0 3px;
+}
+.ba-home-live-stats-widget .ba-live-stats__pagination.swiper-pagination-progressbar {
+  position: relative;
+  width: 90px;
+  height: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ba-home-live-stats-widget .ba-live-stats__arrow {
+    transition: none;
   }
 }

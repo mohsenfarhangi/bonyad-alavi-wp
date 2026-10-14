@@ -126,6 +126,12 @@ final class BA_Elementor_Assets {
 		);
 
 		$this->register_script(
+			'bonyad-alavi-home-live-stats-widget',
+			'assets/js/bonyad-alavi-home-live-stats-widget.js',
+			array( 'elementor-frontend', 'swiper' )
+		);
+
+		$this->register_script(
 			'apache-echarts',
 			'assets/vendor/echarts/echarts.min.js',
 			array()

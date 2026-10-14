@@ -1,6 +1,6 @@
 # Current Project State
 
-آخرین بازبینی: **2026-10-08**
+آخرین بازبینی: **2026-10-14**
 
 ## Project Phase
 
@@ -16,6 +16,15 @@
 AFE release goal همچنان live acceptance نسخه 1.0.28 و رفع blocker واقعی پیش از production promotion است.
 
 ## Recently Completed
+
+### Live Stats Swiper carousel (2026-10-14)
+- آیتم‌های BA Home Live Stats به Swiper داخلی Elementor تبدیل شدند؛ عنوان و پوسته سبز ثابت مانده‌اند.
+- defaults: desktop 6×1، tablet 3×2، mobile 2×3؛ columns, rows, group, horizontal/vertical gap همگی responsive هستند.
+- controls: navigation, pagination, autoplay/delay/pause, speed, touch, grab cursor, keyboard, Loop, Free Mode؛ ناسازگاری multi-row در editor و runtime مدیریت می‌شود.
+- assetهای CSS/JS فقط در ویجت مرتبط load می‌شوند؛ فرمت اعداد فارسی و Repeater حفظ شده‌اند.
+- regression contract متناسب با کاروسل به‌روزرسانی شده است؛ تست زنده Elementor باید جداگانه انجام شود.
+
+
 
 ### Hero mobile ticker
 - تیکر ویجت Hero برای `max-width:760px` به track افقی مستقل و حرکت چپ به راست تبدیل شد؛ متن لینک‌ها RTL و label ثابت است.
