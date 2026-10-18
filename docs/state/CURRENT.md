@@ -1,6 +1,6 @@
 # Current Project State
 
-آخرین بازبینی: **2026-10-14**
+آخرین بازبینی: **2026-10-18**
 
 ## Project Phase
 
@@ -11,11 +11,24 @@
 
 ## Current Goal
 
+فرم «جذب تسهیلگر» با slug `facilitator-recruitment` به Source Definition قالب اضافه شد و در branch `feature/facilitator-recruitment-form` آماده بازبینی است. مرحله باز، اجرای regression با PHP >=8.3 و پذیرش زنده در WordPress/Elementor است: ثبت، جلوگیری از تکرار کد ملی، وابستگی استان/شهرستان، بارگذاری رزومه و حذف نمایش رهگیری از پیام موفقیت.
+
+
 ویجت عمومی Elementor برای `ba-section-heading` اکنون به‌صورت مستقل و قابل استفاده در هر جای Elementor پیاده‌سازی شده است؛ مرحله باز، پذیرش بصری در Elementor واقعی است. News و About/Impact implementation داخلی خودشان را بدون تغییر حفظ می‌کنند و live acceptance آن‌ها نیز همچنان باز است.
 
 AFE release goal همچنان live acceptance نسخه 1.0.28 و رفع blocker واقعی پیش از production promotion است.
 
 ## Recently Completed
+
+### Facilitator recruitment form (2026-10-18)
+- فرم تک‌مرحله‌ای `facilitator-recruitment` در `ostadsho-child/inc/forms/` با ۱۱ فیلد (۹ اجباری، توضیحات و رزومه اختیاری) تعریف شد.
+- کد ملی، موبایل و تلفن ثابت از validator و mask عمومی AFE استفاده می‌کنند؛ PDF/DOC/DOCX تا ۵MB مجاز است.
+- استان/شهرستان از Geo Data Source عمومی AFE و `dependsOn` استفاده می‌کنند؛ منطق اضافی جغرافیا در قالب نوشته نشده است.
+- duplicate config برای `national_id` با رفتار `block` و پیام فارسی ثبت شده؛ AFE خود preflight/submit را کنترل می‌کند.
+- فرم wizard/draft/edit/preview ندارد؛ AFE شناسه داخلی را نگه می‌دارد، ولی stylesheet و success adapter اختصاصی قالب نمایش کد رهگیری و لینک ویرایش را حذف می‌کنند.
+- shortcode: `[alavi_form id="facilitator-recruitment"]`؛ CSS/JS فقط برای slug مربوطه اثر دارد.
+- regression اختصاصی `tests/facilitator-form-definition.php` اضافه شده است. **PHP CLI regression، PHP lint، browser acceptance و تست واقعی در وردپرس هنوز اجرا نشده‌اند.**
+- [MODULE-FACILITATOR-FORM](../modules/facilitator-recruitment-form.md)
 
 ### Dynamic Tags / ACF for Live Stats (2026-10-14)
 - Dynamic Tags با `active => true` برای `value` و `label` در Repeater آمار و دو خط عنوان ثابت ویجت فعال شدند.
@@ -261,7 +274,7 @@ Historical PASSهای AFE/Theme به HEAD جدید تعمیم داده نمی‌
 
 ## Next Agent Handoff
 
-**Current task:** ویجت عمومی `bonyad_alavi_section_heading` با سه variant مرجع ساخته شده و آماده live Elementor visual acceptance است. News/About عمداً refactor نشده‌اند و contract داخلی خودشان را حفظ می‌کنند.
+**Current task:** فرم جذب تسهیلگر در branch `feature/facilitator-recruitment-form` پیاده‌سازی و با AFE یکپارچه شده است؛ اجرای PHP/theme regression و live WordPress/Elementor acceptance پیش از merge لازم است. پذیرش بصری ویجت `bonyad_alavi_section_heading` و News/About هم همچنان باز است.
 
 **Start here:** [../INDEX.md](../INDEX.md) → [../modules/INDEX.md](../modules/INDEX.md).
 
