@@ -39,11 +39,11 @@ final class Bonyad_Alavi_Home_Hero_Widget extends Widget_Base {
 	}
 
 	public function get_style_depends() {
-		return array( 'bonyad-alavi-home-hero-widget' );
+		return array( 'swiper', 'bonyad-alavi-home-hero-widget' );
 	}
 
 	public function get_script_depends() {
-		return array( 'bonyad-alavi-home-hero-widget' );
+		return array( 'elementor-frontend', 'swiper', 'bonyad-alavi-home-hero-widget' );
 	}
 
 	protected function register_controls() {
@@ -128,9 +128,17 @@ final class Bonyad_Alavi_Home_Hero_Widget extends Widget_Base {
 				),
 			)
 		);
+		$this->end_controls_section();
+		$this->start_controls_section( 'content_swiper', array( 'label' => 'تنظیمات Swiper', 'tab' => Controls_Manager::TAB_CONTENT ) );
 		$this->add_control( 'slider_autoplay', array( 'label' => 'پخش خودکار', 'type' => Controls_Manager::SWITCHER, 'return_value' => 'yes', 'default' => 'yes' ) );
 		$this->add_control( 'slider_autoplay_delay', array( 'label' => 'فاصله تعویض اسلاید (ms)', 'type' => Controls_Manager::NUMBER, 'min' => 1500, 'max' => 30000, 'step' => 100, 'default' => 6200, 'condition' => array( 'slider_autoplay' => 'yes' ) ) );
 		$this->add_control( 'slider_pause_on_hover', array( 'label' => 'توقف روی Hover / Focus', 'type' => Controls_Manager::SWITCHER, 'return_value' => 'yes', 'default' => 'yes', 'condition' => array( 'slider_autoplay' => 'yes' ) ) );
+		$this->add_control( 'slider_speed', array( 'label' => 'سرعت انتقال (ms)', 'type' => Controls_Manager::NUMBER, 'min' => 0, 'max' => 5000, 'step' => 50, 'default' => 650 ) );
+		$this->add_control( 'slider_loop', array( 'label' => 'تکرار پیوسته', 'type' => Controls_Manager::SWITCHER, 'return_value' => 'yes', 'default' => 'yes' ) );
+		$this->add_control( 'slider_effect', array( 'label' => 'افکت انتقال', 'type' => Controls_Manager::SELECT, 'default' => 'fade', 'options' => array( 'slide' => 'اسلاید', 'fade' => 'محو شدن' ) ) );
+		$this->add_control( 'slider_disable_on_interaction', array( 'label' => 'توقف پخش خودکار پس از تعامل', 'type' => Controls_Manager::SWITCHER, 'return_value' => 'yes', 'default' => '', 'condition' => array( 'slider_autoplay' => 'yes' ) ) );
+		$this->add_control( 'slider_touch', array( 'label' => 'حرکت با لمس / کشیدن', 'type' => Controls_Manager::SWITCHER, 'return_value' => 'yes', 'default' => 'yes' ) );
+		$this->add_control( 'slider_keyboard', array( 'label' => 'کنترل با صفحه‌کلید', 'type' => Controls_Manager::SWITCHER, 'return_value' => 'yes', 'default' => 'yes' ) );
 		$this->add_control( 'slider_show_arrows', array( 'label' => 'نمایش فلش‌ها', 'type' => Controls_Manager::SWITCHER, 'return_value' => 'yes', 'default' => 'yes' ) );
 		$this->add_control( 'slider_show_dots', array( 'label' => 'نمایش Pagination', 'type' => Controls_Manager::SWITCHER, 'return_value' => 'yes', 'default' => 'yes' ) );
 		$this->end_controls_section();
@@ -247,33 +255,35 @@ final class Bonyad_Alavi_Home_Hero_Widget extends Widget_Base {
 		$this->add_responsive_control(
 			'slider_height',
 			array(
-				'label'      => 'ارتفاع اسلایدر',
+				'label'      => 'حداقل ارتفاع اسلایدر',
+				'description' => 'ارتفاع از نسبت تصویر محاسبه می‌شود؛ صفر یعنی بدون محدودیت حداقل ارتفاع.',
 				'type'       => Controls_Manager::SLIDER,
 				'size_units' => array( 'px', 'vh' ),
-				'range'      => array( 'px' => array( 'min' => 240, 'max' => 900 ), 'vh' => array( 'min' => 20, 'max' => 100 ) ),
+				'range'      => array( 'px' => array( 'min' => 0, 'max' => 900 ), 'vh' => array( 'min' => 0, 'max' => 100 ) ),
 				'selectors'  => array(
 					'{{WRAPPER}} .ba-slider' => 'min-height: {{SIZE}}{{UNIT}};',
-					'{{WRAPPER}} .ba-hero__grid' => '--ba-custom-slider-height: {{SIZE}}{{UNIT}};',
 				),
 			)
 		);
-		$this->add_control(
-			'mobile_aspect_ratio',
+		$this->add_responsive_control(
+			'slider_aspect_ratio',
 			array(
-				'label'   => 'نسبت اسلایدر موبایل',
-				'type'    => Controls_Manager::SELECT,
+				'label' => 'نسبت تصویر اسلایدر',
+				'type' => Controls_Manager::SELECT,
 				'default' => '',
 				'options' => array(
-					''       => 'پیش‌فرض طرح مرجع (4:3)',
-					'1 / 1'  => '1:1',
-					'4 / 3'  => '4:3',
-					'3 / 2'  => '3:2',
-					'16 / 9' => '16:9',
-					'3 / 4'  => '3:4',
+					'' => 'پیش‌فرض: دسکتاپ/تبلت 16:9، موبایل 4:3',
+					'1 / 1' => '1:1', '4 / 3' => '4:3', '3 / 2' => '3:2',
+					'16 / 9' => '16:9', '2 / 1' => '2:1', '5 / 2' => '5:2', '3 / 4' => '3:4',
 				),
-				'selectors' => array( '{{WRAPPER}} .ba-home-hero-widget' => '--ba-mobile-slider-aspect-ratio: {{VALUE}};' ),
+				'selectors' => array( '{{WRAPPER}} .ba-slider' => '--ba-slider-aspect-ratio: {{VALUE}};' ),
 			)
 		);
+		// Preserve saved mobile ratios; the responsive control takes priority when set.
+		$this->add_control( 'mobile_aspect_ratio', array(
+			'type' => Controls_Manager::HIDDEN, 'default' => '',
+			'selectors' => array( '{{WRAPPER}} .ba-home-hero-widget' => '--ba-mobile-slider-aspect-ratio: {{VALUE}};' ),
+		) );
 		$this->end_controls_section();
 	}
 
@@ -481,6 +491,12 @@ final class Bonyad_Alavi_Home_Hero_Widget extends Widget_Base {
 			data-slider-autoplay="<?php echo 'yes' === ( $settings['slider_autoplay'] ?? 'yes' ) ? '1' : '0'; ?>"
 			data-slider-delay="<?php echo esc_attr( (string) max( 1500, absint( $settings['slider_autoplay_delay'] ?? 6200 ) ) ); ?>"
 			data-slider-pause-hover="<?php echo 'yes' === ( $settings['slider_pause_on_hover'] ?? 'yes' ) ? '1' : '0'; ?>"
+			data-slider-speed="<?php echo esc_attr( (string) min( 5000, max( 0, (int) ( $settings['slider_speed'] ?? 650 ) ) ) ); ?>"
+			data-slider-loop="<?php echo 'yes' === ( $settings['slider_loop'] ?? 'yes' ) ? '1' : '0'; ?>"
+			data-slider-effect="<?php echo 'slide' === ( $settings['slider_effect'] ?? 'fade' ) ? 'slide' : 'fade'; ?>"
+			data-slider-disable-interaction="<?php echo 'yes' === ( $settings['slider_disable_on_interaction'] ?? '' ) ? '1' : '0'; ?>"
+			data-slider-touch="<?php echo 'yes' === ( $settings['slider_touch'] ?? 'yes' ) ? '1' : '0'; ?>"
+			data-slider-keyboard="<?php echo 'yes' === ( $settings['slider_keyboard'] ?? 'yes' ) ? '1' : '0'; ?>"
 			data-ticker-autoplay="<?php echo 'yes' === ( $settings['ticker_autoplay'] ?? 'yes' ) ? '1' : '0'; ?>"
 			data-ticker-delay="<?php echo esc_attr( (string) max( 1500, absint( $settings['ticker_delay'] ?? 6000 ) ) ); ?>"
 		>
@@ -496,18 +512,16 @@ final class Bonyad_Alavi_Home_Hero_Widget extends Widget_Base {
 
 					<?php if ( $slides ) : ?>
 						<div aria-label="اخبار و رویدادهای شاخص" aria-roledescription="carousel" class="ba-slider" data-js-slider>
-							<div class="ba-slider__track">
-								<?php foreach ( $slides as $index => $slide ) : ?>
-									<?php $this->render_slide( $slide, $index, $settings ); ?>
-								<?php endforeach; ?>
+							<div class="ba-slider__viewport swiper swiper-container" dir="rtl">
+								<div class="ba-slider__track swiper-wrapper">
+									<?php foreach ( $slides as $index => $slide ) : ?>
+										<?php $this->render_slide( $slide, $index, $settings ); ?>
+									<?php endforeach; ?>
+								</div>
 							</div>
 
 							<?php if ( count( $slides ) > 1 && 'yes' === ( $settings['slider_show_dots'] ?? 'yes' ) ) : ?>
-								<div aria-label="انتخاب اسلاید" class="ba-slider__pagination">
-									<?php foreach ( array_keys( $slides ) as $index ) : ?>
-										<button aria-label="<?php echo esc_attr( sprintf( 'اسلاید %d', $index + 1 ) ); ?>" class="ba-slider__dot<?php echo 0 === $index ? ' is-active' : ''; ?>" data-js-slider-dot type="button"></button>
-									<?php endforeach; ?>
-								</div>
+								<div aria-label="انتخاب اسلاید" class="ba-slider__pagination"></div>
 							<?php endif; ?>
 
 							<?php if ( count( $slides ) > 1 && 'yes' === ( $settings['slider_show_arrows'] ?? 'yes' ) ) : ?>
@@ -661,9 +675,9 @@ final class Bonyad_Alavi_Home_Hero_Widget extends Widget_Base {
 		$title_tag   = 'reference' === $title_mode ? ( 0 === (int) $index ? 'h1' : 'h2' ) : $this->sanitize_heading_tag( $title_mode );
 		$alt         = ! empty( $image['id'] ) ? (string) get_post_meta( absint( $image['id'] ), '_wp_attachment_image_alt', true ) : '';
 		$item        = array( 'id' => absint( $image['id'] ?? 0 ), 'url' => (string) ( $image['url'] ?? '' ), 'alt' => $alt );
-		$class       = 'ba-slider__slide' . ( 0 === (int) $index ? ' is-active' : '' );
+		$class       = 'ba-slider__slide swiper-slide';
 		?>
-		<article class="<?php echo esc_attr( $class ); ?>" data-js-slide>
+		<article class="<?php echo esc_attr( $class ); ?>">
 			<?php echo BA_Media_Helper::render_image( $item, 'full', array( 'loading' => 0 === (int) $index ? 'eager' : 'lazy', 'decoding' => 'async' ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 			<?php if ( $whole_link ) : ?>
 				<a class="ba-slider__whole-link"<?php echo $this->build_link_attributes( $link ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?> aria-label="<?php echo esc_attr( $title ?: $tag ?: 'مشاهده اسلاید' ); ?>"></a>

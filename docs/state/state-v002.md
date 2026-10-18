@@ -611,3 +611,15 @@ Current module: [MODULE-HOME-LIVE-STATS](../modules/theme-home-live-stats-widget
 - Extended the widget regression contract to verify dynamic controls and parsed frontend render path.
 
 Current module: [MODULE-HOME-LIVE-STATS](../modules/theme-home-live-stats-widget.md).
+
+## 2026-10-17 — Hero ratio sizing and Elementor Swiper
+
+- Replaced the custom slide index/timer engine with Elementor's bundled Swiper and its async loader; ticker behavior remains independent.
+- Added speed/loop/effect/interaction/touch/keyboard settings alongside preserved autoplay/arrows/dots IDs.
+- Added responsive slider ratio; kept saved minimum-height ID and legacy mobile-ratio values. Zero minimum no longer collapses tablet rows.
+- Removed fixed grid row sizing. Scoped compatibility handles observed legacy production fixed-row/hidden-arrow CSS absent from this checkout.
+- PHP lint, 32 source contracts, isolated control registration, and browser fixture checks using actual widget rendering plus installed Elementor Swiper/loader passed.
+- Browser checks covered responsive ratios, minimum height, navigation, pagination, autoplay/focus/interaction pause, slide/fade, no loop, single-slide and re-init.
+- Full local WP boot was blocked by DB connection failure; no production deploy or full Elementor editor acceptance occurred.
+
+Current contract: [MODULE-HOME-HERO](../modules/theme-home-hero-widget.md).

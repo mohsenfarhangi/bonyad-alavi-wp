@@ -63,13 +63,15 @@ Rendering contract:
 - تصویر اول eager و تصاویر بعدی lazy هستند؛ decoding async است.
 - اگر تصویر انتخاب نشده باشد، محتوای slide روی background اسلایدر باقی می‌ماند.
 
-Behavior:
-- autoplay default 6200 ms
-- optional pause on hover/focus
-- arrows و dots قابل خاموش/روشن شدن
-- keyboard ArrowLeft/ArrowRight
-- multiple widget instances مستقل
-- reduced-motion → autoplay/transition behavior محدود می‌شود.
+Behavior (2026-10-17):
+- اسلایدر از Swiper v8 نصب‌شده خود Elementor و loader بومی `elementorFrontend.utils.swiper` استفاده می‌کند؛ هیچ نسخه جدید/CDN یا موتور دستی اسلاید اضافه نشده است.
+- Markup: کادر ratio با `ba-slider`، viewport مطلق `ba-slider__viewport swiper swiper-container`، track با `swiper-wrapper` و هر slide با `swiper-slide`.
+- بخش مستقل «تنظیمات Swiper»: autoplay/delay (پیش‌فرض 6200ms)، speed (650ms، صفر مجاز)، loop، slide/fade (پیش‌فرض fade)، pause on hover/focus، disable on interaction، touch، keyboard، arrows و dots.
+- شناسه کنترل‌های قبلی autoplay/delay/pause/arrows/dots حفظ شده‌اند؛ default توقف پس از تعامل خاموش است.
+- Swiper مالک حرکت، pagination، navigation و timer پخش خودکار است؛ کد timer/show/index دستی اسلایدر حذف شد. تیکر همچنان منطق مستقل قبلی خود را دارد.
+- یک اسلاید: بدون loop/autoplay/controls. اسلایدهای غیرفعال inert و aria-hidden می‌شوند.
+- re-init و Elementor handler `onDestroy`، instance/listenerها را پاک می‌کنند؛ نتیجه دیررس loader پس از dispose دور انداخته می‌شود.
+- reduced-motion پخش خودکار را خاموش و سرعت انتقال را صفر می‌کند؛ تغییر preference سبب بازسازی slider می‌شود.
 
 ### Important News Ticker
 
@@ -108,7 +110,7 @@ Ticker در عرض‌های ۷۶۱ پیکسل به بالا رفتار عمود�
 ### Desktop > 1080px
 - Grid reference: `minmax(220px, .82fr) minmax(0, 2.25fr)`
 - Areas: `mission slider` / `mission ticker`
-- rows: `410px 48px`
+- rows خودکار؛ ارتفاع Slider از aspect ratio و حداقل ارتفاع می‌آید، Ticker ارتفاع مستقل خود را دارد.
 - Mission column + Slider و Ticker زیر Slider
 - Mission width فقط در صورت override صریح کاربر قابل تغییر است.
 
@@ -126,13 +128,22 @@ flex order:
 2. Ticker
 3. Mission Nav
 
-Slider ratio-driven است؛ default `4 / 3` و از Style control قابل تغییر است. Mission Nav چهار ردیف تک‌ستونه با ارتفاع حداقل ۷۲ پیکسل، عنوان ۱۳ پیکسلی، توضیح ۱۱ پیکسلی و قاب آیکون ثابت ۴۰ پیکسلی دارد. توضیحات نمایش داده می‌شوند و در عرض باریک متن می‌تواند چندخطی شود؛ خط افقی بین ردیف‌ها و بدون خط عمودی است.
+Slider ratio-driven است؛ default موبایل `4 / 3` است. نسبت جدید responsive و حداقل ارتفاع در «چیدمان و ابعاد» قابل تنظیم‌اند. Mission Nav چهار ردیف تک‌ستونه با ارتفاع حداقل ۷۲ پیکسل، عنوان ۱۳ پیکسلی، توضیح ۱۱ پیکسلی و قاب آیکون ثابت ۴۰ پیکسلی دارد. توضیحات نمایش داده می‌شوند و در عرض باریک متن می‌تواند چندخطی شود؛ خط افقی بین ردیف‌ها و بدون خط عمودی است.
 
 اصلاح تأییدشده کاربر در 2026-10-08 داخل media queryهای asset اصلی ادغام شد؛ override جداگانه لازم نیست. در عرض‌های <=1080 اندازه عنوان/توضیح/گلیف و فاصله و padding آیتم‌ها با `!important` اعمال می‌شوند تا تنظیم ذخیره‌شده المنتور، اندازه‌های تأییدشده رسپانسیو را خنثی نکند. قواعد متناقض Mission برای <=430 حذف شدند. Desktop و قواعد Slider/Ticker در این تغییر حفظ شدند.
 
+### Slider sizing contract — 2026-10-17
+
+- کنترل responsive جدید `slider_aspect_ratio` برای تمام deviceهاست؛ fallback دسکتاپ/تبلت `16 / 9` و موبایل `4 / 3` است.
+- کنترل `slider_height` با همان ID قبلی اکنون صریحاً «حداقل ارتفاع» است؛ range از صفر شروع می‌شود و هیچ ارتفاع ثابتی برای grid تولید نمی‌کند.
+- قرارداد ارتفاع: `max(width / ratio, minimum-height)`؛ صفر یعنی بدون کف ارتفاع، نه ارتفاع صفر.
+- `mobile_aspect_ratio` قدیمی به‌صورت hidden همراه selector خود باقی مانده تا مقادیر ذخیره‌شده قبلی حفظ شوند. نسبت responsive صریح اولویت دارد؛ ارث‌بری deviceها طبق Elementor است.
+- Swiper viewport مطلق است و اندازه تصویر/متن در محاسبه ارتفاع کادر دخالت ندارد؛ `align-self:start` مانع کشیده‌شدن کادر به ارتفاع Mission می‌شود.
+- در live stylesheet قدیمی، override اختصاصی `.elementor-element-964556b .ba-hero__grid` با ردیف ثابت 342px و rule سراسری مخفی‌کردن controls مشاهده شد؛ این دو در `style.css` checkout محلی وجود نداشتند. rule محدود با specificity بیشتر فقط row sizing را خودکار می‌کند و display فلش‌های رندرشده را حفظ می‌کند؛ نیازی به دست‌کاری stylesheet غیرهمسان production در این task نبود.
+
 ## Style Tab Contract
 
-Style controls به‌صورت scoped روی کلاس‌های اصلی reference (`.ba-mission-nav`, `.ba-slider`, `.ba-ticker` و ...) اعمال می‌شوند. این کنترل‌ها عمداً **visual default ندارند**؛ تا وقتی کاربر مقداری را تغییر نداده، CSS فایل مرجع authority ظاهری است. شناسه Style Controlها با prefix `ref_` بازتعریف شده‌اند تا defaultهای اشتباه نسخه اول که ممکن است در JSON یک widget instance ذخیره شده باشند دیگر CSS تولید نکنند.
+Style controls به‌صورت scoped روی کلاس‌های اصلی reference (`.ba-mission-nav`, `.ba-slider`, `.ba-ticker` و ...) اعمال می‌شوند. کنترل‌های رنگ/تایپوگرافی و فاصله‌ها عمداً **visual default ندارند**؛ تا وقتی کاربر مقداری را تغییر نداده، CSS فایل مرجع authority ظاهری است. شناسه Style Controlها با prefix `ref_` بازتعریف شده‌اند تا defaultهای اشتباه نسخه اول که ممکن است در JSON یک widget instance ذخیره شده باشند دیگر CSS تولید نکنند.
 
 Sections:
 - Layout / dimensions
@@ -222,3 +233,12 @@ Regression contract:
 8. desktop/tablet/mobile با breakpointهای reference بررسی شوند.
 9. Style controls و Normal/Hover در frontend مطابق Editor اعمال شوند.
 10. reduced-motion و empty content behavior بررسی شوند.
+
+### Hero Swiper / ratio verification — 2026-10-17
+
+- PHP lint ویجت و bootstrap و 32 بررسی contract واقعی اجرا و PASS شدند؛ خطای قدیمی تست mobile-order که literal `\n` را جستجو می‌کرد اصلاح شد.
+- ثبت کنترل‌ها/defaultها و پذیرش min=0 در harness ایزوله PHP PASS شد.
+- نمونه مرورگری از render واقعی همین PHP، CSS/JS اصلاح‌شده، Swiper v8 نصب‌شده و کلاس SwiperHandler استخراج‌شده از همان Elementor ساخته شد؛ WordPress/Elementor editor کامل شبیه‌سازی نشده است.
+- عرض‌های 1366/1024/768/390/360، نسبت پیش‌فرض و نسبت responsive صریح 16:9 / 3:2 / 1:1، min=0 و min=600 بررسی شدند.
+- arrows/dots، fade/slide، loop خاموش، تک‌اسلاید، autoplay، focus pause/resume، disable-on-interaction و reinitialization بدون تکثیر cloneها در fixture بررسی شدند.
+- وردپرس محلی در bootstrap با خطای اتصال دیتابیس متوقف شد؛ full Editor acceptance و deploy/QA سرور واقعی انجام نشده‌اند. DOM سایت زنده فقط خوانده شد و تغییری نکرد.

@@ -83,13 +83,17 @@
   display: grid;
   grid-template-columns: minmax(220px, var(--ba-mission-column-width, .82fr)) minmax(0, 2.25fr);
   grid-template-areas: "mission slider" "mission ticker";
-  grid-template-rows: var(--ba-custom-slider-height, 410px) 48px;
   gap: 10px;
   min-width: 0;
   max-width: 1280px;
   min-height: 0;
   margin-inline: auto;
   align-items: stretch;
+}
+
+/* Ignore obsolete page-specific fixed rows; the slider owns its ratio/minimum height. */
+.ba-home-hero-widget.ba-hero .ba-hero__grid {
+  grid-template-rows: auto !important;
 }
 
 .ba-home-hero-widget .ba-mission-nav {
@@ -198,29 +202,38 @@
   background: var(--green-900);
   box-shadow: var(--shadow);
   min-width: 0;
-  min-height: var(--ba-custom-slider-height, 410px);
+  width: 100%;
+  height: auto;
+  min-height: 0;
+  aspect-ratio: var(--ba-slider-aspect-ratio, 16 / 9);
+  align-self: start;
   border-radius: 7px 18px 18px 7px;
 }
 
-.ba-home-hero-widget .ba-slider__track {
+/* An absolute Swiper viewport cannot contribute intrinsic height to the ratio box. */
+.ba-home-hero-widget .ba-slider__viewport {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  width: 100%;
   height: 100%;
-  position: relative;
+}
+
+.ba-home-hero-widget .ba-slider__track {
+  display: flex;
+  height: 100%;
 }
 
 .ba-home-hero-widget .ba-slider__slide {
-  position: absolute;
-  inset: 0;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity .65s ease;
-}
-
-.ba-home-hero-widget .ba-slider__slide.is-active {
-  opacity: 1;
-  pointer-events: auto;
+  position: relative;
+  flex-shrink: 0;
+  width: 100%;
+  height: 100%;
 }
 
 .ba-home-hero-widget .ba-slider__slide img {
+  position: absolute;
+  inset: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
@@ -277,7 +290,7 @@
   z-index: 5;
   left: 22px;
   bottom: 20px;
-  display: flex;
+  display: flex !important;
   align-items: center;
   gap: 8px;
   direction: ltr;
@@ -314,6 +327,8 @@
   z-index: 5;
   right: 22px;
   bottom: 25px;
+  width: auto;
+  left: auto;
   display: flex;
   gap: 7px;
 }
@@ -325,6 +340,7 @@
   padding: 0;
   border-radius: 10px;
   background: rgba(255, 255, 255, .5);
+  opacity: 1;
   cursor: pointer;
   transition: .3s;
 }
@@ -437,7 +453,6 @@
 
 .ba-home-hero-widget.ba-home-hero-widget--no-ticker .ba-hero__grid {
   grid-template-areas: "mission slider";
-  grid-template-rows: var(--ba-custom-slider-height, 410px);
 }
 
 .ba-home-hero-widget.ba-home-hero-widget--no-missions .ba-hero__grid {
@@ -447,7 +462,6 @@
 
 .ba-home-hero-widget.ba-home-hero-widget--no-missions.ba-home-hero-widget--no-ticker .ba-hero__grid {
   grid-template-areas: "slider";
-  grid-template-rows: var(--ba-custom-slider-height, 410px);
 }
 
 @media (max-width: 1080px) and (min-width: 761px) {
@@ -456,12 +470,6 @@
     min-width: 0;
     grid-template-columns: minmax(0, 1fr);
     grid-template-areas: "slider" "ticker" "mission";
-    grid-template-rows: var(--ba-custom-slider-height, 390px) 48px auto;
-  }
-
-  .ba-home-hero-widget .ba-slider {
-    min-height: var(--ba-custom-slider-height, 390px);
-    border-radius: var(--radius);
   }
 
   .ba-home-hero-widget .ba-mission-nav {
@@ -480,7 +488,6 @@
 
   .ba-home-hero-widget.ba-home-hero-widget--no-ticker .ba-hero__grid {
     grid-template-areas: "slider" "mission";
-    grid-template-rows: var(--ba-custom-slider-height, 390px) auto;
   }
 }
 
@@ -569,16 +576,8 @@
   .ba-home-hero-widget .ba-slider {
     order: 1;
     width: 100%;
-    height: auto;
-    min-height: 0;
     flex: 0 0 auto;
-    aspect-ratio: var(--ba-mobile-slider-aspect-ratio);
-  }
-
-  .ba-home-hero-widget .ba-slider__track {
-    position: absolute;
-    inset: 0;
-    height: auto;
+    aspect-ratio: var(--ba-slider-aspect-ratio, var(--ba-mobile-slider-aspect-ratio));
   }
 
   .ba-home-hero-widget .ba-ticker {
@@ -715,4 +714,9 @@
     direction: rtl;
     unicode-bidi: isolate;
   }
+}
+
+.ba-home-hero-widget .ba-slider__arrow.swiper-button-disabled {
+  opacity: .4;
+  cursor: default;
 }

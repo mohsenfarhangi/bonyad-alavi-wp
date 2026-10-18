@@ -1,6 +1,6 @@
 # Current Project State
 
-آخرین بازبینی: **2026-10-14**
+آخرین بازبینی: **2026-10-17**
 
 ## Project Phase
 
@@ -16,6 +16,15 @@
 AFE release goal همچنان live acceptance نسخه 1.0.28 و رفع blocker واقعی پیش از production promotion است.
 
 ## Recently Completed
+
+### Hero aspect ratio + Elementor Swiper (2026-10-17)
+- اسلایدر Hero از موتور دستی به Swiper نصب‌شده Elementor منتقل شد؛ کنترل‌های رفتار در بخش مستقل ویجت قرار گرفتند.
+- نسبت تصویر responsive در هر سه device اعمال می‌شود؛ حداقل ارتفاع فقط کف ارتفاع است و صفر، نسبت تصویر را از کار نمی‌اندازد. ID تنظیم ارتفاع و نسبت موبایل قدیمی حفظ شدند.
+- sizing گرید از ارتفاع ثابت جدا شد؛ compatibility محدود برای override قدیمی production وجود دارد. Mission و تیکر حفظ شدند.
+- PHP lint و 32 contract check و harness کنترل‌ها PASS؛ مرورگر ایزوله با render واقعی PHP و Swiper/loader همان Elementor برای responsive sizing و تعاملات PASS.
+- WordPress محلی به دیتابیس وصل نشد؛ Editor کامل و production deployment/acceptance انجام نشده‌اند.
+- جزئیات: [MODULE-HOME-HERO](../modules/theme-home-hero-widget.md).
+
 
 ### Dynamic Tags / ACF for Live Stats (2026-10-14)
 - Dynamic Tags با `active => true` برای `value` و `label` در Repeater آمار و دو خط عنوان ثابت ویجت فعال شدند.
@@ -261,7 +270,7 @@ Historical PASSهای AFE/Theme به HEAD جدید تعمیم داده نمی‌
 
 ## Next Agent Handoff
 
-**Current task:** ویجت عمومی `bonyad_alavi_section_heading` با سه variant مرجع ساخته شده و آماده live Elementor visual acceptance است. News/About عمداً refactor نشده‌اند و contract داخلی خودشان را حفظ می‌کنند.
+**Current task:** اصلاح Hero شامل aspect ratio responsive، min-height=0 و Swiper Elementor در source محلی آماده است؛ اجرای کامل Editor و deploy/QA واقعی باقی است. WordPress محلی خطای اتصال دیتابیس دارد. Hero در [MODULE-HOME-HERO](../modules/theme-home-hero-widget.md) مستند شده؛ وضعیت پذیرش باز سایر ویجت‌ها حفظ است.
 
 **Start here:** [../INDEX.md](../INDEX.md) → [../modules/INDEX.md](../modules/INDEX.md).
 
