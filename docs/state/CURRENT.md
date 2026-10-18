@@ -11,7 +11,7 @@
 
 ## Current Goal
 
-فرم «جذب تسهیلگر» با slug `facilitator-recruitment` به Source Definition قالب اضافه شد و در branch `feature/facilitator-recruitment-form` آماده بازبینی است. مرحله باز، اجرای regression با PHP >=8.3 و پذیرش زنده در WordPress/Elementor است: ثبت، جلوگیری از تکرار کد ملی، وابستگی استان/شهرستان، بارگذاری رزومه و حذف نمایش رهگیری از پیام موفقیت.
+فرم «جذب تسهیلگر» با slug `facilitator-recruitment` به Source Definition قالب اضافه شده است. آزمون خودکار regression و syntax در PHP 8.3/Node موفق بوده؛ مرحله باز فقط پذیرش زنده در WordPress/Elementor است: ثبت، جلوگیری از تکرار کد ملی، وابستگی استان/شهرستان، بارگذاری رزومه و حذف نمایش رهگیری از پیام موفقیت.
 
 
 ویجت عمومی Elementor برای `ba-section-heading` اکنون به‌صورت مستقل و قابل استفاده در هر جای Elementor پیاده‌سازی شده است؛ مرحله باز، پذیرش بصری در Elementor واقعی است. News و About/Impact implementation داخلی خودشان را بدون تغییر حفظ می‌کنند و live acceptance آن‌ها نیز همچنان باز است.
@@ -274,7 +274,7 @@ Historical PASSهای AFE/Theme به HEAD جدید تعمیم داده نمی‌
 
 ## Next Agent Handoff
 
-**Current task:** فرم جذب تسهیلگر در branch `feature/facilitator-recruitment-form` پیاده‌سازی و با AFE یکپارچه شده است؛ اجرای PHP/theme regression و live WordPress/Elementor acceptance پیش از merge لازم است. پذیرش بصری ویجت `bonyad_alavi_section_heading` و News/About هم همچنان باز است.
+**Current task:** فرم جذب تسهیلگر پیاده‌سازی و با AFE یکپارچه شده است؛ GitHub Actions (PHP lint، ۲۳/۲۳ regression، JS syntax) PASS است. پذیرش live WordPress/Elementor از جمله ضدتکرار، Geo و رزومه همچنان باز است. پذیرش بصری ویجت `bonyad_alavi_section_heading` و News/About هم همچنان باز است.
 
 **Start here:** [../INDEX.md](../INDEX.md) → [../modules/INDEX.md](../modules/INDEX.md).
 
