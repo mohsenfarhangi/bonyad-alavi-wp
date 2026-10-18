@@ -1,0 +1,36 @@
+name: Facilitator form checks
+
+on:
+  push:
+    branches: [feature/facilitator-recruitment-form]
+  pull_request:
+    branches: [main]
+    paths:
+      - 'wp-content/themes/ostadsho-child/inc/forms/class-ba-facilitator-recruitment-form.php'
+      - 'wp-content/themes/ostadsho-child/tests/facilitator-form-definition.php'
+      - 'wp-content/themes/ostadsho-child/assets/js/ba-facilitator-recruitment-form.js'
+      - 'wp-content/themes/ostadsho-child/functions.php'
+      - '.github/workflows/facilitator-form-checks.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          coverage: none
+      - name: PHP syntax
+        run: |
+          php -l wp-content/themes/ostadsho-child/functions.php
+          php -l wp-content/themes/ostadsho-child/inc/forms/class-ba-facilitator-recruitment-form.php
+          php -l wp-content/themes/ostadsho-child/tests/facilitator-form-definition.php
+      - name: Theme form regression
+        run: php wp-content/themes/ostadsho-child/tests/facilitator-form-definition.php
+      - name: JavaScript syntax
+        run: node --check wp-content/themes/ostadsho-child/assets/js/ba-facilitator-recruitment-form.js
