@@ -611,3 +611,15 @@ Current module: [MODULE-HOME-LIVE-STATS](../modules/theme-home-live-stats-widget
 - Extended the widget regression contract to verify dynamic controls and parsed frontend render path.
 
 Current module: [MODULE-HOME-LIVE-STATS](../modules/theme-home-live-stats-widget.md).
+
+## 2026-10-18 — Facilitator Recruitment Form in Child Theme
+
+- Added `facilitator-recruitment` as a project-specific AFE Source Definition in `ostadsho-child/inc/forms/`.
+- Eleven fields, with nine required and description/resume optional; national ID, mobile and landline validators; resume MIME/size constraints.
+- Province/county use AFE built-in Geo Data Source and dependent field support (no custom geography logic).
+- Enabled built-in AFE duplicate blocking by `national_id` for both preflight and final submission.
+- Disabled editing/drafts/preview and hid public tracking UI through scoped theme CSS/JS; AFE retains its internal identifiers and Admin/exports.
+- Registered shortcode-compatible form and scoped responsive assets in theme `functions.php`; added theme regression test.
+- Static source verification performed; PHP CLI regression and live WordPress/Elementor testing are pending.
+
+Current module: [MODULE-FACILITATOR-FORM](../modules/facilitator-recruitment-form.md).
