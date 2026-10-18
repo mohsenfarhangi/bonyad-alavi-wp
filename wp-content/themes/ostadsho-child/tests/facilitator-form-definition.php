@@ -68,7 +68,7 @@ $checks = [
 	'optional-description-and-resume' => count( array_filter( $optional, static fn( string $k ): bool => empty( $fields[$k]['required'] ) ) ) === 2,
 	'national-id-rule-and-mask' => !empty( $fields['national_id']['rules']['national_id'] ) && ( $fields['national_id']['input_mask']['key'] ?? '' ) === 'national_id_ir',
 	'mobile-rule-and-mask' => !empty( $fields['mobile']['rules']['mobile_09'] ) && ( $fields['mobile']['input_mask']['key'] ?? '' ) === 'mobile_ir',
-	'landline-registered-validator' => ( $fields['landline']['validators'][0]['key'] ?? '' ) === 'landline',
+	'landline-registered-validator' => ( $fields['landline']['validators'][0]['key'] ?? '' ) === 'landline' && ( $fields['landline']['validators'][1]['key'] ?? '' ) === 'custom_regex',
 	'gender-options' => ( $fields['gender']['options'] ?? [] ) === [ 'male' => 'مرد', 'female' => 'زن' ],
 	'education-options' => count( $fields['education']['options'] ?? [] ) === 6,
 	'province-source' => ( $fields['province']['source']['type'] ?? '' ) === 'geo' && ( $fields['province']['source']['level'] ?? '' ) === 'province',
