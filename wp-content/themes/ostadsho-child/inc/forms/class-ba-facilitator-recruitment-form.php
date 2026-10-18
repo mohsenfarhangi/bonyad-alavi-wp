@@ -88,6 +88,87 @@ HTML
 						->inputMask( 'landline_ir' )
 						->meta( 'validators', [
 							[ 'key' => 'landline', 'message' => 'شماره تلفن ثابت با کد شهر معتبر نیست.' ],
+							[ 'key' => 'custom_regex', 'pattern' => '^0(?!9)[0-9]{10}
+						] )
+						->attributes( [
+							'pattern' => '0(?!9)[0-9]{10}',
+							'inputmode' => 'numeric',
+							'autocomplete' => 'tel-national',
+							'data-afe-digits-only' => '1',
+							'data-afe-invalid-message' => 'شماره تلفن ثابت را با کد شهر وارد کنید.',
+						] )
+						->required()->width( 6 ),
+
+					SelectField::make( 'education' )
+						->label( 'تحصیلات' )
+						->options( [
+							'under_diploma' => 'زیر دیپلم',
+							'diploma' => 'دیپلم',
+							'associate' => 'کاردانی',
+							'bachelor' => 'کارشناسی',
+							'master' => 'کارشناسی ارشد',
+							'phd_plus' => 'دکتری و بالاتر',
+						] )
+						->required()->width( 6 ),
+
+					SelectField::make( 'province' )
+						->label( 'استان مورد تقاضا' )
+						->source( [ 'type' => 'geo', 'level' => 'province' ] )
+						->required()->width( 6 ),
+
+					SelectField::make( 'county' )
+						->label( 'شهرستان مورد تقاضا' )
+						->source( [ 'type' => 'geo', 'level' => 'county', 'parent' => 'province' ] )
+						->dependsOn( 'province' )
+						->required()->width( 6 ),
+
+					TextField::make( 'residential_address' )
+						->label( 'آدرس محل سکونت' )
+						->attributes( [ 'autocomplete' => 'street-address' ] )
+						->required()->width( 12 ),
+
+					TextareaField::make( 'description' )
+						->label( 'توضیحات' )
+						->placeholder( 'سوابق شغلی، علایق و اولویت‌های خود را در صورت تمایل بنویسید.' )
+						->attributes( [ 'rows' => 5 ] )
+						->width( 12 ),
+
+					FileField::make( 'resume' )
+						->label( 'فایل رزومه' )
+						->description( 'اختیاری | PDF، Word (DOC/DOCX) | حداکثر ۵ مگابایت' )
+						->multiple( false )
+						->maxFiles( 1 )
+						->maxSizeMb( 5 )
+						->accept( [
+							'application/pdf',
+							'application/msword',
+							'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+						] )
+						->width( 12 ),
+				] ),
+			] )
+			->settings( [
+				'wizard' => false,
+				'save_draft' => false,
+				'show_progress' => false,
+				'editing_enabled' => false,
+				'editing_modes' => [],
+				'preview_enabled' => false,
+				'lock_after_submit' => false,
+				'show_edit_request_button' => false,
+				'captcha' => 'custom',
+				'rate_limit' => 5,
+				'duplicate' => [
+					'enabled' => true,
+					'fields' => [ 'national_id' ],
+					'behavior' => 'block',
+					'message' => 'این کد ملی قبلاً در فرم جذب تسهیلگر ثبت شده است. امکان ثبت‌نام مجدد وجود ندارد.',
+				],
+			] )
+			->storage( 'shared' );
+	}
+}
+, 'flags' => 'u', 'message' => 'شماره تلفن ثابت باید ۱۱ رقم و شامل کد شهر باشد.' ],
 						] )
 						->attributes( [
 							'pattern' => '0(?!9)[0-9]{10}',
