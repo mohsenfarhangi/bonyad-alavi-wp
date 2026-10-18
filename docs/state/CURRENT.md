@@ -27,7 +27,7 @@ AFE release goal همچنان live acceptance نسخه 1.0.28 و رفع blocker 
 - duplicate config برای `national_id` با رفتار `block` و پیام فارسی ثبت شده؛ AFE خود preflight/submit را کنترل می‌کند.
 - فرم wizard/draft/edit/preview ندارد؛ AFE شناسه داخلی را نگه می‌دارد، ولی stylesheet و success adapter اختصاصی قالب نمایش کد رهگیری و لینک ویرایش را حذف می‌کنند.
 - shortcode: `[alavi_form id="facilitator-recruitment"]`؛ CSS/JS فقط برای slug مربوطه اثر دارد.
-- regression اختصاصی `tests/facilitator-form-definition.php` اضافه شده است. **PHP CLI regression، PHP lint، browser acceptance و تست واقعی در وردپرس هنوز اجرا نشده‌اند.**
+- regression اختصاصی `tests/facilitator-form-definition.php` اجرا شد: **۲۳/۲۳ PASS**؛ PHP 8.3 lint فایل‌های قالب/تعریف فرم/تست و `node --check` هم در GitHub Actions موفق شدند ([run 39121959508](https://github.com/mohsenfarhangi/bonyad-alavi-wp/actions/runs/39121959508)). **پذیرش زنده در WordPress/Elementor هنوز انجام نشده است.**
 - [MODULE-FACILITATOR-FORM](../modules/facilitator-recruitment-form.md)
 
 ### Dynamic Tags / ACF for Live Stats (2026-10-14)
