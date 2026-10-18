@@ -1,6 +1,6 @@
 # Current Project State
 
-آخرین بازبینی: **2026-10-17**
+آخرین بازبینی: **2026-10-18**
 
 ## Project Phase
 
@@ -11,12 +11,24 @@
 
 ## Current Goal
 
+فرم «جذب تسهیلگر» با slug `facilitator-recruitment` به Source Definition قالب اضافه شده است. آزمون خودکار regression و syntax در PHP 8.3/Node موفق بوده؛ مرحله باز فقط پذیرش زنده در WordPress/Elementor است: ثبت، جلوگیری از تکرار کد ملی، وابستگی استان/شهرستان، بارگذاری رزومه و حذف نمایش رهگیری از پیام موفقیت.
+
+
 ویجت عمومی Elementor برای `ba-section-heading` اکنون به‌صورت مستقل و قابل استفاده در هر جای Elementor پیاده‌سازی شده است؛ مرحله باز، پذیرش بصری در Elementor واقعی است. News و About/Impact implementation داخلی خودشان را بدون تغییر حفظ می‌کنند و live acceptance آن‌ها نیز همچنان باز است.
 
 AFE release goal همچنان live acceptance نسخه 1.0.28 و رفع blocker واقعی پیش از production promotion است.
 
 ## Recently Completed
 
+### Facilitator recruitment form (2026-10-18)
+- فرم تک‌مرحله‌ای `facilitator-recruitment` در `ostadsho-child/inc/forms/` با ۱۱ فیلد (۹ اجباری، توضیحات و رزومه اختیاری) تعریف شد.
+- کد ملی، موبایل و تلفن ثابت از validator و mask عمومی AFE استفاده می‌کنند؛ PDF/DOC/DOCX تا ۵MB مجاز است.
+- استان/شهرستان از Geo Data Source عمومی AFE و `dependsOn` استفاده می‌کنند؛ منطق اضافی جغرافیا در قالب نوشته نشده است.
+- duplicate config برای `national_id` با رفتار `block` و پیام فارسی ثبت شده؛ AFE خود preflight/submit را کنترل می‌کند.
+- فرم wizard/draft/edit/preview ندارد؛ AFE شناسه داخلی را نگه می‌دارد، ولی stylesheet و success adapter اختصاصی قالب نمایش کد رهگیری و لینک ویرایش را حذف می‌کنند.
+- shortcode: `[alavi_form id="facilitator-recruitment"]`؛ CSS/JS فقط برای slug مربوطه اثر دارد.
+- regression اختصاصی `tests/facilitator-form-definition.php` اجرا شد: **۲۳/۲۳ PASS**؛ PHP 8.3 lint فایل‌های قالب/تعریف فرم/تست و `node --check` هم در GitHub Actions موفق شدند ([run 39121959508](https://github.com/mohsenfarhangi/bonyad-alavi-wp/actions/runs/39121959508)). **پذیرش زنده در WordPress/Elementor هنوز انجام نشده است.**
+- [MODULE-FACILITATOR-FORM](../modules/facilitator-recruitment-form.md)
 ### Hero aspect ratio + Elementor Swiper (2026-10-17)
 - اسلایدر Hero از موتور دستی به Swiper نصب‌شده Elementor منتقل شد؛ کنترل‌های رفتار در بخش مستقل ویجت قرار گرفتند.
 - نسبت تصویر responsive در هر سه device اعمال می‌شود؛ حداقل ارتفاع فقط کف ارتفاع است و صفر، نسبت تصویر را از کار نمی‌اندازد. ID تنظیم ارتفاع و نسبت موبایل قدیمی حفظ شدند.
@@ -270,7 +282,8 @@ Historical PASSهای AFE/Theme به HEAD جدید تعمیم داده نمی‌
 
 ## Next Agent Handoff
 
-**Current task:** اصلاح Hero شامل aspect ratio responsive، min-height=0 و Swiper Elementor در source محلی آماده است؛ اجرای کامل Editor و deploy/QA واقعی باقی است. WordPress محلی خطای اتصال دیتابیس دارد. Hero در [MODULE-HOME-HERO](../modules/theme-home-hero-widget.md) مستند شده؛ وضعیت پذیرش باز سایر ویجت‌ها حفظ است.
+**Current task:** فرم جذب تسهیلگر پیاده‌سازی و با AFE یکپارچه شده است؛ GitHub Actions (PHP lint، ۲۳/۲۳ regression، JS syntax) PASS است. پذیرش live WordPress/Elementor از جمله ضدتکرار، Geo و رزومه همچنان باز است. پذیرش بصری ویجت `bonyad_alavi_section_heading` و News/About هم همچنان باز است.
+
 
 **Start here:** [../INDEX.md](../INDEX.md) → [../modules/INDEX.md](../modules/INDEX.md).
 

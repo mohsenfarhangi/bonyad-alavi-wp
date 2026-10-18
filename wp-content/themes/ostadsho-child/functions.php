@@ -43,6 +43,22 @@ function my_theme_enqueue_styles()
         true
     );
 
+    // Responsive styling and post-submit presentation for the AFE facilitator form.
+    // Selectors are scoped to its slug so other forms are unaffected.
+    wp_enqueue_style(
+        'ba-facilitator-recruitment-form',
+        get_stylesheet_directory_uri() . '/assets/css/ba-facilitator-recruitment-form.css',
+        array('child-style'),
+        filemtime( get_stylesheet_directory() . '/assets/css/ba-facilitator-recruitment-form.css' )
+    );
+    wp_enqueue_script(
+        'ba-facilitator-recruitment-form',
+        get_stylesheet_directory_uri() . '/assets/js/ba-facilitator-recruitment-form.js',
+        array(),
+        filemtime( get_stylesheet_directory() . '/assets/js/ba-facilitator-recruitment-form.js' ),
+        true
+    );
+
     if ( function_exists( 'is_cart' ) && is_cart() ) {
         wp_enqueue_style(
             'ba-participation-cart',
@@ -154,3 +170,7 @@ add_action( 'afe_register_forms', array( BA_Jihadi_Group_Registration_Form::clas
 // فرم تماس با ما؛ Source Definition در قالب و موتور فرم داخل Alavi Form Engine است.
 require_once get_stylesheet_directory() . '/inc/forms/class-ba-contact-form.php';
 add_action( 'afe_register_forms', array( BA_Contact_Form::class, 'register' ) );
+
+// فرم جذب تسهیلگر؛ تمام مدیریت، اعتبارسنجی و ذخیره‌سازی با Alavi Form Engine است.
+require_once get_stylesheet_directory() . '/inc/forms/class-ba-facilitator-recruitment-form.php';
+add_action( 'afe_register_forms', array( BA_Facilitator_Recruitment_Form::class, 'register' ) );

@@ -1,0 +1,169 @@
+/* Form-specific skin for [alavi_form id="facilitator-recruitment"].
+   All submission, validation, file and geo behaviors belong to AFE. */
+.afe-shell .afe-form[data-form="facilitator-recruitment"] {
+  --afe-green: #008c50;
+  --afe-green-dark: #075d3c;
+  --afe-green-soft: #e9f6ee;
+  --afe-gold: #bb9654;
+  --afe-border: #dce8e0;
+  --afe-ink: #183328;
+  --afe-muted: #657b70;
+  --afe-bg: #f6f9f7;
+  border: 1px solid #dce8e0;
+  border-radius: 22px;
+  box-shadow: 0 18px 50px rgba(10, 73, 43, .07);
+}
+
+.afe-form[data-form="facilitator-recruitment"] .ba-facilitator__header {
+  position: relative;
+  overflow: hidden;
+  padding: 36px 40px 32px;
+  background: radial-gradient(circle at 7% 12%, rgba(195, 226, 205, .42), transparent 38%),
+              linear-gradient(105deg, #f7fcf9, #ecf7f0);
+  border-bottom: 1px solid var(--afe-border);
+}
+
+.afe-form[data-form="facilitator-recruitment"] .ba-facilitator__header::before {
+  content: "";
+  position: absolute;
+  top: 32px;
+  bottom: 32px;
+  right: 0;
+  width: 4px;
+  background: var(--afe-green);
+}
+
+.afe-form[data-form="facilitator-recruitment"] .ba-facilitator__eyebrow {
+  display: inline-flex;
+  align-items: center;
+  padding: 5px 12px;
+  border: 1px solid #c5e5d1;
+  border-radius: 30px;
+  background: #fff;
+  color: var(--afe-green-dark);
+  font-size: 12px;
+  font-weight: 750;
+  line-height: 1.8;
+}
+
+.afe-form[data-form="facilitator-recruitment"] .ba-facilitator__header h2 {
+  margin: 12px 0 8px;
+  color: var(--afe-green-dark);
+  font-size: clamp(25px, 3vw, 34px);
+  font-weight: 800;
+  line-height: 1.45;
+}
+
+.afe-form[data-form="facilitator-recruitment"] .ba-facilitator__header p {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.9;
+  color: var(--afe-muted);
+}
+
+.afe-form[data-form="facilitator-recruitment"] .afe-step {
+  padding: 32px 40px 20px;
+}
+
+.afe-form[data-form="facilitator-recruitment"] .afe-step-heading {
+  display: none;
+}
+
+.afe-form[data-form="facilitator-recruitment"] .afe-grid {
+  gap: 20px 18px;
+}
+
+.afe-form[data-form="facilitator-recruitment"] .afe-label {
+  color: #274f3a !important;
+  font-weight: 700 !important;
+  font-size: 13px !important;
+}
+
+.afe-shell.afe-isolation-strong .afe-form[data-form="facilitator-recruitment"] .afe-control {
+  border-radius: 11px !important;
+  background-color: #f8faf9 !important;
+  min-height: 50px !important;
+}
+
+.afe-shell.afe-isolation-strong .afe-form[data-form="facilitator-recruitment"] .afe-control:focus {
+  background-color: #fff !important;
+  border-color: var(--afe-green) !important;
+  box-shadow: 0 0 0 3px rgba(0, 140, 80, .11) !important;
+}
+
+.afe-form[data-form="facilitator-recruitment"] .afe-custom-select__trigger,
+.afe-form[data-form="facilitator-recruitment"] .afe-upload {
+  border-radius: 11px;
+}
+
+.afe-form[data-form="facilitator-recruitment"] .afe-step-actions {
+  margin-top: 18px;
+  padding-top: 24px;
+}
+
+.afe-form[data-form="facilitator-recruitment"] .afe-submit {
+  min-width: 170px;
+  min-height: 48px;
+  border-radius: 11px;
+  background: var(--afe-green);
+  color: #fff;
+  font-weight: 800;
+}
+
+.afe-form[data-form="facilitator-recruitment"] .afe-submit:hover {
+  background: var(--afe-green-dark);
+}
+
+.afe-form[data-form="facilitator-recruitment"] .afe-captcha-wrap {
+  padding: 0 40px 20px;
+}
+
+.afe-form[data-form="facilitator-recruitment"] .afe-form-result {
+  padding: 0 40px 30px;
+}
+
+/* AFE still keeps its internal submission/tracking record, but this public form
+   must never expose the tracking code or an edit link in the success UI. The
+   scoped JavaScript also removes these nodes after successful submission. */
+.afe-form[data-form="facilitator-recruitment"] .afe-success > span,
+.afe-form[data-form="facilitator-recruitment"] .afe-success > .afe-result-link {
+  display: none !important;
+}
+
+.afe-form[data-form="facilitator-recruitment"] .afe-success {
+  border-radius: 12px;
+  font-size: 15px;
+}
+
+@media (max-width: 780px) {
+  .afe-form[data-form="facilitator-recruitment"] .ba-facilitator__header {
+    padding: 26px 24px;
+  }
+  .afe-form[data-form="facilitator-recruitment"] .afe-step {
+    padding: 26px 24px 18px;
+  }
+  .afe-form[data-form="facilitator-recruitment"] .afe-captcha-wrap,
+  .afe-form[data-form="facilitator-recruitment"] .afe-form-result {
+    padding-left: 24px;
+    padding-right: 24px;
+  }
+}
+
+@media (max-width: 640px) {
+  .afe-form[data-form="facilitator-recruitment"] .afe-grid {
+    gap: 15px;
+  }
+  .afe-form[data-form="facilitator-recruitment"] .afe-field.afe-col-6 {
+    grid-column: span 12;
+  }
+  .afe-form[data-form="facilitator-recruitment"] .afe-submit {
+    width: 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .afe-form[data-form="facilitator-recruitment"] .afe-submit,
+  .afe-form[data-form="facilitator-recruitment"] .afe-control {
+    transition: none;
+  }
+}

@@ -612,6 +612,18 @@ Current module: [MODULE-HOME-LIVE-STATS](../modules/theme-home-live-stats-widget
 
 Current module: [MODULE-HOME-LIVE-STATS](../modules/theme-home-live-stats-widget.md).
 
+## 2026-10-18 — Facilitator Recruitment Form in Child Theme
+
+- Added `facilitator-recruitment` as a project-specific AFE Source Definition in `ostadsho-child/inc/forms/`.
+- Eleven fields, with nine required and description/resume optional; national ID, mobile and landline validators; resume MIME/size constraints.
+- Province/county use AFE built-in Geo Data Source and dependent field support (no custom geography logic).
+- Enabled built-in AFE duplicate blocking by `national_id` for both preflight and final submission.
+- Disabled editing/drafts/preview and hid public tracking UI through scoped theme CSS/JS; AFE retains its internal identifiers and Admin/exports.
+- Registered shortcode-compatible form and scoped responsive assets in theme `functions.php`; added theme regression test.
+- GitHub Actions run 39121959508: PHP lint, Node JS syntax and 23/23 theme regression checks PASS. Live WordPress/Elementor testing remains pending.
+
+Current module: [MODULE-FACILITATOR-FORM](../modules/facilitator-recruitment-form.md).
+
 ## 2026-10-17 — Hero ratio sizing and Elementor Swiper
 
 - Replaced the custom slide index/timer engine with Elementor's bundled Swiper and its async loader; ticker behavior remains independent.
