@@ -83,13 +83,17 @@
   display: grid;
   grid-template-columns: minmax(220px, var(--ba-mission-column-width, .82fr)) minmax(0, 2.25fr);
   grid-template-areas: "mission slider" "mission ticker";
-  grid-template-rows: var(--ba-custom-slider-height, 410px) 48px;
   gap: 10px;
   min-width: 0;
   max-width: 1280px;
   min-height: 0;
   margin-inline: auto;
   align-items: stretch;
+}
+
+/* Ignore obsolete page-specific fixed rows; the slider owns its ratio/minimum height. */
+.ba-home-hero-widget.ba-hero .ba-hero__grid {
+  grid-template-rows: auto !important;
 }
 
 .ba-home-hero-widget .ba-mission-nav {
@@ -198,29 +202,38 @@
   background: var(--green-900);
   box-shadow: var(--shadow);
   min-width: 0;
-  min-height: var(--ba-custom-slider-height, 410px);
+  width: 100%;
+  height: auto;
+  min-height: 0;
+  aspect-ratio: var(--ba-slider-aspect-ratio, 16 / 9);
+  align-self: start;
   border-radius: 7px 18px 18px 7px;
 }
 
-.ba-home-hero-widget .ba-slider__track {
+/* An absolute Swiper viewport cannot contribute intrinsic height to the ratio box. */
+.ba-home-hero-widget .ba-slider__viewport {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  width: 100%;
   height: 100%;
-  position: relative;
+}
+
+.ba-home-hero-widget .ba-slider__track {
+  display: flex;
+  height: 100%;
 }
 
 .ba-home-hero-widget .ba-slider__slide {
-  position: absolute;
-  inset: 0;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity .65s ease;
-}
-
-.ba-home-hero-widget .ba-slider__slide.is-active {
-  opacity: 1;
-  pointer-events: auto;
+  position: relative;
+  flex-shrink: 0;
+  width: 100%;
+  height: 100%;
 }
 
 .ba-home-hero-widget .ba-slider__slide img {
+  position: absolute;
+  inset: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
@@ -277,7 +290,7 @@
   z-index: 5;
   left: 22px;
   bottom: 20px;
-  display: flex;
+  display: flex !important;
   align-items: center;
   gap: 8px;
   direction: ltr;
@@ -314,6 +327,8 @@
   z-index: 5;
   right: 22px;
   bottom: 25px;
+  width: auto;
+  left: auto;
   display: flex;
   gap: 7px;
 }
@@ -325,6 +340,7 @@
   padding: 0;
   border-radius: 10px;
   background: rgba(255, 255, 255, .5);
+  opacity: 1;
   cursor: pointer;
   transition: .3s;
 }
@@ -437,7 +453,6 @@
 
 .ba-home-hero-widget.ba-home-hero-widget--no-ticker .ba-hero__grid {
   grid-template-areas: "mission slider";
-  grid-template-rows: var(--ba-custom-slider-height, 410px);
 }
 
 .ba-home-hero-widget.ba-home-hero-widget--no-missions .ba-hero__grid {
@@ -447,7 +462,6 @@
 
 .ba-home-hero-widget.ba-home-hero-widget--no-missions.ba-home-hero-widget--no-ticker .ba-hero__grid {
   grid-template-areas: "slider";
-  grid-template-rows: var(--ba-custom-slider-height, 410px);
 }
 
 @media (max-width: 1080px) and (min-width: 761px) {
@@ -456,53 +470,88 @@
     min-width: 0;
     grid-template-columns: minmax(0, 1fr);
     grid-template-areas: "slider" "ticker" "mission";
-    grid-template-rows: var(--ba-custom-slider-height, 390px) 48px auto;
-  }
-
-  .ba-home-hero-widget .ba-slider {
-    min-height: var(--ba-custom-slider-height, 390px);
-    border-radius: var(--radius);
   }
 
   .ba-home-hero-widget .ba-mission-nav {
-    grid-template-columns: repeat(1, minmax(0, 1fr));
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     grid-template-rows: repeat(2, minmax(92px, auto));
-    border-radius: 18px;
+    grid-auto-rows: auto;
   }
 
-  .ba-home-hero-widget .ba-mission-nav__item {
-    min-width: 0;
-    padding: 14px 18px;
-    border-bottom: 1px solid #bdd9c7;
+  .ba-home-hero-widget .ba-mission-nav > .ba-mission-nav__item:nth-child(-n+2) {
+    border-bottom: 1px solid #d4e4da !important;
   }
 
-  .ba-home-hero-widget .ba-mission-nav__item:nth-child(odd) {
-    border-left: 1px solid #bdd9c7;
-  }
-
-  .ba-home-hero-widget .ba-mission-nav__item:nth-child(3),
-  .ba-home-hero-widget .ba-mission-nav__item:nth-child(4) {
-    border-bottom: 0;
-  }
-
-  .ba-home-hero-widget .ba-mission-nav__title {
-    font-size: 14px;
-  }
-
-  .ba-home-hero-widget .ba-mission-nav__description {
-    font-size: 11px;
-    line-height: 1.75;
+  .ba-home-hero-widget .ba-mission-nav > .ba-mission-nav__item:nth-child(odd) {
+    border-left: 1px solid #d4e4da !important;
   }
 
   .ba-home-hero-widget.ba-home-hero-widget--no-ticker .ba-hero__grid {
     grid-template-areas: "slider" "mission";
-    grid-template-rows: var(--ba-custom-slider-height, 390px) auto;
   }
 }
 
 @media (max-width: 1080px) {
   .ba-home-hero-widget .ba-slider {
     border-radius: var(--radius);
+  }
+
+  .ba-home-hero-widget .ba-mission-nav {
+    height: auto;
+    min-height: 0;
+    border-radius: 18px;
+    gap: 0;
+  }
+
+  .ba-home-hero-widget .ba-mission-nav > .ba-mission-nav__item {
+    min-width: 0;
+    gap: 12px !important;
+    padding: 14px 16px !important;
+    border: 0 !important;
+    box-sizing: border-box;
+  }
+
+  .ba-home-hero-widget .ba-mission-nav__copy {
+    min-width: 0;
+    flex: 1 1 auto;
+    text-align: right;
+  }
+
+  .ba-home-hero-widget .ba-mission-nav__title {
+    font-size: 14px !important;
+    line-height: 1.8;
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+
+  .ba-home-hero-widget .ba-mission-nav__description {
+    display: block !important;
+    margin-top: 3px;
+    font-size: 11px !important;
+    line-height: 1.8;
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+
+  .ba-home-hero-widget .ba-mission-nav__icon {
+    width: 42px;
+    height: 42px;
+    flex: 0 0 42px;
+    box-sizing: border-box;
+  }
+
+  .ba-home-hero-widget .ba-mission-nav__icon > svg,
+  .ba-home-hero-widget .ba-mission-nav__icon > i,
+  .ba-home-hero-widget .ba-mission-nav__glyph {
+    width: 26px !important;
+    height: 26px !important;
+    font-size: 26px !important;
+  }
+
+  .ba-home-hero-widget .ba-mission-nav > .ba-mission-nav__item:focus-visible {
+    outline: 2px solid var(--green, #069043);
+    outline-offset: -4px;
+    border-radius: 8px;
   }
 }
 
@@ -527,16 +576,8 @@
   .ba-home-hero-widget .ba-slider {
     order: 1;
     width: 100%;
-    height: auto;
-    min-height: 0;
     flex: 0 0 auto;
-    aspect-ratio: var(--ba-mobile-slider-aspect-ratio);
-  }
-
-  .ba-home-hero-widget .ba-slider__track {
-    position: absolute;
-    inset: 0;
-    height: auto;
+    aspect-ratio: var(--ba-slider-aspect-ratio, var(--ba-mobile-slider-aspect-ratio));
   }
 
   .ba-home-hero-widget .ba-ticker {
@@ -547,47 +588,29 @@
 
   .ba-home-hero-widget .ba-mission-nav {
     order: 3;
-    grid-template-columns: repeat(1, minmax(0, 1fr));
-    grid-template-rows: repeat(2, auto);
-    grid-auto-rows: auto;
-    height: auto;
-    min-height: 0;
     align-self: auto;
-    border-radius: 18px;
-    overflow: hidden;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: none;
+    grid-auto-rows: auto;
   }
 
-  .ba-home-hero-widget .ba-mission-nav__item {
-    padding: 13px;
-    border-bottom: 1px solid #d4e4da;
+  .ba-home-hero-widget .ba-mission-nav > .ba-mission-nav__item {
+    min-height: 72px;
+    padding: 12px 14px !important;
   }
 
-  .ba-home-hero-widget .ba-mission-nav__item:nth-child(odd) {
-    border-left: 1px solid #d4e4da;
-  }
-
-  .ba-home-hero-widget .ba-mission-nav__item:nth-child(3) {
-    border-bottom: 0;
+  .ba-home-hero-widget .ba-mission-nav > .ba-mission-nav__item:not(:last-child) {
+    border-bottom: 1px solid #d4e4da !important;
   }
 
   .ba-home-hero-widget .ba-mission-nav__title {
-    font-size: 13px;
-  }
-
-  .ba-home-hero-widget .ba-mission-nav__description {
-    display: block;
+    font-size: 13px !important;
   }
 
   .ba-home-hero-widget .ba-mission-nav__icon {
-    width: 39px;
-    height: 39px;
-    border-radius: 12px;
-  }
-
-  .ba-home-hero-widget .ba-mission-nav__glyph,
-  .ba-home-hero-widget .ba-mission-nav__icon > svg {
-    width: 26px;
-    height: 26px;
+    width: 40px;
+    height: 40px;
+    flex-basis: 40px;
   }
 
   .ba-home-hero-widget .ba-slider__content {
@@ -610,20 +633,6 @@
 }
 
 @media (max-width: 430px) {
-  .ba-home-hero-widget .ba-mission-nav__item {
-    gap: 8px;
-    padding: 10px 8px;
-  }
-
-  .ba-home-hero-widget .ba-mission-nav__icon {
-    width: 34px;
-    height: 34px;
-  }
-
-  .ba-home-hero-widget .ba-mission-nav__title {
-    font-size: 11px;
-  }
-
   .ba-home-hero-widget .ba-ticker {
     grid-template-columns: auto minmax(0, 1fr);
   }
@@ -694,4 +703,20 @@
   .ba-home-hero-widget .ba-ticker.is-mobile-ticker:has(.ba-ticker__mobile-group:only-child) .ba-ticker__viewport {
     overflow-x: auto;
   }
+}
+
+@media (max-width: 760px) {
+  .ba-home-hero-widget .ba-ticker.is-mobile-ticker .ba-ticker__viewport {
+    direction: ltr;
+  }
+
+  .ba-home-hero-widget .ba-ticker__mobile-track .ba-ticker__item {
+    direction: rtl;
+    unicode-bidi: isolate;
+  }
+}
+
+.ba-home-hero-widget .ba-slider__arrow.swiper-button-disabled {
+  opacity: .4;
+  cursor: default;
 }

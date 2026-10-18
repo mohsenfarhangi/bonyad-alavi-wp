@@ -29,6 +29,14 @@ AFE release goal همچنان live acceptance نسخه 1.0.28 و رفع blocker 
 - shortcode: `[alavi_form id="facilitator-recruitment"]`؛ CSS/JS فقط برای slug مربوطه اثر دارد.
 - regression اختصاصی `tests/facilitator-form-definition.php` اجرا شد: **۲۳/۲۳ PASS**؛ PHP 8.3 lint فایل‌های قالب/تعریف فرم/تست و `node --check` هم در GitHub Actions موفق شدند ([run 39121959508](https://github.com/mohsenfarhangi/bonyad-alavi-wp/actions/runs/39121959508)). **پذیرش زنده در WordPress/Elementor هنوز انجام نشده است.**
 - [MODULE-FACILITATOR-FORM](../modules/facilitator-recruitment-form.md)
+### Hero aspect ratio + Elementor Swiper (2026-10-17)
+- اسلایدر Hero از موتور دستی به Swiper نصب‌شده Elementor منتقل شد؛ کنترل‌های رفتار در بخش مستقل ویجت قرار گرفتند.
+- نسبت تصویر responsive در هر سه device اعمال می‌شود؛ حداقل ارتفاع فقط کف ارتفاع است و صفر، نسبت تصویر را از کار نمی‌اندازد. ID تنظیم ارتفاع و نسبت موبایل قدیمی حفظ شدند.
+- sizing گرید از ارتفاع ثابت جدا شد؛ compatibility محدود برای override قدیمی production وجود دارد. Mission و تیکر حفظ شدند.
+- PHP lint و 32 contract check و harness کنترل‌ها PASS؛ مرورگر ایزوله با render واقعی PHP و Swiper/loader همان Elementor برای responsive sizing و تعاملات PASS.
+- WordPress محلی به دیتابیس وصل نشد؛ Editor کامل و production deployment/acceptance انجام نشده‌اند.
+- جزئیات: [MODULE-HOME-HERO](../modules/theme-home-hero-widget.md).
+
 
 ### Dynamic Tags / ACF for Live Stats (2026-10-14)
 - Dynamic Tags با `active => true` برای `value` و `label` در Repeater آمار و دو خط عنوان ثابت ویجت فعال شدند.
@@ -275,6 +283,7 @@ Historical PASSهای AFE/Theme به HEAD جدید تعمیم داده نمی‌
 ## Next Agent Handoff
 
 **Current task:** فرم جذب تسهیلگر پیاده‌سازی و با AFE یکپارچه شده است؛ GitHub Actions (PHP lint، ۲۳/۲۳ regression، JS syntax) PASS است. پذیرش live WordPress/Elementor از جمله ضدتکرار، Geo و رزومه همچنان باز است. پذیرش بصری ویجت `bonyad_alavi_section_heading` و News/About هم همچنان باز است.
+
 
 **Start here:** [../INDEX.md](../INDEX.md) → [../modules/INDEX.md](../modules/INDEX.md).
 

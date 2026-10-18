@@ -116,7 +116,7 @@ final class BA_Elementor_Assets {
 		$this->register_script(
 			'bonyad-alavi-home-hero-widget',
 			'assets/js/bonyad-alavi-home-hero-widget.js',
-			array( 'elementor-frontend' )
+			array( 'elementor-frontend', 'swiper' )
 		);
 
 		$this->register_script(

@@ -7,6 +7,10 @@
         var state = states.get(root);
         if (!state) return;
 
+        state.disposed = true;
+        cancelAnimationFrame(state.frame);
+        state.mobile.removeEventListener('change', state.styleHandler);
+        if (document.fonts) document.fonts.removeEventListener('loadingdone', state.styleHandler);
         if (state.resizeObserver) state.resizeObserver.disconnect();
         if (state.resizeHandler) window.removeEventListener('resize', state.resizeHandler);
         if (state.chart && !state.chart.isDisposed()) state.chart.dispose();
@@ -50,6 +54,7 @@
 
     function buildOption(root, chartElement, payload) {
         var styleSource = chartElement.closest('.ba-impact__funding') || root;
+        var mobile = window.matchMedia('(max-width: 760px)').matches;
         var computed = window.getComputedStyle(root);
         var fontFamily = computed.fontFamily || 'YekanBakh, IRANSans, Tahoma, Arial, sans-serif';
         var trackColor = readCssValue(styleSource, '--ba-impact-chart-track', '#e7eeea');
@@ -90,15 +95,6 @@
         };
 
         sources.forEach(function (source, index) {
-            rich['dot' + index] = {
-                color: source.color,
-                fontFamily: fontFamily,
-                fontSize: Math.max(12, valueSize),
-                fontWeight: 900,
-                lineHeight: Math.round(valueSize * 1.25),
-                width: 14,
-                align: 'center'
-            };
             rich['value' + index] = {
                 color: source.color,
                 fontFamily: fontFamily,
@@ -149,7 +145,7 @@
                 {
                     type: 'pie',
                     silent: true,
-                    radius: ['42%', '58%'],
+                    radius: mobile ? ['60%', '82%'] : ['42%', '58%'],
                     center: ['50%', '50%'],
                     animation: false,
                     label: { show: false },
@@ -166,7 +162,7 @@
                 },
                 {
                     type: 'pie',
-                    radius: ['42%', '58%'],
+                    radius: mobile ? ['60%', '82%'] : ['42%', '58%'],
                     center: ['50%', '50%'],
                     startAngle: 90,
                     clockwise: true,
@@ -179,7 +175,7 @@
                         borderWidth: 0
                     },
                     label: {
-                        show: true,
+                        show: !mobile,
                         position: 'outside',
                         alignTo: 'edge',
                         edgeDistance: edgeDistance,
@@ -205,7 +201,7 @@
                         rich: rich
                     },
                     labelLine: {
-                        show: true,
+                        show: !mobile,
                         length: lineLength,
                         length2: Math.max(4, Math.round(lineLength * .75)),
                         smooth: false
@@ -248,21 +244,66 @@
         var state = {
             chart: chart,
             resizeObserver: null,
-            resizeHandler: null
+            resizeHandler: null,
+            mobile: window.matchMedia('(max-width: 760px)'),
+            frame: 0,
+            disposed: false,
+            forceStyle: false,
+            width: chartElement.clientWidth,
+            height: chartElement.clientHeight,
+            signature: styleSignature()
         };
 
-        if ('ResizeObserver' in window) {
-            state.resizeObserver = new ResizeObserver(function () {
-                if (!chart.isDisposed()) chart.resize();
-            });
-            state.resizeObserver.observe(chartElement);
-        } else {
-            state.resizeHandler = function () {
-                if (!chart.isDisposed()) chart.resize();
-            };
-            window.addEventListener('resize', state.resizeHandler);
+        function styleSignature() {
+            var source = chartElement.closest('.ba-impact__funding') || root;
+            var styles = window.getComputedStyle(source);
+            return ['--ba-impact-chart-track', '--ba-impact-label-bg', '--ba-impact-label-border',
+                '--ba-impact-label-name', '--ba-impact-label-width', '--ba-impact-label-radius',
+                '--ba-impact-label-name-size', '--ba-impact-label-value-size',
+                '--ba-impact-label-line-length', '--ba-impact-label-edge-distance']
+                .map(function (name) { return styles.getPropertyValue(name); })
+                .concat([window.getComputedStyle(root).fontFamily,
+                    String(window.matchMedia('(max-width: 760px)').matches),
+                    String(window.matchMedia('(prefers-reduced-motion: reduce)').matches)])
+                .join('|');
         }
 
+        function refreshChart() {
+            if (state.disposed || chart.isDisposed()) return;
+            var signature = styleSignature();
+            var sizeChanged = state.width !== chartElement.clientWidth || state.height !== chartElement.clientHeight;
+            if (sizeChanged) chart.resize();
+            if (signature !== state.signature || state.forceStyle) {
+                var option = buildOption(root, chartElement, payload);
+                option.animationDuration = 0;
+                option.animationDurationUpdate = 0;
+                chart.setOption(option, true);
+            }
+            state.width = chartElement.clientWidth;
+            state.height = chartElement.clientHeight;
+            state.signature = signature;
+            state.forceStyle = false;
+        }
+
+        function scheduleRefresh(forceStyle) {
+            if (state.disposed) return;
+            state.forceStyle = state.forceStyle || forceStyle;
+            cancelAnimationFrame(state.frame);
+            state.frame = requestAnimationFrame(refreshChart);
+        }
+
+        state.resizeHandler = function () { scheduleRefresh(false); };
+        state.styleHandler = function () { scheduleRefresh(true); };
+        window.addEventListener('resize', state.resizeHandler, { passive: true });
+        state.mobile.addEventListener('change', state.styleHandler);
+        if ('ResizeObserver' in window) {
+            state.resizeObserver = new ResizeObserver(state.resizeHandler);
+            state.resizeObserver.observe(chartElement);
+        }
+        if (document.fonts) {
+            document.fonts.ready.then(state.styleHandler);
+            document.fonts.addEventListener('loadingdone', state.styleHandler);
+        }
         states.set(root, state);
     }
 

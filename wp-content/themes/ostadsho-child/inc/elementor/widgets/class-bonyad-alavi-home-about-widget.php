@@ -792,6 +792,20 @@ final class Bonyad_Alavi_Home_About_Widget extends Widget_Base {
 						<script type="application/json" data-js-impact-chart-data><?php echo wp_json_encode( $chart_payload, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></script>
 					</div>
 
+					<?php if ( ! empty( $sources ) ) : ?>
+						<ul class="ba-impact__funding-sources" aria-label="منابع تأمین مالی">
+							<?php foreach ( $sources as $source ) : ?>
+								<li class="ba-impact__funding-source" style="--ba-impact-source-color:<?php echo esc_attr( $source['color'] ); ?>;">
+									<span class="ba-impact__funding-source-amount">
+										<strong class="ba-impact__funding-source-value"><?php echo esc_html( $this->format_number( $source['value'], $decimals ) ); ?></strong>
+										<?php if ( '' !== $unit ) : ?><span class="ba-impact__funding-source-unit"><?php echo esc_html( $unit ); ?></span><?php endif; ?>
+									</span>
+									<span class="ba-impact__funding-source-name"><?php echo esc_html( $source['label'] ); ?></span>
+								</li>
+							<?php endforeach; ?>
+						</ul>
+					<?php endif; ?>
+
 					<div class="ba-impact__beneficiaries" aria-label="<?php echo esc_attr( $beneficiaries_label ); ?>">
 						<?php if ( '' !== $beneficiaries_label ) : ?>
 							<span class="ba-impact__beneficiaries-label"><?php echo esc_html( $beneficiaries_label ); ?></span>
