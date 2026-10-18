@@ -54,6 +54,8 @@ php -l wp-content/themes/ostadsho-child/inc/forms/class-ba-facilitator-recruitme
 node --check wp-content/themes/ostadsho-child/assets/js/ba-facilitator-recruitment-form.js
 ```
 
+GitHub Actions [run 39121959508](https://github.com/mohsenfarhangi/bonyad-alavi-wp/actions/runs/39121959508) passed PHP 8.3 syntax, 23/23 theme regression checks, and Node JS syntax. This does not replace live WordPress/Elementor acceptance.
+
 Live acceptance pending:
 1. Render shortcode in Elementor and verify RTL layout/responsive styling.
 2. Submit valid/invalid national ID, mobile, and landline values using Persian and Latin digits. Confirm Persian errors under fields.
