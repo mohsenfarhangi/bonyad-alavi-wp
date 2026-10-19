@@ -215,7 +215,23 @@ textarea.afe-control { resize:vertical; min-height:118px; line-height:1.9; }
 .afe-duplicate-live__link { align-self:flex-start; margin-top:3px; font-weight:800; }
 .afe-success { background:var(--afe-green-soft); color:var(--afe-green-dark); border:1px solid #cce0d8; display:flex; gap:9px; flex-direction:column; }
 .afe-result-link { color:var(--afe-green-dark); font-weight:800; }
-.afe-hp { position:absolute !important; left:-10000px !important; width:1px;height:1px;overflow:hidden; }
+/* Hide the honeypot without creating RTL horizontal overflow. */
+.afe-form .afe-hp {
+    position: absolute !important;
+    top: 0 !important;
+    right: 0 !important;
+    left: auto !important;
+
+    width: 1px !important;
+    height: 1px !important;
+    padding: 0 !important;
+    margin: 0 !important;
+
+    overflow: hidden !important;
+    clip: rect(0, 0, 0, 0) !important;
+    clip-path: inset(50%) !important;
+    white-space: nowrap !important;
+}
 @media (max-width: 780px) {
   .afe-form { border-radius:18px; }
   .afe-form-header,.afe-progress,.afe-step { padding-left:20px; padding-right:20px; }
@@ -254,20 +270,7 @@ textarea.afe-control { resize:vertical; min-height:118px; line-height:1.9; }
   pointer-events:none !important;
 }
 
-/* Native source stays in the DOM for validation/submission and graceful fallback. */
-.afe-form select.afe-select-source.afe-select-enhanced {
-  position:absolute !important;
-  width:1px !important;
-  height:1px !important;
-  padding:0 !important;
-  margin:-1px !important;
-  overflow:hidden !important;
-  clip:rect(0,0,0,0) !important;
-  white-space:nowrap !important;
-  border:0 !important;
-  opacity:0 !important;
-  pointer-events:none !important;
-}
+
 
 /* Native opt-out still receives AFE styling and is isolated from theme Select2. */
 .afe-form select.afe-select-source[data-afe-select-mode="native"] {
@@ -1214,3 +1217,34 @@ textarea.afe-control { resize:vertical; min-height:118px; line-height:1.9; }
 }
 .afe-shell .afe-preview-file-link{color:var(--afe-primary);font-weight:600;text-decoration:none;overflow-wrap:anywhere}
 .afe-shell .afe-preview-file-link:hover,.afe-shell .afe-preview-file-link:focus{text-decoration:underline}
+
+/*
+ * Hide native selects after custom-select enhancement.
+ * Specificity must exceed the strong-isolation control rules.
+ */
+.afe-form select.afe-select-source.afe-select-enhanced,
+.afe-shell.afe-isolation-strong
+.afe-form select.afe-control.afe-select-source.afe-select-enhanced {
+    position: absolute !important;
+    inset: 0 auto auto 0 !important;
+
+    width: 1px !important;
+    min-width: 0 !important;
+    max-width: 1px !important;
+
+    height: 1px !important;
+    min-height: 0 !important;
+    max-height: 1px !important;
+
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+
+    overflow: hidden !important;
+    clip: rect(0, 0, 0, 0) !important;
+    clip-path: inset(50%) !important;
+    white-space: nowrap !important;
+
+    opacity: 0 !important;
+    pointer-events: none !important;
+}
