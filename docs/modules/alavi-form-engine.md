@@ -3,7 +3,7 @@
 **Status:** active development / pre-acceptance  
 **Path:** `wp-content/plugins/alavi-form-engine/`  
 **Namespace:** `BonyadAlavi\FormEngine`  
-**Development version:** `1.0.28-dev`  
+**Development version:** `1.0.28-dev.1`  
 **DB checkpoint:** `1.0.5-dev.2`  
 **Stable baseline/tag documented:** `1.0.27`  
 **PHP:** `>=8.3`
@@ -325,3 +325,12 @@ Live acceptance قبل از production bump:
 - `../../wp-content/plugins/alavi-form-engine/README.md`
 - `../../wp-content/plugins/alavi-form-engine/readme.txt`
 - `../../wp-content/plugins/alavi-form-engine/THIRD-PARTY-NOTICES.md`
+
+
+## 2026-10-19 — Frontend CSS isolation hardening
+
+- Honeypot inside `.afe-form` is visually clipped at `top:0/right:0` with `left:auto`; the old negative horizontal offset was removed to prevent RTL overflow.
+- Enhanced native `select` remains available for validation and `FormData` but has 1px dimensions, clipping and pointer-events disabled. The high-specificity rule is placed after strong-isolation `.afe-control` sizing rules.
+- Frontend stylesheet remains registered with `AFE_VERSION`; this development asset revision increments the header and constant to `1.0.28-dev.1` to invalidate browser URL caches. DB version and stable release tag were not promoted.
+- CI: `tests/frontend-css-regression.js` and `tests/frontend-css-browser.mjs` verify CSS contract, RTL widths 360/780/782/1024, custom select selection and mocked submission payload. Browser/WordPress production acceptance remains separate.
+- Per-form Additional CSS overrides are stored in WordPress (not tracked in this repository); remove temporary site CSS from the admin editor and purge any site/CDN caches separately.
