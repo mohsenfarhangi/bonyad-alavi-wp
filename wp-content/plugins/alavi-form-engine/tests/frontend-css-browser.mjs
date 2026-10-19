@@ -17,6 +17,15 @@ try {
     await page.locator('select.afe-select-enhanced').waitFor({ state: 'attached' });
     await page.locator('.afe-custom-select__trigger').waitFor({ state: 'visible' });
 
+    // AFE controls animate on enhancement; inspect the final cascade only after
+    // width, height, and opacity transitions have settled.
+    await page.waitForFunction(() => {
+      const select = document.querySelector('select.afe-select-enhanced');
+      if (!select) return false;
+      const rect = select.getBoundingClientRect();
+      return rect.width <= 1.1 && rect.height <= 1.1 && getComputedStyle(select).opacity === '0';
+    }, { timeout: 5000 });
+
     const bounds = await page.evaluate(() => {
       const form = document.querySelector('.afe-form');
       const hidden = document.querySelector('select.afe-select-enhanced');
