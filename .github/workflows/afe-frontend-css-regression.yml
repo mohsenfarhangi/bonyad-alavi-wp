@@ -1,0 +1,43 @@
+name: AFE frontend CSS regression
+
+on:
+  push:
+    branches:
+      - fix/afe-frontend-select-overflow
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'wp-content/plugins/alavi-form-engine/assets/css/frontend.css'
+      - 'wp-content/plugins/alavi-form-engine/alavi-form-engine.php'
+      - 'wp-content/plugins/alavi-form-engine/tests/frontend-css-*'
+      - '.github/workflows/afe-frontend-css-regression.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  afe-frontend-css:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          coverage: none
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate CSS cascade and asset version
+        run: node wp-content/plugins/alavi-form-engine/tests/frontend-css-regression.js
+      - name: Validate PHP version header
+        run: php -l wp-content/plugins/alavi-form-engine/alavi-form-engine.php
+      - name: Run AFE regression suite
+        run: bash wp-content/plugins/alavi-form-engine/tools/qa.sh
+      - name: Install Playwright Chromium for browser testing
+        run: |
+          npm install --no-save --package-lock=false playwright@1.58.2
+          npx playwright install --with-deps chromium
+      - name: Exercise RTL select UI and mocked form submission at four viewport widths
+        run: node wp-content/plugins/alavi-form-engine/tests/frontend-css-browser.mjs
