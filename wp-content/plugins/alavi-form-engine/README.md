@@ -1,4 +1,4 @@
-## وضعیت توسعه 1.0.28-dev (Feature-complete / Pre-acceptance Checkpoint)
+## وضعیت توسعه 1.0.28-dev.1 (Feature-complete / Pre-acceptance Checkpoint)
 
 > **نکته ارتقا بین checkpointهای توسعه:** بسته را به‌صورت کامل نصب/جایگزین کنید. کپی‌کردن فقط فایل‌های تغییرکرده می‌تواند پوشه‌ها/کلاس‌های جدید را جا بیندازد و از checkpoint 6.1 به بعد bootstrap این وضعیت را قبل از boot تشخیص می‌دهد.
 
@@ -289,3 +289,8 @@ Form::make('my-form')->hideBrandMark();
 - Hook جدید `afe_register_templates` برای ثبت Template Definitionهای آینده اضافه شد.
 - `README.md`، `readme.txt` و مستندات توسعه هم‌زمان با نسخه 1.0.27 به‌روزرسانی شدند.
 
+## اصلاح CSS فرم عمومی (2026-10-19)
+
+- فیلد honeypot با حفظ حضور در فرم بدون ایجاد overflow افقی RTL مخفی می‌شود.
+- select بومی پس از ارتقای Custom Select با قانون با اولویت بیشتر از Strong Isolation در اندازه ۱px باقی می‌ماند و داده ارسالی/اعتبارسنجی حفظ می‌شود.
+- نسخه توسعه برای cache-busting فایل CSS به `1.0.28-dev.1` افزایش یافت. Stable tag `1.0.27` و DB version تغییری ندارند.
