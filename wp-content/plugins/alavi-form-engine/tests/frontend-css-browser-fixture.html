@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Alavi Form Engine CSS regression fixture</title>
+  <link rel="stylesheet" href="../assets/css/frontend.css">
+  <style>
+    html, body { margin: 0; padding: 0; }
+    body { width: 100%; min-height: 100vh; background: #f6f8f7; }
+    .afe-shell { max-width: 100%; }
+  </style>
+  <script>
+    window.afeFrontend = { ajaxUrl: '/mock-afe-submit' };
+    window.__submission = null;
+    window.fetch = async (url, options) => {
+      if (String(url) !== '/mock-afe-submit') throw new Error('Unexpected external request');
+      const body = options.body;
+      window.__submission = {
+        intent: body.get('afe_intent'),
+        province: body.get('afe_data[province]'),
+        action: body.get('action')
+      };
+      return {
+        ok: true,
+        json: async () => ({
+          success: true,
+          data: { message: 'اطلاعات با موفقیت ثبت شد.', tracking_code: 'TEST-12345', files: [] }
+        })
+      };
+    };
+  </script>
+  <script defer src="../assets/js/frontend.js"></script>
+</head>
+<body>
+  <main class="afe-shell afe-isolation-strong" dir="rtl">
+    <form class="afe-form" method="post" novalidate data-form="frontend-css-fixture"
+          data-afe-preview-enabled="0" data-afe-lock-after-submit="0">
+      <input type="hidden" name="action" value="afe_submit">
+      <input type="hidden" name="afe_form_slug" value="frontend-css-fixture">
+      <div class="afe-hp" aria-hidden="true"><label>Website<input name="_afe_website" type="text" tabindex="-1"></label></div>
+      <header class="afe-form-header"><h1>آزمون انتخابگر سفارشی</h1></header>
+      <section class="afe-step is-active" data-step="0">
+        <div class="afe-step-heading"><h2>اطلاعات</h2></div>
+        <div class="afe-grid">
+          <div class="afe-field afe-col-6" data-field="province" data-field-type="select" data-required="1">
+            <label class="afe-label" for="afe_province">استان <span class="afe-required">*</span></label>
+            <select class="afe-control afe-select afe-select-source afe-no-select2 no-select2 select2-ignore afe-select-custom-source"
+              id="afe_province" name="afe_data[province]" required
+              data-afe-select-mode="custom" data-afe-select-placeholder="انتخاب کنید"
+              data-afe-select-searchable="0" data-afe-select-search-threshold="7">
+              <option value="">انتخاب کنید</option>
+              <option value="tehran">تهران</option>
+              <option value="alborz">البرز</option>
+            </select>
+            <div class="afe-field-error"></div>
+          </div>
+        </div>
+        <div class="afe-step-actions"><button class="afe-btn afe-btn-primary afe-submit" type="submit">ارسال</button></div>
+      </section>
+      <div class="afe-form-result" aria-live="polite"></div>
+    </form>
+  </main>
+</body>
+</html>
