@@ -1,12 +1,12 @@
 # Current Project State
 
-آخرین بازبینی: **2026-10-18**
+آخرین بازبینی: **2026-10-19**
 
 ## Project Phase
 
 پروژه در توسعه فعال است.
 
-- **Alavi Form Engine:** `1.0.28-dev`، DB `1.0.5-dev.2`، stable baseline/tag `1.0.27`; production bump هنوز به live acceptance وابسته است.
+- **Alavi Form Engine:** `1.0.28-dev.1`، DB `1.0.5-dev.2`، stable baseline/tag `1.0.27`; production bump هنوز به live acceptance وابسته است.
 - **Ostadsho child theme:** custom integration layer روی Theme header `2.8`; version docs legacy v0.x به state history مهاجرت کرده‌اند.
 
 ## Current Goal
@@ -19,6 +19,13 @@
 AFE release goal همچنان live acceptance نسخه 1.0.28 و رفع blocker واقعی پیش از production promotion است.
 
 ## Recently Completed
+
+### AFE CSS honeypot and select overflow fixes (2026-10-19)
+- `frontend.css`: honeypot no longer uses `left:-10000px`, preventing RTL overflow. Enhanced native select now uses 1px clipped dimensions and strong-isolation-specific override placed after the control sizing rules.
+- Development asset version increased to `1.0.28-dev.1` (header + `AFE_VERSION`), stable tag and DB version unchanged.
+- Added CSS cascade regression and real frontend CSS/JS Chromium viewport fixture for 360/780/782/1024 with option selection and mocked submit.
+- **GitHub Actions [39222851678](https://github.com/mohsenfarhangi/bonyad-alavi-wp/actions/runs/39222851678):** PHP lint + CSS contract PASS; Chromium four viewport checks (360/780/782/1024), custom select and mocked payload PASS. Full AFE QA has two pre-existing export test failures (`export-profile.php`, `export-package-integration.php`) from obsolete Jihadi form references. **Production Additional CSS cleanup, cache purge, and live WordPress/Elementor acceptance require an actual site connection.**
+
 
 ### Facilitator recruitment form (2026-10-18)
 - فرم تک‌مرحله‌ای `facilitator-recruitment` در `ostadsho-child/inc/forms/` با ۱۱ فیلد (۹ اجباری، توضیحات و رزومه اختیاری) تعریف شد.
