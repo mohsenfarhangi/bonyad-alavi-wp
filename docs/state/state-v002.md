@@ -635,3 +635,14 @@ Current module: [MODULE-FACILITATOR-FORM](../modules/facilitator-recruitment-for
 - Full local WP boot was blocked by DB connection failure; no production deploy or full Elementor editor acceptance occurred.
 
 Current contract: [MODULE-HOME-HERO](../modules/theme-home-hero-widget.md).
+
+
+## 2026-10-19 — AFE frontend select / honeypot CSS fixes
+
+- Honeypot hidden at `top:0;right:0;left:auto` inside the form instead of `left:-10000px`, avoiding RTL document overflow.
+- Native enhanced selects clipped to 1px with strong-isolation specificity; original hiding declaration removed and final override moved after `.afe-control` strong isolation rules.
+- `AFE_VERSION` and plugin header increased to `1.0.28-dev.1` for CSS URL cache invalidation, leaving DB `1.0.5-dev.2` and stable tag `1.0.27` unchanged.
+- Regression added for selector cascade and browser fixture for 360/780/782/1024 widths, option selection, and mocked submit serialization.
+- Production custom Additional CSS cleanup and server/CDN cache purge require connected site access; no site is connected through WPVibe currently.
+
+Current module: [MODULE-AFE](../modules/alavi-form-engine.md).
