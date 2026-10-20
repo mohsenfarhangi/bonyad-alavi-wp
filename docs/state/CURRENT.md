@@ -23,7 +23,7 @@ AFE release goal همچنان live acceptance نسخه 1.0.28 و رفع blocker 
 ### Home Hero per-slide mobile images (2026-10-20)
 - فیلد اختیاری `mobile_image` در Repeater موجود اسلایدر اضافه شد؛ `image` اصلی همچنان برای دسکتاپ/تبلت استفاده می‌شود.
 - در عرض حداکثر ۷۶۰px از `picture/source` برای تصویر موبایل استفاده می‌شود؛ وقتی خالی باشد، خروجی همان تصویر دسکتاپ قبلی است. بارگذاری eager/lazy، alt، Swiper و نسبت تصویر دست نخورده‌اند.
-- regression جدید `tests/home-hero-mobile-image.php` همراه با contract موجود `tests/home-hero-widget-contract.php` و workflow مستقل افزوده شد؛ PHP lint، خروجی runtime و JS syntax با GitHub Actions بررسی می‌شوند.
+- regression جدید `tests/home-hero-mobile-image.php` و contract موجود `tests/home-hero-widget-contract.php` در GitHub Actions اجرا شدند؛ PHP 8.3 lint، تست‌های runtime رندر و fallback، contract فعلی Hero و JS syntax همگی PASS هستند ([run 39431427081](https://github.com/mohsenfarhangi/bonyad-alavi-wp/actions/runs/39431427081)).
 - **پذیرش زنده در Elementor و سایت عملیاتی همچنان باز است.**
 
 
@@ -296,7 +296,7 @@ Historical PASSهای AFE/Theme به HEAD جدید تعمیم داده نمی‌
 
 ## Next Agent Handoff
 
-**Current task:** تصویر موبایل اختیاری به هر اسلاید ویجت Hero اضافه شده، fallback دسکتاپ حفظ است و QA خودکار باید روی HEAD فعلی بررسی شود. پذیرش زنده Elementor و کش/CDN محیط عملیاتی هنوز در انتظار است.
+**Current task:** تصویر موبایل اختیاری به اسلایدهای Hero افزوده و با PR #3 در main ادغام شده است؛ PHP regression/runtime و JS syntax با GitHub Actions PASS شده‌اند. پذیرش بصری در Elementor زنده و کش/CDN هاست هنوز بررسی نشده‌اند.
 
 
 **Start here:** [../INDEX.md](../INDEX.md) → [../modules/INDEX.md](../modules/INDEX.md).
