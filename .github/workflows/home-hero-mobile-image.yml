@@ -1,0 +1,39 @@
+name: Home hero mobile image
+
+on:
+  push:
+    branches:
+      - feat/home-hero-mobile-slide-image
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'wp-content/themes/ostadsho-child/inc/elementor/widgets/class-bonyad-alavi-home-hero-widget.php'
+      - 'wp-content/themes/ostadsho-child/tests/home-hero-widget-contract.php'
+      - 'wp-content/themes/ostadsho-child/tests/home-hero-mobile-image.php'
+      - '.github/workflows/home-hero-mobile-image.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  hero-mobile-image:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          coverage: none
+      - name: Check PHP syntax
+        run: |
+          php -l wp-content/themes/ostadsho-child/inc/elementor/widgets/class-bonyad-alavi-home-hero-widget.php
+          php -l wp-content/themes/ostadsho-child/tests/home-hero-widget-contract.php
+          php -l wp-content/themes/ostadsho-child/tests/home-hero-mobile-image.php
+      - name: Check existing hero regression
+        run: php wp-content/themes/ostadsho-child/tests/home-hero-widget-contract.php
+      - name: Check mobile picture output and desktop fallback
+        run: php wp-content/themes/ostadsho-child/tests/home-hero-mobile-image.php
+      - name: Verify Swiper JavaScript remains valid
+        run: node --check wp-content/themes/ostadsho-child/assets/js/bonyad-alavi-home-hero-widget.js

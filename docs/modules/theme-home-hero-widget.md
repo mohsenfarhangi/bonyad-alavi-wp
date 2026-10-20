@@ -45,7 +45,8 @@ Rendering contract:
 ### Slider
 
 Elementor Repeater:
-- Media image
+- Media image (desktop/tablet, existing ID `image`)
+- Mobile image (optional, new ID `mobile_image`)
 - Tag
 - Title
 - Description
@@ -61,6 +62,9 @@ Rendering contract:
 - بدون URL، slide لینک کلی ندارد.
 - HTML tag عنوان قابل انتخاب است؛ default = `h2`.
 - تصویر اول eager و تصاویر بعدی lazy هستند؛ decoding async است.
+- اگر برای اسلاید تصویر موبایل انتخاب شده باشد، از `<picture><source media="(max-width: 760px)">` و تصویر دسکتاپ به‌عنوان `<img>` fallback استفاده می‌شود؛ تبلت و دسکتاپ همیشه تصویر اصلی را می‌بینند.
+- اگر `mobile_image` خالی باشد، خروجی قدیمی همان `<img>` باقی می‌ماند. attachment موبایل از `wp_get_attachment_image_srcset()` و `sizes="100vw"` استفاده می‌کند و برای URL سفارشی fallback دارد؛ breakpoint با موبایل فعلی Hero هماهنگ است.
+- تصویر اصلی هنوز توسط `BA_Media_Helper::render_image()` رندر می‌شود؛ alt/loading/decoding و CSS فعلی img، نسبت تصویرها و Swiper تغییر نکرده‌اند.
 - اگر تصویر انتخاب نشده باشد، محتوای slide روی background اسلایدر باقی می‌ماند.
 
 Behavior (2026-10-17):
@@ -242,3 +246,12 @@ Regression contract:
 - عرض‌های 1366/1024/768/390/360، نسبت پیش‌فرض و نسبت responsive صریح 16:9 / 3:2 / 1:1، min=0 و min=600 بررسی شدند.
 - arrows/dots، fade/slide، loop خاموش، تک‌اسلاید، autoplay، focus pause/resume، disable-on-interaction و reinitialization بدون تکثیر cloneها در fixture بررسی شدند.
 - وردپرس محلی در bootstrap با خطای اتصال دیتابیس متوقف شد؛ full Editor acceptance و deploy/QA سرور واقعی انجام نشده‌اند. DOM سایت زنده فقط خوانده شد و تغییری نکرد.
+
+
+## 2026-10-20 — Optional Mobile Image Per Slide
+
+- `mobile_image` is a single optional Elementor Media control inside the existing slides repeater. Tablet and desktop still use `image`.
+- Native `<picture>` source uses `(max-width: 760px)`; if no mobile image, output is the original desktop `<img>` without a picture wrapper.
+- A WordPress mobile attachment gets responsive srcset; the original desktop image retains its BA_Media_Helper rendering, alt text and eager/lazy behavior.
+- Regression coverage: `tests/home-hero-widget-contract.php` and `tests/home-hero-mobile-image.php`; focused CI `.github/workflows/home-hero-mobile-image.yml`.
+- Live editor and production image/CDN cache acceptance remain pending.
