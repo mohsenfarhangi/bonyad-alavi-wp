@@ -1,6 +1,6 @@
 # Current Project State
 
-آخرین بازبینی: **2026-10-19**
+آخرین بازبینی: **2026-10-20**
 
 ## Project Phase
 
@@ -19,6 +19,13 @@
 AFE release goal همچنان live acceptance نسخه 1.0.28 و رفع blocker واقعی پیش از production promotion است.
 
 ## Recently Completed
+
+### Home Hero per-slide mobile images (2026-10-20)
+- فیلد اختیاری `mobile_image` در Repeater موجود اسلایدر اضافه شد؛ `image` اصلی همچنان برای دسکتاپ/تبلت استفاده می‌شود.
+- در عرض حداکثر ۷۶۰px از `picture/source` برای تصویر موبایل استفاده می‌شود؛ وقتی خالی باشد، خروجی همان تصویر دسکتاپ قبلی است. بارگذاری eager/lazy، alt، Swiper و نسبت تصویر دست نخورده‌اند.
+- regression جدید `tests/home-hero-mobile-image.php` همراه با contract موجود `tests/home-hero-widget-contract.php` و workflow مستقل افزوده شد؛ PHP lint، خروجی runtime و JS syntax با GitHub Actions بررسی می‌شوند.
+- **پذیرش زنده در Elementor و سایت عملیاتی همچنان باز است.**
+
 
 ### AFE CSS honeypot and select overflow fixes (2026-10-19)
 - `frontend.css`: honeypot no longer uses `left:-10000px`, preventing RTL overflow. Enhanced native select now uses 1px clipped dimensions and strong-isolation-specific override placed after the control sizing rules.
@@ -289,7 +296,7 @@ Historical PASSهای AFE/Theme به HEAD جدید تعمیم داده نمی‌
 
 ## Next Agent Handoff
 
-**Current task:** فرم جذب تسهیلگر پیاده‌سازی و با AFE یکپارچه شده است؛ GitHub Actions (PHP lint، ۲۳/۲۳ regression، JS syntax) PASS است. پذیرش live WordPress/Elementor از جمله ضدتکرار، Geo و رزومه همچنان باز است. پذیرش بصری ویجت `bonyad_alavi_section_heading` و News/About هم همچنان باز است.
+**Current task:** تصویر موبایل اختیاری به هر اسلاید ویجت Hero اضافه شده، fallback دسکتاپ حفظ است و QA خودکار باید روی HEAD فعلی بررسی شود. پذیرش زنده Elementor و کش/CDN محیط عملیاتی هنوز در انتظار است.
 
 
 **Start here:** [../INDEX.md](../INDEX.md) → [../modules/INDEX.md](../modules/INDEX.md).
