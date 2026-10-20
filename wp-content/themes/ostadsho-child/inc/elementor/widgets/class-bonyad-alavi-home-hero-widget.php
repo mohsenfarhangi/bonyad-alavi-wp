@@ -63,6 +63,11 @@ final class Bonyad_Alavi_Home_Hero_Widget extends Widget_Base {
 
 		$repeater = new Repeater();
 		$repeater->add_control( 'image', array( 'label' => 'تصویر', 'type' => Controls_Manager::MEDIA ) );
+		$repeater->add_control( 'mobile_image', array(
+			'label'       => 'تصویر موبایل',
+			'type'        => Controls_Manager::MEDIA,
+			'description' => 'اختیاری؛ اگر انتخاب نشود، همان تصویر دسکتاپ نمایش داده می‌شود.',
+		) );
 		$repeater->add_control( 'tag', array( 'label' => 'برچسب', 'type' => Controls_Manager::TEXT, 'label_block' => true ) );
 		$repeater->add_control( 'title', array( 'label' => 'عنوان', 'type' => Controls_Manager::TEXTAREA, 'rows' => 2 ) );
 		$repeater->add_control( 'description', array( 'label' => 'توضیحات', 'type' => Controls_Manager::TEXTAREA, 'rows' => 3 ) );
@@ -669,16 +674,33 @@ final class Bonyad_Alavi_Home_Hero_Widget extends Widget_Base {
 		$link        = is_array( $slide['link'] ?? null ) ? $slide['link'] : array();
 		$link_url    = trim( (string) ( $link['url'] ?? '' ) );
 		$image       = is_array( $slide['image'] ?? null ) ? $slide['image'] : array();
+		$mobile      = is_array( $slide['mobile_image'] ?? null ) ? $slide['mobile_image'] : array();
 		$has_button  = '' !== $button_text && '' !== $link_url;
 		$whole_link  = '' !== $link_url && ! $has_button;
 		$title_mode  = (string) ( $settings['slider_title_tag_reference'] ?? 'reference' );
 		$title_tag   = 'reference' === $title_mode ? ( 0 === (int) $index ? 'h1' : 'h2' ) : $this->sanitize_heading_tag( $title_mode );
 		$alt         = ! empty( $image['id'] ) ? (string) get_post_meta( absint( $image['id'] ), '_wp_attachment_image_alt', true ) : '';
 		$item        = array( 'id' => absint( $image['id'] ?? 0 ), 'url' => (string) ( $image['url'] ?? '' ), 'alt' => $alt );
+		$desktop_img = BA_Media_Helper::render_image( $item, 'full', array( 'loading' => 0 === (int) $index ? 'eager' : 'lazy', 'decoding' => 'async' ) );
+		$mobile_id   = absint( $mobile['id'] ?? 0 );
+		$mobile_url  = $mobile_id ? (string) ( wp_get_attachment_image_url( $mobile_id, 'full' ) ?: ( $mobile['url'] ?? '' ) ) : (string) ( $mobile['url'] ?? '' );
+		$mobile_src  = '';
+		$mobile_set  = false;
+		if ( '' !== trim( $mobile_url ) ) {
+			$mobile_set = $mobile_id ? wp_get_attachment_image_srcset( $mobile_id, 'full' ) : false;
+			$mobile_src = $mobile_set ? (string) $mobile_set : esc_url( $mobile_url );
+		}
 		$class       = 'ba-slider__slide swiper-slide';
 		?>
 		<article class="<?php echo esc_attr( $class ); ?>">
-			<?php echo BA_Media_Helper::render_image( $item, 'full', array( 'loading' => 0 === (int) $index ? 'eager' : 'lazy', 'decoding' => 'async' ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+			<?php if ( '' !== $mobile_src && '' !== $desktop_img ) : ?>
+				<picture class="ba-slider__picture">
+					<source media="(max-width: 760px)" srcset="<?php echo esc_attr( $mobile_src ); ?>"<?php if ( $mobile_set ) : ?> sizes="100vw"<?php endif; ?>>
+					<?php echo $desktop_img; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+				</picture>
+			<?php else : ?>
+				<?php echo $desktop_img; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+			<?php endif; ?>
 			<?php if ( $whole_link ) : ?>
 				<a class="ba-slider__whole-link"<?php echo $this->build_link_attributes( $link ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?> aria-label="<?php echo esc_attr( $title ?: $tag ?: 'مشاهده اسلاید' ); ?>"></a>
 			<?php endif; ?>
