@@ -646,3 +646,12 @@ Current contract: [MODULE-HOME-HERO](../modules/theme-home-hero-widget.md).
 - Production custom Additional CSS cleanup and server/CDN cache purge require connected site access; no site is connected through WPVibe currently.
 
 Current module: [MODULE-AFE](../modules/alavi-form-engine.md).
+
+## 2026-10-20 — Optional mobile image for homepage Hero slides
+
+- Added the optional `mobile_image` Elementor Media control to each slide without altering the persisted `image` control or any of the existing slider configuration.
+- Responsive HTML uses `<picture>` with `<source media="(max-width: 760px)">` only when a mobile image exists, and the existing WordPress/BA_Media_Helper desktop `<img>` as fallback for tablets, desktop and unset mobile.
+- WordPress-attachment mobile image provides a responsive srcset; if only URL is available, use it directly. Preserve alt, eager/lazy, async decoding, slider overlay, Swiper and ratios.
+- Added runtime output regression and static contract checks; PHP/JS workflow tests, with live Elementor/production acceptance pending.
+
+Current module: [MODULE-HOME-HERO](../modules/theme-home-hero-widget.md).
