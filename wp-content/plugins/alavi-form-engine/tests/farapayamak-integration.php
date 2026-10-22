@@ -42,8 +42,8 @@ $checks=[
     'secret-store-available'=>$store->available(),
     'credential-encryption-roundtrip'=>$store->available()
         && $store->decrypt($store->encrypt('test-api-key'))==='test-api-key',
-    'version-bumped-consistently'=>str_contains($entry, 'Version: 1.0.28-dev.3')
-        && str_contains($entry, "define('AFE_VERSION', '1.0.28-dev.3')"),
+    'version-bumped-consistently'=>(bool)preg_match('/Version:\\s+([^\\s]+)/', $entry, $matches)
+        && str_contains($entry, "define('AFE_VERSION', '".$matches[1]."')"),
 ];
 
 foreach ($checks as $name=>$ok) {
