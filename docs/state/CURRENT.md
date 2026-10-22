@@ -24,7 +24,7 @@ AFE release goal همچنان live acceptance نسخه 1.0.28 و رفع blocker 
 - Opt-in config `settings.duplicate.resume_draft` و checkbox مدیریت فرم اضافه شد؛ منطق مشترک افزونه برای preflight و submit، لینک ادامه را فقط برای `draft` باز و مالک تأییدشده برمی‌گرداند.
 - برای فرم جهادی fingerprint `registration_code` + `group_mobile`، رفتار `block` و `resume_draft=true` در Source Definition اضافه شده است.
 - بدون credential معتبر، کد ملی/شماره همراه/کد ثبت به‌تنهایی مجوز دریافت URL یا داده رکورد نیست؛ کاربر فقط راهنمای عمومی بازیابی می‌بیند.
-- آزمون امنیتی `tests/duplicate-draft-resume.php`، تست‌های قبلی duplicate، تست قرارداد فرم جهادی و syntax PHP/JS در GitHub Actions **PASS** شدند؛ پذیرش زنده Wordpress/Elementor هنوز انجام نشده است.
+- آزمون امنیتی `tests/duplicate-draft-resume.php`، تست‌های قبلی duplicate، تست قرارداد فرم جهادی و syntax PHP/JS در GitHub Actions **PASS** شدند ([run 39750057248](https://github.com/mohsenfarhangi/bonyad-alavi-wp/actions/runs/39750057248)). PR [#4](https://github.com/mohsenfarhangi/bonyad-alavi-wp/pull/4) در `main` ادغام شد. تست CSS مربوط به نسخه‌گذاری هم در PR [#5](https://github.com/mohsenfarhangi/bonyad-alavi-wp/pull/5) اصلاح و [run 39750427227](https://github.com/mohsenfarhangi/bonyad-alavi-wp/actions/runs/39750427227) موفق شد. **پذیرش زنده Wordpress/Elementor هنوز انجام نشده است.**
 - نسخه توسعه افزونه برای invalidation فایل CSS/JS برابر `1.0.28-dev.2`؛ DB و stable tag بدون تغییر.
 
 
@@ -304,7 +304,7 @@ Historical PASSهای AFE/Theme به HEAD جدید تعمیم داده نمی‌
 
 ## Next Agent Handoff
 
-**Current task:** تصویر موبایل اختیاری به اسلایدهای Hero افزوده و با PR #3 در main ادغام شده است؛ PHP regression/runtime و JS syntax با GitHub Actions PASS شده‌اند. پذیرش بصری در Elementor زنده و کش/CDN هاست هنوز بررسی نشده‌اند.
+**Current task:** قابلیت عمومی و اختیاری `duplicate.resume_draft` به AFE افزوده، برای فرم جهادی به‌صورت Source Definition فعال و با PR #4 در `main` ادغام شده است. تست‌های امنیتی/رگرسیون متمرکز PASS شدند و تست نسخه CSS با PR #5 اصلاح شد. **بررسی Admin override فعلی فرم جهادی و پذیرش واقعی بازیابی پیش‌نویس در WordPress/Elementor الزامی است.** استقرار در سایت و کش زنده تأیید نشده‌اند. آزمون QA عمومی هنوز محدودیت تست‌های قدیمی export را دارد.
 
 
 **Start here:** [../INDEX.md](../INDEX.md) → [../modules/INDEX.md](../modules/INDEX.md).
