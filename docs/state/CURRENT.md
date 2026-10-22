@@ -1,12 +1,12 @@
 # Current Project State
 
-آخرین بازبینی: **2026-10-20**
+آخرین بازبینی: **2026-10-22**
 
 ## Project Phase
 
 پروژه در توسعه فعال است.
 
-- **Alavi Form Engine:** `1.0.28-dev.1`، DB `1.0.5-dev.2`، stable baseline/tag `1.0.27`; production bump هنوز به live acceptance وابسته است.
+- **Alavi Form Engine:** `1.0.28-dev.2`، DB `1.0.5-dev.2`، stable baseline/tag `1.0.27`; production bump هنوز به live acceptance وابسته است.
 - **Ostadsho child theme:** custom integration layer روی Theme header `2.8`; version docs legacy v0.x به state history مهاجرت کرده‌اند.
 
 ## Current Goal
@@ -19,6 +19,14 @@
 AFE release goal همچنان live acceptance نسخه 1.0.28 و رفع blocker واقعی پیش از production promotion است.
 
 ## Recently Completed
+
+### Optional draft continuation on duplicate — AFE + Jihadi (2026-10-22)
+- Opt-in config `settings.duplicate.resume_draft` و checkbox مدیریت فرم اضافه شد؛ منطق مشترک افزونه برای preflight و submit، لینک ادامه را فقط برای `draft` باز و مالک تأییدشده برمی‌گرداند.
+- برای فرم جهادی fingerprint `registration_code` + `group_mobile`، رفتار `block` و `resume_draft=true` در Source Definition اضافه شده است.
+- بدون credential معتبر، کد ملی/شماره همراه/کد ثبت به‌تنهایی مجوز دریافت URL یا داده رکورد نیست؛ کاربر فقط راهنمای عمومی بازیابی می‌بیند.
+- آزمون امنیتی `tests/duplicate-draft-resume.php`، تست‌های قبلی duplicate، تست قرارداد فرم جهادی و syntax PHP/JS در GitHub Actions **PASS** شدند؛ پذیرش زنده Wordpress/Elementor هنوز انجام نشده است.
+- نسخه توسعه افزونه برای invalidation فایل CSS/JS برابر `1.0.28-dev.2`؛ DB و stable tag بدون تغییر.
+
 
 ### Home Hero per-slide mobile images (2026-10-20)
 - فیلد اختیاری `mobile_image` در Repeater موجود اسلایدر اضافه شد؛ `image` اصلی همچنان برای دسکتاپ/تبلت استفاده می‌شود.

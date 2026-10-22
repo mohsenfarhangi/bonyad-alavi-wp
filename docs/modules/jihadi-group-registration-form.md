@@ -85,6 +85,15 @@ Key settings:
 - rate limit 20
 - shared storage
 
+## Duplicate Draft Continuation (2026-10-22)
+
+- General engine feature `settings.duplicate.resume_draft` is enabled by default for this form.
+- Duplicate fingerprint fields: `registration_code` + `group_mobile` (both in the first step); behavior: `block`.
+- When a matching **draft** exists, the existing submission can be continued without making a second row, but only after ownership verification through the WordPress user session, tracking code or private edit link.
+- Without verified credentials the user sees the generic duplicate notice and may use the existing code-based resume box; the existing record's content, status and edit URL remain private.
+- Finalized/locked submissions are not resumable, and the original duplicate block remains.
+- A previously saved Admin override of duplicate settings may override the Source Definition default; review the Duplicate tab for existing production forms after deployment.
+
 ## Default Actions
 
 ### Admin email

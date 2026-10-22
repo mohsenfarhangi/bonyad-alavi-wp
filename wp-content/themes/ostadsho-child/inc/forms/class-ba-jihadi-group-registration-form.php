@@ -404,6 +404,13 @@ final class BA_Jihadi_Group_Registration_Form {
 			           'captcha'                  => 'custom',
 			           'rate_limit'               => 20,
 			           'storage'                  => 'shared',
+			           'duplicate'                => [
+				           'enabled'      => true,
+				           'fields'       => [ 'registration_code', 'group_mobile' ],
+				           'behavior'     => 'block',
+				           'resume_draft' => true,
+				           'message'      => 'گروهی با این کد ثبت و شماره همراه قبلاً ثبت شده است.',
+			           ],
 		           ] )
 		           ->actions( [
 			           [

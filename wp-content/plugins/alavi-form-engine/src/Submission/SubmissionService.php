@@ -95,7 +95,10 @@ final class SubmissionService
             'message'=>$decision->message,
         ];
 
-        if ($decision->isDuplicate() && $decision->behavior === 'reference' && $decision->duplicateSubmissionId) {
+        // A duplicate fingerprint is not proof of ownership. Only return a draft
+        // continuation URL when the existing applicant is independently authorized.
+        $payload = array_merge($payload, $this->duplicateDraftResumePayload($form, $decision));
+        if (empty($payload['edit_url']) && $decision->isDuplicate() && $decision->behavior === 'reference' && $decision->duplicateSubmissionId) {
             $row = $this->submissions->find((int)$decision->duplicateSubmissionId);
             if ($row) {
                 $url = $this->duplicateReferenceUrl($form, $row);
@@ -835,7 +838,10 @@ final class SubmissionService
     private function duplicateError(array $form, DuplicateDecision $decision, bool $allowReferenceUrl = true): WP_Error
     {
         $data = ['duplicate'=>true];
-        if ($allowReferenceUrl && $decision->behavior === 'reference' && $decision->duplicateSubmissionId) {
+        if ($allowReferenceUrl) {
+            $data = array_merge($data, $this->duplicateDraftResumePayload($form, $decision));
+        }
+        if (empty($data['edit_url']) && $allowReferenceUrl && $decision->behavior === 'reference' && $decision->duplicateSubmissionId) {
             $row = $this->submissions->find((int)$decision->duplicateSubmissionId);
             if ($row) {
                 $url = $this->duplicateReferenceUrl($form, $row);
@@ -843,6 +849,42 @@ final class SubmissionService
             }
         }
         return new WP_Error('duplicate', $decision->message, $data);
+    }
+
+    /**
+     * Promote a duplicate draft to an actionable continuation only when its owner
+     * is authenticated. No saved content, identifiers or status are returned to
+     * visitors who merely know the fingerprint fields.
+     *
+     * @return array{resume_help?:bool,resume_draft?:bool,edit_url?:string}
+     */
+    private function duplicateDraftResumePayload(array $form, DuplicateDecision $decision): array
+    {
+        $config = $this->duplicatePolicy->config($form);
+        $modes = (array)($form['settings']['editing_modes'] ?? []);
+        $hasRecoveryMode = array_intersect(['wordpress','link','tracking'], $modes) !== [];
+        if (!$hasRecoveryMode || !$config['enabled'] || !$config['resume_draft'] || !$decision->isDuplicate()
+            || !$decision->duplicateSubmissionId || empty($form['settings']['save_draft'])
+            || empty($form['settings']['editing_enabled'])) {
+            return [];
+        }
+
+        // The generic recovery hint is safe for any duplicate, even for finalized
+        // submissions. It does not reveal whether the matching record is a draft.
+        $result = ['resume_help'=>true];
+        $row = $this->submissions->find((int)$decision->duplicateSubmissionId);
+        if (!$row || (string)($row['status'] ?? '') !== 'draft' || !empty($row['is_locked'])
+            || !$this->canApplicantAccess($form, $row) || !$this->canEdit($form, $row)) {
+            return $result;
+        }
+
+        $url = $this->duplicateReferenceUrl($form, $row);
+        if ($url === '') return $result;
+        return [
+            'resume_help'=>true,
+            'resume_draft'=>true,
+            'edit_url'=>$url,
+        ];
     }
 
     private function duplicateReferenceUrl(array $form, array $row): string

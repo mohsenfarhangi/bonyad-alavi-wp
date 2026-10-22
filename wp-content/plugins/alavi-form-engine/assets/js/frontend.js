@@ -1619,9 +1619,7 @@
         const payload = json.data || {};
         const count = showServerErrors(form, payload.errors || {}, payload.message || 'خطا در ثبت اطلاعات');
         if (!count && result) {
-          const duplicateLink = payload.code === 'duplicate' && payload.edit_url
-            ? `<a class="afe-result-link" href="${escapeAttr(payload.edit_url)}">مشاهده یا ادامه ثبت قبلی</a>`
-            : '';
+          const duplicateLink = payload.code === 'duplicate' ? duplicateResumeUi(form, payload) : '';
           result.innerHTML = `<div class="afe-notice afe-notice-error">${escapeHtml(payload.message || 'خطا در ثبت اطلاعات')}${duplicateLink}</div>`;
         }
         if (String(payload.code || '').startsWith('captcha')) {
@@ -2010,6 +2008,22 @@
     notice.removeAttribute('aria-busy');
   }
 
+  // Draft continuation is never granted by the duplicate fingerprint alone.
+  // The backend exposes edit_url only after verifying existing credentials.
+  function duplicateResumeUi(form, payload) {
+    if (payload?.edit_url) {
+      const label = payload?.resume_draft ? 'ادامه پیش‌نویس قبلی' : 'مشاهده یا ادامه ثبت قبلی';
+      return `<a class="afe-result-link afe-duplicate-live__link" href="${escapeAttr(String(payload.edit_url))}">${label}</a>`;
+    }
+    if (!payload?.resume_help) return '';
+    const hasTracking = Boolean(form.closest('.afe-shell')?.querySelector('.afe-resume-code'));
+    const hint = 'اگر قبلاً پیش‌نویس ذخیره کرده‌اید، از روش بازیابی فعال در فرم (کد رهگیری، لینک اختصاصی یا حساب کاربری) برای ادامه همان ثبت استفاده کنید.';
+    const action = hasTracking
+      ? '<button type="button" class="afe-result-link afe-draft-resume-jump">ورود با کد رهگیری</button>'
+      : '';
+    return `<span class="afe-duplicate-live__hint">${hint} ${action}</span>`;
+  }
+
   function showDuplicateNotice(form, payload, anchor) {
     const notice = duplicateNotice(form);
     if (!notice) return;
@@ -2023,13 +2037,11 @@
 
     const blocking = Boolean(payload?.blocking);
     const behavior = String(payload?.behavior || 'block');
-    const state = blocking ? 'error' : 'warning';
+    const state = payload?.resume_draft ? 'warning' : (blocking ? 'error' : 'warning');
     const message = String(payload?.message || 'این اطلاعات قبلاً ثبت شده است.');
     let extra = '';
     if (behavior === 'allow') extra = '<span class="afe-duplicate-live__hint">طبق تنظیمات فرم، ایجاد ثبت جدید همچنان مجاز است.</span>';
-    if (payload?.edit_url) {
-      extra += `<a class="afe-result-link afe-duplicate-live__link" href="${escapeAttr(String(payload.edit_url))}">مشاهده یا ادامه ثبت قبلی</a>`;
-    }
+    extra += duplicateResumeUi(form, payload);
 
     notice.dataset.state = state;
     notice.removeAttribute('aria-busy');
@@ -2166,6 +2178,14 @@
     };
 
     form.addEventListener('click', async e => {
+      const resumeJump = e.target.closest('.afe-draft-resume-jump');
+      if (resumeJump) {
+        e.preventDefault();
+        const input = form.closest('.afe-shell')?.querySelector('.afe-resume-code');
+        input?.scrollIntoView({behavior:'smooth', block:'center'});
+        input?.focus({preventScroll:true});
+        return;
+      }
       const errorLink = e.target.closest('[data-afe-error-target]');
       if (errorLink) {
         const stepIndex = Number(errorLink.dataset.afeErrorStep || 0);
