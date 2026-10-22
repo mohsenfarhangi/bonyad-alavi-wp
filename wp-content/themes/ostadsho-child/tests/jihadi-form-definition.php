@@ -48,6 +48,11 @@ $smsConfig = is_array($sms['config'] ?? null) ? $sms['config'] : [];
 
 $checks = [
     'slug-stable' => ($form['slug'] ?? '') === 'jihadi-group-registration',
+    'duplicate-enabled-and-blocked' => !empty($form['settings']['duplicate']['enabled'])
+        && ($form['settings']['duplicate']['behavior'] ?? '') === 'block',
+    'duplicate-keys-group-identity' => ($form['settings']['duplicate']['fields'] ?? []) === ['registration_code','group_mobile'],
+    'duplicate-resume-draft-on' => !empty($form['settings']['duplicate']['resume_draft'])
+        && !empty($form['settings']['save_draft']) && !empty($form['settings']['editing_enabled']),
     'title' => str_contains((string)($form['title'] ?? ''), 'شناسنامه گروه‌های مردمی و جهادی') && str_contains((string)($form['title'] ?? ''), 'شهید رسول عالم باقری'),
     'slogan' => !empty($form['settings']['header_slogan']),
     'mobile-strict' => ($fields['group_mobile']['rules']['mobile_09'] ?? false) === true && ($fields['group_mobile']['attributes']['maxlength'] ?? 0) === 11,

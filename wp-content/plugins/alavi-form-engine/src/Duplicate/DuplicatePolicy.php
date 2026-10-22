@@ -38,7 +38,7 @@ final class DuplicatePolicy
         );
     }
 
-    /** @return array{enabled:bool,fields:list<string>,behavior:string,message:string} */
+    /** @return array{enabled:bool,fields:list<string>,behavior:string,message:string,resume_draft:bool} */
     public function config(array $form): array
     {
         $raw = (array)($form['settings']['duplicate'] ?? []);
@@ -61,6 +61,7 @@ final class DuplicatePolicy
             'fields'=>$fields,
             'behavior'=>$behavior,
             'message'=>$message,
+            'resume_draft'=>!empty($raw['resume_draft']),
         ];
     }
 

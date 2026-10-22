@@ -44,6 +44,9 @@ for (const declaration of [
 ]) {
   assert.ok(select.declarations.includes(declaration), 'Native select lacks ' + declaration);
 }
-assert.ok(entrypoint.includes('Version: 1.0.28-dev.1'), 'Plugin header version was not updated');
-assert.ok(entrypoint.includes("define('AFE_VERSION', '1.0.28-dev.1')"), 'AFE_VERSION was not updated');
+const headerVersion = /^ \* Version: ([^\s]+)$/m.exec(entrypoint)?.[1];
+const constantVersion = /define\('AFE_VERSION', '([^']+)'\);/.exec(entrypoint)?.[1];
+assert.ok(headerVersion, 'Missing plugin header version');
+assert.ok(constantVersion, 'Missing AFE_VERSION constant');
+assert.equal(headerVersion, constantVersion, 'Plugin header and asset version must agree');
 console.log('PASS frontend CSS cascade, overflow, and version contract');

@@ -24,7 +24,9 @@ Project-specific forms are registered through the afe_register_forms hook. The B
 
 == Changelog ==
 
-= Unreleased / 1.0.28-dev.1 feature-complete pre-acceptance checkpoint =
+* 1.0.28-dev.2: optional per-form duplicate draft continuation with strict ownership checks; enabled by default in Jihadi group registration with registration code and group mobile fingerprint. Stable tag unchanged.
+
+= Unreleased / 1.0.28-dev.2 feature-complete pre-acceptance checkpoint =
 * CSS patch: clipping the in-form honeypot without RTL overflow; overriding enhanced native-select width/height after strong isolation. Development asset version 1.0.28-dev.1 (stable tag unchanged).
 * Moved the project-specific jihadi-group-registration source definition out of the engine and into the Bonyad Alavi child theme via afe_register_forms; the slug remains unchanged so existing submissions and admin overrides continue to resolve.
 * Added registry-driven Action Builder with Persian Event labels, stable action keys, multiple actions, same-event drag/drop ordering, enable/disable controls, conditional logic and execution/error policies.

@@ -63,6 +63,7 @@ final class Form
                 'brand_mark_alt' => '',
                 'captcha' => 'custom',
                 'rate_limit' => 10,
+                'duplicate' => ['resume_draft' => false],
             ], $this->settings),
             'workflow' => $this->workflow ?: [
                 'draft' => 'پیش‌نویس',

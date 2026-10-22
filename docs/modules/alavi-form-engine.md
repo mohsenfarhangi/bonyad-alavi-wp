@@ -3,7 +3,7 @@
 **Status:** active development / pre-acceptance  
 **Path:** `wp-content/plugins/alavi-form-engine/`  
 **Namespace:** `BonyadAlavi\FormEngine`  
-**Development version:** `1.0.28-dev.1`  
+**Development version:** `1.0.28-dev.2`  
 **DB checkpoint:** `1.0.5-dev.2`  
 **Stable baseline/tag documented:** `1.0.27`  
 **PHP:** `>=8.3`
@@ -130,6 +130,9 @@ Features:
 - Persian/Arabic digit normalization
 - whitespace/case normalization
 - drafts included
+- Opt-in `duplicate.resume_draft` permits continuing an existing, unlocked `draft` after the duplicate fingerprint matches, **only with verified ownership** through the existing WordPress account, private edit link, or tracking code. Fingerprint-only knowledge is never an authentication method.
+- The admin Duplicate tab exposes the per-form `duplicate_resume_draft` toggle. Forms require enabled duplicate detection with fingerprint fields, `save_draft`, and `editing_enabled`. When disabled, existing duplicate behavior is unchanged.
+- A verified draft returns an `edit_url` and `resume_draft=true`; anonymous/unauthorized visitors get only a generic recovery hint (no submission ID, draft state, URL, saved data or credential).
 - current edited submission excluded
 - trash excluded
 - behaviors: block/reference/custom/allow+mark
@@ -308,7 +311,7 @@ Live acceptance قبل از production bump:
 13. console/debug.log sanity
 
 تا PASS کامل:
-- Plugin = `1.0.28-dev.1`
+- Plugin = `1.0.28-dev.2`
 - DB = `1.0.5-dev.2`
 - Stable = `1.0.27`
 

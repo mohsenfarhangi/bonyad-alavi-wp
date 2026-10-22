@@ -655,3 +655,13 @@ Current module: [MODULE-AFE](../modules/alavi-form-engine.md).
 - Added runtime output regression and static contract checks; PHP/JS workflow tests, with live Elementor/production acceptance pending.
 
 Current module: [MODULE-HOME-HERO](../modules/theme-home-hero-widget.md).
+
+## 2026-10-22 — Secure optional duplicate draft continuation
+
+- Added per-form `duplicate.resume_draft` setting and admin checkbox; default remains off for other forms.
+- Authorized draft owners can continue the previous unlocked record via verified WordPress login, edit token, or tracking code, with the existing edit URL. No auto-load by fingerprint.
+- Unauthorized users receive generic recovery guidance only: no draft status, submission ID, saved values or private link.
+- Jihadi group registration enables `block` duplicate policy keyed by `registration_code` + `group_mobile`, with draft continuation enabled.
+- Added dedicated security/regression tests and GitHub Actions checks, bumped AFE dev asset version to 1.0.28-dev.2; DB/stable unchanged. Real WordPress acceptance remains open.
+
+Modules: [MODULE-AFE](../modules/alavi-form-engine.md), [MODULE-JIHADI-FORM](../modules/jihadi-group-registration-form.md).
