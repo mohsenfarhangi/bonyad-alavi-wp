@@ -2017,7 +2017,7 @@
     }
     if (!payload?.resume_help) return '';
     const hasTracking = Boolean(form.closest('.afe-shell')?.querySelector('.afe-resume-code'));
-    const hint = 'اگر قبلاً پیش‌نویس ذخیره کرده‌اید، با کد رهگیری یا حساب کاربری خود وارد همان ثبت شوید.';
+    const hint = 'اگر قبلاً پیش‌نویس ذخیره کرده‌اید، از روش بازیابی فعال در فرم (کد رهگیری، لینک اختصاصی یا حساب کاربری) برای ادامه همان ثبت استفاده کنید.';
     const action = hasTracking
       ? '<button type="button" class="afe-result-link afe-draft-resume-jump">ورود با کد رهگیری</button>'
       : '';
