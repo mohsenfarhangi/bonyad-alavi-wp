@@ -22,7 +22,7 @@ $store=new SecretStore();
 $checks=[
     'provider-separate-from-melipayamak'=>str_contains($plugin, 'new FarapayamakProvider($farapayamakSettings)')
         && str_contains($plugin, 'FarapayamakProvider::KEY')
-        && str_contains($plugin, "new MeliPayamakProvider($smsSettings)"),
+        && str_contains($plugin, 'new MeliPayamakProvider($smsSettings)'),
     'provider-supports-free-and-pattern'=>str_contains($plugin, "'فراپیامک — REST JSON'")
         && str_contains($plugin, "['free','pattern']"),
     'private-credentials-decrypted-only-in-runtime'=>str_contains($plugin, "\$farapayamakSettings['api_key'] = \$secretStore->decrypt("),
