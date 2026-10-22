@@ -1,0 +1,53 @@
+name: AFE recovery OTP SMS templates
+
+on:
+  push:
+    branches: [feat/afe-otp-sms-template]
+  pull_request:
+    branches: [main]
+    paths:
+      - 'wp-content/plugins/alavi-form-engine/src/Actions/Sms/SmsOtpMessageFactory.php'
+      - 'wp-content/plugins/alavi-form-engine/src/Security/SmsDraftRecovery.php'
+      - 'wp-content/plugins/alavi-form-engine/src/Admin/FormsPage.php'
+      - 'wp-content/plugins/alavi-form-engine/assets/js/admin.js'
+      - 'wp-content/plugins/alavi-form-engine/tests/sms-otp-message-factory.php'
+      - 'wp-content/plugins/alavi-form-engine/tests/sms-draft-resume-pattern.php'
+      - 'wp-content/plugins/alavi-form-engine/tests/sms-draft-recovery.php'
+      - '.github/workflows/afe-otp-sms-template.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  recovery-message:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          coverage: none
+      - name: Syntax
+        run: |
+          php -l wp-content/plugins/alavi-form-engine/src/Actions/Sms/SmsOtpMessageFactory.php
+          php -l wp-content/plugins/alavi-form-engine/src/Security/SmsDraftRecovery.php
+          php -l wp-content/plugins/alavi-form-engine/src/Admin/FormsPage.php
+          php -l wp-content/plugins/alavi-form-engine/tests/sms-otp-message-factory.php
+          php -l wp-content/plugins/alavi-form-engine/tests/sms-draft-resume-pattern.php
+          node --check wp-content/plugins/alavi-form-engine/assets/js/admin.js
+      - name: OTP templates and pattern integration
+        run: |
+          php wp-content/plugins/alavi-form-engine/tests/sms-otp-message-factory.php
+          php wp-content/plugins/alavi-form-engine/tests/sms-draft-resume-pattern.php
+          php wp-content/plugins/alavi-form-engine/tests/sms-draft-recovery.php
+          php wp-content/plugins/alavi-form-engine/tests/sms-recovery-integration.php
+      - name: SMS providers and form regression
+        run: |
+          php wp-content/plugins/alavi-form-engine/tests/sms-provider-registry.php
+          php wp-content/plugins/alavi-form-engine/tests/farapayamak-provider.php
+          php wp-content/plugins/alavi-form-engine/tests/farapayamak-integration.php
+          php wp-content/plugins/alavi-form-engine/tests/sms-action.php
+          php wp-content/themes/ostadsho-child/tests/jihadi-form-definition.php
+          node wp-content/plugins/alavi-form-engine/tests/duplicate-reference-recovery.js
+          node wp-content/plugins/alavi-form-engine/tests/frontend-css-regression.js

@@ -950,6 +950,20 @@
     });
   };
 
+  const initOtpSmsSettings = () => {
+    document.querySelectorAll('[data-afe-otp-sms-settings]').forEach(root => {
+      const select = qs(root, '[data-afe-otp-sms-mode]');
+      if (!select) return;
+      const sync = () => {
+        root.querySelectorAll('[data-afe-otp-sms-section]').forEach(section => {
+          section.hidden = section.dataset.afeOtpSmsSection !== select.value;
+        });
+      };
+      select.addEventListener('change', sync);
+      sync();
+    });
+  };
+
   const initAdminDatePickers = () => {
     if (!window.afeAdmin?.isJalali || !window.jalaliDatepicker) return;
     try {
@@ -996,6 +1010,7 @@
     initTokenPalettes();
     initActionBuilders();
     initDuplicateSettings();
+    initOtpSmsSettings();
     initFieldOrdering();
     initFieldOverrideSidebar();
     initValidatorOverrides();

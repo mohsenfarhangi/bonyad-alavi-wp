@@ -85,6 +85,10 @@ Key settings:
 - rate limit 20
 - shared storage
 
+## Configurable OTP text and approved SMS Pattern (2026-10-22)
+
+برای فرم جهادی با `group_mobile`، در مدیریت فرم به تب «جلوگیری از تکرار» بروید. پایین تنظیمات بازیابی OTP می‌توان حالت «ارسال متن آزاد» را برای پیام سفارشی `{{code}}` یا حالت «پترن/BodyId» را برای الگوی تأییدشده پنل انتخاب کرد. متغیرهای پترن را **هر کدام در یک سطر** به ترتیب مورد انتظار Provider بنویسید. هنگام تغییر تنظیمات، کد رهگیری و اطلاعات ثبت قبلی همچنان نمایش داده نمی‌شوند. اگر Override مدیریتی وجود دارد باید تنظیمات جدید را در آنجا وارد و ذخیره کرد؛ پیش‌فرض‌های PHP تغییری نکردند.
+
 ## Forgotten tracking code — SMS recovery (2026-10-22)
 
 - Source Definition فرم جهادی، `duplicate.otp_enabled=true`، `otp_mobile_field=group_mobile` و `otp_provider=default` را تعیین می‌کند.
