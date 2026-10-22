@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace BonyadAlavi\FormEngine\Security;
 
-use BonyadAlavi\FormEngine\Actions\Sms\SmsMessage;
+use BonyadAlavi\FormEngine\Actions\Sms\SmsOtpMessageFactory;
 use BonyadAlavi\FormEngine\Actions\Sms\SmsProviderRegistry;
 use BonyadAlavi\FormEngine\Actions\Sms\SmsDebugLog;
 use BonyadAlavi\FormEngine\Duplicate\DuplicatePolicy;
@@ -95,13 +95,12 @@ final class SmsDraftRecovery
         if ($rowId > 0 && !$blocked) {
             $providerKey = $this->sms->effectiveKey(sanitize_key((string)($config['otp_provider'] ?? 'default')));
             try {
-                $provider = $this->sms->resolve($providerKey, 'free');
-                // Only the saved mobile is used. Never send a caller-controlled
-                // message or echo any provider response to the browser.
-                $result = $provider->send(new SmsMessage(
-                    $stored, 'free',
-                    'کد تایید بازیابی فرم: '.$code."\n".'اعتبار: ۵ دقیقه. این کد را در اختیار دیگران قرار ندهید.'
-                ));
+                // Validate OTP template before network access and never
+                // interpolate applicant-controlled field values.
+                $message = SmsOtpMessageFactory::make($config, $stored, $code);
+                $provider = $this->sms->resolve($providerKey, $message->mode);
+                // Both free-text and pattern send ONLY to persisted mobile.
+                $result = $provider->send($message);
                 SmsDebugLog::record('otp', $providerKey, $result);
                 if (empty($result['success'])) {
                     // A failed delivery must not leave a usable challenge.

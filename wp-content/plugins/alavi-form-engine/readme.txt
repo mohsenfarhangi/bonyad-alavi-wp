@@ -24,6 +24,8 @@ Project-specific forms are registered through the afe_register_forms hook. The B
 
 == Changelog ==
 
+* 1.0.28-dev.7: configurable per-form recovery OTP message body with {{code}} placeholder, optional {{minutes}}, approved Pattern/BodyId and ordered arguments; validation and backwards-compatible free mode; no DB/stable change.
+
 * 1.0.28-dev.6: six-tab global settings with sticky save and preserved active tab; optional bounded admin-only SMS send diagnostics for test/Action/OTP, sanitized Farapayamak numeric status codes and history clear/refresh. Existing SMS test rate limit unchanged, DB/stable unchanged.
 
 * 1.0.28-dev.5: opt-in per-form SMS OTP recovery for existing unlocked drafts, short-lived secure grants and throttled verification; authenticated SMS provider test-send panel. Jihadi source definition opts in. No DB or stable tag changes.
@@ -34,7 +36,7 @@ Project-specific forms are registered through the afe_register_forms hook. The B
 
 * 1.0.28-dev.2: optional per-form duplicate draft continuation with strict ownership checks; enabled by default in Jihadi group registration with registration code and group mobile fingerprint. Stable tag unchanged.
 
-= Unreleased / 1.0.28-dev.6 feature-complete pre-acceptance checkpoint =
+= Unreleased / 1.0.28-dev.7 feature-complete pre-acceptance checkpoint =
 * CSS patch: clipping the in-form honeypot without RTL overflow; overriding enhanced native-select width/height after strong isolation. Development asset version 1.0.28-dev.1 (stable tag unchanged).
 * Moved the project-specific jihadi-group-registration source definition out of the engine and into the Bonyad Alavi child theme via afe_register_forms; the slug remains unchanged so existing submissions and admin overrides continue to resolve.
 * Added registry-driven Action Builder with Persian Event labels, stable action keys, multiple actions, same-event drag/drop ordering, enable/disable controls, conditional logic and execution/error policies.

@@ -14,6 +14,7 @@ use BonyadAlavi\FormEngine\Events\EventRegistry;
 use BonyadAlavi\FormEngine\Actions\ActionRegistry;
 use BonyadAlavi\FormEngine\Actions\ActionDefinition;
 use BonyadAlavi\FormEngine\Actions\ActionConfigSanitizer;
+use BonyadAlavi\FormEngine\Actions\Sms\SmsOtpMessageFactory;
 use BonyadAlavi\FormEngine\Actions\Tokens\TokenRegistry;
 use BonyadAlavi\FormEngine\Duplicate\DuplicatePolicy;
 use BonyadAlavi\FormEngine\Validation\ValidatorRegistry;
@@ -318,6 +319,20 @@ final class FormsPage
         foreach(['default'=>'پیش‌فرض سراسری','farapayamak'=>'فراپیامک','melipayamak'=>'ملی پیامک','persian_woocommerce_sms'=>'Persian WooCommerce SMS'] as $key=>$label) echo '<option value="'.esc_attr($key).'" '.selected((string)($otp['otp_provider']??'default'),$key,false).'>'.esc_html($label).'</option>';
         echo '</select></label>';
         echo '<p class="description afe-span-2">کد فقط به شماره ذخیره‌شده در پیش‌نویس ارسال می‌شود؛ رمز یک‌بارمصرف ۵ دقیقه و مجوز ادامه فرم یک ساعت اعتبار دارد. ارسال آزمایشی پنل را در تنظیمات سراسری پیامک انجام دهید. ثبت‌های نهایی یا قفل‌شده بازیابی نمی‌شوند.</p>';
+        $otpMode=(string)($otp['otp_sms_mode']??'free');
+        if(!in_array($otpMode,['free','pattern'],true)) $otpMode='free';
+        $otpText=(string)($otp['otp_sms_text']??SmsOtpMessageFactory::DEFAULT_TEXT);
+        $otpPatternValues=$otp['otp_sms_pattern_values']??['{{code}}'];
+        if(!is_array($otpPatternValues)) $otpPatternValues=['{{code}}'];
+        echo '<div class="afe-span-2 afe-admin-callout" data-afe-otp-sms-settings><strong>محتوای پیامک تأیید بازیابی فرم</strong><p class="description">مستقل از SMS Actionهای فرم است. پس از انتخاب حالت، متن یا متغیرهای پترن را تنظیم کنید. کد تأیید فقط در سمت سرور جایگزین می‌شود.</p>';
+        echo '<label>روش ارسال پیامک تأیید<select name="duplicate_otp_sms_mode" data-afe-otp-sms-mode>';
+        foreach(['free'=>'ارسال متن آزاد','pattern'=>'ارسال خدماتی با پترن / BodyId'] as $mode=>$label) echo '<option value="'.esc_attr($mode).'" '.selected($otpMode,$mode,false).'>'.esc_html($label).'</option>';
+        echo '</select></label>';
+        echo '<div data-afe-otp-sms-section="free"><label>متن پیامک بازیابی<textarea name="duplicate_otp_sms_text" rows="4" dir="rtl" maxlength="2800" class="large-text">'.esc_textarea($otpText).'</textarea></label><p class="description">از <code>{{code}}</code> برای جایگذاری کد شش‌رقمی استفاده کنید. متغیر <code>{{minutes}}</code> معادل ۵ است. وجود دقیقاً یک <code>{{code}}</code> الزامی است.</p></div>';
+        echo '<div data-afe-otp-sms-section="pattern"><label>شناسه پترن تأییدشده (BodyId)<input name="duplicate_otp_sms_pattern_code" type="text" inputmode="numeric" dir="ltr" class="regular-text" value="'.esc_attr((string)($otp['otp_sms_pattern_code']??'')).'" placeholder="12345"></label>';
+        echo '<label>متغیرهای پترن به ترتیب (هر سطر یک مقدار)<textarea name="duplicate_otp_sms_pattern_values" rows="4" dir="ltr" class="large-text" placeholder="{{code}}">'.esc_textarea(implode("\n",$otpPatternValues)).'</textarea></label>';
+        echo '<p class="description">مثال: اگر پترن فقط کد تأیید دارد، یک سطر <code>{{code}}</code> وارد کنید. اگر پترن چند متغیر دارد، مقادیر را به ترتیب آن‌ها در سطرهای جداگانه بنویسید. حداکثر ۱۰ سطر و دقیقاً یک <code>{{code}}</code> الزامی است. شناسه پترن باید قبلاً در پنل پیامک تأیید شده باشد.</p></div>';
+        echo '</div>';
         echo '</div>';
         echo '<div class="afe-admin-callout"><strong>بررسی زنده:</strong> به‌محض اینکه همه فیلدهای Fingerprint در فرم تکمیل شوند، بدون انتظار برای ثبت نهایی بررسی تکراری بودن انجام می‌شود و پیام مناسب به کاربر نمایش داده می‌شود. بررسی نهایی سمت سرور در Submit همچنان برقرار است.</div>';
         echo '<div class="afe-admin-callout">حالت «اجازه ثبت» رکورد جدید را با <code>is_duplicate=1</code> و مرجع Submission اصلی ذخیره می‌کند. این علامت‌گذاری مستقل از Workflow است.</div>';
@@ -1002,15 +1017,36 @@ final class FormsPage
         if(!in_array($otpField,$otpPhoneFields,true)) $otpField='';
         $otpProvider=sanitize_key((string)wp_unslash($_POST['duplicate_otp_provider']??'default'));
         if(!in_array($otpProvider,['default','farapayamak','melipayamak','persian_woocommerce_sms'],true)) $otpProvider='default';
+        $otpMode=sanitize_key((string)wp_unslash($_POST['duplicate_otp_sms_mode']??'free'));
+        if(!in_array($otpMode,['free','pattern'],true)) $otpMode='free';
+        $otpText=sanitize_textarea_field(wp_unslash((string)($_POST['duplicate_otp_sms_text']??SmsOtpMessageFactory::DEFAULT_TEXT)));
+        $otpPatternCode=sanitize_text_field(wp_unslash((string)($_POST['duplicate_otp_sms_pattern_code']??'')));
+        $otpPatternLines=preg_split('/\r\n|\r|\n/',(string)wp_unslash($_POST['duplicate_otp_sms_pattern_values']??'{{code}}')) ?: [];
+        $otpPatternValues=array_map('sanitize_text_field',array_map('trim',$otpPatternLines));
+        $otpEnabled=!empty($_POST['duplicate_otp_enabled']) && $otpField!=='' && !empty($settings['editing_enabled']) && !empty($codeForm['settings']['save_draft']);
+        $otpMessageSettings=[
+            'otp_sms_mode'=>$otpMode,
+            'otp_sms_text'=>$otpText,
+            'otp_sms_pattern_code'=>$otpPatternCode,
+            'otp_sms_pattern_values'=>$otpPatternValues,
+        ];
+        if($otpEnabled){
+            try {
+                SmsOtpMessageFactory::make($otpMessageSettings,'09120000000','123456');
+            } catch(\InvalidArgumentException $error) {
+                wp_die(esc_html($error->getMessage()),'خطا در تنظیمات پیامک بازیابی',['back_link'=>true]);
+            }
+        }
         $settings['duplicate']=[
             'enabled'=>!empty($_POST['duplicate_enabled']) && $duplicateFields!==[],
             'fields'=>$duplicateFields,
             'behavior'=>$duplicateBehavior,
             'message'=>sanitize_textarea_field(wp_unslash($_POST['duplicate_message']??'')),
             'resume_draft'=>!empty($_POST['duplicate_resume_draft']),
-            'otp_enabled'=>!empty($_POST['duplicate_otp_enabled']) && $otpField!=='' && !empty($settings['editing_enabled']) && !empty($codeForm['settings']['save_draft']),
+            'otp_enabled'=>$otpEnabled,
             'otp_mobile_field'=>$otpField,
             'otp_provider'=>$otpProvider,
+            ...$otpMessageSettings,
         ];
         if(!empty($_POST['actions_override_enabled'])){
             $actionForm=$codeForm;

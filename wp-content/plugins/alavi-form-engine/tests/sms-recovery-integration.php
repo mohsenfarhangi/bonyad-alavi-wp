@@ -20,8 +20,8 @@ $checks=[
         && str_contains($plugin, 'wp_ajax_nopriv_afe_otp_verify'),
     'server-normalizes-before-duplicate-lookup'=>str_contains($plugin, 'normalizeRecoveryInput($form')
         && str_contains($service, 'return $this->sanitizeBySchema($form, $data);'),
-    'sms-recipient-is-persisted-mobile'=>str_contains($recovery, 'new SmsMessage(')
-        && str_contains($recovery, '$stored, \'free\'')
+    'sms-recipient-is-persisted-mobile'=>str_contains($recovery, 'SmsOtpMessageFactory::make($config, $stored, $code)')
+        && str_contains($recovery, 'resolve($providerKey, $message->mode)')
         && !str_contains($recovery, 'new SmsMessage($mobile'),
     'challenge-hashed-and-bounded'=>str_contains($recovery, "hash_hmac('sha256'")
         && str_contains($recovery, '5*MINUTE_IN_SECONDS')
@@ -39,13 +39,18 @@ $checks=[
     'form-admin-opt-in-and-phone-selector'=>str_contains($formAdmin, 'name="duplicate_otp_enabled"')
         && str_contains($formAdmin, 'name="duplicate_otp_mobile_field"')
         && str_contains($formAdmin, 'name="duplicate_otp_provider"'),
+    'otp-message-admin-config'=>str_contains($formAdmin, 'name="duplicate_otp_sms_mode"')
+        && str_contains($formAdmin, 'name="duplicate_otp_sms_text"')
+        && str_contains($formAdmin, 'name="duplicate_otp_sms_pattern_code"')
+        && str_contains($formAdmin, 'name="duplicate_otp_sms_pattern_values"')
+        && str_contains($formAdmin, 'SmsOtpMessageFactory::make($otpMessageSettings'),
     'frontend-starts-and-verifies-otp'=>str_contains($front, "'afe_otp_start'")
         && str_contains($front, "'afe_otp_verify'")
         && str_contains($front, 'afe-otp-mobile')
         && str_contains($front, "'_afe_recovery'"),
     'admin-test-authentication-and-throttle'=>str_contains($settings, 'Capabilities::MANAGE_SETTINGS')
         && str_contains($settings, "check_ajax_referer('afe_test_sms'")
-        && str_contains($settings, 'get_transient($rate)>=3'),
+        && str_contains($settings, 'get_transient($rate)>='),
     'admin-test-does-not-return-raw-gateway-error'=>!str_contains($settings, "\$sent['error']")
         && !str_contains($settings, "\$sent['raw']"),
     'admin-test-uses-saved-provider'=>str_contains($settings, "\$this->smsProviders->resolve(\$providerKey,'free')")

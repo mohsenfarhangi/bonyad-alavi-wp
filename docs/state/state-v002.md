@@ -694,3 +694,10 @@ Modules: [MODULE-AFE](../modules/alavi-form-engine.md), [MODULE-JIHADI-FORM](../
 - Added opt-in `afe_settings.sms.debug_enabled` and a bounded 40-event diagnostic ring for SMS Action, OTP and test sends. Admin-only AJAX refresh/clear guarded by capability and nonce; no recipient, message content, OTP, credentials, raw response or exception body stored.
 - Farapayamak returns only limited numeric status metadata for debugging. Inline SMS test shows sanitized summaries. Rate limit for test messages remains 3 per 10 minutes.
 - Added regression tests for logging privacy, tabs and admin security. Development asset version 1.0.28-dev.6; stable and DB unchanged. Real WordPress/admin and live provider acceptance pending.
+
+## 2026-10-22 — Configurable draft recovery SMS template and Pattern/BodyId
+
+- Introduced per-form `duplicate.otp_sms_mode` (`free`/`pattern`), `otp_sms_text`, `otp_sms_pattern_code`, and ordered `otp_sms_pattern_values` under the existing duplicate prevention settings.
+- `SmsOtpMessageFactory` requires exactly one server-owned `{{code}}` in body or pattern arguments; optional `{{minutes}}` renders to five. Invalid mode, missing code, unknown placeholders, bad BodyId or invalid arguments fail closed. Existing forms without these keys retain the previous free-text SMS.
+- Pattern resolution is provider-mode aware. Only the stored draft mobile is used; OTP verify and rate limits unchanged. Per-form admin UI exposes the options; no changes to global SMS Actions.
+- Added unit and draft-flow integration tests; version 1.0.28-dev.7, no DB migration or stable promotion. Live Pattern/BodyId acceptance remains pending.

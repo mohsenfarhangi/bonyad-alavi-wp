@@ -3,7 +3,7 @@
 **Status:** active development / pre-acceptance  
 **Path:** `wp-content/plugins/alavi-form-engine/`  
 **Namespace:** `BonyadAlavi\FormEngine`  
-**Development version:** `1.0.28-dev.6`  
+**Development version:** `1.0.28-dev.7`  
 **DB checkpoint:** `1.0.5-dev.2`  
 **Stable baseline/tag documented:** `1.0.27`  
 **PHP:** `>=8.3`
@@ -182,6 +182,15 @@ Security:
 - در «تست اتصال پنل پیامک» نتیجهٔ خلاصهٔ فنی و شناسه پیام به‌صورت فوری در همان بخش نمایش داده می‌شود، حتی اگر ثبت تاریخچه خاموش باشد. سابقه SMS Action و OTP فقط پس از روشن کردن Debug جمع می‌شود. پاک‌کردن تاریخچه روی تنظیمات حساب/پیامک یا Action logهای قبلی اثر ندارد.
 - مسیر کد: `src/Actions/Sms/SmsDebugLog.php`، `src/Admin/SettingsPage.php`، `src/Actions/Sms/SmsAction.php`، `src/Security/SmsDraftRecovery.php`، `src/Actions/Sms/FarapayamakProvider.php`، `assets/js/admin-sms-test.js`، `assets/css/admin.css`. تست‌ها: `sms-debug-log.php`، `admin-sms-debug-settings.php`، `admin-settings-tabs.js`.
 - محدودیت تست ارسال واقعی **۳ بار در ۱۰ دقیقه** تغییر نکرده است. موفقیت پنل به معنی تحویل به گوشی نیست. نسخه `1.0.28-dev.6` فقط توسعه‌ای است؛ DB/stable بدون تغییر، تست واقعی WordPress/admin و پنل پیامک همچنان pending هستند.
+
+## Configurable OTP recovery SMS: free text or Pattern/BodyId (2026-10-22)
+
+- تنظیمات اختصاصی پیامک بازیابی در **تب «جلوگیری از تکرار» همان فرم**: `duplicate.otp_sms_mode` (`free` پیش‌فرض یا `pattern`)، `otp_sms_text`، `otp_sms_pattern_code` (BodyId) و `otp_sms_pattern_values` (فهرست مرتب متغیرهای پترن). تنظیمات صرفاً برای OTP بازیابی هستند و روی SMS Actionهای عمومی اثر ندارند.
+- در حالت متن آزاد، قالب قابل تنظیم است. `{{code}}` رمز یک‌بارمصرف ۶رقمی سرور را قرار می‌دهد و `{{minutes}}` معادل ۵ دقیقه است. پترن هم همین Placeholderها را در **هر سطر یک مقدار، به ترتیب متغیرهای متن تأییدشده در پنل** می‌پذیرد. مثلاً `['{{code}}']` برای یک متغیر؛ در فراپیامک به `bodyId` و متن values جداشده با semicolon تبدیل می‌شود، در ملی‌پیامک console به args مرتب.
+- فقط `{{code}}` و `{{minutes}}` مجازند. `{{code}}` باید **دقیقاً یک بار** در قالب متن آزاد یا تمام متغیرهای پترن ظاهر شود، وگرنه `SmsOtpMessageFactory` جلوی ارسال را می‌گیرد. BodyId باید عدد مثبت بدون صفر ابتدایی باشد؛ حداکثر ۱۰ متغیر. Admin هنگام فعال‌بودن OTP تنظیمات را در سمت PHP اعتبارسنجی می‌کند و در صورت پیکربندی نامعتبر، ذخیره رد می‌شود.
+- سازگاری: فرم‌هایی که تنظیمات جدید را ندارند همچنان از **متن پیش‌فرض قدیمی** با Provider فعلی و حالت `free` استفاده می‌کنند؛ Source Definition فرم جهادی بدون نیاز به تغییر باقی می‌ماند. Provider/Mode با `SmsProviderRegistry::resolve($provider,$mode)` در زمان ارسال بررسی می‌شوند؛ Provider فاقد پشتیبانی Pattern نمی‌تواند به‌طور ناامن به Free fallback کند. بعد از ارسال موفق، سازوکار challenge/verify و grant پیشین عیناً برقرار است.
+- UI حالت‌ها در مدیریت قابل تعویض است، بدون پاک‌کردن مقدار حالت دیگر. برای استفاده از پترن واقعی، ابتدا باید الگو/BodyId در پنل انتخابی تأیید شده باشد. پیامک تست سراسری همچنان تست ارسال Free است، نه تست پترن OTP.
+- آزمون‌ها: `tests/sms-otp-message-factory.php`، `tests/sms-draft-resume-pattern.php`، `tests/sms-draft-recovery.php` و `tests/sms-recovery-integration.php`. نسخه توسعه `1.0.28-dev.7` فقط cache-busting، DB/stable تغییری ندارد و آزمایش ارسال پترن واقعی روی سایت نیاز است.
 
 ## SMS OTP recovery for forgotten tracking codes (2026-10-22)
 
