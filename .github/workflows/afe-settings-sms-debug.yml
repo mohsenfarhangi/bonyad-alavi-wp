@@ -1,0 +1,58 @@
+name: AFE settings tabs and SMS diagnostics
+
+on:
+  push:
+    branches: [feat/afe-settings-tabs-sms-debug]
+  pull_request:
+    branches: [main]
+    paths:
+      - 'wp-content/plugins/alavi-form-engine/src/Admin/SettingsPage.php'
+      - 'wp-content/plugins/alavi-form-engine/src/Actions/Sms/**'
+      - 'wp-content/plugins/alavi-form-engine/src/Security/SmsDraftRecovery.php'
+      - 'wp-content/plugins/alavi-form-engine/src/Core/Plugin.php'
+      - 'wp-content/plugins/alavi-form-engine/assets/js/admin-sms-test.js'
+      - 'wp-content/plugins/alavi-form-engine/assets/css/admin.css'
+      - 'wp-content/plugins/alavi-form-engine/tests/admin-*'
+      - 'wp-content/plugins/alavi-form-engine/tests/sms-*'
+      - 'wp-content/plugins/alavi-form-engine/alavi-form-engine.php'
+      - '.github/workflows/afe-settings-sms-debug.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  admin-settings-sms-debug:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          coverage: none
+      - name: PHP syntax
+        run: |
+          php -l wp-content/plugins/alavi-form-engine/src/Actions/Sms/SmsDebugLog.php
+          php -l wp-content/plugins/alavi-form-engine/src/Actions/Sms/FarapayamakProvider.php
+          php -l wp-content/plugins/alavi-form-engine/src/Actions/Sms/SmsAction.php
+          php -l wp-content/plugins/alavi-form-engine/src/Security/SmsDraftRecovery.php
+          php -l wp-content/plugins/alavi-form-engine/src/Admin/SettingsPage.php
+          php -l wp-content/plugins/alavi-form-engine/src/Core/Plugin.php
+          php -l wp-content/plugins/alavi-form-engine/tests/sms-debug-log.php
+          php -l wp-content/plugins/alavi-form-engine/tests/admin-sms-debug-settings.php
+      - name: Debug privacy and settings contracts
+        run: |
+          php wp-content/plugins/alavi-form-engine/tests/sms-debug-log.php
+          php wp-content/plugins/alavi-form-engine/tests/admin-sms-debug-settings.php
+          node --check wp-content/plugins/alavi-form-engine/assets/js/admin-sms-test.js
+          node wp-content/plugins/alavi-form-engine/tests/admin-settings-tabs.js
+      - name: SMS provider and action regression
+        run: |
+          php wp-content/plugins/alavi-form-engine/tests/farapayamak-provider.php
+          php wp-content/plugins/alavi-form-engine/tests/farapayamak-integration.php
+          php wp-content/plugins/alavi-form-engine/tests/sms-provider-registry.php
+          php wp-content/plugins/alavi-form-engine/tests/sms-action.php
+          php wp-content/plugins/alavi-form-engine/tests/sms-draft-recovery.php
+          php wp-content/plugins/alavi-form-engine/tests/sms-recovery-integration.php
+      - name: Existing frontend CSS version regression
+        run: node wp-content/plugins/alavi-form-engine/tests/frontend-css-regression.js

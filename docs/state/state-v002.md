@@ -687,3 +687,10 @@ Modules: [MODULE-AFE](../modules/alavi-form-engine.md), [MODULE-JIHADI-FORM](../
 - Opt-in per-form flags `duplicate.otp_enabled`, `otp_mobile_field`, `otp_provider`; Jihadi group registration opts in for stored `group_mobile`.
 - Admin-only SMS test-send UI and endpoint (saved provider, real message, optional charge, nonce/capability, throttling and redacted error).
 - Development version `1.0.28-dev.5`, stable and DB untouched. Live SMS, WordPress runtime and end-user UX acceptance pending.
+
+## 2026-10-22 — Global settings tabs and safe SMS debug log
+
+- Changed AFE global settings page to 6 accessible tabs with a single POST form, keyboard navigation and sticky Save. All fields persist across tab switches and current tab is restored after a successful save.
+- Added opt-in `afe_settings.sms.debug_enabled` and a bounded 40-event diagnostic ring for SMS Action, OTP and test sends. Admin-only AJAX refresh/clear guarded by capability and nonce; no recipient, message content, OTP, credentials, raw response or exception body stored.
+- Farapayamak returns only limited numeric status metadata for debugging. Inline SMS test shows sanitized summaries. Rate limit for test messages remains 3 per 10 minutes.
+- Added regression tests for logging privacy, tabs and admin security. Development asset version 1.0.28-dev.6; stable and DB unchanged. Real WordPress/admin and live provider acceptance pending.

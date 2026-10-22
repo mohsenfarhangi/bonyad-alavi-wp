@@ -82,23 +82,23 @@ final class FarapayamakProvider implements SmsProviderInterface
 
         if (is_wp_error($response)) {
             // Transport errors may include URLs or echoed request details.
-            return $this->failure('ارتباط با سرویس فراپیامک برقرار نشد.');
+            return $this->failure('ارتباط با سرویس فراپیامک برقرار نشد.', ['stage'=>'transport']);
         }
 
         $http = (int)wp_remote_retrieve_response_code($response);
         if ($http < 200 || $http >= 300) {
-            return $this->failure('سرویس فراپیامک پاسخ HTTP ناموفق داد (' . $http . ').');
+            return $this->failure('سرویس فراپیامک پاسخ HTTP ناموفق داد (' . $http . ').', ['http_status'=>$http]);
         }
 
         $decoded = json_decode((string)wp_remote_retrieve_body($response), true);
         if (!is_array($decoded) || !array_key_exists('RetStatus', $decoded) || !array_key_exists('Value', $decoded)) {
-            return $this->failure('ساختار پاسخ فراپیامک معتبر نیست.');
+            return $this->failure('ساختار پاسخ فراپیامک معتبر نیست.', ['http_status'=>$http]);
         }
 
         $status = $decoded['RetStatus'];
         $value = $decoded['Value'];
         if (!is_numeric($status) || !is_scalar($value)) {
-            return $this->failure('ساختار وضعیت پاسخ فراپیامک معتبر نیست.');
+            return $this->failure('ساختار وضعیت پاسخ فراپیامک معتبر نیست.', ['http_status'=>$http]);
         }
         $code = trim((string)$value);
         $knownErrors = [
@@ -127,18 +127,23 @@ final class FarapayamakProvider implements SmsProviderInterface
         if ((int)$status !== 1 || $code === '' || isset($knownErrors[$code])
             || !preg_match('/^[0-9]+(?:[,;][0-9]+)*$/D', $code)) {
             $reason = $knownErrors[$code] ?? 'پاسخ سرویس نشان‌دهنده ارسال موفق نیست.';
-            return $this->failure('فراپیامک: ' . $reason . ' (RetStatus ' . (int)$status . ').');
+            return $this->failure('فراپیامک: ' . $reason . ' (RetStatus ' . (int)$status . ').', [
+                'http_status'=>$http, 'ret_status'=>(int)$status,
+                'value_code'=>preg_match('/^-?[0-9]{1,4}$/D',$code) ? (int)$code : null,
+            ]);
         }
 
         // Value=1 is a documented generic success code, not a receipt ID.
+        $debug=['http_status'=>$http, 'ret_status'=>(int)$status];
         return $code === '1'
-            ? ['success'=>true]
-            : ['success'=>true, 'message_id'=>$code];
+            ? ['success'=>true, 'debug'=>$debug]
+            : ['success'=>true, 'message_id'=>$code, 'debug'=>$debug];
     }
 
     /** @return array{success:false,error:string} */
-    private function failure(string $reason): array
+    private function failure(string $reason, array $debug = []): array
     {
-        return ['success'=>false, 'error'=>$reason];
+        // This diagnostic metadata is built only from numeric status codes.
+        return ['success'=>false, 'error'=>$reason, 'debug'=>$debug];
     }
 }

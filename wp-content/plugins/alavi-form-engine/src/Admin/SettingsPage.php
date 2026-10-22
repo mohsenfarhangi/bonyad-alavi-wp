@@ -11,6 +11,7 @@ use BonyadAlavi\FormEngine\Style\StyleIsolationManager;
 use BonyadAlavi\FormEngine\Actions\Sms\SmsProviderRegistry;
 use BonyadAlavi\FormEngine\Actions\Sms\SmsSettings;
 use BonyadAlavi\FormEngine\Actions\Sms\SmsMessage;
+use BonyadAlavi\FormEngine\Actions\Sms\SmsDebugLog;
 use BonyadAlavi\FormEngine\Security\SmsDraftRecovery;
 
 final class SettingsPage
@@ -30,12 +31,23 @@ final class SettingsPage
         wp_enqueue_script('afe-admin-sms-test', AFE_URL.'assets/js/admin-sms-test.js', [], AFE_VERSION, true);
         wp_add_inline_script('afe-admin-sms-test', 'window.afeSmsTest='.wp_json_encode([
             'url'=>admin_url('admin-ajax.php'), 'nonce'=>wp_create_nonce('afe_test_sms'),
+            'debugNonce'=>wp_create_nonce('afe_sms_debug'),
         ]).';', 'before');
         $settings=get_option('afe_settings',[]);
         $roles=wp_roles()->roles;
         echo '<div class="wrap afe-admin-wrap"><h1>تنظیمات و مدیریت دسترسی</h1>';
         if(!empty($_GET['updated'])) echo '<div class="notice notice-success is-dismissible"><p>تنظیمات ذخیره شد.</p></div>';
-        echo '<form method="post">'; wp_nonce_field('afe_save_settings','afe_settings_nonce'); echo '<input type="hidden" name="afe_save_settings" value="1">';
+        echo '<form method="post" data-afe-settings-form>'; wp_nonce_field('afe_save_settings','afe_settings_nonce'); echo '<input type="hidden" name="afe_save_settings" value="1">';
+        $activeTab=sanitize_key((string)($_GET['tab']??'general'));
+        $tabs=['general'=>'عمومی و API','sms'=>'پنل‌های پیامک','debug'=>'دیباگ پیامک','style'=>'استایل فرم','roles'=>'دسترسی نقش‌ها','forms'=>'دسترسی فرم‌ها'];
+        if(!isset($tabs[$activeTab])) $activeTab='general';
+        echo '<input type="hidden" name="afe_settings_tab" value="'.esc_attr($activeTab).'" data-afe-current-tab>';
+        echo '<nav class="afe-settings-tabs" role="tablist" aria-label="بخش‌های تنظیمات فرم‌ساز" data-afe-settings-tabs>';
+        foreach($tabs as $key=>$label){
+            echo '<button type="button" role="tab" data-afe-settings-tab="'.esc_attr($key).'" id="afe-settings-tab-'.esc_attr($key).'" aria-controls="afe-settings-panel-'.esc_attr($key).'" aria-selected="'.($activeTab===$key?'true':'false').'" class="'.($activeTab===$key?'is-active':'').'">'.esc_html($label).'</button>';
+        }
+        echo '</nav><p class="description afe-settings-guidance">تنظیمات همه تب‌ها با دکمه ثابت پایین صفحه ذخیره می‌شوند. هنگام جابه‌جایی تب‌ها اطلاعات واردشده حفظ می‌شود.</p>';
+        echo '<section class="afe-settings-panel" id="afe-settings-panel-general" role="tabpanel" aria-labelledby="afe-settings-tab-general" data-afe-settings-panel="general">';
 
         echo '<div class="afe-admin-card"><h2>API و کپچا</h2><div class="afe-admin-grid">';
         echo '<label><input type="checkbox" name="api_enabled" value="1" '.checked(!empty($settings['api_enabled']),true,false).'> REST API مدیریت فعال باشد</label>';
@@ -44,6 +56,7 @@ final class SettingsPage
         echo '<label>Google reCAPTCHA Secret Key<input class="regular-text" type="password" autocomplete="new-password" value="" disabled><span class="description">برای جلوگیری از وابستگی مرورگر به سرویس خارجی استفاده نمی‌شود.</span></label>';
         echo '<label class="afe-span-2"><input type="checkbox" name="delete_data_on_uninstall" value="1" '.checked(!empty($settings['delete_data_on_uninstall']),true,false).'> هنگام Uninstall تمام داده‌ها و جداول افزونه حذف شوند <strong>(غیرقابل بازگشت)</strong></label>';
         echo '</div></div>';
+        echo '</section><section class="afe-settings-panel" id="afe-settings-panel-sms" role="tabpanel" aria-labelledby="afe-settings-tab-sms" data-afe-settings-panel="sms">';
 
         $sms=SmsSettings::section($settings);
         $smsEnabled=SmsSettings::enabled($settings);
@@ -109,8 +122,18 @@ final class SettingsPage
             echo '<option value="'.esc_attr((string)$providerKey).'" '.selected($smsDefault,(string)$providerKey,false).'>'.esc_html((string)$providerLabel).'</option>';
         }
         echo '</select></label><label>شماره همراه مقصد<input type="tel" inputmode="numeric" dir="ltr" autocomplete="off" data-afe-sms-mobile placeholder="09123456789"></label></div>';
-        echo '<button type="button" class="button button-secondary" data-afe-sms-test-button>ارسال پیامک آزمایشی</button><p role="status" aria-live="polite" data-afe-sms-test-result></p></div>';
+        echo '<button type="button" class="button button-secondary" data-afe-sms-test-button>ارسال پیامک آزمایشی</button><p role="status" aria-live="polite" data-afe-sms-test-result></p><pre class="afe-settings-test-diagnostics" data-afe-sms-test-diagnostics hidden></pre></div>';
         echo '</div></div>';
+        echo '</section><section class="afe-settings-panel" id="afe-settings-panel-debug" role="tabpanel" aria-labelledby="afe-settings-tab-debug" data-afe-settings-panel="debug">';
+        echo '<div class="afe-admin-card"><h2>دیباگ ارسال پیامک</h2><p class="description">گزارش فقط پس از فعال‌سازی و ذخیره تنظیمات، برای ارسال آزمایشی، SMS Action و بازیابی پیامکی ثبت می‌شود. حداکثر ۴۰ نتیجه آخر نگهداری می‌شود.</p>';
+        echo '<label class="afe-settings-debug-enable"><input type="checkbox" name="sms_debug_enabled" value="1" '.checked(!empty($sms['debug_enabled']),true,false).'> ثبت گزارش دیباگ پیامک فعال باشد</label>';
+        echo '<p class="description">شماره گیرنده، متن SMS، کد یک‌بارمصرف، رمز عبور، کلید API و پاسخ خام پنل ذخیره نمی‌شوند. گزارش‌ها فقط برای مدیر تنظیمات قابل مشاهده‌اند.</p>';
+        echo '<div class="afe-settings-debug-actions"><button type="button" class="button button-secondary" data-afe-sms-debug-refresh>بازخوانی گزارش‌ها</button> <button type="button" class="button button-secondary" data-afe-sms-debug-clear>پاک‌کردن گزارش‌ها</button><span role="status" aria-live="polite" data-afe-sms-debug-message></span></div>';
+        echo '<div class="afe-table-scroll"><table class="widefat striped afe-sms-debug-table"><thead><tr><th>زمان (UTC)</th><th>مسیر ارسال</th><th>Provider</th><th>نتیجه</th><th>مرحله</th><th>HTTP</th><th>RetStatus</th><th>Value خطا</th><th>شناسه پیام</th></tr></thead><tbody data-afe-sms-debug-rows>';
+        foreach(SmsDebugLog::all() as $entry) echo $this->debugRow($entry);
+        echo '</tbody></table></div>';
+        echo '<p class="description">موفقیت API صرفاً پذیرش درخواست در پنل است؛ تحویل پیامک به گوشی باید جداگانه بررسی شود.</p></div>';
+        echo '</section><section class="afe-settings-panel" id="afe-settings-panel-style" role="tabpanel" aria-labelledby="afe-settings-tab-style" data-afe-settings-panel="style">';
 
         echo '<div class="afe-admin-card"><h2>ایزوله‌سازی استایل فرم</h2><div class="afe-admin-grid">';
         echo '<label class="afe-span-2">حالت ایزوله‌سازی<select name="style_isolation">';
@@ -121,6 +144,7 @@ final class SettingsPage
         echo '</select><span class="description">حالت «قوی» برای سایت‌هایی که CSS قالب روی input، label، button، select یا ساختار فرم اثر می‌گذارد پیشنهاد می‌شود. این تنظیم فقط داخل فرم‌های AFE اعمال می‌شود.</span></label>';
         echo '<div class="afe-span-2 afe-admin-callout"><strong>ترتیب استایل:</strong> CSS قالب → Reset ایزوله AFE → Design Tokenها → Componentهای AFE → CSS سفارشی هر فرم</div>';
         echo '</div></div>';
+        echo '</section><section class="afe-settings-panel" id="afe-settings-panel-roles" role="tabpanel" aria-labelledby="afe-settings-tab-roles" data-afe-settings-panel="roles">';
 
         echo '<div class="afe-admin-card"><h2>Capabilityها بر اساس نقش</h2><p class="description">Administrator همیشه همه Capabilityهای افزونه را دریافت می‌کند. برای نقش‌های دیگر دسترسی‌های لازم را انتخاب کنید.</p><div class="afe-table-scroll"><table class="widefat striped"><thead><tr><th>نقش</th>';
         foreach(Capabilities::assignable() as $cap) echo '<th><code>'.esc_html(str_replace('afe_','',$cap)).'</code></th>';
@@ -134,6 +158,7 @@ final class SettingsPage
             echo '</tr>';
         }
         echo '</tbody></table></div></div>';
+        echo '</section><section class="afe-settings-panel" id="afe-settings-panel-forms" role="tabpanel" aria-labelledby="afe-settings-tab-forms" data-afe-settings-panel="forms">';
 
         echo '<div class="afe-admin-card"><div class="afe-admin-card-title"><div><h2>دسترسی اختصاصی هر فرم</h2><p>این بخش مشخص می‌کند هر نقش روی کدام فرم چه عملیاتی انجام دهد. Capability سراسری لازم برای ورود به صفحه مدیریت به‌صورت خودکار همگام می‌شود و دسترسی کاربر همچنان فقط به فرم‌های انتخاب‌شده محدود می‌ماند.</p></div></div>';
         foreach($this->registry->all() as $slug=>$formObj){
@@ -154,7 +179,10 @@ final class SettingsPage
             echo '</tbody></table></div></details>';
         }
         echo '</div>';
-        submit_button('ذخیره تنظیمات'); echo '</form></div>';
+        echo '</section>';
+        echo '<div class="afe-settings-save"><span>ذخیره تغییرات همه تب‌ها</span>';
+        submit_button('ذخیره تنظیمات','primary','submit',false);
+        echo '</div></form></div>';
     }
 
     /** Test uses saved credentials, never unsaved admin form values. */
@@ -179,18 +207,56 @@ final class SettingsPage
         try {
             $provider=$this->smsProviders->resolve($providerKey,'free');
             $sent=$provider->send(new SmsMessage($mobile,'free','پیامک آزمایشی اتصال پنل Alavi Form Engine'));
+            $debug=SmsDebugLog::record('test',$providerKey,$sent);
             if(empty($sent['success'])) {
-                // External gateway errors may contain secrets or raw request data.
-                wp_send_json_error(['message'=>'ارسال آزمایشی ناموفق بود. تنظیمات ذخیره‌شده، اعتبار، خط فرستنده و دسترسی وب‌سرویس را بررسی کنید.'],422);
+                // Never return freeform provider errors or raw HTTP responses.
+                wp_send_json_error(['message'=>'ارسال آزمایشی ناموفق بود. تنظیمات، اعتبار، خط فرستنده و دسترسی API را بررسی کنید.','debug'=>$debug],422);
             }
-            $receipt=(string)($sent['message_id']??'');
             wp_send_json_success([
-                'message'=>'درخواست ارسال پیامک آزمایشی با موفقیت در پنل ثبت شد. رسیدن پیام به گوشی جداگانه بررسی شود.',
-                'message_id'=>preg_match('/^[0-9]{2,40}$/D',$receipt)?$receipt:'',
+                'message'=>'پنل درخواست ارسال آزمایشی را پذیرفت. تحویل به گوشی جداگانه بررسی شود.',
+                'message_id'=>(string)($debug['message_id']??''),
+                'debug'=>$debug,
             ]);
         } catch(\Throwable) {
-            wp_send_json_error(['message'=>'برقراری ارتباط با پنل پیامک ممکن نشد.'],422);
+            $debug=SmsDebugLog::record('test',$providerKey,['success'=>false],'exception');
+            wp_send_json_error(['message'=>'برقراری ارتباط با پنل پیامک ممکن نشد.','debug'=>$debug],422);
         }
+    }
+
+    /**
+     * Admin-only read/clear diagnostic ring. Nonce and capability are mandatory.
+     */
+    public function debugSms(): void
+    {
+        if(!current_user_can(Capabilities::MANAGE_SETTINGS)) {
+            wp_send_json_error(['message'=>'دسترسی کافی ندارید.'],403);
+        }
+        if(!check_ajax_referer('afe_sms_debug','nonce',false)) {
+            wp_send_json_error(['message'=>'اعتبار درخواست منقضی شده است.'],403);
+        }
+        $operation=sanitize_key((string)wp_unslash($_POST['operation']??'read'));
+        if($operation==='clear') SmsDebugLog::clear();
+        elseif($operation!=='read') wp_send_json_error(['message'=>'عملیات مجاز نیست.'],422);
+        wp_send_json_success(['events'=>SmsDebugLog::all()]);
+    }
+
+    /** Displays only the whitelisted diagnostic fields, escaped as text. */
+    private function debugRow(array $entry): string
+    {
+        $cells=[
+            (string)($entry['at']??''),
+            (string)($entry['channel']??''),
+            (string)($entry['provider']??''),
+            (string)($entry['status']??''),
+            (string)($entry['stage']??''),
+            (string)($entry['http_status']??'—'),
+            (string)($entry['ret_status']??'—'),
+            (string)($entry['value_code']??'—'),
+            (string)($entry['message_id']??'—'),
+        ];
+        $result='<tr>';
+        foreach($cells as $cell) $result.='<td>'.esc_html($cell).'</td>';
+        return $result.'</tr>';
     }
 
     private function save(): void
@@ -213,6 +279,7 @@ final class SettingsPage
         $authMode=sanitize_key(wp_unslash($_POST['sms_auth_mode']??'legacy'));
         if(!in_array($authMode,['legacy','api_key'],true)) $authMode='legacy';
         $smsEnabled=!empty($_POST['sms_enabled']);
+        $smsDebugEnabled=!empty($_POST['sms_debug_enabled']);
         $defaultProvider=sanitize_key(wp_unslash($_POST['sms_default_provider']??($oldSms['default_provider']??$oldSms['provider']??'melipayamak')));
         $allowedProviders=array_keys($this->smsProviders?->providerOptions()??['melipayamak'=>'','farapayamak'=>'','persian_woocommerce_sms'=>'']);
         if(!in_array($defaultProvider,$allowedProviders,true)) $defaultProvider='melipayamak';
@@ -227,6 +294,7 @@ final class SettingsPage
             'sms_enabled'=>$smsEnabled,
             'sms'=>[
                 'enabled'=>$smsEnabled,
+                'debug_enabled'=>$smsDebugEnabled,
                 'provider'=>$defaultProvider,
                 'default_provider'=>$defaultProvider,
                 'auth_mode'=>$authMode,
@@ -272,6 +340,8 @@ final class SettingsPage
         Capabilities::install();
         $this->formAccess->sync($this->registry);
         Capabilities::syncAccess();
-        wp_safe_redirect(admin_url('admin.php?page=alavi-form-engine-settings&updated=1')); exit;
+        $tab=sanitize_key((string)wp_unslash($_POST['afe_settings_tab']??'general'));
+        if(!in_array($tab,['general','sms','debug','style','roles','forms'],true)) $tab='general';
+        wp_safe_redirect(admin_url('admin.php?page=alavi-form-engine-settings&updated=1&tab='.$tab)); exit;
     }
 }
