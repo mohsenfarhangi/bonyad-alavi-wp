@@ -6,7 +6,7 @@
 
 پروژه در توسعه فعال است.
 
-- **Alavi Form Engine:** `1.0.28-dev.2`، DB `1.0.5-dev.2`، stable baseline/tag `1.0.27`; production bump هنوز به live acceptance وابسته است.
+- **Alavi Form Engine:** `1.0.28-dev.3`، DB `1.0.5-dev.2`، stable baseline/tag `1.0.27`; production bump هنوز به live acceptance وابسته است.
 - **Ostadsho child theme:** custom integration layer روی Theme header `2.8`; version docs legacy v0.x به state history مهاجرت کرده‌اند.
 
 ## Current Goal
@@ -19,6 +19,14 @@
 AFE release goal همچنان live acceptance نسخه 1.0.28 و رفع blocker واقعی پیش از production promotion است.
 
 ## Recently Completed
+
+### Farapayamak REST JSON SMS provider (2026-10-22)
+- Provider مستقل `farapayamak` با `SendSMS` و `BaseServiceNumber` اضافه شد؛ POST JSON و نام پارامترها دقیقاً طبق مستندات REST.
+- credential مستقل `sms.farapayamak.api_key` با `SecretStore` رمز می‌شود. کلید API در فرم ادمین بازنمایی نمی‌شود و پاسخ/خطای خام سرویس در Action log قرار نمی‌گیرد.
+- موفقیت بر اساس `RetStatus` و `Value`؛ پاسخ نامعتبر و خطاهای کاربردی رد می‌شوند. حفظ Providerهای ملی‌پیامک و Persian WooCommerce SMS.
+- تست‌های provider و integration با mock تهیه شده‌اند؛ پذیرش زنده با حساب، شماره فرستنده و bodyId تأییدشده و نصب WordPress همچنان باز است.
+- نسخه توسعه `1.0.28-dev.3`، DB `1.0.5-dev.2` و stable `1.0.27` بدون ارتقا؛ قانون اتمام کار پیش از Commit در `AGENTS.md` ثبت شد.
+
 
 ### Optional draft continuation on duplicate — AFE + Jihadi (2026-10-22)
 - Opt-in config `settings.duplicate.resume_draft` و checkbox مدیریت فرم اضافه شد؛ منطق مشترک افزونه برای preflight و submit، لینک ادامه را فقط برای `draft` باز و مالک تأییدشده برمی‌گرداند.

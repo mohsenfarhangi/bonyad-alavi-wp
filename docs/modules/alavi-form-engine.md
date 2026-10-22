@@ -3,7 +3,7 @@
 **Status:** active development / pre-acceptance  
 **Path:** `wp-content/plugins/alavi-form-engine/`  
 **Namespace:** `BonyadAlavi\FormEngine`  
-**Development version:** `1.0.28-dev.2`  
+**Development version:** `1.0.28-dev.3`  
 **DB checkpoint:** `1.0.5-dev.2`  
 **Stable baseline/tag documented:** `1.0.27`  
 **PHP:** `>=8.3`
@@ -180,6 +180,14 @@ Provider داخلی MeliPayamak:
 - free text
 - pattern/shared
 - encrypted secrets
+
+Provider مستقل فراپیامک (`farapayamak`, REST JSON):
+- قابل انتخاب به‌عنوان Provider سراسری و per-Action؛ تنظیمات حساب جدا از ملی پیامک در `afe_settings['sms']['farapayamak']`.
+- ارسال آزاد: `POST https://rest.payamak-panel.com/api/SendSMS/SendSMS` با JSON `username,password,to,from,text,isflash` (`isflash=false`).
+- ارسال خدماتی: `POST https://rest.payamak-panel.com/api/SendSMS/BaseServiceNumber` با JSON `username,password,text,to,bodyId`. متن از مقادیر مرتب Pattern با جداکننده `;` ساخته می‌شود؛ قالب جای‌گذاری باید با متن تأییدشده حساب واقعی آزمایش شود.
+- کلید API در فیلد `password` JSON ارسال و در WordPress با `SecretStore` رمز می‌شود؛ خروجی خام/خطای HTTP نباید secret را وارد لاگ کند. Endpoint ثابت HTTPS، بدون redirect.
+- موفقیت فقط با `RetStatus=1` و `Value` معتبر؛ خطاهای کاربردی حتی با HTTP 200 رد می‌شوند.
+- تست‌های `tests/farapayamak-provider.php` و `tests/farapayamak-integration.php` قرارداد و امنیت را بررسی می‌کنند؛ پذیرش ارسال واقعی با خط و الگوی تأیید‌شده هنوز باز است.
 
 Persian WooCommerce SMS adapter:
 - credential را داخل AFE کپی نمی‌کند.
