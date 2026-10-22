@@ -2037,7 +2037,7 @@
 
     const blocking = Boolean(payload?.blocking);
     const behavior = String(payload?.behavior || 'block');
-    const state = blocking ? 'error' : 'warning';
+    const state = payload?.resume_draft ? 'warning' : (blocking ? 'error' : 'warning');
     const message = String(payload?.message || 'این اطلاعات قبلاً ثبت شده است.');
     let extra = '';
     if (behavior === 'allow') extra = '<span class="afe-duplicate-live__hint">طبق تنظیمات فرم، ایجاد ثبت جدید همچنان مجاز است.</span>';
