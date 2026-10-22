@@ -62,16 +62,22 @@ final class SmsAction implements ActionInterface
         }
 
         $providerKey = sanitize_key((string)($config['provider'] ?? SmsProviderRegistry::USE_DEFAULT));
-        $provider = $this->providers->resolve($providerKey, $mode);
-
-        $result = $provider->send(new SmsMessage(
-            $recipient,
-            $mode,
-            $body,
-            $patternCode,
-            $patternValues,
-            $sender
-        ));
+        $key = $this->providers->effectiveKey($providerKey);
+        try {
+            $provider = $this->providers->resolve($providerKey, $mode);
+            $result = $provider->send(new SmsMessage(
+                $recipient,
+                $mode,
+                $body,
+                $patternCode,
+                $patternValues,
+                $sender
+            ));
+        } catch (\Throwable $error) {
+            SmsDebugLog::record('action', $key, ['success'=>false], 'exception');
+            throw $error;
+        }
+        SmsDebugLog::record('action', $key, $result);
 
         if (empty($result['success'])) {
             $error = trim((string)($result['error'] ?? 'SMS provider rejected the request.'));

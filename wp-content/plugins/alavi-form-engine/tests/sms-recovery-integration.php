@@ -58,8 +58,8 @@ $checks=[
         && str_contains($settings, "wp_add_inline_script('afe-admin-sms-test'"),
     'ui-responsive-controls'=>str_contains($css,'.afe-form .afe-otp-mobile')
         && str_contains($css,'[data-afe-otp-verify-section][hidden]'),
-    'development-assets-version'=>str_contains($entry,'Version: 1.0.28-dev.5')
-        && str_contains($entry,"define('AFE_VERSION', '1.0.28-dev.5')"),
+    'development-assets-version'=>(bool)preg_match('/Version:\\s+([^\\s]+)/', $entry, $matches)
+        && str_contains($entry, "define('AFE_VERSION', '".$matches[1]."')"),
 ];
 foreach($checks as $name=>$pass) {
     echo ($pass?'PASS ':'FAIL ').$name.PHP_EOL;

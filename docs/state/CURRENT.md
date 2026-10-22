@@ -6,7 +6,7 @@
 
 پروژه در توسعه فعال است.
 
-- **Alavi Form Engine:** `1.0.28-dev.5`، DB `1.0.5-dev.2`، stable baseline/tag `1.0.27`; production bump هنوز به live acceptance وابسته است.
+- **Alavi Form Engine:** `1.0.28-dev.6`، DB `1.0.5-dev.2`، stable baseline/tag `1.0.27`; production bump هنوز به live acceptance وابسته است.
 - **Ostadsho child theme:** custom integration layer روی Theme header `2.8`; version docs legacy v0.x به state history مهاجرت کرده‌اند.
 
 ## Current Goal
@@ -19,6 +19,13 @@
 AFE release goal همچنان live acceptance نسخه 1.0.28 و رفع blocker واقعی پیش از production promotion است.
 
 ## Recently Completed
+
+### Global settings tabs and SMS debugging (2026-10-22)
+- صفحه تنظیمات عمومی AFE اکنون ۶ تب (عمومی/API، پنل‌های پیامک، دیباگ پیامک، استایل، نقش‌ها، فرم‌ها) دارد؛ یک فرم/POST سابق بدون تغییر در ماهیت ذخیره، دکمه ذخیره sticky و حفظ تب فعال پس از ذخیره.
+- دیباگ پیامک در `afe_settings.sms.debug_enabled` opt-in است؛ فقط ۴۰ نتیجه امن اخیر SMS Action، OTP و تست ارسال در `afe_sms_debug_events` ذخیره و با nonce + capability ادمین بازخوانی/پاک می‌شود. شماره، متن پیام، OTP، API key، رمز و پاسخ خام ممنوع‌اند؛ Farapayamak فقط کدهای عددی و رسید پیام مجاز را برمی‌گرداند.
+- خروجی فوری تست ارسال به‌شکل summary امن و code/receipt برای مدیر ارائه می‌شود. محدودیت تست ۳ بار/۱۰ دقیقه بدون تغییر.
+- تست‌های واحد `sms-debug-log.php` و UI/contract `admin-settings-tabs.js` و `admin-sms-debug-settings.php` اضافه شدند؛ نسخه `1.0.28-dev.6` فقط برای کش ادمین bump شده و DB/stable ثابت‌اند. پذیرش WordPress واقعی و ارسال/تحویل زنده همچنان باز است.
+
 
 ### SMS OTP draft recovery + SMS provider connection test (2026-10-22)
 - قابلیت عمومی `settings.duplicate.otp_enabled/otp_mobile_field/otp_provider` برای بازیابی پیش‌نویس با OTP به شماره ذخیره‌شده افزوده شد. برای فرم جهادی `group_mobile` و Provider پیش‌فرض در Source Definition فعال است؛ Override ادمین باید بررسی شود.
@@ -326,7 +333,7 @@ Historical PASSهای AFE/Theme به HEAD جدید تعمیم داده نمی‌
 
 ## Next Agent Handoff
 
-**Current task:** بازیابی امن پیش‌نویس با SMS OTP و تست ارسال واقعی پنل پیامک در AFE اضافه شده‌اند و برای فرم جهادی روی group_mobile فعال شده‌اند. آزمون CI متمرکز PASS شده ولی پذیرش زنده WordPress/Elementor و تحویل واقعی SMS همچنان باز است؛ Override ذخیره‌شده فرم و تنظیمات پنل باید بررسی شوند.
+**Current task:** تب‌بندی تنظیمات سراسری و دیباگ محدود SMS (Action/OTP/Test) تکمیل شده و نیازمند اعتبارسنجی CI و پذیرش بصری/عملکردی در wp-admin واقعی است. اتصال واقعی پنل پیامک/تحویل به گوشی و استقرار سایت هنوز تأیید نشده است.
 
 
 **Start here:** [../INDEX.md](../INDEX.md) → [../modules/INDEX.md](../modules/INDEX.md).

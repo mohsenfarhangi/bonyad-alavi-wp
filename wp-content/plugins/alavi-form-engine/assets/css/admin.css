@@ -121,3 +121,26 @@
 
 /* Export template builder */
 .afe-export-template-card{margin-top:18px}.afe-export-columns{display:grid;gap:8px;margin-top:16px}.afe-export-columns__head{display:flex;align-items:center;justify-content:space-between;gap:12px}.afe-export-columns__head span{color:#66756f;font-size:12px}.afe-export-column{display:grid;grid-template-columns:28px 76px minmax(150px,.8fr) minmax(220px,1.4fr) 100px;align-items:end;gap:10px;padding:10px 12px;border:1px solid #dbe5e0;border-radius:10px;background:#fff;cursor:grab}.afe-export-column.is-dragging{opacity:.55}.afe-export-column .afe-drag-handle{font-size:20px;color:#87938e;align-self:center}.afe-export-column label{display:grid;gap:5px;margin:0}.afe-export-column label code{direction:ltr;text-align:left;white-space:normal;overflow-wrap:anywhere}.afe-export-column__enabled{align-self:center!important;display:flex!important;flex-direction:row!important;align-items:center;gap:6px!important}@media(max-width:900px){.afe-export-column{grid-template-columns:28px 1fr}.afe-export-column>*:not(.afe-drag-handle){grid-column:2}.afe-export-columns__head{align-items:flex-start;flex-direction:column}}
+
+
+/* Global settings: accessible short tabs and a persistent save control. */
+.afe-admin-wrap [data-afe-settings-form] { padding-bottom: 80px; }
+.afe-settings-tabs { display:flex;flex-wrap:nowrap;align-items:center;gap:8px;margin:18px 0 8px;padding:5px;overflow-x:auto;scrollbar-width:thin;background:#fff;border:1px solid #dcdcde;border-radius:13px; }
+.afe-settings-tabs button { flex:0 0 auto;display:inline-flex;align-items:center;justify-content:center;min-height:43px;padding:10px 17px;border:0;border-radius:9px;background:transparent;color:#344054;font:inherit;font-weight:600;cursor:pointer;white-space:nowrap;transition:background .15s,color .15s; }
+.afe-settings-tabs button:hover { background:#eef5f1;color:#1b654b; }
+.afe-settings-tabs button[aria-selected="true"] { background:#0d654c;color:#fff;box-shadow:0 2px 8px rgba(13,101,76,.13); }
+.afe-settings-tabs button:focus-visible { outline:2px solid #196c51;outline-offset:2px; }
+.afe-settings-guidance { margin:0 2px 16px!important; }
+.afe-settings-panel[hidden] { display:none!important; }
+.afe-settings-save { position:sticky;bottom:12px;z-index:35;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;padding:13px 18px;margin-top:12px;border:1px solid #b9d7cc;border-radius:12px;box-shadow:0 6px 25px rgba(18,58,44,.15);background:rgba(255,255,255,.98);backdrop-filter:blur(8px); }
+.afe-settings-save span { font-weight:600;color:#194b3b; }
+.afe-settings-save .button { min-height:40px;padding:5px 24px; }
+.afe-settings-debug-enable { display:flex;align-items:center;gap:8px;font-weight:700;margin:15px 0; }
+.afe-settings-debug-enable input { margin:0; }
+.afe-settings-debug-actions { display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:17px 0; }
+.afe-settings-debug-actions [role="status"] { font-size:13px;color:#526157; }
+.afe-sms-debug-table { min-width:860px; }
+.afe-sms-debug-table td,.afe-sms-debug-table th { white-space:nowrap;direction:ltr;text-align:left; }
+.afe-settings-test-diagnostics { padding:12px 14px;margin:12px 0 0;background:#13271e;color:#d8eddf;border-radius:8px;direction:ltr;text-align:left;font-size:12px;white-space:pre-wrap;word-break:break-word; }
+.afe-settings-test-diagnostics[hidden] { display:none!important; }
+@media(max-width:782px) { .afe-settings-tabs {margin-top:12px;} .afe-settings-save {bottom:0;margin-left:-8px;margin-right:-8px;border-radius:12px 12px 0 0;padding:10px 12px;} .afe-settings-save span {font-size:12px;} .afe-settings-save .button {flex:1 1 auto;} }

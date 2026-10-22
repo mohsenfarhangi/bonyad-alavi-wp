@@ -3,7 +3,7 @@
 **Status:** active development / pre-acceptance  
 **Path:** `wp-content/plugins/alavi-form-engine/`  
 **Namespace:** `BonyadAlavi\FormEngine`  
-**Development version:** `1.0.28-dev.5`  
+**Development version:** `1.0.28-dev.6`  
 **DB checkpoint:** `1.0.5-dev.2`  
 **Stable baseline/tag documented:** `1.0.27`  
 **PHP:** `>=8.3`
@@ -173,6 +173,15 @@ Security:
 - capability/session/application-password meta keys block می‌شوند.
 - user-meta mappings قبل از write کامل prevalidate می‌شوند.
 - Retry current enabled/event/condition را دوباره resolve می‌کند.
+
+## Global settings tabs & SMS diagnostics (2026-10-22)
+
+- صفحه «تنظیمات و مدیریت دسترسی» از صفحه عمودی طولانی به **۶ تب مجزا** تقسیم شد: «عمومی و API»، «پنل‌های پیامک»، «دیباگ پیامک»، «استایل فرم»، «دسترسی نقش‌ها»، «دسترسی فرم‌ها». این‌ها فقط UI هستند: همه کنترل‌ها در همان form اصلی باقی می‌مانند و **همه تنظیمات همچنان با یک بار ذخیره ارسال می‌شوند**. تب فعال بعد از Post/Redirect/Get باز می‌ماند، جابه‌جایی تب‌ها فیلدها را reset یا disabled نمی‌کند و دکمه ذخیره در پایین viewport به‌صورت sticky دیده می‌شود.
+- گزینه مستقل **«ثبت گزارش دیباگ پیامک»** در تب «دیباگ پیامک» با کلید `afe_settings['sms']['debug_enabled']` به‌طور پیش‌فرض خاموش است. بعد از فعال‌سازی و ذخیره، خروجی‌های `SMS Action`، `OTP` و «تست اتصال» در یک فهرست محدود **۴۰ رکورد اخیر** در گزینه غیرautoload `afe_sms_debug_events` ذخیره می‌شوند. خواندن/پاک‌کردن فقط توسط مدیر دارای `Capabilities::MANAGE_SETTINGS` و nonce اختصاصی `afe_sms_debug` از AJAX `afe_sms_debug` انجام می‌شود. تغییر نام/کلید Provider، فرم یا event در logger داده خام نمی‌نویسد.
+- داده مجاز گزارش: تاریخ UTC، مسیر ارسال، شناسه Provider، success/failed، مرحله امن خطا، `http_status`، `ret_status`، `value_code` فقط به‌شکل عددی کوچک، و شناسه عددی پیام در صورت موفقیت. **شماره همراه، متن پیام، رمز OTP، username/password، API key، raw response و exception message ذخیره یا نمایش داده نمی‌شوند**. تشخیص خطای Farapayamak از کدهای عددی مستقل از پاسخ خام استفاده می‌کند؛ سایر providerها فقط خلاصهٔ امن ارائه می‌کنند.
+- در «تست اتصال پنل پیامک» نتیجهٔ خلاصهٔ فنی و شناسه پیام به‌صورت فوری در همان بخش نمایش داده می‌شود، حتی اگر ثبت تاریخچه خاموش باشد. سابقه SMS Action و OTP فقط پس از روشن کردن Debug جمع می‌شود. پاک‌کردن تاریخچه روی تنظیمات حساب/پیامک یا Action logهای قبلی اثر ندارد.
+- مسیر کد: `src/Actions/Sms/SmsDebugLog.php`، `src/Admin/SettingsPage.php`، `src/Actions/Sms/SmsAction.php`، `src/Security/SmsDraftRecovery.php`، `src/Actions/Sms/FarapayamakProvider.php`، `assets/js/admin-sms-test.js`، `assets/css/admin.css`. تست‌ها: `sms-debug-log.php`، `admin-sms-debug-settings.php`، `admin-settings-tabs.js`.
+- محدودیت تست ارسال واقعی **۳ بار در ۱۰ دقیقه** تغییر نکرده است. موفقیت پنل به معنی تحویل به گوشی نیست. نسخه `1.0.28-dev.6` فقط توسعه‌ای است؛ DB/stable بدون تغییر، تست واقعی WordPress/admin و پنل پیامک همچنان pending هستند.
 
 ## SMS OTP recovery for forgotten tracking codes (2026-10-22)
 
