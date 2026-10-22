@@ -861,7 +861,9 @@ final class SubmissionService
     private function duplicateDraftResumePayload(array $form, DuplicateDecision $decision): array
     {
         $config = $this->duplicatePolicy->config($form);
-        if (!$config['enabled'] || !$config['resume_draft'] || !$decision->isDuplicate()
+        $modes = (array)($form['settings']['editing_modes'] ?? []);
+        $hasRecoveryMode = array_intersect(['wordpress','link','tracking'], $modes) !== [];
+        if (!$hasRecoveryMode || !$config['enabled'] || !$config['resume_draft'] || !$decision->isDuplicate()
             || !$decision->duplicateSubmissionId || empty($form['settings']['save_draft'])
             || empty($form['settings']['editing_enabled'])) {
             return [];
