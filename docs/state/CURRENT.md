@@ -24,7 +24,7 @@ AFE release goal همچنان live acceptance نسخه 1.0.28 و رفع blocker 
 - قابلیت عمومی `settings.duplicate.otp_enabled/otp_mobile_field/otp_provider` برای بازیابی پیش‌نویس با OTP به شماره ذخیره‌شده افزوده شد. برای فرم جهادی `group_mobile` و Provider پیش‌فرض در Source Definition فعال است؛ Override ادمین باید بررسی شود.
 - کد ۶رقمی زمان‌دار (۵ دقیقه، ۵ تلاش)، درخواست محدود (۳ بار/۱۵ دقیقه) و grant یک‌ساعته محدود به همان پیش‌نویس؛ SMS از Provider فعلی با ارسال free. کد رهگیری اصلی افشا نمی‌شود.
 - در تنظیمات سراسری پیامک، تست اتصال از طریق **ارسال واقعی به شماره مدیر** با Capability+nonce و محدودیت ۳ بار/۱۰ دقیقه اضافه شد. نتیجه API لزوماً برابر تحویل نیست. تنظیمات قبل تست ذخیره شود.
-- فایل‌های آزمون `sms-draft-recovery.php`, `sms-recovery-integration.php` و CI مرتبط افزوده شده‌اند. **پذیرش واقعی WordPress، تحویل SMS و تست کد OTP در سایت هنوز باز است.** نسخه توسعه `1.0.28-dev.5`؛ DB/stable بدون تغییر.
+- فایل‌های آزمون `sms-draft-recovery.php`, `sms-recovery-integration.php` و CI مرتبط افزوده شده‌اند. **PHP syntax، SMS OTP security، Providerهای موجود، فرم جهادی، JavaScript و CSS در GitHub Actions [run 39768522454](https://github.com/mohsenfarhangi/bonyad-alavi-wp/actions/runs/39768522454) PASS شدند.** پذیرش واقعی WordPress، تحویل SMS و تست کد OTP در سایت هنوز باز است. نسخه توسعه `1.0.28-dev.5`؛ DB/stable بدون تغییر.
 
 
 ### Duplicate reference: inline credential verification (2026-10-22)
@@ -326,7 +326,7 @@ Historical PASSهای AFE/Theme به HEAD جدید تعمیم داده نمی‌
 
 ## Next Agent Handoff
 
-**Current task:** بازیابی امن پیش‌نویس با SMS OTP و تست ارسال واقعی پنل پیامک در AFE اضافه شده‌اند و برای فرم جهادی روی group_mobile فعال شده‌اند. اجرای CI متمرکز و پذیرش زنده WordPress/Elementor و تحویل واقعی SMS همچنان باز است؛ Override ذخیره‌شده فرم و تنظیمات پنل باید بررسی شوند.
+**Current task:** بازیابی امن پیش‌نویس با SMS OTP و تست ارسال واقعی پنل پیامک در AFE اضافه شده‌اند و برای فرم جهادی روی group_mobile فعال شده‌اند. آزمون CI متمرکز PASS شده ولی پذیرش زنده WordPress/Elementor و تحویل واقعی SMS همچنان باز است؛ Override ذخیره‌شده فرم و تنظیمات پنل باید بررسی شوند.
 
 
 **Start here:** [../INDEX.md](../INDEX.md) → [../modules/INDEX.md](../modules/INDEX.md).
