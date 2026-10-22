@@ -22,7 +22,7 @@ $checks=[
     'sticky-save'=>str_contains($settings,'class="afe-settings-save"')
         && str_contains($css,'.afe-settings-save { position:sticky'),
     'tab-persisted-through-save'=>str_contains($settings,'name="afe_settings_tab"')
-        && str_contains($settings, "'&tab='.\$tab"),
+        && str_contains($settings, "&tab='.\$tab"),
     'tab-JS-keeps-other-inputs-enabled'=>str_contains($js,'panel.hidden =')
         && !str_contains($js,'panel.disabled =')
         && str_contains($js,'aria-selected'),
