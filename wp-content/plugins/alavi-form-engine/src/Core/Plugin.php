@@ -251,6 +251,7 @@ final class Plugin
         add_action('wp_ajax_afe_otp_verify', [$this,'ajaxOtpVerify']);
         add_action('wp_ajax_nopriv_afe_otp_verify', [$this,'ajaxOtpVerify']);
         add_action('wp_ajax_afe_sms_test', [$this,'ajaxSmsTest']);
+        add_action('wp_ajax_afe_sms_debug', [$this,'ajaxSmsDebug']);
         add_action('wp_ajax_afe_request_edit', [$this,'ajaxRequestEdit']);
         add_action('wp_ajax_nopriv_afe_request_edit', [$this,'ajaxRequestEdit']);
         add_action('wp_ajax_afe_refresh_captcha', [$this,'ajaxRefreshCaptcha']);
@@ -381,6 +382,13 @@ final class Plugin
         } catch (\Throwable) {
             wp_send_json_error(['message'=>'درخواست بازیابی قابل انجام نیست.'],422);
         }
+    }
+
+    public function ajaxSmsDebug(): void
+    {
+        /** @var SettingsPage $page */
+        $page = $this->container->get(SettingsPage::class);
+        $page->debugSms();
     }
 
     public function ajaxSmsTest(): void
