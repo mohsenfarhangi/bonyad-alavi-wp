@@ -1,0 +1,68 @@
+name: AFE SMS OTP recovery and connection test
+
+on:
+  push:
+    branches: [feat/afe-sms-otp-recovery]
+  pull_request:
+    branches: [main]
+    paths:
+      - 'wp-content/plugins/alavi-form-engine/src/Security/SmsDraftRecovery.php'
+      - 'wp-content/plugins/alavi-form-engine/src/Core/Plugin.php'
+      - 'wp-content/plugins/alavi-form-engine/src/Form/**'
+      - 'wp-content/plugins/alavi-form-engine/src/Submission/**'
+      - 'wp-content/plugins/alavi-form-engine/src/Admin/**'
+      - 'wp-content/plugins/alavi-form-engine/assets/**'
+      - 'wp-content/plugins/alavi-form-engine/tests/sms-*'
+      - 'wp-content/plugins/alavi-form-engine/tests/duplicate-*'
+      - 'wp-content/themes/ostadsho-child/inc/forms/class-ba-jihadi-group-registration-form.php'
+      - 'wp-content/themes/ostadsho-child/tests/jihadi-form-definition.php'
+      - '.github/workflows/afe-sms-otp-recovery.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  sms-otp:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          coverage: none
+      - name: PHP syntax
+        run: |
+          php -l wp-content/plugins/alavi-form-engine/src/Security/SmsDraftRecovery.php
+          php -l wp-content/plugins/alavi-form-engine/src/Core/Plugin.php
+          php -l wp-content/plugins/alavi-form-engine/src/Submission/SubmissionService.php
+          php -l wp-content/plugins/alavi-form-engine/src/Form/Renderer.php
+          php -l wp-content/plugins/alavi-form-engine/src/Form/Form.php
+          php -l wp-content/plugins/alavi-form-engine/src/Admin/FormsPage.php
+          php -l wp-content/plugins/alavi-form-engine/src/Admin/SettingsPage.php
+          php -l wp-content/themes/ostadsho-child/inc/forms/class-ba-jihadi-group-registration-form.php
+          php -l wp-content/plugins/alavi-form-engine/tests/sms-draft-recovery.php
+          php -l wp-content/plugins/alavi-form-engine/tests/sms-recovery-integration.php
+      - name: SMS OTP security and wiring checks
+        run: |
+          php wp-content/plugins/alavi-form-engine/tests/sms-draft-recovery.php
+          php wp-content/plugins/alavi-form-engine/tests/sms-recovery-integration.php
+      - name: Duplicate and form regression
+        run: |
+          php wp-content/plugins/alavi-form-engine/tests/duplicate-policy.php
+          php wp-content/plugins/alavi-form-engine/tests/duplicate-repository.php
+          php wp-content/plugins/alavi-form-engine/tests/live-duplicate-check.php
+          php wp-content/plugins/alavi-form-engine/tests/duplicate-draft-resume.php
+          php wp-content/themes/ostadsho-child/tests/jihadi-form-definition.php
+      - name: Existing SMS providers
+        run: |
+          php wp-content/plugins/alavi-form-engine/tests/sms-provider-registry.php
+          php wp-content/plugins/alavi-form-engine/tests/sms-settings-switch.php
+          php wp-content/plugins/alavi-form-engine/tests/farapayamak-provider.php
+          php wp-content/plugins/alavi-form-engine/tests/farapayamak-integration.php
+      - name: JavaScript behavior, syntax and CSS
+        run: |
+          node --check wp-content/plugins/alavi-form-engine/assets/js/frontend.js
+          node --check wp-content/plugins/alavi-form-engine/assets/js/admin-sms-test.js
+          node wp-content/plugins/alavi-form-engine/tests/duplicate-reference-recovery.js
+          node wp-content/plugins/alavi-form-engine/tests/frontend-css-regression.js

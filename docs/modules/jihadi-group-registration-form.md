@@ -85,6 +85,14 @@ Key settings:
 - rate limit 20
 - shared storage
 
+## Forgotten tracking code — SMS recovery (2026-10-22)
+
+- Source Definition فرم جهادی، `duplicate.otp_enabled=true`، `otp_mobile_field=group_mobile` و `otp_provider=default` را تعیین می‌کند.
+- برای پیش‌نویس غیرقفل با شناسه ترکیبی `registration_code + group_mobile`، مالک می‌تواند شماره همراه ذخیره‌شده را تأیید کند تا یک رمز ۶رقمی ۵دقیقه‌ای دریافت کند؛ پس از تأیید، مجوز ادامه یک‌ساعته به همان ثبت صادر می‌شود.
+- درگاه پیش‌فرض پیامک باید در تنظیمات سراسری AFE **فعال، معتبر و دارای شماره فرستنده مجاز** باشد؛ مدیر پیش از استفاده «تست اتصال پنل پیامک» را انجام دهد. این قابلیت **OTP خدماتی Pattern/BodyId** نیست؛ ارسال عادی `free` است.
+- Admin override تنظیمات قبلی ممکن است بر `otp_enabled` پیش‌فرض تقدم داشته باشد؛ در «جلوگیری از تکرار» فرم گزینه را بازبینی و ذخیره کنید.
+- ارسال زنده به خط واقعی و پذیرش فرم در سایت هنوز انجام نشده است.
+
 ## Duplicate Draft Continuation (2026-10-22)
 
 - General engine feature `settings.duplicate.resume_draft` is enabled by default for this form.

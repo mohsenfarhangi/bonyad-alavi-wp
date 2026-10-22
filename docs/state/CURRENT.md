@@ -6,7 +6,7 @@
 
 پروژه در توسعه فعال است.
 
-- **Alavi Form Engine:** `1.0.28-dev.4`، DB `1.0.5-dev.2`، stable baseline/tag `1.0.27`; production bump هنوز به live acceptance وابسته است.
+- **Alavi Form Engine:** `1.0.28-dev.5`، DB `1.0.5-dev.2`، stable baseline/tag `1.0.27`; production bump هنوز به live acceptance وابسته است.
 - **Ostadsho child theme:** custom integration layer روی Theme header `2.8`; version docs legacy v0.x به state history مهاجرت کرده‌اند.
 
 ## Current Goal
@@ -19,6 +19,13 @@
 AFE release goal همچنان live acceptance نسخه 1.0.28 و رفع blocker واقعی پیش از production promotion است.
 
 ## Recently Completed
+
+### SMS OTP draft recovery + SMS provider connection test (2026-10-22)
+- قابلیت عمومی `settings.duplicate.otp_enabled/otp_mobile_field/otp_provider` برای بازیابی پیش‌نویس با OTP به شماره ذخیره‌شده افزوده شد. برای فرم جهادی `group_mobile` و Provider پیش‌فرض در Source Definition فعال است؛ Override ادمین باید بررسی شود.
+- کد ۶رقمی زمان‌دار (۵ دقیقه، ۵ تلاش)، درخواست محدود (۳ بار/۱۵ دقیقه) و grant یک‌ساعته محدود به همان پیش‌نویس؛ SMS از Provider فعلی با ارسال free. کد رهگیری اصلی افشا نمی‌شود.
+- در تنظیمات سراسری پیامک، تست اتصال از طریق **ارسال واقعی به شماره مدیر** با Capability+nonce و محدودیت ۳ بار/۱۰ دقیقه اضافه شد. نتیجه API لزوماً برابر تحویل نیست. تنظیمات قبل تست ذخیره شود.
+- فایل‌های آزمون `sms-draft-recovery.php`, `sms-recovery-integration.php` و CI مرتبط افزوده شده‌اند. **PHP syntax، SMS OTP security، Providerهای موجود، فرم جهادی، JavaScript و CSS در GitHub Actions [run 39768522454](https://github.com/mohsenfarhangi/bonyad-alavi-wp/actions/runs/39768522454) PASS شدند.** پذیرش واقعی WordPress، تحویل SMS و تست کد OTP در سایت هنوز باز است. نسخه توسعه `1.0.28-dev.5`؛ DB/stable بدون تغییر.
+
 
 ### Duplicate reference: inline credential verification (2026-10-22)
 - مشکل: رفتار `reference` روی فرم تازه چون credential مالک قبلی همراه درخواست نیست، صرفاً پیام تکراری می‌داد؛ این محدودیت امنیتی بوده اما مسیر قابل اقدام داخل پیام نبود.
@@ -319,7 +326,7 @@ Historical PASSهای AFE/Theme به HEAD جدید تعمیم داده نمی‌
 
 ## Next Agent Handoff
 
-**Current task:** قابلیت عمومی و اختیاری `duplicate.resume_draft` به AFE افزوده، برای فرم جهادی به‌صورت Source Definition فعال و با PR #4 در `main` ادغام شده است. تست‌های امنیتی/رگرسیون متمرکز PASS شدند و تست نسخه CSS با PR #5 اصلاح شد. **بررسی Admin override فعلی فرم جهادی و پذیرش واقعی بازیابی پیش‌نویس در WordPress/Elementor الزامی است.** استقرار در سایت و کش زنده تأیید نشده‌اند. آزمون QA عمومی هنوز محدودیت تست‌های قدیمی export را دارد.
+**Current task:** بازیابی امن پیش‌نویس با SMS OTP و تست ارسال واقعی پنل پیامک در AFE اضافه شده‌اند و برای فرم جهادی روی group_mobile فعال شده‌اند. آزمون CI متمرکز PASS شده ولی پذیرش زنده WordPress/Elementor و تحویل واقعی SMS همچنان باز است؛ Override ذخیره‌شده فرم و تنظیمات پنل باید بررسی شوند.
 
 
 **Start here:** [../INDEX.md](../INDEX.md) → [../modules/INDEX.md](../modules/INDEX.md).

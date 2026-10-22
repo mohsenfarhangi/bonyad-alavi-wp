@@ -22,6 +22,7 @@ use BonyadAlavi\FormEngine\InputMask\InputMaskRegistry;
 use BonyadAlavi\FormEngine\Repository\FormRepository;
 use BonyadAlavi\FormEngine\Repository\SubmissionRepository;
 use BonyadAlavi\FormEngine\Security\SecurityManager;
+use BonyadAlavi\FormEngine\Security\SmsDraftRecovery;
 use BonyadAlavi\FormEngine\Security\Validators;
 use WP_Error;
 
@@ -41,7 +42,8 @@ final class SubmissionService
         private readonly DuplicatePolicy $duplicatePolicy,
         private readonly DuplicateRepository $duplicateRepository,
         private readonly ActionExecutionRepository $actionExecutions,
-        private readonly InputMaskRegistry $inputMasks
+        private readonly InputMaskRegistry $inputMasks,
+        private readonly ?SmsDraftRecovery $smsRecovery = null
     ) {}
 
     /**
@@ -108,6 +110,7 @@ final class SubmissionService
             'duplicate'=>$decision->isDuplicate(),
             'blocking'=>$decision->blocksDuplicate(),
             'behavior'=>$decision->behavior,
+            'otp_enabled'=>SmsDraftRecovery::enabled($form),
             'message'=>$decision->message,
         ];
 
@@ -855,6 +858,7 @@ final class SubmissionService
     {
         // The effective policy enables inline authentication without exposing prior data.
         $data = ['duplicate'=>true, 'behavior'=>$decision->behavior];
+        $data['otp_enabled'] = SmsDraftRecovery::enabled($form);
         if ($allowReferenceUrl) {
             $data = array_merge($data, $this->duplicateDraftResumePayload($form, $decision));
         }
@@ -1086,6 +1090,8 @@ final class SubmissionService
             $tracking=sanitize_text_field(wp_unslash($_POST['_afe_tracking']??''));
             if ($tracking!=='' && hash_equals((string)$row['tracking_code'],$tracking)) return true;
         }
+        $recovery = sanitize_text_field(wp_unslash($_POST['_afe_recovery'] ?? ''));
+        if ($recovery !== '' && ($this->smsRecovery ?? null)?->authorize($form, $row, $recovery)) return true;
         return false;
     }
 
@@ -1107,7 +1113,15 @@ final class SubmissionService
             $tracking = sanitize_text_field(wp_unslash($_POST['_afe_tracking'] ?? ''));
             if ($tracking !== '' && hash_equals((string)$row['tracking_code'],$tracking)) return true;
         }
+        $recovery = sanitize_text_field(wp_unslash($_POST['_afe_recovery'] ?? ''));
+        if ($recovery !== '' && ($this->smsRecovery ?? null)?->authorize($form, $row, $recovery)) return true;
         return false;
+    }
+
+    /** Match the exact same input normalization used by final submit. */
+    public function normalizeRecoveryInput(array $form, array $data): array
+    {
+        return $this->sanitizeBySchema($form, $data);
     }
 
     private function sanitizeBySchema(array $form, array $data): array

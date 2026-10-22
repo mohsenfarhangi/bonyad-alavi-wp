@@ -300,6 +300,24 @@ final class FormsPage
         echo '<label class="afe-span-2">پیام تکراری<textarea name="duplicate_message" rows="3" placeholder="این اطلاعات قبلاً ثبت شده است.">'.esc_textarea($config['message']).'</textarea><span class="description">در حالت ارجاع، لینک ثبت قبلی فقط زمانی نمایش داده می‌شود که مالکیت/دسترسی معتبر کاربر سمت PHP تأیید شود.</span></label>';
         echo '<label class="afe-span-2"><input type="checkbox" name="duplicate_resume_draft" value="1" '.checked($config['resume_draft'],true,false).'> پیشنهاد ادامه پیش‌نویس قبلی هنگام شناسایی ثبت تکراری</label>';
         echo '<p class="description afe-span-2">این گزینه فقط برای پیش‌نویسِ غیرقفل و فرم دارای ذخیره پیش‌نویس/ویرایش فعال عمل می‌کند. لینک ادامه تنها پس از تأیید مالکیت از طریق ورود وردپرس، کد رهگیری یا لینک خصوصی نمایش داده می‌شود؛ شناسه تکراری به‌تنهایی مجوز دسترسی نیست.</p>';
+
+        $otp=(array)($form['settings']['duplicate'] ?? []);
+        $phoneFields=[];
+        foreach ((array)($form['steps'] ?? []) as $step) {
+            foreach ((array)($step['items'] ?? []) as $item) {
+                if (($item['type'] ?? '') === 'tel' && !empty($item['name'])) {
+                    $phoneFields[(string)$item['name']]=(string)($item['label'] ?? $item['name']);
+                }
+            }
+        }
+        echo '<label class="afe-span-2"><input type="checkbox" name="duplicate_otp_enabled" value="1" '.checked(!empty($otp['otp_enabled']),true,false).'> بازیابی پیش‌نویس با کد یک‌بارمصرف پیامکی در صورت فراموشی کد رهگیری</label>';
+        echo '<label>فیلد شماره همراه ذخیره‌شده<select name="duplicate_otp_mobile_field"><option value="">انتخاب کنید</option>';
+        foreach($phoneFields as $key=>$label) echo '<option value="'.esc_attr($key).'" '.selected((string)($otp['otp_mobile_field']??''),$key,false).'>'.esc_html($label).'</option>';
+        echo '</select></label>';
+        echo '<label>سرویس‌دهنده بازیابی پیامکی<select name="duplicate_otp_provider">';
+        foreach(['default'=>'پیش‌فرض سراسری','farapayamak'=>'فراپیامک','melipayamak'=>'ملی پیامک','persian_woocommerce_sms'=>'Persian WooCommerce SMS'] as $key=>$label) echo '<option value="'.esc_attr($key).'" '.selected((string)($otp['otp_provider']??'default'),$key,false).'>'.esc_html($label).'</option>';
+        echo '</select></label>';
+        echo '<p class="description afe-span-2">کد فقط به شماره ذخیره‌شده در پیش‌نویس ارسال می‌شود؛ رمز یک‌بارمصرف ۵ دقیقه و مجوز ادامه فرم یک ساعت اعتبار دارد. ارسال آزمایشی پنل را در تنظیمات سراسری پیامک انجام دهید. ثبت‌های نهایی یا قفل‌شده بازیابی نمی‌شوند.</p>';
         echo '</div>';
         echo '<div class="afe-admin-callout"><strong>بررسی زنده:</strong> به‌محض اینکه همه فیلدهای Fingerprint در فرم تکمیل شوند، بدون انتظار برای ثبت نهایی بررسی تکراری بودن انجام می‌شود و پیام مناسب به کاربر نمایش داده می‌شود. بررسی نهایی سمت سرور در Submit همچنان برقرار است.</div>';
         echo '<div class="afe-admin-callout">حالت «اجازه ثبت» رکورد جدید را با <code>is_duplicate=1</code> و مرجع Submission اصلی ذخیره می‌کند. این علامت‌گذاری مستقل از Workflow است.</div>';
@@ -976,12 +994,23 @@ final class FormsPage
         )));
         $duplicateBehavior=sanitize_key((string)($_POST['duplicate_behavior']??'block'));
         if(!in_array($duplicateBehavior,DuplicatePolicy::BEHAVIORS,true)) $duplicateBehavior='block';
+        $otpPhoneFields=[];
+        foreach((array)($codeForm['steps']??[]) as $step) foreach((array)($step['items']??[]) as $item) {
+            if(($item['type']??'')==='tel' && !empty($item['name'])) $otpPhoneFields[]=(string)$item['name'];
+        }
+        $otpField=sanitize_key((string)wp_unslash($_POST['duplicate_otp_mobile_field']??''));
+        if(!in_array($otpField,$otpPhoneFields,true)) $otpField='';
+        $otpProvider=sanitize_key((string)wp_unslash($_POST['duplicate_otp_provider']??'default'));
+        if(!in_array($otpProvider,['default','farapayamak','melipayamak','persian_woocommerce_sms'],true)) $otpProvider='default';
         $settings['duplicate']=[
             'enabled'=>!empty($_POST['duplicate_enabled']) && $duplicateFields!==[],
             'fields'=>$duplicateFields,
             'behavior'=>$duplicateBehavior,
             'message'=>sanitize_textarea_field(wp_unslash($_POST['duplicate_message']??'')),
             'resume_draft'=>!empty($_POST['duplicate_resume_draft']),
+            'otp_enabled'=>!empty($_POST['duplicate_otp_enabled']) && $otpField!=='' && !empty($settings['editing_enabled']) && !empty($codeForm['settings']['save_draft']),
+            'otp_mobile_field'=>$otpField,
+            'otp_provider'=>$otpProvider,
         ];
         if(!empty($_POST['actions_override_enabled'])){
             $actionForm=$codeForm;

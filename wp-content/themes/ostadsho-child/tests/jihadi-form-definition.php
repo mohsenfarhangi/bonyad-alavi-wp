@@ -51,6 +51,9 @@ $checks = [
     'duplicate-enabled-and-blocked' => !empty($form['settings']['duplicate']['enabled'])
         && ($form['settings']['duplicate']['behavior'] ?? '') === 'block',
     'duplicate-keys-group-identity' => ($form['settings']['duplicate']['fields'] ?? []) === ['registration_code','group_mobile'],
+    'duplicate-otp-recovery-enabled' => !empty($form['settings']['duplicate']['otp_enabled'])
+        && ($form['settings']['duplicate']['otp_mobile_field'] ?? '') === 'group_mobile'
+        && ($form['settings']['duplicate']['otp_provider'] ?? '') === 'default',
     'duplicate-resume-draft-on' => !empty($form['settings']['duplicate']['resume_draft'])
         && !empty($form['settings']['save_draft']) && !empty($form['settings']['editing_enabled']),
     'title' => str_contains((string)($form['title'] ?? ''), 'شناسنامه گروه‌های مردمی و جهادی') && str_contains((string)($form['title'] ?? ''), 'شهید رسول عالم باقری'),

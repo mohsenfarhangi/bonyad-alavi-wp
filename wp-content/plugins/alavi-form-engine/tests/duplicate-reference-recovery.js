@@ -10,7 +10,7 @@ const source = fs.readFileSync(path.join(root, 'assets/js/frontend.js'), 'utf8')
 const css = fs.readFileSync(path.join(root, 'assets/css/frontend.css'), 'utf8');
 const renderer = fs.readFileSync(path.join(root, 'src/Form/Renderer.php'), 'utf8');
 
-const start = source.indexOf('  function duplicateResumeUi(form, payload) {');
+const start = source.indexOf('  function otpRecoveryMarkup(form, payload) {');
 const end = source.indexOf('  function showDuplicateNotice(form, payload, anchor) {', start);
 assert.ok(start >= 0 && end > start, 'Recovery implementation not found');
 

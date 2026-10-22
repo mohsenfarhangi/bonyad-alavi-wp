@@ -1988,7 +1988,7 @@
     fd.set('action', 'afe_check_duplicate');
     for (const [name, value] of source.entries()) {
       if (typeof value !== 'string') continue;
-      if (name.startsWith('afe_data[') || ['afe_form_slug','_afe_nonce','_afe_submission_id','_afe_edit_token','_afe_tracking'].includes(name)) {
+      if (name.startsWith('afe_data[') || ['afe_form_slug','_afe_nonce','_afe_submission_id','_afe_edit_token','_afe_tracking','_afe_recovery'].includes(name)) {
         fd.append(name, value);
       }
     }
@@ -2008,6 +2008,83 @@
     notice.removeAttribute('aria-busy');
   }
 
+
+  function otpRecoveryMarkup(form, payload) {
+    if (form.dataset.afeDuplicateOtp !== '1' || !payload?.otp_enabled) return '';
+    return [
+      '<div class="afe-duplicate-recovery" data-afe-otp-recovery>',
+      '<strong>کد رهگیری را فراموش کرده‌اید؟</strong>',
+      '<span class="afe-duplicate-live__hint">شماره همراه ثبت‌شده در فرم قبلی را وارد کنید تا کد یک‌بارمصرف ارسال شود.</span>',
+      '<div class="afe-duplicate-recovery__controls">',
+      '<input class="afe-otp-mobile" type="tel" maxlength="16" dir="ltr" inputmode="tel" autocomplete="tel" placeholder="09123456789" aria-label="شماره همراه ثبت قبلی">',
+      '<button type="button" class="afe-btn afe-btn-secondary afe-otp-start">ارسال کد تأیید پیامکی</button>',
+      '</div>',
+      '<div class="afe-duplicate-recovery__controls" data-afe-otp-verify-section hidden>',
+      '<input class="afe-otp-code" type="text" maxlength="6" dir="ltr" inputmode="numeric" autocomplete="one-time-code" placeholder="کد ۶ رقمی" aria-label="کد تأیید">',
+      '<button type="button" class="afe-btn afe-btn-secondary afe-otp-verify">تأیید و ادامه پیش‌نویس</button>',
+      '</div>',
+      '<span class="afe-otp-feedback" role="status" aria-live="polite"></span>',
+      '</div>'
+    ].join('');
+  }
+
+  async function requestSmsRecovery(form, button, verify = false) {
+    const area = button.closest('[data-afe-otp-recovery]');
+    const feedback = qs(area, '.afe-otp-feedback');
+    const mobile = qs(area, '.afe-otp-mobile');
+    const code = qs(area, '.afe-otp-code');
+    const id = String(area?.dataset.afeOtpRequest || '');
+    if (!area || !feedback || !mobile || !code) return;
+    if (!verify && !/^09[0-9]{9}$/.test(String(mobile.value || '').trim())) {
+      feedback.textContent = 'شماره همراه را به صورت ۱۱ رقم و با ۰۹ وارد کنید.';
+      mobile.focus();
+      return;
+    }
+    if (verify && (!id || !/^[0-9]{6}$/.test(String(code.value || '').trim()))) {
+      feedback.textContent = 'کد تأیید ۶ رقمی را وارد کنید.';
+      code.focus();
+      return;
+    }
+    button.disabled = true;
+    feedback.textContent = verify ? 'در حال بررسی کد تأیید...' : 'در حال ارسال درخواست پیامکی...';
+    const data = verify ? new FormData() : duplicateRequestData(form);
+    data.set('action', verify ? 'afe_otp_verify' : 'afe_otp_start');
+    data.set('afe_form_slug', String(qs(form, '[name="afe_form_slug"]')?.value || ''));
+    data.set('_afe_nonce', String(qs(form, '[name="_afe_nonce"]')?.value || ''));
+    if (verify) {
+      data.set('request_id', id);
+      data.set('code', String(code.value || '').trim());
+    } else {
+      data.set('mobile', String(mobile.value || '').trim());
+    }
+    try {
+      const response = await fetch(cfg.ajaxUrl, {method:'POST', body:data, credentials:'same-origin', cache:'no-store'});
+      const json = await response.json();
+      if (!response.ok || !json?.success) {
+        feedback.textContent = String(json?.data?.message || 'درخواست بازیابی ناموفق بود.');
+        return;
+      }
+      const payload = json.data || {};
+      if (verify && payload.edit_url) {
+        const url = new URL(String(payload.edit_url), window.location.href);
+        if (url.origin === window.location.origin && /^https?:$/.test(url.protocol)) {
+          window.location.assign(url.toString());
+          return;
+        }
+      }
+      if (!verify && payload.request_id) {
+        area.dataset.afeOtpRequest = String(payload.request_id);
+        const verifySection = qs(area, '[data-afe-otp-verify-section]');
+        if (verifySection) verifySection.hidden = false;
+      }
+      feedback.textContent = String(payload.message || 'درخواست پردازش شد.');
+    } catch (_) {
+      feedback.textContent = 'ارتباط با سامانه بازیابی برقرار نشد. دوباره تلاش کنید.';
+    } finally {
+      button.disabled = false;
+    }
+  }
+
   // The fingerprint identifies an existing submission but never authenticates
   // its owner. An edit_url is only actionable after PHP verifies a credential.
   function duplicateResumeUi(form, payload) {
@@ -2016,11 +2093,11 @@
       return `<a class="afe-result-link afe-duplicate-live__link" href="${escapeAttr(String(payload.edit_url))}">${label}</a>`;
     }
 
-    const needsRecovery = payload?.behavior === 'reference' || Boolean(payload?.resume_help);
+    const needsRecovery = payload?.behavior === 'reference' || Boolean(payload?.resume_help) || Boolean(payload?.otp_enabled);
     if (!needsRecovery) return '';
     const trackingEnabled = form.dataset.afeDuplicateTracking === '1';
     const hint = 'برای دسترسی به ثبت قبلی باید مالکیت آن با کد رهگیری، لینک خصوصی یا حساب کاربری تأیید شود.';
-    if (!trackingEnabled) return `<span class="afe-duplicate-live__hint">${hint}</span>`;
+    if (!trackingEnabled) return `<span class="afe-duplicate-live__hint">${hint}</span>` + otpRecoveryMarkup(form,payload);
 
     return `<div class="afe-duplicate-recovery" data-afe-duplicate-recovery>
       <span class="afe-duplicate-recovery__label">کد رهگیری ثبت قبلی</span>
@@ -2031,7 +2108,7 @@
       </div>
       <span class="afe-duplicate-recovery__feedback" role="status" aria-live="polite" hidden></span>
       <span class="afe-duplicate-live__hint">کد رهگیری فقط برای بررسی دسترسی استفاده می‌شود. بدون تأیید، اطلاعات ثبت قبلی نمایش داده نخواهد شد.</span>
-    </div>`;
+    </div>` + otpRecoveryMarkup(form,payload);
   }
 
   async function verifyDuplicateRecovery(form, button) {
@@ -2235,6 +2312,13 @@
     };
 
     form.addEventListener('click', async e => {
+      const smsStart = e.target.closest('.afe-otp-start');
+      const smsVerify = e.target.closest('.afe-otp-verify');
+      if ((smsStart || smsVerify) && form.contains(smsStart || smsVerify)) {
+        e.preventDefault();
+        await requestSmsRecovery(form, smsStart || smsVerify, Boolean(smsVerify));
+        return;
+      }
       const recoverButton = e.target.closest('.afe-duplicate-recovery__submit');
       if (recoverButton && form.contains(recoverButton)) {
         e.preventDefault();
