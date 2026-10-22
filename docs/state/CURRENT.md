@@ -23,7 +23,7 @@ AFE release goal همچنان live acceptance نسخه 1.0.28 و رفع blocker 
 ### Per-form recovery OTP message template and pattern mode (2026-10-22)
 - درخواست کاربر: متن پیامک بازیابی پیش‌نویس قابل تنظیم باشد یا با پترن/BodyId تأییدشده ارسال شود. `SmsOtpMessageFactory` به موتور بازیابی وصل شد، دو حالت free/pattern با `{{code}}` و `{{minutes}}`، اعتبارسنجی سخت‌گیرانه در سمت سرور و ورودی‌های اختصاصی تب جلوگیری از تکرار افزوده شدند.
 - سازگاری با تنظیمات قدیمی: فقدان کلید جدید => free با متن قبلی. در پترن، Provider باید mode=pattern را پشتیبانی کند؛ بدون fallback ناامن، با ارسال کد فقط به شماره ذخیره‌شده. لاگ امن SMS و محدودیت‌های درخواست/تأیید ثابت مانده‌اند.
-- تست‌های جدید `sms-otp-message-factory.php` و `sms-draft-resume-pattern.php` و regressions مرتبط؛ نسخه `1.0.28-dev.7` (DB/stable ثابت)، پذیرش وردپرس و تست SMS/Pattern زنده باقی است.
+- تست‌های جدید `sms-otp-message-factory.php` و `sms-draft-resume-pattern.php` و regressions مرتبط؛ **GitHub Actions [run 39785138638](https://github.com/mohsenfarhangi/bonyad-alavi-wp/actions/runs/39785138638) PASS** شامل PHP lint، Free/Pattern، بازیابی، Providerها و JS/CSS. نسخه `1.0.28-dev.7` (DB/stable ثابت)، پذیرش وردپرس و تست SMS/Pattern زنده باقی است.
 
 
 ### Global settings tabs and SMS debugging (2026-10-22)
@@ -339,7 +339,7 @@ Historical PASSهای AFE/Theme به HEAD جدید تعمیم داده نمی‌
 
 ## Next Agent Handoff
 
-**Current task:** تب‌بندی تنظیمات سراسری و دیباگ محدود SMS (Action/OTP/Test) تکمیل شده و نیازمند اعتبارسنجی CI و پذیرش بصری/عملکردی در wp-admin واقعی است. اتصال واقعی پنل پیامک/تحویل به گوشی و استقرار سایت هنوز تأیید نشده است.
+**Current task:** پیامک بازیابی فرم با متن آزاد و پترن/BodyId قابل تنظیم شده است؛ آزمون‌های متمرکز PHP/JS و Providerها PASS شده‌اند. پذیرش زنده ارسال پترن تأییدشده در وردپرس، بررسی Overrideهای فرم جهادی و تأیید رسیدن پیامک همچنان لازم است.
 
 
 **Start here:** [../INDEX.md](../INDEX.md) → [../modules/INDEX.md](../modules/INDEX.md).
