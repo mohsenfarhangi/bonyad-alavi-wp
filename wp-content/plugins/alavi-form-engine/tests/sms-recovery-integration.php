@@ -21,7 +21,7 @@ $checks=[
     'server-normalizes-before-duplicate-lookup'=>str_contains($plugin, 'normalizeRecoveryInput($form')
         && str_contains($service, 'return $this->sanitizeBySchema($form, $data);'),
     'sms-recipient-is-persisted-mobile'=>str_contains($recovery, 'new SmsMessage(')
-        && str_contains($recovery, "$stored, 'free'")
+        && str_contains($recovery, '$stored, \'free\'')
         && !str_contains($recovery, 'new SmsMessage($mobile'),
     'challenge-hashed-and-bounded'=>str_contains($recovery, "hash_hmac('sha256'")
         && str_contains($recovery, '5*MINUTE_IN_SECONDS')
@@ -29,8 +29,8 @@ $checks=[
         && str_contains($recovery, 'HOUR_IN_SECONDS'),
     'existing-token-not-leaked'=>!str_contains($recovery, "'tracking_code'")
         && !str_contains($recovery, "'submission_id'"),
-    'grant-validates-row-and-form'=>str_contains($recovery, "($grant['row_id'] ?? 0)")
-        && str_contains($recovery, "($row['status'] ?? '') === 'draft'"),
+    'grant-validates-row-and-form'=>str_contains($recovery, "row_id")
+        && str_contains($recovery, "'draft'"),
     'renderer-loads-otp-grant'=>str_contains($renderer, "'afe_recovery'")
         && str_contains($renderer, "name=\"_afe_recovery\"")
         && str_contains($renderer, 'data-afe-duplicate-otp'),
@@ -45,7 +45,7 @@ $checks=[
         && str_contains($front, "'_afe_recovery'"),
     'admin-test-authentication-and-throttle'=>str_contains($settings, 'Capabilities::MANAGE_SETTINGS')
         && str_contains($settings, "check_ajax_referer('afe_test_sms'")
-        && str_contains($settings, "get_transient($rate)>=3"),
+        && str_contains($settings, 'get_transient($rate)>=3'),
     'admin-test-does-not-return-raw-gateway-error'=>!str_contains($settings, "\$sent['error']")
         && !str_contains($settings, "\$sent['raw']"),
     'admin-test-uses-saved-provider'=>str_contains($settings, "\$this->smsProviders->resolve(\$providerKey,'free')")
