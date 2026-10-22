@@ -125,6 +125,8 @@ Lock server-side enforce می‌شود و public renderer با admin capability 
 
 ## Duplicate Detection
 
+**راهنمای مدیر و کاربر:** [بررسی تکراری بودن فرم، ارجاع به ثبت قبلی و ادامه پیش‌نویس](afe-duplicate-detection-user-guide.md).
+
 Features:
 - multi-field fingerprint
 - Persian/Arabic digit normalization

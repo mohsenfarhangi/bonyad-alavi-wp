@@ -19,6 +19,8 @@
 | MODULE-HOME-NEWS | Homepage News Elementor Widget | homepage, news, WP_Query, taxonomy, cards, Elementor | Reference-faithful `ba-news` widget with shared WP_Query service, configurable date/card metadata and responsive 4/2/1 grid | [theme-home-news-widget.md](theme-home-news-widget.md) |
 | MODULE-SECTION-HEADING | Reusable Section Heading Elementor Widget | section heading, eyebrow, title, lead, action, Elementor | Standalone reference-faithful `ba-section-heading` widget with Default/Stack/Card variants and scoped style controls | [theme-section-heading-widget.md](theme-section-heading-widget.md) |
 
+**راهنمای کاربردی تشخیص تکرار برای مدیر و متقاضی:** [بررسی ثبت تکراری و ادامه پیش‌نویس](afe-duplicate-detection-user-guide.md).
+
 برای task فرم جهادی از `MODULE-JIHADI-FORM` شروع کن و در صورت تغییر Engine سپس `MODULE-AFE`/`MODULE-AFE-EXTENSION` را بخوان.
 
 برای فرم تماس با ما از `MODULE-CONTACT-FORM` شروع کن.
