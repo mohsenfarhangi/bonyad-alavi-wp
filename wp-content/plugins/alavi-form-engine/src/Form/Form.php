@@ -63,7 +63,7 @@ final class Form
                 'brand_mark_alt' => '',
                 'captcha' => 'custom',
                 'rate_limit' => 10,
-                'duplicate' => ['resume_draft' => false],
+                'duplicate' => ['resume_draft' => false, 'otp_enabled'=>false, 'otp_mobile_field'=>'', 'otp_provider'=>'default'],
             ], $this->settings),
             'workflow' => $this->workflow ?: [
                 'draft' => 'پیش‌نویس',

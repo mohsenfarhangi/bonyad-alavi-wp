@@ -3,7 +3,7 @@
 **Status:** active development / pre-acceptance  
 **Path:** `wp-content/plugins/alavi-form-engine/`  
 **Namespace:** `BonyadAlavi\FormEngine`  
-**Development version:** `1.0.28-dev.4`  
+**Development version:** `1.0.28-dev.5`  
 **DB checkpoint:** `1.0.5-dev.2`  
 **Stable baseline/tag documented:** `1.0.27`  
 **PHP:** `>=8.3`
@@ -125,6 +125,8 @@ Lock server-side enforce می‌شود و public renderer با admin capability 
 
 ## Duplicate Detection
 
+**راهنمای مدیر و کاربر:** [بررسی تکراری بودن فرم، ارجاع به ثبت قبلی و ادامه پیش‌نویس](afe-duplicate-detection-user-guide.md).
+
 Features:
 - multi-field fingerprint
 - Persian/Arabic digit normalization
@@ -171,6 +173,17 @@ Security:
 - capability/session/application-password meta keys block می‌شوند.
 - user-meta mappings قبل از write کامل prevalidate می‌شوند.
 - Retry current enabled/event/condition را دوباره resolve می‌کند.
+
+## SMS OTP recovery for forgotten tracking codes (2026-10-22)
+
+- **عمومی و اختیاری به‌ازای هر فرم:** تنظیمات `settings.duplicate.otp_enabled`، `otp_mobile_field` و `otp_provider`. پیش‌فرض سایر فرم‌ها خاموش است؛ Source Definition فرم جهادی `group_mobile` را انتخاب و OTP را فعال می‌کند (Admin override ذخیره‌شده می‌تواند تقدم داشته باشد).
+- بازیابی فقط برای ثبت **`draft`، غیرقفل و از همان فرم** که fingerprint آن با ورودی فرم تطابق دارد مجاز است؛ شماره گیرنده **فقط از داده ذخیره‌شده رکورد** خوانده می‌شود و باید با شماره واردشده مطابقت داشته باشد.
+- درخواست `afe_otp_start` با nonce فرم، ورودی‌های نرمال‌شده مشابه Submit و شماره واردشده انجام می‌شود. برای فرم/شماره نامعتبر، پاسخ عمومی یکسان است؛ هیچ وضعیت/شناسه/داده ثبت قبلی بازگردانده نمی‌شود.
+- کد ۶ رقمی تصادفی با `hash_hmac` و WordPress salt به‌صورت Transient برای حداکثر **۵ دقیقه** ذخیره می‌شود؛ حداکثر **۵ تلاش تأیید** و **۳ درخواست برای فرم/IP و شماره در ۱۵ دقیقه**. بدون کلید واقعی سرویس پیامک، ارسال موفق آزمایش نشده است.
+- `afe_otp_verify` پس از تأیید کد، challenge را باطل و یک grant تصادفی ۲۵۶بیتی با `afe_recovery` و عمر **۱ ساعت** صادر می‌کند. این grant فقط برای همان فرم و همان پیش‌نویس اعتبار دارد و در `Renderer::resolveEditing` / `SubmissionService::canApplicantAccess` / `canEdit` بررسی می‌شود؛ هنگام Submit نیز `_afe_recovery` همراه فرم است. کد رهگیری اصلی برای بازیابی افشا نمی‌شود.
+- پیامک از `SmsProviderRegistry` با mode `free` و provider پیش‌فرض یا انتخاب‌شده ارسال می‌شود؛ به‌شکل ارسال عادی و بدون نیاز به bodyId. مدیر باید وضعیت ارسال واقعی سرویس/شماره مجاز را بررسی کند.
+- **تست اتصال پنل:** بخش «تست اتصال پنل پیامک» در تنظیمات سراسری AFE، ارسال واقعی به شماره تعیین‌شده مدیر از طریق Provider ذخیره‌شده را با endpoint ادمین `afe_sms_test` اجرا می‌کند؛ فقط با capability `afe_manage_settings`، nonce و سقف ۳ تلاش در ۱۰ دقیقه. پاسخ خام یا اطلاعات محرمانه سرویس به کاربر برگردانده نمی‌شود. موفقیت API فقط تأیید پذیرش درخواست است و تحویل به گوشی باید جداگانه کنترل شود. ممکن است هزینه داشته باشد.
+- تست‌های `tests/sms-draft-recovery.php` و `tests/sms-recovery-integration.php` و regression‌های قبلی؛ پذیرش زنده هنوز لازم است.
 
 ## Duplicate reference and secure inline recovery (2026-10-22)
 

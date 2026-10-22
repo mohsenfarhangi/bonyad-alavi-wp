@@ -13,6 +13,8 @@ use BonyadAlavi\FormEngine\Actions\Sms\FarapayamakProvider;
 use BonyadAlavi\FormEngine\Actions\Sms\PersianWooCommerceSmsProvider;
 use BonyadAlavi\FormEngine\Actions\Sms\SmsProviderRegistry;
 use BonyadAlavi\FormEngine\Actions\Sms\SmsSettings;
+use BonyadAlavi\FormEngine\Security\SmsDraftRecovery;
+use BonyadAlavi\FormEngine\Actions\Sms\SmsMessage;
 use BonyadAlavi\FormEngine\Actions\Pdf\PdfGenerator;
 use BonyadAlavi\FormEngine\Admin\DatabasePage;
 use BonyadAlavi\FormEngine\Admin\FormsPage;
@@ -181,14 +183,15 @@ final class Plugin
         do_action('afe_register_event_definitions', $eventRegistry);
         do_action('afe_register_events', $events);
 
+        $smsRecovery = new SmsDraftRecovery($submissionRepo, $duplicatePolicy, $smsProviders);
         $service = new SubmissionService(
             $registry, $formRepo, $submissionRepo, $security, $validator,
             $fileUploader, $actions, $events, $dedicated, $formAccess,
-            $duplicatePolicy, $duplicateRepo, $actionExecutions, $inputMaskRegistry
+            $duplicatePolicy, $duplicateRepo, $actionExecutions, $inputMaskRegistry, $smsRecovery
         );
         $previewPresenter = new FormDataPresenter($sources, $dates);
         $previewRenderer = new PreviewRenderer($previewPresenter, $submissionRepo, $templates);
-        $renderer = new Renderer($registry, $formRepo, $submissionRepo, $service, $sources, $security, $styleIsolation, $dates, $previewRenderer, $templates);
+        $renderer = new Renderer($registry, $formRepo, $submissionRepo, $service, $sources, $security, $styleIsolation, $dates, $previewRenderer, $templates, $smsRecovery);
 
         $formRepo->syncRegistry($registry);
         (new TemplateOverrideNormalizer($formRepo,$templates))->run($registry);
@@ -221,6 +224,7 @@ final class Plugin
         $this->container->set(TokenResolver::class,$tokenResolver);
         $this->container->set(SecretStore::class,$secretStore);
         $this->container->set(SmsProviderRegistry::class,$smsProviders);
+        $this->container->set(SmsDraftRecovery::class,$smsRecovery);
         $this->container->set(ActionRegistry::class,$actionRegistry);
         $this->container->set(ActionExecutionRepository::class,$actionExecutions);
         $this->container->set(ActionManager::class,$actions);
@@ -242,6 +246,11 @@ final class Plugin
         add_action('wp_ajax_nopriv_afe_submit', [$this,'ajaxSubmit']);
         add_action('wp_ajax_afe_check_duplicate', [$this,'ajaxCheckDuplicate']);
         add_action('wp_ajax_nopriv_afe_check_duplicate', [$this,'ajaxCheckDuplicate']);
+        add_action('wp_ajax_afe_otp_start', [$this,'ajaxOtpStart']);
+        add_action('wp_ajax_nopriv_afe_otp_start', [$this,'ajaxOtpStart']);
+        add_action('wp_ajax_afe_otp_verify', [$this,'ajaxOtpVerify']);
+        add_action('wp_ajax_nopriv_afe_otp_verify', [$this,'ajaxOtpVerify']);
+        add_action('wp_ajax_afe_sms_test', [$this,'ajaxSmsTest']);
         add_action('wp_ajax_afe_request_edit', [$this,'ajaxRequestEdit']);
         add_action('wp_ajax_nopriv_afe_request_edit', [$this,'ajaxRequestEdit']);
         add_action('wp_ajax_afe_refresh_captcha', [$this,'ajaxRefreshCaptcha']);
@@ -256,6 +265,7 @@ final class Plugin
             $reportsPage = new ReportsPage($registry,$submissionRepo,$formAccess,$dates);
             $databasePage = new DatabasePage(new Migrator(),$registry,$dedicated,$dates);
             $settingsPage = new SettingsPage($registry,$formAccess,$secretStore,$smsProviders);
+            $this->container->set(SettingsPage::class, $settingsPage);
             (new Menu($formsPage,$submissionsPage,$reportsPage,$databasePage,$settingsPage))->register();
         }
 
@@ -339,6 +349,47 @@ final class Plugin
         }
     }
 
+    /** AJAX SMS recovery is isolated from the duplicate query and never reveals a record. */
+    public function ajaxOtpStart(): void
+    {
+        $this->otpEndpoint(false);
+    }
+
+    public function ajaxOtpVerify(): void
+    {
+        $this->otpEndpoint(true);
+    }
+
+    private function otpEndpoint(bool $verify): void
+    {
+        nocache_headers();
+        $slug = sanitize_key(wp_unslash($_POST['afe_form_slug'] ?? ''));
+        if ($slug === '' || !wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['_afe_nonce'] ?? '')), 'afe_submit_'.$slug)) {
+            wp_send_json_error(['message'=>'اعتبار فرم منقضی شده است.'],403);
+        }
+        /** @var SubmissionService $service */
+        $service = $this->container->get(SubmissionService::class);
+        /** @var SmsDraftRecovery $recovery */
+        $recovery = $this->container->get(SmsDraftRecovery::class);
+        try {
+            $form = $service->resolvedForm($slug);
+            $result = $verify
+                ? $recovery->verify($form, sanitize_text_field(wp_unslash($_POST['request_id'] ?? '')), sanitize_text_field(wp_unslash($_POST['code'] ?? '')))
+                : $recovery->start($form, $service->normalizeRecoveryInput($form, (array)wp_unslash($_POST['afe_data'] ?? [])), sanitize_text_field(wp_unslash($_POST['mobile'] ?? '')));
+            if (empty($result['success'])) wp_send_json_error(['message'=>$result['message']],422);
+            wp_send_json_success($result);
+        } catch (\Throwable) {
+            wp_send_json_error(['message'=>'درخواست بازیابی قابل انجام نیست.'],422);
+        }
+    }
+
+    public function ajaxSmsTest(): void
+    {
+        /** @var SettingsPage $page */
+        $page = $this->container->get(SettingsPage::class);
+        $page->testSms();
+    }
+
     public function ajaxSubmit(): void
     {
         /** @var SubmissionService $service */
@@ -356,6 +407,10 @@ final class Plugin
                 if($code==='duplicate'){
                     $payload['duplicate']=true;
                     if(!empty($errorData['edit_url'])) $payload['edit_url']=esc_url_raw((string)$errorData['edit_url']);
+                    if(!empty($errorData['behavior'])) $payload['behavior']=(string)$errorData['behavior'];
+                    if(!empty($errorData['otp_enabled'])) $payload['otp_enabled']=true;
+                    if(!empty($errorData['resume_help'])) $payload['resume_help']=true;
+                    if(!empty($errorData['resume_draft'])) $payload['resume_draft']=true;
                 }
                 wp_send_json_error($payload, 422);
             }
