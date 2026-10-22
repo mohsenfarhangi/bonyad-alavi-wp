@@ -103,6 +103,9 @@ $noDraft=$method->invoke($instance,$saveDisabled,$decision);
 $editDisabled=$form;
 $editDisabled['settings']['editing_enabled']=false;
 $noEdit=$method->invoke($instance,$editDisabled,$decision);
+$noModesForm=$form;
+$noModesForm['settings']['editing_modes']=[];
+$noModes=$method->invoke($instance,$noModesForm,$decision);
 $nonduplicate=$method->invoke($instance,$form,new DuplicateDecision(true,'fingerprint',null,'block',''));
 
 $GLOBALS['afe_test_user_id']=0;
@@ -129,6 +132,7 @@ $checks=[
     'opt-out-preserves-default-behavior'=>$off===[],
     'requires-draft-support'=>$noDraft===[],
     'requires-edit-support'=>$noEdit===[],
+    'requires-auth-recovery-method'=>$noModes===[],
     'nonduplicate-no-resume-hint'=>$nonduplicate===[],
     'submit-error-recovery-hint-but-no-link'=>($submitError->get_error_data()['resume_help']??false)===true
         && !isset($submitError->get_error_data()['edit_url']),
