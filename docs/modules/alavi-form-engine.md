@@ -3,7 +3,7 @@
 **Status:** active development / pre-acceptance  
 **Path:** `wp-content/plugins/alavi-form-engine/`  
 **Namespace:** `BonyadAlavi\FormEngine`  
-**Development version:** `1.0.28-dev.3`  
+**Development version:** `1.0.28-dev.4`  
 **DB checkpoint:** `1.0.5-dev.2`  
 **Stable baseline/tag documented:** `1.0.27`  
 **PHP:** `>=8.3`
@@ -171,6 +171,15 @@ Security:
 - capability/session/application-password meta keys block می‌شوند.
 - user-meta mappings قبل از write کامل prevalidate می‌شوند.
 - Retry current enabled/event/condition را دوباره resolve می‌کند.
+
+## Duplicate reference and secure inline recovery (2026-10-22)
+
+- **علت UX قبلی:** گزینه `duplicate.behavior=reference` بدون دسترسی معتبر به ثبت قبلی فقط پیام تکراری می‌داد؛ fingerprint به‌تنهایی حق نمایش `edit_url` ندارد و نباید به‌عنوان احراز هویت استفاده شود.
+- **اصلاح:** وقتی رفتار `reference` (یا `duplicate.resume_draft` فعال) و دسترسی ورود با کد رهگیری در فرم فعال باشد، روی همان پیام تشخیص تکراری یک فیلد «کد رهگیری ثبت قبلی» و دکمه «تأیید و ورود به ثبت قبلی» نمایش داده می‌شود. در همان `afe_check_duplicate`، اعتبار کد به‌صورت POST با nonce فرم و با تطبیق submission تکراری بررسی می‌شود. نتیجه فقط برای مالک تأیید‌شده شامل `edit_url` است؛ لینک مستقیم برای WordPress account/link/token معتبر همچنان حفظ می‌شود.
+- اگر پیوند خصوصی یا حساب کاربری موجود باشد می‌توان از مسیر قبلی استفاده کرد؛ بدون کد رهگیری/لینک خصوصی/حساب مالک **اجازه بازیابی و مشاهده اطلاعات داده نمی‌شود**. هیچ شناسه/وضعیت/محتوای فرم برای کاربر بی‌مجوز افشا نمی‌شود. موارد نهایی و قفل‌شده فقط طبق قواعد اصلی دسترسی/ویرایش قابل مشاهده‌اند.
+- کنترل HTML `data-afe-duplicate-tracking` از تنظیمات فرم می‌آید. تلاش‌های بازیابی غیرمتصل به ویرایش مجاز با حد ۱۲ بار در ۱۰ دقیقه در سطح فرم/IP محدود می‌شوند؛ preflight عادی و بررسی‌های هنگام ویرایش معتبر مصرف محدودیت نمی‌کنند.
+- پیام submit نیز `behavior` مؤثر را برمی‌گرداند تا همان UI بازیابی در خطای ثبت نهایی ظاهر شود. کش CSS/JS با توسعه `AFE_VERSION=1.0.28-dev.4` باطل می‌شود؛ هیچ مهاجرت DB لازم نیست.
+- تست‌ها: `tests/duplicate-draft-resume.php` (دسترسی PHP) و `tests/duplicate-reference-recovery.js` (اجرای JS در sandbox، redirect فقط هم‌مبدأ و فقط با تأیید سرور). اعتبارسنجی زنده WordPress هنوز باز است.
 
 ## SMS
 

@@ -213,7 +213,15 @@ textarea.afe-control { resize:vertical; min-height:118px; line-height:1.9; }
 .afe-duplicate-live[data-state="error"] .afe-duplicate-live__content { background:#fff2f0; color:#8f2018; border:1px solid #ffd3cd; }
 .afe-duplicate-live__hint { font-size:12px; opacity:.86; }
 .afe-duplicate-live__link { align-self:flex-start; margin-top:3px; font-weight:800; }
-.afe-form .afe-draft-resume-jump { display:inline; padding:0; margin:0 4px; border:0; background:transparent; font:inherit; text-decoration:underline; cursor:pointer; }
+.afe-form .afe-duplicate-recovery { display:flex; flex-direction:column; gap:9px; width:100%; max-width:530px; margin-top:8px; }
+.afe-form .afe-duplicate-recovery__label { font-weight:700; font-size:13px; }
+.afe-form .afe-duplicate-recovery__controls { display:flex; flex-wrap:wrap; align-items:center; gap:8px; }
+.afe-form .afe-duplicate-recovery__input { flex:1 1 175px; min-width:0; max-width:260px; min-height:44px; padding:9px 12px; background:#fff; color:#243a33; border:1px solid var(--afe-border); border-radius:9px; box-sizing:border-box; text-align:left; direction:ltr; }
+.afe-form .afe-duplicate-recovery__input:focus { outline:2px solid var(--afe-green-dark); outline-offset:2px; }
+.afe-form .afe-duplicate-recovery__submit { flex:0 1 auto; min-height:44px; white-space:normal; }
+.afe-form .afe-duplicate-recovery__feedback { font-size:12px; line-height:1.8; }
+.afe-form .afe-duplicate-recovery__feedback[hidden] { display:none !important; }
+@media (max-width:480px) { .afe-form .afe-duplicate-recovery__controls { align-items:stretch; flex-direction:column; } .afe-form .afe-duplicate-recovery__input, .afe-form .afe-duplicate-recovery__submit { width:100%; max-width:none; } }
 .afe-success { background:var(--afe-green-soft); color:var(--afe-green-dark); border:1px solid #cce0d8; display:flex; gap:9px; flex-direction:column; }
 .afe-result-link { color:var(--afe-green-dark); font-weight:800; }
 /* Hide the honeypot without creating RTL horizontal overflow. */

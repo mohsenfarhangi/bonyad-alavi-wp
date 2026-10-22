@@ -1,0 +1,50 @@
+name: AFE duplicate reference recovery
+
+on:
+  push:
+    branches:
+      - fix/afe-duplicate-reference-recovery
+  pull_request:
+    branches: [main]
+    paths:
+      - 'wp-content/plugins/alavi-form-engine/src/Submission/SubmissionService.php'
+      - 'wp-content/plugins/alavi-form-engine/src/Form/Renderer.php'
+      - 'wp-content/plugins/alavi-form-engine/assets/js/frontend.js'
+      - 'wp-content/plugins/alavi-form-engine/assets/css/frontend.css'
+      - 'wp-content/plugins/alavi-form-engine/tests/duplicate-draft-resume.php'
+      - 'wp-content/plugins/alavi-form-engine/tests/duplicate-reference-recovery.js'
+      - 'wp-content/plugins/alavi-form-engine/alavi-form-engine.php'
+      - '.github/workflows/afe-duplicate-reference-recovery.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  duplicate-reference:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          coverage: none
+      - name: PHP syntax
+        run: |
+          php -l wp-content/plugins/alavi-form-engine/src/Submission/SubmissionService.php
+          php -l wp-content/plugins/alavi-form-engine/src/Form/Renderer.php
+          php -l wp-content/plugins/alavi-form-engine/tests/duplicate-draft-resume.php
+          php -l wp-content/plugins/alavi-form-engine/alavi-form-engine.php
+      - name: Duplicate engine and access security regression
+        run: |
+          php wp-content/plugins/alavi-form-engine/tests/duplicate-policy.php
+          php wp-content/plugins/alavi-form-engine/tests/duplicate-repository.php
+          php wp-content/plugins/alavi-form-engine/tests/live-duplicate-check.php
+          php wp-content/plugins/alavi-form-engine/tests/duplicate-draft-resume.php
+      - name: Project form compatibility
+        run: php wp-content/themes/ostadsho-child/tests/jihadi-form-definition.php
+      - name: Browser JS recovery logic and CSS contract
+        run: |
+          node --check wp-content/plugins/alavi-form-engine/assets/js/frontend.js
+          node wp-content/plugins/alavi-form-engine/tests/duplicate-reference-recovery.js
+          node wp-content/plugins/alavi-form-engine/tests/frontend-css-regression.js

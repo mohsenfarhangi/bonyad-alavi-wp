@@ -6,7 +6,7 @@
 
 پروژه در توسعه فعال است.
 
-- **Alavi Form Engine:** `1.0.28-dev.3`، DB `1.0.5-dev.2`، stable baseline/tag `1.0.27`; production bump هنوز به live acceptance وابسته است.
+- **Alavi Form Engine:** `1.0.28-dev.4`، DB `1.0.5-dev.2`، stable baseline/tag `1.0.27`; production bump هنوز به live acceptance وابسته است.
 - **Ostadsho child theme:** custom integration layer روی Theme header `2.8`; version docs legacy v0.x به state history مهاجرت کرده‌اند.
 
 ## Current Goal
@@ -19,6 +19,13 @@
 AFE release goal همچنان live acceptance نسخه 1.0.28 و رفع blocker واقعی پیش از production promotion است.
 
 ## Recently Completed
+
+### Duplicate reference: inline credential verification (2026-10-22)
+- مشکل: رفتار `reference` روی فرم تازه چون credential مالک قبلی همراه درخواست نیست، صرفاً پیام تکراری می‌داد؛ این محدودیت امنیتی بوده اما مسیر قابل اقدام داخل پیام نبود.
+- رفع UX: ورودی کد رهگیری داخل پیام تکراری + AJAX بررسی همان submission + redirect فقط با `edit_url` تأییدشده و هم‌مبدأ؛ در صورت ورود با حساب قبلی یا لینک خصوصی، رفتار امن قبلی حفظ می‌شود. در submit error هم رفتار `reference` منتقل می‌شود.
+- محافظت: بدون کد معتبر هیچ لینک/شناسه/اطلاعاتی افشا نمی‌شود؛ تلاش بازیابی حداکثر ۱۲ بار در ۱۰ دقیقه بر اساس فرم/IP، بدون تاثیر بر live duplicate معمولی و ویرایش مجاز.
+- `duplicate-draft-resume.php` و `duplicate-reference-recovery.js` توسعه یافته‌اند؛ نسخه توسعه `1.0.28-dev.4` برای کش JS/CSS، بدون تغییر stable و DB. **پذیرش واقعی فرم جهادی در WordPress همچنان باز است.**
+
 
 ### Farapayamak REST JSON SMS provider (2026-10-22)
 - Provider مستقل `farapayamak` با `SendSMS` و `BaseServiceNumber` اضافه شد؛ POST JSON و نام پارامترها دقیقاً طبق مستندات REST.

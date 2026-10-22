@@ -152,9 +152,13 @@ final class Renderer
         $duplicateLive = $duplicateFields !== []
             ? '<div class="afe-duplicate-live" data-afe-duplicate-live aria-live="polite" aria-atomic="true" hidden></div>'
             : '';
+        // The applicant must present an actual tracking credential before the
+        // public duplicate check may return an existing submission's edit URL.
+        $duplicateTracking = !empty($form['settings']['editing_enabled'])
+            && in_array('tracking', (array)($form['settings']['editing_modes'] ?? []), true);
 
         return $customCssHtml . '<div class="'.esc_attr($shellClass).'" data-afe-isolation="'.esc_attr($this->styleIsolation->modeForForm($form)).'" dir="rtl">'.$editingNotice.$lockPanel.$resumeBox
-            . '<form class="afe-form" method="post" enctype="multipart/form-data" novalidate data-form="'.esc_attr($slug).'"'.($locked?' data-afe-readonly="1"':'').' data-afe-lock-after-submit="'.(!empty($form['settings']['lock_after_submit'])?'1':'0').'" data-afe-preview-enabled="'.($previewEnabled?'1':'0').'" data-afe-lock-warning="'.esc_attr((string)($form['settings']['lock_warning']??'')).'"'.$duplicateAttrs.'>'
+            . '<form class="afe-form" method="post" enctype="multipart/form-data" novalidate data-form="'.esc_attr($slug).'"'.($locked?' data-afe-readonly="1"':'').' data-afe-lock-after-submit="'.(!empty($form['settings']['lock_after_submit'])?'1':'0').'" data-afe-preview-enabled="'.($previewEnabled?'1':'0').'" data-afe-lock-warning="'.esc_attr((string)($form['settings']['lock_warning']??'')).'" data-afe-duplicate-tracking="'.($duplicateTracking?'1':'0').'"'.$duplicateAttrs.'>'
             . $hidden . $duplicateLive . $content
             . ($locked?'':'<div class="afe-captcha-wrap">'.$this->security->captchaMarkup((string)($form['settings']['captcha']??'custom')).'</div>')
             . '<div class="afe-form-result" aria-live="polite"></div>'

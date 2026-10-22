@@ -2008,20 +2008,77 @@
     notice.removeAttribute('aria-busy');
   }
 
-  // Draft continuation is never granted by the duplicate fingerprint alone.
-  // The backend exposes edit_url only after verifying existing credentials.
+  // The fingerprint identifies an existing submission but never authenticates
+  // its owner. An edit_url is only actionable after PHP verifies a credential.
   function duplicateResumeUi(form, payload) {
     if (payload?.edit_url) {
       const label = payload?.resume_draft ? 'ادامه پیش‌نویس قبلی' : 'مشاهده یا ادامه ثبت قبلی';
       return `<a class="afe-result-link afe-duplicate-live__link" href="${escapeAttr(String(payload.edit_url))}">${label}</a>`;
     }
-    if (!payload?.resume_help) return '';
-    const hasTracking = Boolean(form.closest('.afe-shell')?.querySelector('.afe-resume-code'));
-    const hint = 'اگر قبلاً پیش‌نویس ذخیره کرده‌اید، از روش بازیابی فعال در فرم (کد رهگیری، لینک اختصاصی یا حساب کاربری) برای ادامه همان ثبت استفاده کنید.';
-    const action = hasTracking
-      ? '<button type="button" class="afe-result-link afe-draft-resume-jump">ورود با کد رهگیری</button>'
-      : '';
-    return `<span class="afe-duplicate-live__hint">${hint} ${action}</span>`;
+
+    const needsRecovery = payload?.behavior === 'reference' || Boolean(payload?.resume_help);
+    if (!needsRecovery) return '';
+    const trackingEnabled = form.dataset.afeDuplicateTracking === '1';
+    const hint = 'برای دسترسی به ثبت قبلی باید مالکیت آن با کد رهگیری، لینک خصوصی یا حساب کاربری تأیید شود.';
+    if (!trackingEnabled) return `<span class="afe-duplicate-live__hint">${hint}</span>`;
+
+    return `<div class="afe-duplicate-recovery" data-afe-duplicate-recovery>
+      <span class="afe-duplicate-recovery__label">کد رهگیری ثبت قبلی</span>
+      <div class="afe-duplicate-recovery__controls">
+        <input type="text" class="afe-duplicate-recovery__input" dir="ltr" maxlength="120"
+          autocomplete="off" placeholder="کد رهگیری" aria-label="کد رهگیری ثبت قبلی">
+        <button type="button" class="afe-btn afe-btn-secondary afe-duplicate-recovery__submit">تأیید و ورود به ثبت قبلی</button>
+      </div>
+      <span class="afe-duplicate-recovery__feedback" role="status" aria-live="polite" hidden></span>
+      <span class="afe-duplicate-live__hint">کد رهگیری فقط برای بررسی دسترسی استفاده می‌شود. بدون تأیید، اطلاعات ثبت قبلی نمایش داده نخواهد شد.</span>
+    </div>`;
+  }
+
+  async function verifyDuplicateRecovery(form, button) {
+    const area = button?.closest('[data-afe-duplicate-recovery]');
+    const input = qs(area, '.afe-duplicate-recovery__input');
+    const feedback = qs(area, '.afe-duplicate-recovery__feedback');
+    const code = String(input?.value || '').trim();
+    if (!area || !input || !feedback) return;
+    if (!code) {
+      feedback.textContent = 'کد رهگیری را وارد کنید.';
+      feedback.hidden = false;
+      input.focus();
+      return;
+    }
+
+    const fingerprint = JSON.stringify(Array.from(duplicateRequestData(form).entries()));
+    const fd = duplicateRequestData(form);
+    fd.set('_afe_tracking', code);
+    button.disabled = true;
+    input.disabled = true;
+    feedback.hidden = false;
+    feedback.textContent = 'در حال بررسی کد رهگیری...';
+    try {
+      const res = await fetch(cfg.ajaxUrl, {
+        method: 'POST',
+        body: fd,
+        credentials: 'same-origin',
+        cache: 'no-store',
+      });
+      const json = await res.json();
+      // Never use credentials to redirect if form values changed mid-request.
+      if (fingerprint !== JSON.stringify(Array.from(duplicateRequestData(form).entries()))) return;
+      const data = json?.data || {};
+      if (res.ok && json?.success && data.duplicate && data.edit_url) {
+        const target = new URL(String(data.edit_url), window.location.href);
+        if (target.origin === window.location.origin && /^https?:$/.test(target.protocol)) {
+          window.location.assign(target.toString());
+          return;
+        }
+      }
+      feedback.textContent = 'دسترسی تأیید نشد. کد رهگیری را بررسی کنید یا از لینک اختصاصی ثبت قبلی استفاده کنید.';
+    } catch (error) {
+      feedback.textContent = 'بررسی کد رهگیری انجام نشد. دوباره تلاش کنید.';
+    } finally {
+      button.disabled = false;
+      input.disabled = false;
+    }
   }
 
   function showDuplicateNotice(form, payload, anchor) {
@@ -2037,7 +2094,7 @@
 
     const blocking = Boolean(payload?.blocking);
     const behavior = String(payload?.behavior || 'block');
-    const state = payload?.resume_draft ? 'warning' : (blocking ? 'error' : 'warning');
+    const state = payload?.resume_draft || behavior === 'reference' ? 'warning' : (blocking ? 'error' : 'warning');
     const message = String(payload?.message || 'این اطلاعات قبلاً ثبت شده است.');
     let extra = '';
     if (behavior === 'allow') extra = '<span class="afe-duplicate-live__hint">طبق تنظیمات فرم، ایجاد ثبت جدید همچنان مجاز است.</span>';
@@ -2178,12 +2235,10 @@
     };
 
     form.addEventListener('click', async e => {
-      const resumeJump = e.target.closest('.afe-draft-resume-jump');
-      if (resumeJump) {
+      const recoverButton = e.target.closest('.afe-duplicate-recovery__submit');
+      if (recoverButton && form.contains(recoverButton)) {
         e.preventDefault();
-        const input = form.closest('.afe-shell')?.querySelector('.afe-resume-code');
-        input?.scrollIntoView({behavior:'smooth', block:'center'});
-        input?.focus({preventScroll:true});
+        await verifyDuplicateRecovery(form, recoverButton);
         return;
       }
       const errorLink = e.target.closest('[data-afe-error-target]');
