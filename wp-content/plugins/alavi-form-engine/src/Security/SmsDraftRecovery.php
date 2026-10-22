@@ -81,11 +81,15 @@ final class SmsDraftRecovery
             set_transient($phoneKey, (int)get_transient($phoneKey)+1, 15*MINUTE_IN_SECONDS);
         }
         $key = $this->challengeKey($requestId);
-        set_transient($key, [
-            'form'=>$slug, 'row_id'=>$rowId, 'attempts'=>0,
-            'hash'=>$this->hashCode($requestId, $code),
-            'expires'=>time()+5*MINUTE_IN_SECONDS,
-        ], 5*MINUTE_IN_SECONDS);
+        // Rate-limited or malformed requests still receive the same public
+        // response, but must not allocate unlimited fake transient records.
+        if (!$blocked) {
+            set_transient($key, [
+                'form'=>$slug, 'row_id'=>$rowId, 'attempts'=>0,
+                'hash'=>$this->hashCode($requestId, $code),
+                'expires'=>time()+5*MINUTE_IN_SECONDS,
+            ], 5*MINUTE_IN_SECONDS);
+        }
 
         if ($rowId > 0 && !$blocked) {
             try {
