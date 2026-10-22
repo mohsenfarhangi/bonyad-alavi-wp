@@ -673,3 +673,10 @@ Modules: [MODULE-AFE](../modules/alavi-form-engine.md), [MODULE-JIHADI-FORM](../
 - Success requires valid RetStatus and Value. Mocked provider/integration tests added; live credential, sender and approved bodyId acceptance still pending.
 - AFE development version incremented to 1.0.28-dev.3; DB and stable unchanged.
 - AGENTS.md requires completing code, tests and docs prior to the final task commit.
+
+## 2026-10-22 — Inline duplicate reference credential verification
+
+- Users selecting `duplicate.behavior=reference` previously saw only a duplicate error if a new form lacked verified credentials for the older submission. This is secure, but insufficient UX.
+- On forms with tracking-code edit enabled, live duplicate and submit error now offer an inline tracking-code input and verification action. It reuses the secured `afe_check_duplicate` endpoint and only navigates on matching authorized `edit_url` of the duplicate row; no data leaks through the fingerprint.
+- Explicit recovery attempts have a separate per-form/IP limit of 12/10 minutes. Existing authorized edit preflights are exempt.
+- PHP regression and executable Node VM recovery UI regression added; AFE dev asset version `1.0.28-dev.4`, no DB/stable bump. Live WordPress acceptance pending.

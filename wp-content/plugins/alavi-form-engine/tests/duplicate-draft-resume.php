@@ -113,6 +113,23 @@ $submitError=$errorMethod->invoke($instance,$form,$decision,true);
 $GLOBALS['afe_test_user_id']=21;
 $ownerError=$errorMethod->invoke($instance,$form,$decision,true);
 
+// Reference policy is not an authorization mechanism. A new visitor should get
+// an authentication prompt, but never the previous application's URL.
+$reference=$form;
+$reference['settings']['duplicate']['behavior']='reference';
+$reference['settings']['duplicate']['resume_draft']=false;
+$referenceDecision=new DuplicateDecision(true,'fingerprint',14,'reference','ثبت قبلی یافت شد.');
+$GLOBALS['afe_test_user_id']=0;
+$anonymousReference=$errorMethod->invoke($instance,$reference,$referenceDecision,true);
+$_POST['_afe_tracking']='WRONG';
+$invalidReference=$errorMethod->invoke($instance,$reference,$referenceDecision,true);
+$_POST['_afe_tracking']='PRIVATE-CODE';
+$verifiedReference=$errorMethod->invoke($instance,$reference,$referenceDecision,true);
+unset($_POST['_afe_tracking']);
+$GLOBALS['afe_test_user_id']=21;
+$accountReference=$errorMethod->invoke($instance,$reference,$referenceDecision,true);
+$GLOBALS['afe_test_user_id']=0;
+
 $codeFile=file_get_contents(__DIR__.'/../src/Admin/FormsPage.php') ?: '';
 $js=file_get_contents(__DIR__.'/../assets/js/frontend.js') ?: '';
 $renderer=file_get_contents(__DIR__.'/../src/Form/Renderer.php') ?: '';
@@ -138,11 +155,20 @@ $checks=[
         && !isset($submitError->get_error_data()['edit_url']),
     'authorized-submit-error-includes-draft-url'=>($ownerError->get_error_data()['resume_draft']??false)===true
         && isset($ownerError->get_error_data()['edit_url']),
+    'reference-policy-visible-on-submit'=>($anonymousReference->get_error_data()['behavior']??'')==='reference',
+    'reference-guest-requires-credential'=>!isset($anonymousReference->get_error_data()['edit_url']),
+    'reference-wrong-code-does-not-disclose-url'=>!isset($invalidReference->get_error_data()['edit_url']),
+    'reference-matching-tracking-resolves-url'=>str_contains((string)($verifiedReference->get_error_data()['edit_url']??''),'afe_tracking=PRIVATE-CODE'),
+    'reference-account-owner-resolves-url'=>str_contains((string)($accountReference->get_error_data()['edit_url']??''),'afe_submission=14'),
     'admin-per-form-toggle'=>str_contains($codeFile,'name="duplicate_resume_draft"')
         && str_contains($codeFile,"'resume_draft'=>!empty(\$_POST['duplicate_resume_draft'])"),
     'frontend-uses-only-authorized-url'=>str_contains($js,'function duplicateResumeUi(form, payload)')
         && str_contains($js,'payload?.resume_draft')
-        && str_contains($js,'afe-draft-resume-jump'),
+        && str_contains($js,'afe-duplicate-recovery__submit')
+        && str_contains($js,"fd.set('_afe_tracking', code)")
+        && str_contains($js,'data.edit_url'),
+    'renderer-recovery-capability-limited-to-enabled-mode'=>str_contains($renderer, 'data-afe-duplicate-tracking')
+        && str_contains($renderer, "in_array('tracking', (array)"),
     'renderer-still-has-private-tracking-resume'=>str_contains($renderer,'afe-resume-button')
         && str_contains($renderer,'afe_tracking'),
 ];
