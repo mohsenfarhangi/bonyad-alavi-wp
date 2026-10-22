@@ -298,6 +298,8 @@ final class FormsPage
         }
         echo '</select></label>';
         echo '<label class="afe-span-2">پیام تکراری<textarea name="duplicate_message" rows="3" placeholder="این اطلاعات قبلاً ثبت شده است.">'.esc_textarea($config['message']).'</textarea><span class="description">در حالت ارجاع، لینک ثبت قبلی فقط زمانی نمایش داده می‌شود که مالکیت/دسترسی معتبر کاربر سمت PHP تأیید شود.</span></label>';
+        echo '<label class="afe-span-2"><input type="checkbox" name="duplicate_resume_draft" value="1" '.checked($config['resume_draft'],true,false).'> پیشنهاد ادامه پیش‌نویس قبلی هنگام شناسایی ثبت تکراری</label>';
+        echo '<p class="description afe-span-2">این گزینه فقط برای پیش‌نویسِ غیرقفل و فرم دارای ذخیره پیش‌نویس/ویرایش فعال عمل می‌کند. لینک ادامه تنها پس از تأیید مالکیت از طریق ورود وردپرس، کد رهگیری یا لینک خصوصی نمایش داده می‌شود؛ شناسه تکراری به‌تنهایی مجوز دسترسی نیست.</p>';
         echo '</div>';
         echo '<div class="afe-admin-callout"><strong>بررسی زنده:</strong> به‌محض اینکه همه فیلدهای Fingerprint در فرم تکمیل شوند، بدون انتظار برای ثبت نهایی بررسی تکراری بودن انجام می‌شود و پیام مناسب به کاربر نمایش داده می‌شود. بررسی نهایی سمت سرور در Submit همچنان برقرار است.</div>';
         echo '<div class="afe-admin-callout">حالت «اجازه ثبت» رکورد جدید را با <code>is_duplicate=1</code> و مرجع Submission اصلی ذخیره می‌کند. این علامت‌گذاری مستقل از Workflow است.</div>';
@@ -979,6 +981,7 @@ final class FormsPage
             'fields'=>$duplicateFields,
             'behavior'=>$duplicateBehavior,
             'message'=>sanitize_textarea_field(wp_unslash($_POST['duplicate_message']??'')),
+            'resume_draft'=>!empty($_POST['duplicate_resume_draft']),
         ];
         if(!empty($_POST['actions_override_enabled'])){
             $actionForm=$codeForm;
