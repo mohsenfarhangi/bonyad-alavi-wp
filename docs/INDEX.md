@@ -11,6 +11,7 @@
 | [state/INDEX.md](state/INDEX.md) | history, versions | پیدا کردن state تاریخی لازم |
 | [decisions/INDEX.md](decisions/INDEX.md) | ADR index | پیدا کردن تصمیم معماری/فنی |
 | [modules/INDEX.md](modules/INDEX.md) | modules, subsystems | پیدا کردن مستند subsystem |
+| [modules/afe-duplicate-detection-user-guide.md](modules/afe-duplicate-detection-user-guide.md) | راهنمای کاربر، جلوگیری از ثبت تکراری، کد رهگیری، پیش‌نویس | آموزش تنظیمات و بازیابی امن فرم قبلی برای مدیر و متقاضی |
 
 ## Progressive Loading
 
