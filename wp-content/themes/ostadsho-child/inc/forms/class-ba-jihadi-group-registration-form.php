@@ -409,6 +409,9 @@ final class BA_Jihadi_Group_Registration_Form {
 				           'fields'       => [ 'registration_code', 'group_mobile' ],
 				           'behavior'     => 'block',
 				           'resume_draft' => true,
+				           'otp_enabled' => true,
+				           'otp_mobile_field' => 'group_mobile',
+				           'otp_provider' => 'default',
 				           'message'      => 'گروهی با این کد ثبت و شماره همراه قبلاً ثبت شده است.',
 			           ],
 		           ] )

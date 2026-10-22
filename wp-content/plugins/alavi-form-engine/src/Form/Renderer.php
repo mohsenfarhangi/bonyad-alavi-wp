@@ -9,6 +9,7 @@ use BonyadAlavi\FormEngine\Repository\SubmissionRepository;
 use BonyadAlavi\FormEngine\Localization\LocaleDateService;
 use BonyadAlavi\FormEngine\InputMask\InputMaskPattern;
 use BonyadAlavi\FormEngine\Security\SecurityManager;
+use BonyadAlavi\FormEngine\Security\SmsDraftRecovery;
 use BonyadAlavi\FormEngine\Submission\SubmissionService;
 use BonyadAlavi\FormEngine\Style\StyleIsolationManager;
 use BonyadAlavi\FormEngine\Template\TemplateResolver;
@@ -26,7 +27,8 @@ final class Renderer
         private readonly StyleIsolationManager $styleIsolation,
         private readonly LocaleDateService $dates,
         private readonly PreviewRenderer $previewRenderer,
-        private readonly TemplateResolver $templates
+        private readonly TemplateResolver $templates,
+        private readonly ?SmsDraftRecovery $smsRecovery = null
     ) {}
 
     public function shortcode(array|string $atts = []): string
@@ -126,11 +128,14 @@ final class Renderer
             $hidden .= '<input type="hidden" name="_afe_submission_id" value="'.esc_attr((string)$editing['row']['id']).'">';
             if (!empty($credentials['token'])) $hidden .= '<input type="hidden" name="_afe_edit_token" value="'.esc_attr($credentials['token']).'">';
             if (!empty($credentials['tracking'])) $hidden .= '<input type="hidden" name="_afe_tracking" value="'.esc_attr($credentials['tracking']).'">';
+            if (!empty($credentials['recovery'])) $hidden .= '<input type="hidden" name="_afe_recovery" value="'.esc_attr($credentials['recovery']).'">';
         }
 
         $editingNotice = '';
         if (!empty($editing['row'])) {
-            $editingNotice = '<div class="afe-notice afe-notice-info">در حال ویرایش ثبت با کد رهگیری <strong>'.esc_html((string)$editing['row']['tracking_code']).'</strong></div>';
+            $editingNotice = !empty($credentials['recovery'])
+                ? '<div class="afe-notice afe-notice-info">دسترسی پیامکی تأیید شد. در حال ادامه پیش‌نویس قبلی هستید.</div>'
+                : '<div class="afe-notice afe-notice-info">در حال ویرایش ثبت با کد رهگیری <strong>'.esc_html((string)$editing['row']['tracking_code']).'</strong></div>';
         } elseif (!empty($editing['error'])) {
             $editingNotice = '<div class="afe-notice afe-notice-error">'.esc_html((string)$editing['error']).'</div>';
         }
@@ -154,11 +159,12 @@ final class Renderer
             : '';
         // The applicant must present an actual tracking credential before the
         // public duplicate check may return an existing submission's edit URL.
+        $duplicateOtp = SmsDraftRecovery::enabled($form);
         $duplicateTracking = !empty($form['settings']['editing_enabled'])
             && in_array('tracking', (array)($form['settings']['editing_modes'] ?? []), true);
 
         return $customCssHtml . '<div class="'.esc_attr($shellClass).'" data-afe-isolation="'.esc_attr($this->styleIsolation->modeForForm($form)).'" dir="rtl">'.$editingNotice.$lockPanel.$resumeBox
-            . '<form class="afe-form" method="post" enctype="multipart/form-data" novalidate data-form="'.esc_attr($slug).'"'.($locked?' data-afe-readonly="1"':'').' data-afe-lock-after-submit="'.(!empty($form['settings']['lock_after_submit'])?'1':'0').'" data-afe-preview-enabled="'.($previewEnabled?'1':'0').'" data-afe-lock-warning="'.esc_attr((string)($form['settings']['lock_warning']??'')).'" data-afe-duplicate-tracking="'.($duplicateTracking?'1':'0').'"'.$duplicateAttrs.'>'
+            . '<form class="afe-form" method="post" enctype="multipart/form-data" novalidate data-form="'.esc_attr($slug).'"'.($locked?' data-afe-readonly="1"':'').' data-afe-lock-after-submit="'.(!empty($form['settings']['lock_after_submit'])?'1':'0').'" data-afe-preview-enabled="'.($previewEnabled?'1':'0').'" data-afe-lock-warning="'.esc_attr((string)($form['settings']['lock_warning']??'')).'" data-afe-duplicate-tracking="'.($duplicateTracking?'1':'0').'" data-afe-duplicate-otp="'.($duplicateOtp?'1':'0').'" data-afe-duplicate-otp="'.($duplicateOtp?'1':'0').'"'.$duplicateAttrs.'>'
             . $hidden . $duplicateLive . $content
             . ($locked?'':'<div class="afe-captcha-wrap">'.$this->security->captchaMarkup((string)($form['settings']['captcha']??'custom')).'</div>')
             . '<div class="afe-form-result" aria-live="polite"></div>'
@@ -653,6 +659,13 @@ final class Renderer
     {
         $modes=(array)($form['settings']['editing_modes']??[]);
         if (empty($form['settings']['editing_enabled']) && empty($form['settings']['lock_after_submit'])) return [];
+
+        if (!empty($_GET['afe_recovery']) && ($this->smsRecovery ?? null) !== null) {
+            $token = sanitize_text_field(wp_unslash($_GET['afe_recovery']));
+            $row = $this->smsRecovery->resolve($form, $token);
+            return $row ? ['row'=>$row,'credentials'=>['recovery'=>$token]]
+                : ['error'=>'مجوز بازیابی پیامکی نامعتبر یا منقضی شده است.'];
+        }
 
         if (in_array('link',$modes,true) && !empty($_GET['afe_edit'])) {
             $token=sanitize_text_field(wp_unslash($_GET['afe_edit']));

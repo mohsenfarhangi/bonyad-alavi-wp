@@ -221,6 +221,12 @@ textarea.afe-control { resize:vertical; min-height:118px; line-height:1.9; }
 .afe-form .afe-duplicate-recovery__submit { flex:0 1 auto; min-height:44px; white-space:normal; }
 .afe-form .afe-duplicate-recovery__feedback { font-size:12px; line-height:1.8; }
 .afe-form .afe-duplicate-recovery__feedback[hidden] { display:none !important; }
+.afe-form .afe-duplicate-recovery-container { display:flex; flex-direction:column; gap:12px; width:100%; }
+.afe-form [data-afe-otp-recovery] { padding-top:12px; border-top:1px solid var(--afe-border); }
+.afe-form .afe-otp-mobile, .afe-form .afe-otp-code { flex:1 1 170px; min-width:0; max-width:260px; min-height:44px; padding:9px 12px; background:#fff; border:1px solid var(--afe-border); border-radius:9px; direction:ltr; text-align:left; box-sizing:border-box; }
+.afe-form [data-afe-otp-verify-section][hidden] { display:none !important; }
+.afe-form .afe-otp-feedback { display:block; font-size:12px; line-height:1.9; }
+
 @media (max-width:480px) { .afe-form .afe-duplicate-recovery__controls { align-items:stretch; flex-direction:column; } .afe-form .afe-duplicate-recovery__input, .afe-form .afe-duplicate-recovery__submit { width:100%; max-width:none; } }
 .afe-success { background:var(--afe-green-soft); color:var(--afe-green-dark); border:1px solid #cce0d8; display:flex; gap:9px; flex-direction:column; }
 .afe-result-link { color:var(--afe-green-dark); font-weight:800; }

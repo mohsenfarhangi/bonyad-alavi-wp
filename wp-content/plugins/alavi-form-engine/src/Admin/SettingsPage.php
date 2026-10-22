@@ -10,6 +10,8 @@ use BonyadAlavi\FormEngine\Form\FormRegistry;
 use BonyadAlavi\FormEngine\Style\StyleIsolationManager;
 use BonyadAlavi\FormEngine\Actions\Sms\SmsProviderRegistry;
 use BonyadAlavi\FormEngine\Actions\Sms\SmsSettings;
+use BonyadAlavi\FormEngine\Actions\Sms\SmsMessage;
+use BonyadAlavi\FormEngine\Security\SmsDraftRecovery;
 
 final class SettingsPage
 {
@@ -25,6 +27,10 @@ final class SettingsPage
         if(!current_user_can(Capabilities::MANAGE_SETTINGS)) wp_die('دسترسی کافی ندارید.');
         if($_SERVER['REQUEST_METHOD']==='POST' && isset($_POST['afe_save_settings'])) $this->save();
 
+        wp_enqueue_script('afe-admin-sms-test', AFE_URL.'assets/js/admin-sms-test.js', [], AFE_VERSION, true);
+        wp_add_inline_script('afe-admin-sms-test', 'window.afeSmsTest='.wp_json_encode([
+            'url'=>admin_url('admin-ajax.php'), 'nonce'=>wp_create_nonce('afe_test_sms'),
+        ]).';', 'before');
         $settings=get_option('afe_settings',[]);
         $roles=wp_roles()->roles;
         echo '<div class="wrap afe-admin-wrap"><h1>تنظیمات و مدیریت دسترسی</h1>';
@@ -97,6 +103,13 @@ final class SettingsPage
         echo '<div class="afe-span-2 afe-admin-callout">ارسال عادی: <code>SendSMS/SendSMS</code> و ارسال خدماتی: <code>SendSMS/BaseServiceNumber</code>. برای خدماتی باید شناسه الگوی تأییدشده (bodyId) و مقادیر متغیرهای آن را در SMS Action تنظیم کنید. فراپیامک مستقل از تنظیمات ملی‌پیامک است.</div>';
         if(!$this->secrets->available()) echo '<div class="afe-span-2 afe-admin-callout"><strong>هشدار:</strong> OpenSSL در دسترس نیست؛ کلید API جدید فراپیامک ذخیره نخواهد شد.</div>';
         echo '</div></details></div>';
+        echo '<div class="afe-span-2 afe-admin-callout" data-afe-sms-test><strong>تست اتصال پنل پیامک (ارسال واقعی)</strong><p>ابتدا تنظیمات سرویس را ذخیره کنید، سپس شماره مقصد و Provider را انتخاب کنید. ارسال آزمایشی ممکن است هزینه داشته باشد.</p>';
+        echo '<div class="afe-admin-grid"><label>Provider تست<select data-afe-sms-provider>';
+        foreach($providerOptions as $providerKey=>$providerLabel){
+            echo '<option value="'.esc_attr((string)$providerKey).'" '.selected($smsDefault,(string)$providerKey,false).'>'.esc_html((string)$providerLabel).'</option>';
+        }
+        echo '</select></label><label>شماره همراه مقصد<input type="tel" inputmode="numeric" dir="ltr" autocomplete="off" data-afe-sms-mobile placeholder="09123456789"></label></div>';
+        echo '<button type="button" class="button button-secondary" data-afe-sms-test-button>ارسال پیامک آزمایشی</button><p role="status" aria-live="polite" data-afe-sms-test-result></p></div>';
         echo '</div></div>';
 
         echo '<div class="afe-admin-card"><h2>ایزوله‌سازی استایل فرم</h2><div class="afe-admin-grid">';
@@ -142,6 +155,42 @@ final class SettingsPage
         }
         echo '</div>';
         submit_button('ذخیره تنظیمات'); echo '</form></div>';
+    }
+
+    /** Test uses saved credentials, never unsaved admin form values. */
+    public function testSms(): void
+    {
+        if(!current_user_can(Capabilities::MANAGE_SETTINGS)) {
+            wp_send_json_error(['message'=>'دسترسی کافی ندارید.'],403);
+        }
+        if(!check_ajax_referer('afe_test_sms','nonce',false)) {
+            wp_send_json_error(['message'=>'اعتبار درخواست منقضی شده است.'],403);
+        }
+        $mobile=SmsDraftRecovery::normalizeMobile(sanitize_text_field(wp_unslash($_POST['mobile']??'')));
+        $providerKey=sanitize_key((string)wp_unslash($_POST['provider']??''));
+        if($mobile==='' || !$this->smsProviders || !$this->smsProviders->has($providerKey)) {
+            wp_send_json_error(['message'=>'شماره موبایل یا سرویس‌دهنده معتبر نیست.'],422);
+        }
+        $rate='afe_sms_test_'.hash('sha256',get_current_user_id().'|'.(string)($_SERVER['REMOTE_ADDR']??''));
+        if((int)get_transient($rate)>=3) {
+            wp_send_json_error(['message'=>'حداکثر سه پیام آزمایشی در ۱۰ دقیقه مجاز است.'],429);
+        }
+        set_transient($rate,(int)get_transient($rate)+1,10*MINUTE_IN_SECONDS);
+        try {
+            $provider=$this->smsProviders->resolve($providerKey,'free');
+            $sent=$provider->send(new SmsMessage($mobile,'free','پیامک آزمایشی اتصال پنل Alavi Form Engine'));
+            if(empty($sent['success'])) {
+                // External gateway errors may contain secrets or raw request data.
+                wp_send_json_error(['message'=>'ارسال آزمایشی ناموفق بود. تنظیمات ذخیره‌شده، اعتبار، خط فرستنده و دسترسی وب‌سرویس را بررسی کنید.'],422);
+            }
+            $receipt=(string)($sent['message_id']??'');
+            wp_send_json_success([
+                'message'=>'درخواست ارسال پیامک آزمایشی با موفقیت در پنل ثبت شد. رسیدن پیام به گوشی جداگانه بررسی شود.',
+                'message_id'=>preg_match('/^[0-9]{2,40}$/D',$receipt)?$receipt:'',
+            ]);
+        } catch(\Throwable) {
+            wp_send_json_error(['message'=>'برقراری ارتباط با پنل پیامک ممکن نشد.'],422);
+        }
     }
 
     private function save(): void

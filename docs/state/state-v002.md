@@ -680,3 +680,10 @@ Modules: [MODULE-AFE](../modules/alavi-form-engine.md), [MODULE-JIHADI-FORM](../
 - On forms with tracking-code edit enabled, live duplicate and submit error now offer an inline tracking-code input and verification action. It reuses the secured `afe_check_duplicate` endpoint and only navigates on matching authorized `edit_url` of the duplicate row; no data leaks through the fingerprint.
 - Explicit recovery attempts have a separate per-form/IP limit of 12/10 minutes. Existing authorized edit preflights are exempt.
 - PHP regression and executable Node VM recovery UI regression added; AFE dev asset version `1.0.28-dev.4`, no DB/stable bump. Live WordPress acceptance pending.
+
+## 2026-10-22 — Opt-in SMS OTP recovery and admin SMS test
+
+- Public SMS OTP challenge/verify for matching unlocked draft submissions; fixed 6-digit code with 5-minute expiry, capped failed attempts and rate limits; successful verification yields a scoped 1-hour grant accepted by Renderer and HTTP submit. The prior tracking code is not disclosed.
+- Opt-in per-form flags `duplicate.otp_enabled`, `otp_mobile_field`, `otp_provider`; Jihadi group registration opts in for stored `group_mobile`.
+- Admin-only SMS test-send UI and endpoint (saved provider, real message, optional charge, nonce/capability, throttling and redacted error).
+- Development version `1.0.28-dev.5`, stable and DB untouched. Live SMS, WordPress runtime and end-user UX acceptance pending.
