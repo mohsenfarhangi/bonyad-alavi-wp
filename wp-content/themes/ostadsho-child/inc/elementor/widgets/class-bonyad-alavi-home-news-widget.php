@@ -895,7 +895,7 @@ final class Bonyad_Alavi_Home_News_Widget extends Widget_Base {
 		$permalink    = get_permalink( $post );
 		$title        = trim( wp_strip_all_tags( get_the_title( $post ) ) );
 		$category     = $this->get_first_term_name( $post->ID, $taxonomy );
-		$date         = '' !== $date_format ? get_the_date( $date_format, $post ) : '';
+		$date         = '' !== $date_format ? date_i18n( $date_format, strtotime( $post->post_date ) ) : '';
 		$thumbnail_id = get_post_thumbnail_id( $post );
 		$aria_label   = '' !== $title ? $title : 'مشاهده خبر';
 		?>
