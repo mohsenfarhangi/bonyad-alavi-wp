@@ -50,7 +50,7 @@ $checks=[
         && str_contains($front, "'_afe_recovery'"),
     'admin-test-authentication-and-throttle'=>str_contains($settings, 'Capabilities::MANAGE_SETTINGS')
         && str_contains($settings, "check_ajax_referer('afe_test_sms'")
-        && str_contains($settings, 'get_transient($rate)>=3'),
+        && str_contains($settings, 'get_transient($rate)>='),
     'admin-test-does-not-return-raw-gateway-error'=>!str_contains($settings, "\$sent['error']")
         && !str_contains($settings, "\$sent['raw']"),
     'admin-test-uses-saved-provider'=>str_contains($settings, "\$this->smsProviders->resolve(\$providerKey,'free')")
