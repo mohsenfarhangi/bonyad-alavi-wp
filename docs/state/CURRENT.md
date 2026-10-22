@@ -24,7 +24,7 @@ AFE release goal همچنان live acceptance نسخه 1.0.28 و رفع blocker 
 - صفحه تنظیمات عمومی AFE اکنون ۶ تب (عمومی/API، پنل‌های پیامک، دیباگ پیامک، استایل، نقش‌ها، فرم‌ها) دارد؛ یک فرم/POST سابق بدون تغییر در ماهیت ذخیره، دکمه ذخیره sticky و حفظ تب فعال پس از ذخیره.
 - دیباگ پیامک در `afe_settings.sms.debug_enabled` opt-in است؛ فقط ۴۰ نتیجه امن اخیر SMS Action، OTP و تست ارسال در `afe_sms_debug_events` ذخیره و با nonce + capability ادمین بازخوانی/پاک می‌شود. شماره، متن پیام، OTP، API key، رمز و پاسخ خام ممنوع‌اند؛ Farapayamak فقط کدهای عددی و رسید پیام مجاز را برمی‌گرداند.
 - خروجی فوری تست ارسال به‌شکل summary امن و code/receipt برای مدیر ارائه می‌شود. محدودیت تست ۳ بار/۱۰ دقیقه بدون تغییر.
-- تست‌های واحد `sms-debug-log.php` و UI/contract `admin-settings-tabs.js` و `admin-sms-debug-settings.php` اضافه شدند؛ نسخه `1.0.28-dev.6` فقط برای کش ادمین bump شده و DB/stable ثابت‌اند. پذیرش WordPress واقعی و ارسال/تحویل زنده همچنان باز است.
+- تست‌های واحد `sms-debug-log.php` و UI/contract `admin-settings-tabs.js` و `admin-sms-debug-settings.php` اضافه شدند؛ **GitHub Actions [run 39778076900](https://github.com/mohsenfarhangi/bonyad-alavi-wp/actions/runs/39778076900) PASS** (PHP syntax، دیباگ/حریم خصوصی، تب‌ها، SMS Action و Providerها و CSS). نسخه `1.0.28-dev.6` فقط برای کش ادمین bump شده و DB/stable ثابت‌اند. پذیرش WordPress واقعی و ارسال/تحویل زنده همچنان باز است.
 
 
 ### SMS OTP draft recovery + SMS provider connection test (2026-10-22)
