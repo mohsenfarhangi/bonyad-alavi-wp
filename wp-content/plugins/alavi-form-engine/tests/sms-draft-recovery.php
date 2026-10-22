@@ -92,6 +92,9 @@ $unknownPhoneSend=count($fake->sent);
 $GLOBALS['test_record']['status']='new';
 $finalAttempt=$otp->start($form,$data,'09120000001');
 $finalSend=count($fake->sent);
+$transientsBeforeBlocked=count($GLOBALS['transients']);
+$blockedAttempt=$otp->start($form,$data,'09120000001');
+$transientsAfterBlocked=count($GLOBALS['transients']);
 $checks=[
     'valid-mobile-and-normalization'=>SmsDraftRecovery::normalizeMobile('+989120000001')==='09120000001',
     'otp-message-sent-only-to-stored-mobile'=>$sent?->recipient==='09120000001',
@@ -108,6 +111,9 @@ $checks=[
         && ($missing['message']??'')===($start['message']??'')
         && isset($missing['request_id']),
     'finalized-record-does-not-send-otp'=>$finalSend===$sentBefore,
+    'throttled-request-does-not-allocate-fake-challenge'=>$transientsAfterBlocked===$transientsBeforeBlocked
+        && ($blockedAttempt['message']??'')===($start['message']??''),
+
 ];
 foreach($checks as $name=>$ok) {
     echo ($ok?'PASS ':'FAIL ').$name.PHP_EOL;
