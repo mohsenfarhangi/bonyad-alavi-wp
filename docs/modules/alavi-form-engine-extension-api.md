@@ -190,6 +190,15 @@ Integration surfaces:
 
 در Elementor Widget constructor DI جدید اضافه نکن مگر lifecycle Elementor کاملاً بررسی شده باشد؛ legacy project state این الگو را source یک failure قبلی ثبت کرده است.
 
+## Farapayamak REST JSON Provider
+
+Registry key: `farapayamak`. Provider `FarapayamakProvider` از تنظیمات مستقل `afe_settings['sms']['farapayamak']` شامل `username`, `api_key` رمز‌شده و `sender` استفاده می‌کند.
+
+- `free`: `POST /api/SendSMS/SendSMS`, JSON دقیق `username,password,to,from,text,isflash`.
+- `pattern`: `POST /api/SendSMS/BaseServiceNumber`, JSON دقیق `username,password,text,to,bodyId`. `pattern_code` باید شناسه عددی تأییدشده باشد و `pattern_values` به ترتیب با `;` در text قرار می‌گیرند؛ تطابق با الگوی واقعی باید آزمایش شود.
+- Endpointها ثابت، HTTPS و بدون redirect هستند. API key در URL، raw response یا گزارش Action نوشته نمی‌شود؛ `RetStatus` و `Value` هر دو بررسی می‌شوند.
+- منابع: مشخصات REST ارائه‌شده در task 2026-10-22. OTP، گروهی و گزارش وضعیت خارج از محدوده این Provider هستند.
+
 ## SMS Provider Extensions
 
 Hook:

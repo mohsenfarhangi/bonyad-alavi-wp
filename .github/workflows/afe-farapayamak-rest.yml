@@ -1,0 +1,53 @@
+name: AFE Farapayamak REST provider
+
+on:
+  push:
+    branches:
+      - feat/afe-farapayamak-rest
+  pull_request:
+    branches: [main]
+    paths:
+      - 'wp-content/plugins/alavi-form-engine/src/Actions/Sms/FarapayamakProvider.php'
+      - 'wp-content/plugins/alavi-form-engine/src/Core/Plugin.php'
+      - 'wp-content/plugins/alavi-form-engine/src/Admin/SettingsPage.php'
+      - 'wp-content/plugins/alavi-form-engine/tests/farapayamak-*.php'
+      - 'wp-content/plugins/alavi-form-engine/alavi-form-engine.php'
+      - '.github/workflows/afe-farapayamak-rest.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  rest-provider:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          coverage: none
+      - name: PHP syntax
+        run: |
+          php -l wp-content/plugins/alavi-form-engine/src/Actions/Sms/FarapayamakProvider.php
+          php -l wp-content/plugins/alavi-form-engine/src/Core/Plugin.php
+          php -l wp-content/plugins/alavi-form-engine/src/Admin/SettingsPage.php
+          php -l wp-content/plugins/alavi-form-engine/tests/farapayamak-provider.php
+          php -l wp-content/plugins/alavi-form-engine/tests/farapayamak-integration.php
+      - name: Farapayamak REST provider and secret integration
+        run: |
+          php wp-content/plugins/alavi-form-engine/tests/farapayamak-provider.php
+          php wp-content/plugins/alavi-form-engine/tests/farapayamak-integration.php
+      - name: Existing SMS providers and routing regressions
+        run: |
+          php wp-content/plugins/alavi-form-engine/tests/melipayamak-provider.php
+          php wp-content/plugins/alavi-form-engine/tests/persian-woocommerce-sms-provider.php
+          php wp-content/plugins/alavi-form-engine/tests/sms-provider-registry.php
+          php wp-content/plugins/alavi-form-engine/tests/sms-settings-switch.php
+          php wp-content/plugins/alavi-form-engine/tests/sms-action.php
+      - name: Existing SMS action configuration and secrets
+        run: |
+          php wp-content/plugins/alavi-form-engine/tests/secret-store.php
+          php wp-content/plugins/alavi-form-engine/tests/sms-action-provider-routing.php
+      - name: JS syntax unchanged
+        run: node --check wp-content/plugins/alavi-form-engine/assets/js/frontend.js

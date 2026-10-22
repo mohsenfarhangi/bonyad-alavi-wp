@@ -44,9 +44,12 @@ final class SettingsPage
         $smsAuth=in_array((string)($sms['auth_mode']??'legacy'),['legacy','api_key'],true)?(string)$sms['auth_mode']:'legacy';
         $hasSmsPassword=(string)($sms['password']??'')!=='';
         $hasSmsApiKey=(string)($sms['api_key']??'')!=='';
+        $farapayamak=is_array($sms['farapayamak']??null)?(array)$sms['farapayamak']:[];
+        $hasFarapayamakKey=(string)($farapayamak['api_key']??'')!=='';
         $smsDefault=sanitize_key((string)($sms['default_provider']??$sms['provider']??'melipayamak'));
         $providerOptions=$this->smsProviders?->providerOptions()??[
             'melipayamak'=>'ملی پیامک — تنظیمات Alavi Form Engine',
+            'farapayamak'=>'فراپیامک — REST JSON',
             'persian_woocommerce_sms'=>'Persian WooCommerce SMS',
         ];
         if(!isset($providerOptions[$smsDefault])) $smsDefault='melipayamak';
@@ -86,6 +89,13 @@ final class SettingsPage
         echo '<label class="afe-span-2">API Key / Token<input class="regular-text" type="password" name="sms_api_key" value="" autocomplete="new-password" placeholder="'.esc_attr($hasSmsApiKey?'ذخیره شده — برای تغییر وارد کنید':'').'"><span class="description">برای روش کنسول جدید؛ فقط Provider داخلی.</span></label>';
         if(!$this->secrets->available()) echo '<div class="afe-span-2 afe-admin-callout"><strong>هشدار:</strong> OpenSSL روی سرور در دسترس نیست؛ Credential جدید Provider داخلی AFE قابل ذخیره امن نیست. این محدودیت روی Persian WooCommerce SMS اثری ندارد.</div>';
         echo '<div class="afe-span-2 afe-admin-callout"><strong>امنیت:</strong> Credentialهای Provider داخلی با WordPress salts رمز می‌شوند. Persian WooCommerce SMS Credentialهای خودش را در اختیار AFE قرار نمی‌دهد و AFE آن‌ها را ذخیره نمی‌کند.</div>';
+        echo '</div></details></div>';
+        echo '<div class="afe-span-2"><details '.($smsDefault==='farapayamak'?'open':'').'><summary><strong>تنظیمات Provider — فراپیامک (REST JSON)</strong></summary><div class="afe-admin-grid" style="margin-top:12px">';
+        echo '<label>نام کاربری فراپیامک<input class="regular-text" name="sms_farapayamak_username" value="'.esc_attr((string)($farapayamak['username']??'')).'" autocomplete="off"></label>';
+        echo '<label>شماره فرستنده پیش‌فرض<input class="regular-text" name="sms_farapayamak_sender" value="'.esc_attr((string)($farapayamak['sender']??'')).'" autocomplete="off" inputmode="numeric"></label>';
+        echo '<label class="afe-span-2">کلید API فراپیامک<input class="regular-text" type="password" name="sms_farapayamak_api_key" value="" autocomplete="new-password" placeholder="'.esc_attr($hasFarapayamakKey?'ذخیره شده — برای تغییر وارد کنید':'').'" ><span class="description">کلید API در پارامتر password JSON ارسال می‌شود؛ برای حفظ مقدار ذخیره‌شده این فیلد را خالی بگذارید.</span></label>';
+        echo '<div class="afe-span-2 afe-admin-callout">ارسال عادی: <code>SendSMS/SendSMS</code> و ارسال خدماتی: <code>SendSMS/BaseServiceNumber</code>. برای خدماتی باید شناسه الگوی تأییدشده (bodyId) و مقادیر متغیرهای آن را در SMS Action تنظیم کنید. فراپیامک مستقل از تنظیمات ملی‌پیامک است.</div>';
+        if(!$this->secrets->available()) echo '<div class="afe-span-2 afe-admin-callout"><strong>هشدار:</strong> OpenSSL در دسترس نیست؛ کلید API جدید فراپیامک ذخیره نخواهد شد.</div>';
         echo '</div></details></div>';
         echo '</div></div>';
 
@@ -141,6 +151,12 @@ final class SettingsPage
         $oldSms=is_array($old['sms']??null)?(array)$old['sms']:[];
         $smsPassword=(string)($oldSms['password']??'');
         $smsApiKey=(string)($oldSms['api_key']??'');
+        $oldFarapayamak=is_array($oldSms['farapayamak']??null)?(array)$oldSms['farapayamak']:[];
+        $farapayamakKey=(string)($oldFarapayamak['api_key']??'');
+        $farapayamakInput=trim((string)wp_unslash($_POST['sms_farapayamak_api_key']??''));
+        if($farapayamakInput!=='' && $this->secrets->available()) {
+            $farapayamakKey=$this->secrets->encrypt($farapayamakInput);
+        }
         $passwordInput=(string)wp_unslash($_POST['sms_password']??'');
         $apiKeyInput=trim((string)wp_unslash($_POST['sms_api_key']??''));
         if($passwordInput!=='' && $this->secrets->available()) $smsPassword=$this->secrets->encrypt($passwordInput);
@@ -149,7 +165,7 @@ final class SettingsPage
         if(!in_array($authMode,['legacy','api_key'],true)) $authMode='legacy';
         $smsEnabled=!empty($_POST['sms_enabled']);
         $defaultProvider=sanitize_key(wp_unslash($_POST['sms_default_provider']??($oldSms['default_provider']??$oldSms['provider']??'melipayamak')));
-        $allowedProviders=array_keys($this->smsProviders?->providerOptions()??['melipayamak'=>'','persian_woocommerce_sms'=>'']);
+        $allowedProviders=array_keys($this->smsProviders?->providerOptions()??['melipayamak'=>'','farapayamak'=>'','persian_woocommerce_sms'=>'']);
         if(!in_array($defaultProvider,$allowedProviders,true)) $defaultProvider='melipayamak';
         $settings=array_replace($old,[
             'api_enabled'=>!empty($_POST['api_enabled']),
@@ -169,6 +185,11 @@ final class SettingsPage
                 'password'=>$smsPassword,
                 'api_key'=>$smsApiKey,
                 'sender'=>sanitize_text_field(wp_unslash($_POST['sms_sender']??'')),
+                'farapayamak'=>[
+                    'username'=>sanitize_text_field(wp_unslash($_POST['sms_farapayamak_username']??'')),
+                    'api_key'=>$farapayamakKey,
+                    'sender'=>sanitize_text_field(wp_unslash($_POST['sms_farapayamak_sender']??'')),
+                ],
             ],
         ]);
         update_option('afe_settings',$settings,true);

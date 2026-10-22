@@ -665,3 +665,11 @@ Current module: [MODULE-HOME-HERO](../modules/theme-home-hero-widget.md).
 - Added dedicated security/regression tests and GitHub Actions checks, bumped AFE dev asset version to 1.0.28-dev.2; DB/stable unchanged. Real WordPress acceptance remains open.
 
 Modules: [MODULE-AFE](../modules/alavi-form-engine.md), [MODULE-JIHADI-FORM](../modules/jihadi-group-registration-form.md).
+
+## 2026-10-22 — Farapayamak REST JSON provider and completion-before-commit rule
+
+- Standalone `farapayamak` SMS Provider for free and approved service templates using fixed JSON POST endpoints.
+- Independent encrypted API key using AFE SecretStore; payload secrets/raw responses do not appear in returned Action diagnostics.
+- Success requires valid RetStatus and Value. Mocked provider/integration tests added; live credential, sender and approved bodyId acceptance still pending.
+- AFE development version incremented to 1.0.28-dev.3; DB and stable unchanged.
+- AGENTS.md requires completing code, tests and docs prior to the final task commit.
