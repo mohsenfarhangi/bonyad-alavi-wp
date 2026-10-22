@@ -3,6 +3,13 @@ declare(strict_types=1);
 
 define('ARRAY_A', 'ARRAY_A');
 
+final class WP_Error {
+    public function __construct(private string $code, private string $message, private array $data=[]) {}
+    public function get_error_data(): array { return $this->data; }
+    public function get_error_message(): string { return $this->message; }
+}
+
+
 function sanitize_key($value): string { return preg_replace('/[^a-z0-9_\-]/', '', strtolower((string)$value)); }
 function sanitize_text_field($value): string { return trim((string)$value); }
 function sanitize_textarea_field($value): string { return trim((string)$value); }
