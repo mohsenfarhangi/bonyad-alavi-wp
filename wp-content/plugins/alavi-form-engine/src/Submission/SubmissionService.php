@@ -61,6 +61,22 @@ final class SubmissionService
         }
 
         $form = $this->resolvedForm($slug);
+        // Do not count ordinary preflight checks on an already-authorized edit.
+        // Only attempts to unlock a different submission need this throttle.
+        $hasRecoveryCredential = trim((string)wp_unslash($_POST['_afe_tracking'] ?? '')) !== ''
+            || trim((string)wp_unslash($_POST['_afe_edit_token'] ?? '')) !== '';
+        if ($hasRecoveryCredential) {
+            $editing = $this->resolveExisting($form);
+            $alreadyAuthorizedEdit = $editing && $this->canApplicantAccess($form, $editing);
+            if (!$alreadyAuthorizedEdit) {
+                $rateKey = 'afe_dup_recover_' . hash('sha256', $slug.'|'.(string)($_SERVER['REMOTE_ADDR'] ?? ''));
+                $attempts = (int)get_transient($rateKey);
+                if ($attempts >= 12) {
+                    return new WP_Error('rate_limit','تعداد تلاش برای بازیابی بیش از حد مجاز است. کمی بعد دوباره تلاش کنید.');
+                }
+                set_transient($rateKey, $attempts + 1, 10 * MINUTE_IN_SECONDS);
+            }
+        }
         $config = $this->duplicatePolicy->config($form);
         if (!$config['enabled'] || $config['fields'] === []) {
             return ['enabled'=>false,'ready'=>false,'duplicate'=>false,'blocking'=>false];
@@ -837,7 +853,8 @@ final class SubmissionService
 
     private function duplicateError(array $form, DuplicateDecision $decision, bool $allowReferenceUrl = true): WP_Error
     {
-        $data = ['duplicate'=>true];
+        // The effective policy enables inline authentication without exposing prior data.
+        $data = ['duplicate'=>true, 'behavior'=>$decision->behavior];
         if ($allowReferenceUrl) {
             $data = array_merge($data, $this->duplicateDraftResumePayload($form, $decision));
         }
