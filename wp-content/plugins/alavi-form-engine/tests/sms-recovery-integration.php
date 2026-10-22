@@ -54,7 +54,7 @@ $checks=[
     'admin-test-ui-real-send-warning'=>str_contains($settings, 'data-afe-sms-test-button')
         && str_contains($settings, 'ارسال آزمایشی ممکن است هزینه داشته باشد'),
     'admin-script-uses-post-and-nonce'=>str_contains($script, "method:'POST'")
-        && str_contains($script, 'window.afeSmsTest.nonce')
+        && str_contains($script, 'nonce:settings.nonce')
         && str_contains($settings, "wp_add_inline_script('afe-admin-sms-test'"),
     'ui-responsive-controls'=>str_contains($css,'.afe-form .afe-otp-mobile')
         && str_contains($css,'[data-afe-otp-verify-section][hidden]'),
