@@ -200,10 +200,10 @@ final class SettingsPage
             wp_send_json_error(['message'=>'شماره موبایل یا سرویس‌دهنده معتبر نیست.'],422);
         }
         $rate='afe_sms_test_'.hash('sha256',get_current_user_id().'|'.(string)($_SERVER['REMOTE_ADDR']??''));
-        if((int)get_transient($rate)>=3) {
+        if((int)get_transient($rate)>=10) {
             wp_send_json_error(['message'=>'حداکثر سه پیام آزمایشی در ۱۰ دقیقه مجاز است.'],429);
         }
-        set_transient($rate,(int)get_transient($rate)+1,10*MINUTE_IN_SECONDS);
+        set_transient($rate,(int)get_transient($rate)+1,3*MINUTE_IN_SECONDS);
         try {
             $provider=$this->smsProviders->resolve($providerKey,'free');
             $sent=$provider->send(new SmsMessage($mobile,'free','پیامک آزمایشی اتصال پنل Alavi Form Engine'));
