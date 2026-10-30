@@ -342,6 +342,10 @@ Historical PASSهای AFE/Theme به HEAD جدید تعمیم داده نمی‌
 **Current task:** پیامک بازیابی فرم با متن آزاد و پترن/BodyId قابل تنظیم شده است؛ آزمون‌های متمرکز PHP/JS و Providerها PASS شده‌اند. پذیرش زنده ارسال پترن تأییدشده در وردپرس، بررسی Overrideهای فرم جهادی و تأیید رسیدن پیامک همچنان لازم است.
 
 
+**Open task (هیرو، task جدا):** فلش‌های اسلایدر با `slider_show_arrows` در Elementor خاموش شوند و سپس قانون `.ba-slider__controls` در `style.css` و `<style>` inline در Code Snippet #9 حذف شوند. قانون `.elementor-element-964556b .ba-hero__grid { grid-template-rows … !important }` پیش از حذف روی دسکتاپ و موبایل تست شود. تا آن زمان قوانین موجود بدون تغییر بمانند.
+
+**Tracked since 2026-10-30:** `wp-content/plugins/alavi-pages/` اکنون در whitelist `.gitignore` است (نسخه سرور مرجع است).
+
 **Start here:** [../INDEX.md](../INDEX.md) → [../modules/INDEX.md](../modules/INDEX.md).
 
 **Do not reconsider without new evidence:** AFE source-definition override model، ownership فرم پروژه‌ای در theme، participation cart isolation، theme shared settings persistence، Jihadi source precedence، shared admin Repeater، export autoload isolation.
