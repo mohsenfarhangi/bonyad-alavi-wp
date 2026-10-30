@@ -456,6 +456,7 @@ final class Bonyad_Alavi_Home_Quick_Links_Widget extends Widget_Base {
 			'award'        => '#b57b0d',
 			'hamgam'       => '#3f7eaf',
 			'camp'         => '#678a43',
+			'books'        => '#6658a6',
 		);
 	}
 
@@ -537,6 +538,7 @@ final class Bonyad_Alavi_Home_Quick_Links_Widget extends Widget_Base {
 			'award'        => '<svg aria-hidden="true" class="ba-quick-links__icon" data-icon="tabler:award" focusable="false" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9a6 6 0 1 0 12 0a6 6 0 1 0 -12 0"/><path d="M12 15l3.4 5.89l1.598 -3.233l3.598 .232l-3.4 -5.889"/><path d="M6.802 12l-3.4 5.89l3.598 -.233l1.598 3.232l3.4 -5.889"/></svg>',
 			'hamgam'       => '<svg aria-hidden="true" class="ba-quick-links__icon" data-icon="tabler:route" focusable="false" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 19a2 2 0 1 0 4 0a2 2 0 0 0 -4 0"/><path d="M19 7a2 2 0 1 0 0 -4a2 2 0 0 0 0 4"/><path d="M11 19h5.5a3.5 3.5 0 0 0 0 -7h-8a3.5 3.5 0 0 1 0 -7h4.5"/></svg>',
 			'camp'         => '<svg aria-hidden="true" class="ba-quick-links__icon" data-icon="tabler:tent" focusable="false" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 14l4 6h6l-9 -16l-9 16h6l4 -6"/></svg>',
+			'books'        => '<svg aria-hidden="true" class="ba-quick-links__icon" data-icon="stacked-books" focusable="false" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="6" width="14" height="3.5" rx="1"/><rect x="3" y="10.5" width="18" height="3.5" rx="1"/><rect x="2" y="15" width="20" height="4" rx="1"/></svg>',
 		);
 
 		return $icons[ $key ] ?? '';

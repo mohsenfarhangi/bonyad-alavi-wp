@@ -701,3 +701,12 @@ Modules: [MODULE-AFE](../modules/alavi-form-engine.md), [MODULE-JIHADI-FORM](../
 - `SmsOtpMessageFactory` requires exactly one server-owned `{{code}}` in body or pattern arguments; optional `{{minutes}}` renders to five. Invalid mode, missing code, unknown placeholders, bad BodyId or invalid arguments fail closed. Existing forms without these keys retain the previous free-text SMS.
 - Pattern resolution is provider-mode aware. Only the stored draft mobile is used; OTP verify and rate limits unchanged. Per-form admin UI exposes the options; no changes to global SMS Actions.
 - Added unit and draft-flow integration tests; version 1.0.28-dev.7, no DB migration or stable promotion. Live Pattern/BodyId acceptance remains pending.
+
+## STATE-002-031 — Live-server theme changes synced into repository (2026-10-30)
+
+- نسخه live برای `style.css` و `class-bonyad-alavi-home-quick-links-widget.php` مرجع بود و به repository آورده شد؛ تفاوت‌ها صرفاً افزودنی بودند و repository قبلاً تغییر هم‌پوشان نداشت.
+- `style.css`: ruleهای محلی صفحه اصلی (پر شدن تصویر slider، ارتفاع ستون donut `.elementor-element-a1e99ce`، فونت peyda و justify بخش About، استایل News، فونت آمار استان‌ها، مخفی‌سازی `.ba-slider__controls`، و چند fix منو/جستجو/ticker).
+- Quick Links: کلید `books` (گروه‌های جهادی) آیکون stacked-books و رنگ `#6658a6` گرفت؛ `studies` همچنان `tabler:report-analytics` است.
+- هشدار: `.elementor-element-964556b .ba-hero__grid { grid-template-rows: ... !important }` و مخفی‌سازی سراسری controls همان overrideهایی هستند که `theme-home-hero-widget.md` درباره‌شان هشدار می‌دهد؛ با قرارداد aspect-ratio هیرو ممکن است تداخل کنند. بازبینی نشده است.
+- بقیه فایل‌های قالب از نظر محتوا با repository یکسان بودند. پلاگین `alavi-pages` track نمی‌شود.
+

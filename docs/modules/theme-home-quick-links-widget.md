@@ -160,3 +160,5 @@ Guards:
 8. تغییر Color در Repeater فقط همان item را تغییر دهد.
 9. انتخاب Elementor Icon فقط SVG همان item را جایگزین کند.
 10. چند instance در Editor listener/state مشترک نداشته باشند.
+
+> یادداشت (2026-10-30): در `get_reference_svg` کلید `books` آیکون سفارشی stacked-books (`data-icon="stacked-books"`، رنگ `#6658a6`) دارد؛ `studies` تغییری نکرده است.
