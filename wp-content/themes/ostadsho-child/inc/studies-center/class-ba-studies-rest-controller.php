@@ -53,6 +53,7 @@ final class BA_Studies_Rest_Controller {
 				'args'                => array(
 					'type'         => array( 'type' => 'string', 'enum' => BA_Studies_Query_Service::TYPES, 'required' => true ),
 					'area'         => array( 'type' => 'string', 'default' => '', 'sanitize_callback' => 'sanitize_title' ),
+					'categories'   => array( 'type' => 'string', 'default' => '', 'maxLength' => 512, 'sanitize_callback' => array( 'BA_Studies_Query_Service', 'sanitize_category_csv' ) ),
 					'limit'        => array( 'type' => 'integer', 'default' => 8, 'minimum' => 1, 'maximum' => 24 ),
 					'orderby'      => array( 'type' => 'string', 'default' => 'date', 'enum' => array( 'date', 'title', 'menu_order', 'rand', 'modified' ) ),
 					'order'        => array( 'type' => 'string', 'default' => 'DESC', 'enum' => array( 'ASC', 'DESC' ) ),
@@ -79,6 +80,7 @@ final class BA_Studies_Rest_Controller {
 			$type,
 			array(
 				'area'    => $request['area'],
+				'categories' => $request['categories'],
 				'limit'   => (int) $request['limit'],
 				'orderby' => $request['orderby'],
 				'order'   => $request['order'],

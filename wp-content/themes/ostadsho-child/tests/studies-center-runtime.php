@@ -80,6 +80,33 @@ $check('research-unconfigured-null', BA_Studies_Query_Service::build_args('resea
 $check('books-unconfigured-all', !isset(BA_Studies_Query_Service::build_args('books')['tax_query']));
 $check('invalid-type-fallback', BA_Studies_Query_Service::sanitize_type('evil') === 'books');
 
+/* ---------- Carousel category filters and priority ---------- */
+$check('category-ids-sanitized', BA_Studies_Query_Service::sanitize_category_ids(array('4', '4', '2', 'bad', '-3', '0')) === array(4, 2));
+$check('category-csv-sanitized', BA_Studies_Query_Service::sanitize_category_csv('9,7,foo,7,-1') === '9,7');
+$GLOBALS['t_options'][BA_Studies_Center_Settings_Service::OPTION_NAME] = array();
+$widget_books = BA_Studies_Query_Service::build_args('books', array('categories' => array('4', '7')));
+$check('books-widget-categories', $widget_books['tax_query'][0]['terms'] === array(4, 7) && $widget_books['tax_query'][0]['taxonomy'] === 'publications-cat');
+$widget_research = BA_Studies_Query_Service::build_args('research', array('categories' => '5,6'));
+$check('research-widget-categories', $widget_research['tax_query'][0]['terms'] === array(5, 6));
+$check('research-empty-preserved', BA_Studies_Query_Service::build_args('research', array('categories' => '')) === null);
+$session_categories = BA_Studies_Query_Service::build_args('sessions', array('categories' => '1,2', 'area' => 'health'));
+$check('session-area-intersection', $session_categories['tax_query'][0]['taxonomy'] === 'ba_study_area'
+	&& $session_categories['tax_query'][0]['field'] === 'term_id'
+	&& $session_categories['tax_query'][0]['terms'] === array(1, 2)
+	&& $session_categories['tax_query'][1]['field'] === 'slug'
+	&& $session_categories['tax_query'][1]['terms'] === array('health'));
+$GLOBALS['t_options'][BA_Studies_Center_Settings_Service::OPTION_NAME] = array('books_cats' => array(3), 'research_cats' => array(9));
+$admin_books = BA_Studies_Query_Service::build_args('books', array('categories' => '4,7'));
+$admin_research = BA_Studies_Query_Service::build_args('research', array('categories' => '5,6'));
+$check('admin-books-precedence', $admin_books['tax_query'][0]['terms'] === array(3) && $admin_books['tax_query'][1]['terms'] === array(9));
+$check('admin-research-precedence', $admin_research['tax_query'][0]['terms'] === array(9));
+$GLOBALS['t_options'][BA_Studies_Center_Settings_Service::OPTION_NAME] = array('research_cats' => array(9));
+$widget_books_with_exclusion = BA_Studies_Query_Service::build_args('books', array('categories' => '4,9'));
+$check('books-research-exclusion', $widget_books_with_exclusion['tax_query'][0]['terms'] === array(4, 9)
+	&& $widget_books_with_exclusion['tax_query'][1]['operator'] === 'NOT IN'
+	&& $widget_books_with_exclusion['tax_query'][1]['terms'] === array(9));
+$GLOBALS['t_options'][BA_Studies_Center_Settings_Service::OPTION_NAME] = array();
+
 /* ---------- Session meta sanitize ---------- */
 $meta = BA_Studies_Session_Meta::sanitize(array(
 	'video_id'   => '15',

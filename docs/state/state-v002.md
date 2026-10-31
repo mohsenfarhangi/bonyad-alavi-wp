@@ -722,3 +722,10 @@ Modules: [MODULE-AFE](../modules/alavi-form-engine.md), [MODULE-JIHADI-FORM](../
 - پیش‌ازاین روی `main` هم: `tests/home-news-widget-contract.php` در `default-date-format` FAIL است (مرتبط با این task نیست).
 - باز: Theme Builder/Elementor Pro و import templateها، پذیرش زنده، تصمیم جایگزینی page 7930، افزودن منو.
 
+
+## STATE-002-033 — Studies carousel category query override (2026-10-31)
+
+- اضافه شدن انتخاب چندگانه دسته‌بندی publications برای کاروسل‌های کتاب/پژوهش و حوزه‌های نشست برای کاروسل نشست.
+- اولویت فیلتر دسته برای کتاب/پژوهش: non-empty تنظیمات مدیریت > انتخاب ویجت > پیش‌فرض فعلی. پژوهش بدون انتخاب هیچ منبعی ندارد؛ کتاب همچنان دسته‌های پژوهش سراسری را exclude می‌کند.
+- افزودن categories امن و یکسان به REST برای حفظ نتایج هنگام تعویض فیلتر حوزه و پوشش جدید contract/runtime.
+- راهنمای ماژول و CURRENT به‌روزرسانی شدند. WordPress/Elementor live acceptance همچنان لازم است.

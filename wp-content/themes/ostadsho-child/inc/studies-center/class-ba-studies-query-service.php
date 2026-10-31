@@ -34,10 +34,50 @@ final class BA_Studies_Query_Service {
 	}
 
 	/**
+	 * شناسه‌های دسته انتخاب‌شده در ویجت یا REST؛ فقط شناسه‌های مثبت و یکتا.
+	 *
+	 * @param mixed $value آرایه شناسه‌ها یا CSV.
+	 * @return int[]
+	 */
+	public static function sanitize_category_ids( $value ) {
+		if ( is_string( $value ) ) {
+			$value = explode( ',', $value );
+		}
+		if ( ! is_array( $value ) ) {
+			return array();
+		}
+
+		$ids = array();
+		foreach ( $value as $raw ) {
+			if ( ! is_scalar( $raw ) || ! preg_match( '/^[0-9]+$/', (string) $raw ) ) {
+				continue;
+			}
+			$id = absint( $raw );
+			if ( $id ) {
+				$ids[ $id ] = $id;
+			}
+			if ( count( $ids ) >= 50 ) {
+				break;
+			}
+		}
+		return array_values( $ids );
+	}
+
+	/**
+	 * فرمت ایمن دسته‌ها برای REST و داده‌های کاروسل.
+	 *
+	 * @param mixed $value مقادیر دسته.
+	 * @return string
+	 */
+	public static function sanitize_category_csv( $value ) {
+		return implode( ',', self::sanitize_category_ids( $value ) );
+	}
+
+	/**
 	 * آرگومان‌های WP_Query یک نوع خروجی؛ null یعنی منبع پیکربندی نشده است.
 	 *
 	 * @param string $type books|sessions|research.
-	 * @param array  $opts area, limit, paged, orderby, order.
+	 * @param array  $opts area, categories, limit, paged, orderby, order.
 	 * @return array|null
 	 */
 	public static function build_args( $type, array $opts = array() ) {
@@ -45,6 +85,7 @@ final class BA_Studies_Query_Service {
 		$opts = wp_parse_args(
 			$opts,
 			array(
+				'categories' => array(),
 				'area'    => '',
 				'limit'   => 8,
 				'paged'   => 1,
@@ -63,24 +104,38 @@ final class BA_Studies_Query_Service {
 			'ignore_sticky_posts' => true,
 		);
 		$tax     = array();
+		$selected_categories = self::sanitize_category_ids( $opts['categories'] );
 
 		if ( 'sessions' === $type ) {
 			$args['post_type'] = BA_Studies_Content_Types::SESSION_POST_TYPE;
+			if ( $selected_categories ) {
+				$tax[] = array(
+					'taxonomy'         => BA_Studies_Content_Types::AREA_TAXONOMY,
+					'field'            => 'term_id',
+					'terms'            => $selected_categories,
+					'operator'         => 'IN',
+					'include_children' => true,
+				);
+			}
 		} else {
 			$settings          = BA_Studies_Center_Settings_Service::get_settings();
 			$args['post_type'] = BA_Studies_Content_Types::PUBLICATION_TYPE;
 
 			if ( 'research' === $type ) {
-				if ( empty( $settings['research_cats'] ) ) {
+				// دسته‌های تنظیمات مدیریت، در صورت وجود، بر انتخاب ویجت مقدم‌اند.
+				$research_cats = ! empty( $settings['research_cats'] ) ? $settings['research_cats'] : $selected_categories;
+				if ( ! $research_cats ) {
 					return null;
 				}
-
-				$tax[] = self::cat_clause( $settings['research_cats'], 'IN' );
+				$tax[] = self::cat_clause( $research_cats, 'IN' );
 			} else {
 				if ( ! empty( $settings['books_cats'] ) ) {
 					$tax[] = self::cat_clause( $settings['books_cats'], 'IN' );
+				} elseif ( $selected_categories ) {
+					$tax[] = self::cat_clause( $selected_categories, 'IN' );
 				}
 
+				// دسته‌های پژوهش سراسری همواره از کتاب‌ها حذف می‌شوند.
 				if ( ! empty( $settings['research_cats'] ) ) {
 					$tax[] = self::cat_clause( $settings['research_cats'], 'NOT IN' );
 				}

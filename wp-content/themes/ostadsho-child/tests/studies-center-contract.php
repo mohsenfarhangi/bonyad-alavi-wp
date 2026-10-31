@@ -78,7 +78,10 @@ $checks = array(
 
 	// Query و تفکیک کتاب/پژوهش.
 	'books-exclude-research'         => str_contains($query, "self::cat_clause( \$settings['research_cats'], 'NOT IN' )") && str_contains($query, "self::cat_clause( \$settings['books_cats'], 'IN' )"),
-	'research-requires-config'       => str_contains($query, "if ( empty( \$settings['research_cats'] ) ) {\n\t\t\t\t\treturn null;"),
+	'research-requires-config'       => str_contains($query, 'if ( ! $research_cats ) {') && str_contains($query, 'return null;'),
+	'carousel-category-controls'      => str_contains($carousel, "'publication_categories'") && str_contains($carousel, "'session_categories'") && str_contains($carousel, 'Controls_Manager::SELECT2') && str_contains($carousel, 'get_category_options'),
+	'carousel-category-rest-parity'   => str_contains($carousel, "BA_Studies_Query_Service::sanitize_category_csv( \$selected_categories )") && str_contains($rest, "'categories' => \$request['categories']") && str_contains($rest, 'sanitize_category_csv'),
+	'query-admin-category-precedence' => str_contains($query, "! empty( \$settings['research_cats'] ) ? \$settings['research_cats'] : \$selected_categories") && str_contains($query, 'elseif ( $selected_categories )'),
 	'area-filter-shared-tax'         => str_contains($query, "'taxonomy'         => BA_Studies_Content_Types::AREA_TAXONOMY"),
 	'separate-counts'                => str_contains($query, 'public static function count( $type )') && str_contains($query, "\$args['fields']                 = 'ids';") && str_contains($query, 'get_stat_override'),
 	'settings-no-overlap'            => str_contains($settings, "array_diff( \$output['books_cats'], \$output['research_cats'] )"),

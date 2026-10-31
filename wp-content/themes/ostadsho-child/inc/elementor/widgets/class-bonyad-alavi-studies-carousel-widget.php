@@ -56,6 +56,34 @@ final class Bonyad_Alavi_Studies_Carousel_Widget extends Widget_Base {
 		);
 	}
 
+	/**
+	 * گزینه‌های term هر taxonomy با شناسه واقعی.
+	 *
+	 * @param string $taxonomy نام taxonomy.
+	 * @return array
+	 */
+	private static function get_category_options( $taxonomy ) {
+		if ( ! taxonomy_exists( $taxonomy ) ) {
+			return array();
+		}
+		$terms = get_terms(
+			array(
+				'taxonomy'   => $taxonomy,
+				'hide_empty' => false,
+				'orderby'    => 'name',
+				'order'      => 'ASC',
+			)
+		);
+		if ( is_wp_error( $terms ) || ! is_array( $terms ) ) {
+			return array();
+		}
+		$options = array();
+		foreach ( $terms as $term ) {
+			$options[ (string) $term->term_id ] = $term->name;
+		}
+		return $options;
+	}
+
 	protected function register_controls() {
 		$this->start_controls_section(
 			'content_section',
@@ -142,6 +170,33 @@ final class Bonyad_Alavi_Studies_Carousel_Widget extends Widget_Base {
 			array(
 				'label' => 'Query',
 				'tab'   => Controls_Manager::TAB_CONTENT,
+			)
+		);
+
+		$this->add_control(
+			'publication_categories',
+			array(
+				'label'       => 'دسته‌بندی انتشارات',
+				'type'        => Controls_Manager::SELECT2,
+				'multiple'    => true,
+				'default'     => array(),
+				'label_block' => true,
+				'options'     => self::get_category_options( BA_Studies_Content_Types::PUBLICATION_CAT_TAX ),
+				'condition'   => array( 'content_type' => array( 'books', 'research' ) ),
+				'description' => 'خالی = رفتار پیش‌فرض. دسته‌های مشخص‌شده در تنظیمات بنیاد علوی ← مرکز مطالعات اولویت بالاتر دارند.',
+			)
+		);
+		$this->add_control(
+			'session_categories',
+			array(
+				'label'       => 'حوزه‌های نشست',
+				'type'        => Controls_Manager::SELECT2,
+				'multiple'    => true,
+				'default'     => array(),
+				'label_block' => true,
+				'options'     => self::get_category_options( BA_Studies_Content_Types::AREA_TAXONOMY ),
+				'condition'   => array( 'content_type' => 'sessions' ),
+				'description' => 'خالی = همه نشست‌ها. فیلتر حوزه سایت نیز، در صورت فعال‌بودن، اعمال می‌شود.',
 			)
 		);
 
@@ -352,6 +407,10 @@ final class Bonyad_Alavi_Studies_Carousel_Widget extends Widget_Base {
 			'orderby' => $settings['orderby'],
 			'order'   => $settings['order'],
 		);
+		$selected_categories = 'sessions' === $type
+			? ( $settings['session_categories'] ?? array() )
+			: ( $settings['publication_categories'] ?? array() );
+		$query['categories'] = BA_Studies_Query_Service::sanitize_category_csv( $selected_categories );
 		$result    = BA_Studies_Query_Service::get_items( $type, array_merge( $query, array( 'area' => $area ) ), $date_fmt );
 		$more_url  = isset( $settings['more_link']['url'] ) && '' !== trim( (string) $settings['more_link']['url'] )
 			? $settings['more_link']['url']
