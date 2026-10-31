@@ -175,6 +175,8 @@ $check('empty-hidden', str_contains(BA_Studies_Card_Renderer::render_empty('مو
 
 /* ---------- REST sanitizers ---------- */
 $check('rest-date-format', BA_Studies_Rest_Controller::sanitize_date_format('j F Y<script>') === 'j F Yscript' && BA_Studies_Rest_Controller::sanitize_date_format('<>') === 'j F Y');
+$check('rest-area-empty-is-string', BA_Studies_Rest_Controller::sanitize_area('') === '' && BA_Studies_Rest_Controller::sanitize_area(new stdClass()) === '');
+$check('rest-area-slug', BA_Studies_Rest_Controller::sanitize_area('Health<b>') === 'healthb');
 $check('rest-short-text', mb_strlen(BA_Studies_Rest_Controller::sanitize_short_text(str_repeat('ا', 90))) === 40);
 
 $failed = false;

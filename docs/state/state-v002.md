@@ -736,3 +736,9 @@ Modules: [MODULE-AFE](../modules/alavi-form-engine.md), [MODULE-JIHADI-FORM](../
 - شناسه term و پارامتر categories ثابت مانده تا تنظیمات قبلی سازگار بمانند. Query بر اساس taxonomy واقعی Term ساخته می‌شود، OR در هر taxonomy و AND بین taxonomyها.
 - اولویت تنظیمات مدیریت و حذف دسته پژوهش از کتاب حفظ شد. انتخاب نامعتبر به query گسترده‌تر تبدیل نمی‌شود.
 - تست‌های runtime/contract و harness توسعه یافتند؛ تست زنده WordPress/Elementor باز است.
+
+## STATE-002-035 — Studies REST 500 root cause (2026-10-31)
+
+- علت ۵۰۰ endpoint `ba/v1/studies/items` بدون `area` از `error_log` سرور: `Object of class WP_REST_Request could not be converted to string` در `build_args()`. وردپرس به `sanitize_callback` سه آرگومان (مقدار، درخواست، نام) می‌دهد؛ `sanitize_title` مستقیم، درخواست را `$fallback_title` می‌گیرد و برای `area` خالی همان شیء را برمی‌گرداند.
+- رفع: `BA_Studies_Rest_Controller::sanitize_area()` فقط مقدار را می‌گیرد. تست‌های `rest-area-empty-is-string` و `rest-area-slug` افزوده شدند. تا deploy این فایل، فیلتر live کاروسل‌ها با حوزه «همه» ۵۰۰ می‌دهد.
+

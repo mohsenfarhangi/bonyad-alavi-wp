@@ -52,7 +52,7 @@ final class BA_Studies_Rest_Controller {
 				'permission_callback' => '__return_true',
 				'args'                => array(
 					'type'         => array( 'type' => 'string', 'enum' => BA_Studies_Query_Service::TYPES, 'required' => true ),
-					'area'         => array( 'type' => 'string', 'default' => '', 'sanitize_callback' => 'sanitize_title' ),
+					'area'         => array( 'type' => 'string', 'default' => '', 'sanitize_callback' => array( __CLASS__, 'sanitize_area' ) ),
 					'categories'   => array( 'type' => 'string', 'default' => '', 'maxLength' => 512, 'sanitize_callback' => array( 'BA_Studies_Query_Service', 'sanitize_category_csv' ) ),
 					'limit'        => array( 'type' => 'integer', 'default' => 8, 'minimum' => 1, 'maximum' => 24 ),
 					'orderby'      => array( 'type' => 'string', 'default' => 'date', 'enum' => array( 'date', 'title', 'menu_order', 'rand', 'modified' ) ),
@@ -109,6 +109,18 @@ final class BA_Studies_Rest_Controller {
 		$response->header( 'Cache-Control', 'public, max-age=300' );
 
 		return $response;
+	}
+
+	/**
+	 * slug حوزه. وردپرس به sanitize_callback سه آرگومان (مقدار، درخواست، نام) می‌دهد؛
+	 * اگر sanitize_title مستقیم استفاده شود، درخواست به‌جای عنوان جایگزین می‌شود و مقدار خالی
+	 * همان شیء درخواست را برمی‌گرداند (Fatal در Query).
+	 *
+	 * @param mixed $value مقدار.
+	 * @return string
+	 */
+	public static function sanitize_area( $value ) {
+		return is_scalar( $value ) ? sanitize_title( (string) $value ) : '';
 	}
 
 	/**
