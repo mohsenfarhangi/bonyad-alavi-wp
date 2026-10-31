@@ -9,6 +9,7 @@
 - `settings/class-ba-settings-ajax-controller.php`
 - `settings/class-ba-settings-access-service.php`
 - `settings/class-ba-center-settings-tab.php`
+- `settings/class-ba-studies-center-settings-tab.php` (تب «مرکز مطالعات»، [MODULE-STUDIES-CENTER](studies-center.md))
 - `settings/tab-participation.php`
 - `settings/tab-access-management.php`
 - `components/class-ba-admin-repeater-component.php`
@@ -76,6 +77,7 @@ Current consumers:
 - System Cards
 - Partners
 - Center FAQ
+- Studies Center session files (متاباکس نشست)
 
 Elementor از `Elementor\Repeater` خودش استفاده می‌کند.
 

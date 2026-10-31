@@ -1,0 +1,36 @@
+/*
+ * شبیه‌سازی containerهای Elementor مطابق templateهای elementor-templates/.
+ * فقط برای harness؛ وارد قالب نمی‌شود.
+ */
+
+html { font-size: 16px; }
+body { margin: 0; background: #fff; color: #163027; font-family: "Vazirmatn", Tahoma, sans-serif; }
+body * { font-family: "Vazirmatn", Tahoma, sans-serif !important; }
+
+.harness-header { height: 64px; display: flex; align-items: center; justify-content: center; border-bottom: 1px solid #eef1ef; color: #9aa6a0; font-size: 13px; }
+
+.e-con-boxed { width: min(1200px, calc(100% - 40px)); margin: 0 auto; }
+.e-con { margin-top: 24px; }
+.e-con.harness-gap { margin-top: 64px; }
+main.e-con-boxed { padding-bottom: 80px; }
+
+.harness-intro { display: grid; grid-template-columns: minmax(0, 1fr) 30%; margin-top: 16px; border: 1px solid #dfe8e3; border-radius: 18px; overflow: hidden; background: #fff; box-shadow: 0 2px 10px rgba(7, 76, 44, .04); }
+.harness-intro__main { padding: 28px 30px 24px; }
+.harness-intro__side { display: flex; }
+.harness-intro__side > * { flex: 1 1 auto; }
+.harness-intro .ba-section-heading { margin-bottom: 10px; }
+.elementor-widget-text-editor p { margin: 0; color: #67766f; font-size: 13.5px; line-height: 2.15; text-align: justify; }
+
+.harness-session-bg { background: #f4f4f4; padding: 20px 0 60px; }
+.harness-session { display: grid; grid-template-columns: minmax(0, 1fr) 470px; gap: 30px; align-items: start; }
+.harness-session__side { order: 2; }
+.harness-space { height: 22px; }
+
+@media (max-width: 760px) {
+  .e-con.harness-gap { margin-top: 44px; }
+  .harness-intro { grid-template-columns: minmax(0, 1fr); }
+  .harness-intro__main { padding: 22px 18px 16px; }
+  .harness-intro__side .ba-studies-filter { border-top: 0; }
+  .harness-session { grid-template-columns: minmax(0, 1fr); gap: 26px; }
+  .harness-session-bg { background: #fff; padding-top: 14px; }
+}

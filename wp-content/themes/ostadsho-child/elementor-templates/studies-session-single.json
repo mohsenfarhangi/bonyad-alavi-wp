@@ -1,0 +1,138 @@
+{
+ "content": [
+  {
+   "id": "8665078",
+   "elType": "container",
+   "isInner": false,
+   "settings": {
+    "content_width": "boxed",
+    "flex_direction": "row",
+    "flex_direction_mobile": "column",
+    "flex_align_items": "flex-start",
+    "flex_gap": {
+     "unit": "px",
+     "size": 30,
+     "column": "30",
+     "row": "30",
+     "isLinked": true
+    },
+    "flex_gap_mobile": {
+     "unit": "px",
+     "size": 26,
+     "column": "26",
+     "row": "26",
+     "isLinked": true
+    },
+    "background_background": "classic",
+    "background_color": "#F4F4F4",
+    "padding": {
+     "unit": "px",
+     "top": "20",
+     "right": "0",
+     "bottom": "60",
+     "left": "0",
+     "isLinked": false
+    },
+    "padding_mobile": {
+     "unit": "px",
+     "top": "14",
+     "right": "0",
+     "bottom": "40",
+     "left": "0",
+     "isLinked": false
+    }
+   },
+   "elements": [
+    {
+     "id": "b11d1c8",
+     "elType": "container",
+     "isInner": true,
+     "settings": {
+      "content_width": "full",
+      "width": {
+       "unit": "%",
+       "size": 61
+      },
+      "width_mobile": {
+       "unit": "%",
+       "size": 100
+      },
+      "flex_direction": "column",
+      "flex_gap": {
+       "unit": "px",
+       "size": 22,
+       "column": "22",
+       "row": "22",
+       "isLinked": true
+      },
+      "padding": {
+       "unit": "px",
+       "top": "0",
+       "right": "0",
+       "bottom": "0",
+       "left": "0",
+       "isLinked": false
+      }
+     },
+     "elements": [
+      {
+       "id": "a34357c",
+       "elType": "widget",
+       "isInner": false,
+       "widgetType": "bonyad_alavi_studies_session_video",
+       "settings": {},
+       "elements": []
+      },
+      {
+       "id": "55495e3",
+       "elType": "widget",
+       "isInner": false,
+       "widgetType": "bonyad_alavi_studies_session_content",
+       "settings": {},
+       "elements": []
+      }
+     ]
+    },
+    {
+     "id": "5af40ff",
+     "elType": "container",
+     "isInner": true,
+     "settings": {
+      "content_width": "full",
+      "width": {
+       "unit": "%",
+       "size": 37
+      },
+      "width_mobile": {
+       "unit": "%",
+       "size": 100
+      },
+      "flex_direction": "column",
+      "padding": {
+       "unit": "px",
+       "top": "0",
+       "right": "0",
+       "bottom": "0",
+       "left": "0",
+       "isLinked": false
+      }
+     },
+     "elements": [
+      {
+       "id": "d8c786b",
+       "elType": "widget",
+       "isInner": false,
+       "widgetType": "bonyad_alavi_studies_session_info",
+       "settings": {},
+       "elements": []
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "page_settings": [],
+ "version": "0.4",
+ "title": "مرکز مطالعات — صفحه داخلی نشست",
+ "type": "single-post"
+}

@@ -29,6 +29,7 @@
 - معرفی بنیاد صفحه اصلی / نمودار منابع → `MODULE-HOME-ABOUT`
 - آخرین اخبار صفحه اصلی → `MODULE-HOME-NEWS`
 - عنوان سکشن عمومی Elementor → `MODULE-SECTION-HEADING`
+- مرکز مطالعات / نشست‌ها / حوزه‌ها → `MODULE-STUDIES-CENTER`
 - چرایی یک contract → [decisions/INDEX.md](decisions/INDEX.md)
 - سابقه تغییر → [state/INDEX.md](state/INDEX.md)
 

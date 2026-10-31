@@ -1,6 +1,6 @@
 # Current Project State
 
-آخرین بازبینی: **2026-10-22**
+آخرین بازبینی: **2026-10-31**
 
 ## Project Phase
 
@@ -19,6 +19,13 @@
 AFE release goal همچنان live acceptance نسخه 1.0.28 و رفع blocker واقعی پیش از production promotion است.
 
 ## Recently Completed
+
+### Studies Center page — branch `feat/studies-center-page` (2026-10-31)
+- صفحه «مرکز مطالعات» (Hero با اسلایدر و آمار واقعی، باکس معرفی و فیلتر حوزه، کاروسل کتاب/نشست/پژوهش) و صفحه داخلی نشست (ویدئو، لید/گزارش، کارت اطلاعات و فایل‌ها) طبق طرح تأییدشده. جزئیات: [MODULE-STUDIES-CENTER](../modules/studies-center.md)، تصمیم: [ADR-008](../decisions/ADR-008-studies-center-data-model.md).
+- CPT `ba_study_session`، Taxonomy مشترک `ba_study_area` (۸ حوزه یک‌بار)، `ba_research_type`. کتاب/پژوهش در publications با دسته‌های انتخابی تب «مرکز مطالعات». Capability `ba_manage_studies_center` برای تب و مدیریت کامل نشست‌ها.
+- ۸ ویجت Elementor، REST فقط‌خواندنی فیلتر، exportهای JSON در `elementor-templates/`. `functions.php` فقط یک خط require.
+- **محلی PASS:** contract ۴۱/۴۱، runtime ۲۷/۲۷، php -l و node --check. مقایسه بصری با harness ایزوله در ۱۲۸۰/۳۹۰. CI جدید `studies-center-checks.yml` هنوز روی GitHub اجرا نشده است. **پذیرش زنده WordPress/Elementor انجام نشده است.**
+
 
 ### Per-form recovery OTP message template and pattern mode (2026-10-22)
 - درخواست کاربر: متن پیامک بازیابی پیش‌نویس قابل تنظیم باشد یا با پترن/BodyId تأییدشده ارسال شود. `SmsOtpMessageFactory` به موتور بازیابی وصل شد، دو حالت free/pattern با `{{code}}` و `{{minutes}}`، اعتبارسنجی سخت‌گیرانه در سمت سرور و ورودی‌های اختصاصی تب جلوگیری از تکرار افزوده شدند.
@@ -279,6 +286,7 @@ Open release work برای AFE:
 - [ADR-005 — Shared admin Repeater](../decisions/ADR-005-shared-admin-repeater.md)
 - [ADR-006 — AFE export dependency isolation](../decisions/ADR-006-afe-export-dependency-isolation.md)
 - [ADR-007 — Project form ownership](../decisions/ADR-007-project-form-ownership.md)
+- [ADR-008 — Studies Center data model](../decisions/ADR-008-studies-center-data-model.md)
 
 ## Relevant Modules
 
@@ -297,6 +305,7 @@ Open release work برای AFE:
 - [MODULE-HOME-ABOUT](../modules/theme-home-about-widget.md)
 - [MODULE-HOME-NEWS](../modules/theme-home-news-widget.md)
 - [MODULE-SECTION-HEADING](../modules/theme-section-heading-widget.md)
+- [MODULE-STUDIES-CENTER](../modules/studies-center.md)
 
 ## Tests Status
 
@@ -326,6 +335,8 @@ Theme legacy v0.6.5 docs recorded PHP/JS syntax + ZIP checks for that patch.
 
 برای Hero صفحه اصلی فایل regression contract جدید `tests/home-hero-widget-contract.php` اضافه شده است. روی draft محلی معادل این implementation، PHP lint، JavaScript syntax و contract checks PASS شدند؛ نسخه commit‌شده نیز از GitHub برای registration، Query reuse، link contract، نبود تصاویر پیش‌فرض، scope CSS و Elementor JS hook بازبینی استاتیک شد. **اجرای live WordPress/Elementor روی HEAD جدید هنوز تأیید نشده است.**
 
+برای مرکز مطالعات `tests/studies-center-contract.php` (۴۱) و `tests/studies-center-runtime.php` (۲۷) روی PHP 8.5 محلی PASS شدند. `tests/home-news-widget-contract.php` روی `main` در check `default-date-format` FAIL است (پیش از این task).
+
 Historical PASSهای AFE/Theme به HEAD جدید تعمیم داده نمی‌شوند.
 
 ## Next Actions
@@ -345,6 +356,8 @@ Historical PASSهای AFE/Theme به HEAD جدید تعمیم داده نمی‌
 **Open task (هیرو، task جدا):** فلش‌های اسلایدر با `slider_show_arrows` در Elementor خاموش شوند و سپس قانون `.ba-slider__controls` در `style.css` و `<style>` inline در Code Snippet #9 حذف شوند. قانون `.elementor-element-964556b .ba-hero__grid { grid-template-rows … !important }` پیش از حذف روی دسکتاپ و موبایل تست شود. تا آن زمان قوانین موجود بدون تغییر بمانند.
 
 **Tracked since 2026-10-30:** `wp-content/plugins/alavi-pages/` اکنون در whitelist `.gitignore` است (نسخه سرور مرجع است).
+
+**Studies Center (branch `feat/studies-center-page`, PR باز نشده/merge نشده):** پیش از هر چیز روی سایت بررسی شود که Elementor Pro با Theme Builder فعال و مجاز است. اگر نبود، متوقف شو و گزارش بده و قالب PHP جایگزین نساز. سپس طبق «مراحل import» در [MODULE-STUDIES-CENTER](../modules/studies-center.md): import سه JSON، شرط نمایش single نشست، ساخت برگه پیش‌نویس، انتخاب دسته‌های کتاب/پژوهش در تب، دادن Capability، و افزودن منو از پنل. صفحه 7930 بدون تأیید مدیر پروژه بازنویسی نشود.
 
 **Start here:** [../INDEX.md](../INDEX.md) → [../modules/INDEX.md](../modules/INDEX.md).
 

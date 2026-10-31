@@ -83,6 +83,16 @@ final class BA_Elementor_Assets {
 			'bonyad-alavi-section-heading-widget',
 			'assets/css/bonyad-alavi-section-heading-widget.css'
 		);
+
+		$this->register_style(
+			'bonyad-alavi-studies-center',
+			'assets/css/bonyad-alavi-studies-center.css'
+		);
+
+		$this->register_style(
+			'bonyad-alavi-studies-session',
+			'assets/css/bonyad-alavi-studies-session.css'
+		);
 	}
 
 	/**
@@ -141,6 +151,18 @@ final class BA_Elementor_Assets {
 			'bonyad-alavi-home-about-widget',
 			'assets/js/bonyad-alavi-home-about-widget.js',
 			array( 'elementor-frontend', 'apache-echarts' )
+		);
+
+		$this->register_script(
+			'bonyad-alavi-studies-center',
+			'assets/js/bonyad-alavi-studies-center.js',
+			array( 'elementor-frontend', 'swiper' )
+		);
+
+		$this->register_script(
+			'bonyad-alavi-studies-session',
+			'assets/js/bonyad-alavi-studies-session.js',
+			array()
 		);
 	}
 
@@ -241,6 +263,15 @@ final class BA_Elementor_Widgets_Registrar {
 		require_once get_stylesheet_directory() . '/inc/elementor/widgets/class-bonyad-alavi-home-about-widget.php';
 		require_once get_stylesheet_directory() . '/inc/elementor/widgets/class-bonyad-alavi-home-news-widget.php';
 		require_once get_stylesheet_directory() . '/inc/elementor/widgets/class-bonyad-alavi-section-heading-widget.php';
+		require_once get_stylesheet_directory() . '/inc/elementor/widgets/class-bonyad-alavi-studies-hero-widget.php';
+		require_once get_stylesheet_directory() . '/inc/elementor/widgets/class-bonyad-alavi-studies-area-filter-widget.php';
+		require_once get_stylesheet_directory() . '/inc/elementor/widgets/class-bonyad-alavi-studies-carousel-widget.php';
+		require_once get_stylesheet_directory() . '/inc/elementor/widgets/class-bonyad-alavi-studies-grid-widget.php';
+		require_once get_stylesheet_directory() . '/inc/elementor/widgets/abstract-bonyad-alavi-studies-session-widget.php';
+		require_once get_stylesheet_directory() . '/inc/elementor/widgets/class-bonyad-alavi-studies-session-video-widget.php';
+		require_once get_stylesheet_directory() . '/inc/elementor/widgets/class-bonyad-alavi-studies-session-content-widget.php';
+		require_once get_stylesheet_directory() . '/inc/elementor/widgets/class-bonyad-alavi-studies-session-info-widget.php';
+		require_once get_stylesheet_directory() . '/inc/elementor/widgets/class-bonyad-alavi-studies-session-files-widget.php';
 
 		$widgets_manager->register( new \Bonyad_Alavi_Participation_Widget() );
 		$widgets_manager->register( new \Bonyad_Alavi_Product_Gallery_Widget() );
@@ -251,6 +282,14 @@ final class BA_Elementor_Widgets_Registrar {
 		$widgets_manager->register( new \Bonyad_Alavi_Home_About_Widget() );
 		$widgets_manager->register( new \Bonyad_Alavi_Home_News_Widget() );
 		$widgets_manager->register( new \Bonyad_Alavi_Section_Heading_Widget() );
+		$widgets_manager->register( new \Bonyad_Alavi_Studies_Hero_Widget() );
+		$widgets_manager->register( new \Bonyad_Alavi_Studies_Area_Filter_Widget() );
+		$widgets_manager->register( new \Bonyad_Alavi_Studies_Carousel_Widget() );
+		$widgets_manager->register( new \Bonyad_Alavi_Studies_Grid_Widget() );
+		$widgets_manager->register( new \Bonyad_Alavi_Studies_Session_Video_Widget() );
+		$widgets_manager->register( new \Bonyad_Alavi_Studies_Session_Content_Widget() );
+		$widgets_manager->register( new \Bonyad_Alavi_Studies_Session_Info_Widget() );
+		$widgets_manager->register( new \Bonyad_Alavi_Studies_Session_Files_Widget() );
 	}
 }
 

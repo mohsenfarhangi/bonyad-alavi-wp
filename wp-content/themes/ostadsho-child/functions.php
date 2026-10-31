@@ -153,6 +153,7 @@ require_once get_stylesheet_directory() . '/inc/woocommerce/class-ba-woocommerce
 // سرویس و تب تنظیمات مرکز حرکت‌های مردمی و جهادی.
 require_once get_stylesheet_directory() . '/inc/services/class-ba-center-settings-service.php';
 require_once get_stylesheet_directory() . '/inc/admin/settings/class-ba-center-settings-tab.php';
+require_once get_stylesheet_directory() . '/inc/studies-center/class-ba-studies-center-bootstrap.php';
 
 // تنظیمات مدیریتی بنیاد علوی: صفحه تب‌دار، مشارکت مردمی و مدیریت دسترسی.
 require_once get_stylesheet_directory() . '/inc/admin/settings/tab-participation.php';

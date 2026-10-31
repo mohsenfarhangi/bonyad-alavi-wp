@@ -1,0 +1,81 @@
+name: Studies center checks
+
+on:
+  push:
+    branches:
+      - feat/studies-center-page
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'wp-content/themes/ostadsho-child/functions.php'
+      - 'wp-content/themes/ostadsho-child/inc/studies-center/**'
+      - 'wp-content/themes/ostadsho-child/inc/services/class-ba-studies-center-settings-service.php'
+      - 'wp-content/themes/ostadsho-child/inc/admin/settings/class-ba-studies-center-settings-tab.php'
+      - 'wp-content/themes/ostadsho-child/inc/elementor/elementor-widgets.php'
+      - 'wp-content/themes/ostadsho-child/inc/elementor/widgets/*studies*'
+      - 'wp-content/themes/ostadsho-child/assets/css/*studies*'
+      - 'wp-content/themes/ostadsho-child/assets/js/*studies*'
+      - 'wp-content/themes/ostadsho-child/elementor-templates/**'
+      - 'wp-content/themes/ostadsho-child/tests/studies-center-*.php'
+      - 'wp-content/themes/ostadsho-child/tests/studies-center-harness/**'
+      - '.github/workflows/studies-center-checks.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  studies-center:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: wp-content/themes/ostadsho-child
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          coverage: none
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Check PHP syntax
+        run: |
+          set -e
+          for file in functions.php inc/elementor/elementor-widgets.php \
+            inc/studies-center/*.php \
+            inc/services/class-ba-studies-center-settings-service.php \
+            inc/admin/settings/class-ba-studies-center-settings-tab.php \
+            inc/elementor/widgets/*studies*.php \
+            tests/studies-center-*.php \
+            tests/studies-center-harness/*.php; do
+            php -l "$file"
+          done
+      - name: Studies center contract
+        run: php tests/studies-center-contract.php
+      - name: Studies center runtime logic
+        run: php tests/studies-center-runtime.php
+      - name: Shared Elementor bootstrap regressions
+        run: |
+          php tests/home-hero-widget-contract.php
+          php tests/home-quick-links-widget-contract.php
+          php tests/home-live-stats-widget-contract.php
+          php tests/home-about-widget-contract.php
+          php tests/section-heading-widget-contract.php
+      - name: JavaScript syntax
+        run: |
+          node --check assets/js/bonyad-alavi-studies-center.js
+          node --check assets/js/bonyad-alavi-studies-session.js
+          node --check assets/js/ba-studies-session-admin.js
+      - name: Elementor template JSON
+        run: |
+          for file in elementor-templates/*.json; do
+            php -r 'json_decode(file_get_contents($argv[1]), true, 512, JSON_THROW_ON_ERROR); echo "valid {$argv[1]}\n";' "$file"
+          done
+      - name: Isolated harness render
+        run: |
+          mkdir -p /tmp/harness-deps/node_modules/swiper /tmp/harness-deps/node_modules/vazirmatn
+          php tests/studies-center-harness/render.php /tmp/harness-out /tmp/harness-deps
+          grep -q 'ba-studies-hero' /tmp/harness-out/index.html
+          grep -q 'ba-session-info' /tmp/harness-out/session.html
