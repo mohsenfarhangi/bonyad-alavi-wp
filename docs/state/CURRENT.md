@@ -20,6 +20,10 @@ AFE release goal همچنان live acceptance نسخه 1.0.28 و رفع blocker 
 
 ## Recently Completed
 
+### Studies Center live page data + sessions from post categories (2026-10-31)
+- روی سایت زنده (صفحه 7930، از پنل): دسته پژوهش در تب «مرکز مطالعات» = `333`، ویجت کتاب = `334`، ویجت پژوهش = `333`، و اسلایدر Hero حالت دستی با ۴ اسلاید از نوشته‌های دسته `317` (عکس شاخص، تاریخ شمسی، لینک). این‌ها داده سایت‌اند و در ریپو نیستند. پشتیبان `_elementor_data` قبل از تغییر گرفته شد.
+- کد: کاروسل نشست‌ها با دسته نوشته‌ها (`category`) از Post Type همان taxonomy می‌خواند؛ شاخه `fix/studies-sessions-from-post-taxonomies-20261031`. **تا deploy/merge این شاخه کاروسل نشست‌ها روی سایت خالی است.** ۵۰۰ endpoint REST فیلتر حوزه بدون پارامتر `area` هنوز علت‌یابی نشده (نیاز به error_log).
+
 ### Studies Center carousel site-wide taxonomy selector (2026-10-31)
 - کنترل SELECT2 کاروسل اکنون termهای تمام taxonomyهای ثبت‌شده سایت را با برچسب taxonomy نمایش می‌دهد؛ شناسه‌های ذخیره‌شده قبلی و REST ثابت مانده‌اند.
 - Query از taxonomy واقعی Term استفاده می‌کند: OR در یک taxonomy و AND میان taxonomyها. تقدم تنظیمات مدیریت کتاب/پژوهش و تفکیک آنها محفوظ است.

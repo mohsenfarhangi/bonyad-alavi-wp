@@ -736,3 +736,10 @@ Modules: [MODULE-AFE](../modules/alavi-form-engine.md), [MODULE-JIHADI-FORM](../
 - شناسه term و پارامتر categories ثابت مانده تا تنظیمات قبلی سازگار بمانند. Query بر اساس taxonomy واقعی Term ساخته می‌شود، OR در هر taxonomy و AND بین taxonomyها.
 - اولویت تنظیمات مدیریت و حذف دسته پژوهش از کتاب حفظ شد. انتخاب نامعتبر به query گسترده‌تر تبدیل نمی‌شود.
 - تست‌های runtime/contract و harness توسعه یافتند؛ تست زنده WordPress/Elementor باز است.
+
+## STATE-002-035 — Sessions carousel from post categories (2026-10-31)
+
+- مشکل: روی سایت زنده کاروسل «نشست‌ها» دسته `317` («رویدادها و نشست‌ها» از دسته‌بندی نوشته‌ها) را انتخاب کرده بود، ولی Query نشست همیشه فقط CPT `ba_study_session` را می‌خواند، پس همیشه خالی می‌ماند.
+- رفع: `BA_Studies_Query_Service::build_args()` برای نوع `sessions` با termهای انتخاب‌شده، Post Type را از `object_type` taxonomyها تعیین می‌کند (فقط CPT نشست برای حوزه یا بدون انتخاب).
+- تصحیح تصمیم داده: دسته پژوهش در تب «مرکز مطالعات» روی سایت زنده باید `333` (آئین‌نامه و دستورالعمل) باشد، نه `335`؛ ۹ کتاب طرح هر دو دسته 334 و 335 را دارند و انتخاب 335 آن‌ها را از سکشن کتاب برمی‌داشت.
+- تست‌های runtime با `get_taxonomy` و ۶ مورد جدید توسعه یافتند. پذیرش زنده WordPress/Elementor باز است و تا deploy این کد کاروسل نشست خالی می‌ماند.

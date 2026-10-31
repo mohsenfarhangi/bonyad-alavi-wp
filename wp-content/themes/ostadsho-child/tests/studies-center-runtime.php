@@ -19,6 +19,16 @@ $GLOBALS['t_terms']   = array();
 $GLOBALS['t_inserts'] = 0;
 
 function get_term($id) { $taxonomy = $GLOBALS['t_term_taxonomies'][(int) $id] ?? null; return $taxonomy ? (object) array('term_id' => (int) $id, 'taxonomy' => $taxonomy) : null; }
+function get_taxonomy($tax) {
+	$map = array(
+		'ba_study_area'    => array('ba_study_session', 'publications'),
+		'publications-cat' => array('publications'),
+		'ba_research_type' => array('publications'),
+		'category'         => array('post'),
+		'post_tag'         => array('post'),
+	);
+	return isset($map[$tax]) ? (object) array('object_type' => $map[$tax]) : false;
+}
 function is_wp_error($value) { return false; }
 function get_option($name, $default = false) { return $GLOBALS['t_options'][$name] ?? $default; }
 function update_option($name, $value, $autoload = null) { $GLOBALS['t_options'][$name] = $value; return true; }
@@ -114,6 +124,15 @@ $check('session-area-intersection', $session_categories['tax_query'][0]['taxonom
 	&& $session_categories['tax_query'][0]['terms'] === array(1, 2)
 	&& $session_categories['tax_query'][1]['field'] === 'slug'
 	&& $session_categories['tax_query'][1]['terms'] === array('health'));
+$check('session-area-keeps-session-cpt', $session_categories['post_type'] === 'ba_study_session');
+$check('session-without-categories-keeps-session-cpt', BA_Studies_Query_Service::build_args('sessions', array())['post_type'] === 'ba_study_session');
+$session_posts = BA_Studies_Query_Service::build_args('sessions', array('categories' => '42'));
+$check('session-post-category-uses-post-type', $session_posts['post_type'] === 'post'
+	&& $session_posts['tax_query'][0]['taxonomy'] === 'category'
+	&& $session_posts['tax_query'][0]['terms'] === array(42));
+$check('session-post-category-with-area-does-not-broaden', BA_Studies_Query_Service::build_args('sessions', array('categories' => '42', 'area' => 'health'))['post_type'] === 'post');
+$check('session-incompatible-taxonomies-empty', BA_Studies_Query_Service::build_args('sessions', array('categories' => '42,1')) === null);
+$check('session-unregistered-taxonomy-empty', BA_Studies_Query_Service::build_args('sessions', array('categories' => '43,41')) === null);
 $GLOBALS['t_options'][BA_Studies_Center_Settings_Service::OPTION_NAME] = array('books_cats' => array(3), 'research_cats' => array(9));
 $admin_books = BA_Studies_Query_Service::build_args('books', array('categories' => '4,7'));
 $admin_research = BA_Studies_Query_Service::build_args('research', array('categories' => '5,6'));
