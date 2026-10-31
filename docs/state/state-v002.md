@@ -736,3 +736,28 @@ Modules: [MODULE-AFE](../modules/alavi-form-engine.md), [MODULE-JIHADI-FORM](../
 - شناسه term و پارامتر categories ثابت مانده تا تنظیمات قبلی سازگار بمانند. Query بر اساس taxonomy واقعی Term ساخته می‌شود، OR در هر taxonomy و AND بین taxonomyها.
 - اولویت تنظیمات مدیریت و حذف دسته پژوهش از کتاب حفظ شد. انتخاب نامعتبر به query گسترده‌تر تبدیل نمی‌شود.
 - تست‌های runtime/contract و harness توسعه یافتند؛ تست زنده WordPress/Elementor باز است.
+
+## STATE-002-035 — Studies REST 500 root cause (2026-10-31)
+
+- علت ۵۰۰ endpoint `ba/v1/studies/items` بدون `area` از `error_log` سرور: `Object of class WP_REST_Request could not be converted to string` در `build_args()`. وردپرس به `sanitize_callback` سه آرگومان (مقدار، درخواست، نام) می‌دهد؛ `sanitize_title` مستقیم، درخواست را `$fallback_title` می‌گیرد و برای `area` خالی همان شیء را برمی‌گرداند.
+- رفع: `BA_Studies_Rest_Controller::sanitize_area()` فقط مقدار را می‌گیرد. تست‌های `rest-area-empty-is-string` و `rest-area-slug` افزوده شدند. تا deploy این فایل، فیلتر live کاروسل‌ها با حوزه «همه» ۵۰۰ می‌دهد.
+
+## STATE-002-036 — Studies area filter double arrow (2026-10-31)
+
+- علت فلش دوم: Select2 سایت (مثلاً از WooCommerce) روی `select` فیلتر حوزه اعمال می‌شود، `span.select2` با فلش پیش‌فرض خودش اضافه می‌کند و کنار `__chevron` ویجت دو فلش دیده می‌شود. با probe در Chrome headless روی صفحه زنده تأیید شد.
+- رفع فقط در CSS ویجت: کانتینر Select2 در `.ba-studies-filter__control` مخفی و `select` بومی با ظاهر ویجت نمایش داده می‌شود؛ رویدادهای `change` و JS ویجت بدون تغییرند. با تزریق CSS جدید به نسخه محلی صفحه زنده، یک فلش دیده شد. روی سایت واقعی تا deploy این فایل اعمال نمی‌شود.
+- فلش‌های اسلایدر Hero با کنترل `show_arrows` خود ویجت در Elementor خاموش شد (داده سایت، نه ریپو).
+
+## STATE-002-037 — Sessions carousel from post categories (2026-10-31)
+
+- مشکل: روی سایت زنده کاروسل «نشست‌ها» دسته `317` («رویدادها و نشست‌ها» از دسته‌بندی نوشته‌ها) را انتخاب کرده بود، ولی Query نشست همیشه فقط CPT `ba_study_session` را می‌خواند، پس همیشه خالی می‌ماند.
+- رفع: `BA_Studies_Query_Service::build_args()` برای نوع `sessions` با termهای انتخاب‌شده، Post Type را از `object_type` taxonomyها تعیین می‌کند (فقط CPT نشست برای حوزه یا بدون انتخاب).
+- منشأ داده: در قالب ذخیره‌شده «صفحه مطالعات و آبادانی قدیمی» (Elementor template 29741) سکشن «رویداد و نشست» یک Loop Carousel روی نوشته‌های دسته `317` بود و «تحقیق و پژوهش» روی انتشارات دسته `335`. تصمیم کارفرما: داده نشست‌ها همان نوشته‌های 317 باشد (موقتاً تا ورود نشست‌های CPT با ویدئو/فایل). فیلتر حوزه روی نوشته‌ها اثر ندارد.
+- تصحیح تصمیم داده: دسته پژوهش در تب «مرکز مطالعات» روی سایت زنده باید `333` (آئین‌نامه و دستورالعمل) باشد، نه `335`؛ ۹ کتاب طرح هر دو دسته 334 و 335 را دارند و انتخاب 335 آن‌ها را از سکشن کتاب برمی‌داشت.
+- تست‌های runtime با `get_taxonomy` و ۶ مورد جدید توسعه یافتند. پذیرش زنده WordPress/Elementor باز است و تا deploy این کد کاروسل نشست خالی می‌ماند.
+
+## STATE-002-038 — Studies card dates from global post (2026-10-31)
+
+- روی سایت زنده تاریخ همه کارت‌های کاروسل «۲۴ خرداد ۱۴۰۴» بود (تاریخ خود صفحه 7930). افزونه تاریخ شمسی سایت `get_the_date` را از پست سراسری می‌خواند و آرگومان `$post` را نادیده می‌گیرد.
+- رفع: `BA_Studies_Query_Service::normalize()` هنگام ساخت تاریخ، `$GLOBALS['post']` را موقتاً برابر پست کارت می‌گذارد و بعد برمی‌گرداند. تست‌های `card-date-uses-own-post` و `card-date-restores-global-post` (شکست بدون اصلاح، پاس با اصلاح) افزوده شدند.
+

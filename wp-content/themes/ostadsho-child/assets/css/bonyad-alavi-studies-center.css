@@ -306,6 +306,25 @@ a.ba-studies-stat:focus-visible {
   outline-offset: 1px;
 }
 
+/* Select2 سایت (مثلاً WooCommerce) انتخابگر را بازنویسی می‌کند و فلش دومی اضافه می‌کند.
+   Select2 را برای این فیلتر کنار می‌گذاریم و select بومی را با همان ظاهر نشان می‌دهیم. */
+.ba-studies-filter__control > .select2-container {
+  display: none !important;
+}
+
+.ba-studies-filter__control > .ba-studies-filter__select.select2-hidden-accessible {
+  position: static !important;
+  width: 100% !important;
+  height: 46px !important;
+  margin: 0 !important;
+  padding: 0 16px 0 40px !important;
+  border: 1px solid var(--ba-line) !important;
+  clip: auto !important;
+  clip-path: none !important;
+  overflow: visible !important;
+  white-space: normal !important;
+}
+
 .ba-studies-filter__chevron {
   position: absolute;
   left: 16px;
