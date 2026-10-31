@@ -24,7 +24,7 @@ AFE release goal همچنان live acceptance نسخه 1.0.28 و رفع blocker 
 - صفحه «مرکز مطالعات» (Hero با اسلایدر و آمار واقعی، باکس معرفی و فیلتر حوزه، کاروسل کتاب/نشست/پژوهش) و صفحه داخلی نشست (ویدئو، لید/گزارش، کارت اطلاعات و فایل‌ها) طبق طرح تأییدشده. جزئیات: [MODULE-STUDIES-CENTER](../modules/studies-center.md)، تصمیم: [ADR-008](../decisions/ADR-008-studies-center-data-model.md).
 - CPT `ba_study_session`، Taxonomy مشترک `ba_study_area` (۸ حوزه یک‌بار)، `ba_research_type`. کتاب/پژوهش در publications با دسته‌های انتخابی تب «مرکز مطالعات». Capability `ba_manage_studies_center` برای تب و مدیریت کامل نشست‌ها.
 - ۸ ویجت Elementor، REST فقط‌خواندنی فیلتر، exportهای JSON در `elementor-templates/`. `functions.php` فقط یک خط require.
-- **محلی PASS:** contract ۴۱/۴۱، runtime ۲۷/۲۷، php -l و node --check. مقایسه بصری با harness ایزوله در ۱۲۸۰/۳۹۰. CI جدید `studies-center-checks.yml` هنوز روی GitHub اجرا نشده است. **پذیرش زنده WordPress/Elementor انجام نشده است.**
+- **محلی PASS:** contract ۴۱/۴۱، runtime ۲۷/۲۷، php -l و node --check. مقایسه بصری با harness ایزوله در ۱۲۸۰/۳۹۰. **GitHub Actions [run 41186040854](https://github.com/mohsenfarhangi/bonyad-alavi-wp/actions/runs/41186040854) PASS** (`studies-center-checks.yml`: PHP 8.3 lint، contract، runtime، regressions مشترک Elementor، JS، JSON و harness). **پذیرش زنده WordPress/Elementor انجام نشده است.**
 
 
 ### Per-form recovery OTP message template and pattern mode (2026-10-22)

@@ -718,6 +718,7 @@ Modules: [MODULE-AFE](../modules/alavi-form-engine.md), [MODULE-JIHADI-FORM](../
 - ۸ ویجت Elementor، REST فقط‌خواندنی فیلتر، exportهای JSON (single نشست، صفحه اصلی، آرشیو نشست‌ها).
 - `functions.php`: فقط یک خط `require_once` (مجوز صریح مدیر پروژه).
 - آزمون محلی PHP 8.5: contract ۴۱/۴۱ و runtime ۲۷/۲۷ PASS، php -l همه فایل‌های جدید و `node --check` سه JS PASS. harness ایزوله با Chromium headless در ۱۲۸۰ و ۳۹۰ رندر و با طرح مقایسه شد (اصلاح‌ها: عرض صفر اسلایدر به‌علت `margin:auto` در CSS خود Swiper، چیدمان footer کارت در موبایل، تعداد کارت در نمای موبایل، ارتفاع Hero موبایل).
+- GitHub Actions [run 41186040854](https://github.com/mohsenfarhangi/bonyad-alavi-wp/actions/runs/41186040854) روی branch PASS شد.
 - پیش‌ازاین روی `main` هم: `tests/home-news-widget-contract.php` در `default-date-format` FAIL است (مرتبط با این task نیست).
 - باز: Theme Builder/Elementor Pro و import templateها، پذیرش زنده، تصمیم جایگزینی page 7930، افزودن منو.
 
