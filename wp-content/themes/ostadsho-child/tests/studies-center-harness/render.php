@@ -109,7 +109,7 @@ $GLOBALS['harness_items'] = array(
 
 $GLOBALS['harness_terms'] = array();
 foreach ( array( 'مدیریت دانش', 'نوآوری اجتماعی', 'پیشرفت و آبادانی', 'توانمندسازی اقتصادی', 'آموزش، مهارت و پرورش', 'بهداشت و درمان', 'عمرانی و زیرساختی', 'سایر حوزه‌ها' ) as $i => $name ) {
-	$GLOBALS['harness_terms'][] = (object) array( 'slug' => 'area-' . $i, 'name' => $name );
+	$GLOBALS['harness_terms'][] = (object) array( 'term_id' => $i, 'slug' => 'area-' . $i, 'name' => $name );
 }
 
 $hero_image = harness_photo( 'hero.svg', 120 );
