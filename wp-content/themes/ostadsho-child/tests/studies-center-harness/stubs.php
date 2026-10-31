@@ -126,7 +126,23 @@ namespace {
 	function get_the_ID() { return $GLOBALS['harness_post_id'] ?? 0; }
 	function get_post_type( $id ) { return BA_Studies_Content_Types::SESSION_POST_TYPE; }
 	function get_post_field( $field, $id ) { return $GLOBALS['harness_session']['body'] ?? ''; }
-	function get_terms( $args ) { return $GLOBALS['harness_terms'] ?? array(); }
+	function get_terms( $args ) {
+		$taxonomies = (array) ( $args['taxonomy'] ?? array() );
+		return array_values( array_filter(
+			$GLOBALS['harness_terms'] ?? array(),
+			static function ( $term ) use ( $taxonomies ) {
+				return ! $taxonomies || in_array( $term->taxonomy ?? '', $taxonomies, true );
+			}
+		) );
+	}
+	function get_taxonomies( $args = array(), $output = 'names' ) {
+		$objects = array(
+			'ba_study_area'    => (object) array( 'label' => 'حوزه‌ها' ),
+			'publications-cat' => (object) array( 'label' => 'دسته‌های انتشارات' ),
+			'post_tag'         => (object) array( 'label' => 'برچسب‌ها' ),
+		);
+		return 'objects' === $output ? $objects : array_keys( $objects );
+	}
 	function taxonomy_exists( $taxonomy ) { return true; }
 	function is_wp_error( $value ) { return false; }
 

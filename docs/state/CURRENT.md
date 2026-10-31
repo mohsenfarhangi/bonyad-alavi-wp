@@ -20,6 +20,11 @@ AFE release goal همچنان live acceptance نسخه 1.0.28 و رفع blocker 
 
 ## Recently Completed
 
+### Studies Center carousel site-wide taxonomy selector (2026-10-31)
+- کنترل SELECT2 کاروسل اکنون termهای تمام taxonomyهای ثبت‌شده سایت را با برچسب taxonomy نمایش می‌دهد؛ شناسه‌های ذخیره‌شده قبلی و REST ثابت مانده‌اند.
+- Query از taxonomy واقعی Term استفاده می‌کند: OR در یک taxonomy و AND میان taxonomyها. تقدم تنظیمات مدیریت کتاب/پژوهش و تفکیک آنها محفوظ است.
+- تست‌های runtime، contract و harness توسعه یافتند؛ پذیرش زنده Elementor همچنان باز است.
+
 ### Studies Center carousel category query (2026-10-31)
 - Query ویجت `bonyad_alavi_studies_carousel` امکان انتخاب چندگانه دسته انتشارات برای کتاب/پژوهش و حوزه برای نشست دارد. فقط انتخاب غیرخالی تب تنظیمات مدیریت، انتخاب همان نوع در ویجت را override می‌کند؛ در غیر این صورت تنظیم ویجت و سپس رفتار پیش‌فرض قبلی حاکم است. تفکیک پژوهش از کتاب حفظ شده است.
 - پارامتر `categories` در REST و رندر اولیه مشترک، sanitize می‌شود تا فیلتر زنده حوزه همان منبع کاروسل را حفظ کند. پوشش regression در contract/runtime افزوده شد. پذیرش زنده Elementor باز است.

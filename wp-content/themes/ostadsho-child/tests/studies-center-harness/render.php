@@ -109,7 +109,18 @@ $GLOBALS['harness_items'] = array(
 
 $GLOBALS['harness_terms'] = array();
 foreach ( array( 'مدیریت دانش', 'نوآوری اجتماعی', 'پیشرفت و آبادانی', 'توانمندسازی اقتصادی', 'آموزش، مهارت و پرورش', 'بهداشت و درمان', 'عمرانی و زیرساختی', 'سایر حوزه‌ها' ) as $i => $name ) {
-	$GLOBALS['harness_terms'][] = (object) array( 'term_id' => $i, 'slug' => 'area-' . $i, 'name' => $name );
+	$GLOBALS['harness_terms'][] = (object) array( 'term_id' => $i, 'taxonomy' => 'ba_study_area', 'slug' => 'area-' . $i, 'name' => $name );
+}
+
+// آزمون گزینه‌های قابل جست‌وجوی چند taxonomy متفاوت.
+$GLOBALS['harness_terms'][] = (object) array( 'term_id' => 101, 'taxonomy' => 'publications-cat', 'name' => 'کتاب‌های آموزشی', 'slug' => 'education-books' );
+$GLOBALS['harness_terms'][] = (object) array( 'term_id' => 102, 'taxonomy' => 'post_tag', 'name' => 'توسعه پایدار', 'slug' => 'sustainable' );
+$category_method = new ReflectionMethod( Bonyad_Alavi_Studies_Carousel_Widget::class, 'get_category_options' );
+$category_options = $category_method->invoke( null );
+if ( ! isset( $category_options['101'], $category_options['102'] )
+	|| ! str_contains( $category_options['101'], 'دسته‌های انتشارات' )
+	|| ! str_contains( $category_options['102'], 'برچسب‌ها' ) ) {
+	throw new RuntimeException( 'All-taxonomy carousel options were not generated correctly.' );
 }
 
 $hero_image = harness_photo( 'hero.svg', 120 );

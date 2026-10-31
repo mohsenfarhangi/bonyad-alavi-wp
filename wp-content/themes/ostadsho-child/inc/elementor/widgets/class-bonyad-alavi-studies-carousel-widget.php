@@ -57,18 +57,19 @@ final class Bonyad_Alavi_Studies_Carousel_Widget extends Widget_Base {
 	}
 
 	/**
-	 * گزینه‌های term هر taxonomy با شناسه واقعی.
+	 * فهرست جست‌وجوی Termهای همه Taxonomyهای ثبت‌شده سایت.
+	 * شناسه‌های عددی فعلی Elementor برای سازگاری بدون migration حفظ می‌شوند.
 	 *
-	 * @param string $taxonomy نام taxonomy.
 	 * @return array
 	 */
-	private static function get_category_options( $taxonomy ) {
-		if ( ! taxonomy_exists( $taxonomy ) ) {
+	private static function get_category_options() {
+		$taxonomies = get_taxonomies( array(), 'objects' );
+		if ( ! is_array( $taxonomies ) || ! $taxonomies ) {
 			return array();
 		}
 		$terms = get_terms(
 			array(
-				'taxonomy'   => $taxonomy,
+				'taxonomy'   => array_keys( $taxonomies ),
 				'hide_empty' => false,
 				'orderby'    => 'name',
 				'order'      => 'ASC',
@@ -79,7 +80,12 @@ final class Bonyad_Alavi_Studies_Carousel_Widget extends Widget_Base {
 		}
 		$options = array();
 		foreach ( $terms as $term ) {
-			$options[ (string) $term->term_id ] = $term->name;
+			if ( ! isset( $term->term_id, $term->taxonomy, $term->name ) ) {
+				continue;
+			}
+			$taxonomy = $taxonomies[ $term->taxonomy ] ?? null;
+			$label = $taxonomy->label ?? $term->taxonomy;
+			$options[ (string) $term->term_id ] = $label . ' — ' . $term->name . ' (' . $term->taxonomy . ')';
 		}
 		return $options;
 	}
@@ -176,27 +182,27 @@ final class Bonyad_Alavi_Studies_Carousel_Widget extends Widget_Base {
 		$this->add_control(
 			'publication_categories',
 			array(
-				'label'       => 'دسته‌بندی انتشارات',
+				'label'       => 'انتخاب از همه تکسونومی‌ها',
 				'type'        => Controls_Manager::SELECT2,
 				'multiple'    => true,
 				'default'     => array(),
 				'label_block' => true,
-				'options'     => self::get_category_options( BA_Studies_Content_Types::PUBLICATION_CAT_TAX ),
+				'options'     => self::get_category_options(),
 				'condition'   => array( 'content_type' => array( 'books', 'research' ) ),
-				'description' => 'خالی = رفتار پیش‌فرض. دسته‌های مشخص‌شده در تنظیمات بنیاد علوی ← مرکز مطالعات اولویت بالاتر دارند.',
+				'description' => 'در میان Termهای همه تکسونومی‌های سایت جست‌وجو کنید. خالی = پیش‌فرض. تنظیمات غیرخالی بنیاد علوی اولویت بالاتری دارند. تکسونومی نامرتبط با نوع محتوا ممکن است خروجی نداشته باشد.',
 			)
 		);
 		$this->add_control(
 			'session_categories',
 			array(
-				'label'       => 'حوزه‌های نشست',
+				'label'       => 'انتخاب از همه تکسونومی‌ها',
 				'type'        => Controls_Manager::SELECT2,
 				'multiple'    => true,
 				'default'     => array(),
 				'label_block' => true,
-				'options'     => self::get_category_options( BA_Studies_Content_Types::AREA_TAXONOMY ),
+				'options'     => self::get_category_options(),
 				'condition'   => array( 'content_type' => 'sessions' ),
-				'description' => 'خالی = همه نشست‌ها. فیلتر حوزه سایت نیز، در صورت فعال‌بودن، اعمال می‌شود.',
+				'description' => 'جست‌وجو در Termهای تمام تکسونومی‌های سایت. خالی = همه نشست‌ها؛ فیلتر حوزه نیز اعمال می‌شود. تکسونومی نامرتبط ممکن است نتیجه‌ای نداشته باشد.',
 			)
 		);
 
