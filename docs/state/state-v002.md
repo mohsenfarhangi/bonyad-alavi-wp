@@ -736,3 +736,10 @@ Modules: [MODULE-AFE](../modules/alavi-form-engine.md), [MODULE-JIHADI-FORM](../
 - شناسه term و پارامتر categories ثابت مانده تا تنظیمات قبلی سازگار بمانند. Query بر اساس taxonomy واقعی Term ساخته می‌شود، OR در هر taxonomy و AND بین taxonomyها.
 - اولویت تنظیمات مدیریت و حذف دسته پژوهش از کتاب حفظ شد. انتخاب نامعتبر به query گسترده‌تر تبدیل نمی‌شود.
 - تست‌های runtime/contract و harness توسعه یافتند؛ تست زنده WordPress/Elementor باز است.
+
+## STATE-002-035 — Studies area filter double arrow (2026-10-31)
+
+- علت فلش دوم: Select2 سایت (مثلاً از WooCommerce) روی `select` فیلتر حوزه اعمال می‌شود، `span.select2` با فلش پیش‌فرض خودش اضافه می‌کند و کنار `__chevron` ویجت دو فلش دیده می‌شود. با probe در Chrome headless روی صفحه زنده تأیید شد.
+- رفع فقط در CSS ویجت: کانتینر Select2 در `.ba-studies-filter__control` مخفی و `select` بومی با ظاهر ویجت نمایش داده می‌شود؛ رویدادهای `change` و JS ویجت بدون تغییرند. با تزریق CSS جدید به نسخه محلی صفحه زنده، یک فلش دیده شد. روی سایت واقعی تا deploy این فایل اعمال نمی‌شود.
+- فلش‌های اسلایدر Hero با کنترل `show_arrows` خود ویجت در Elementor خاموش شد (داده سایت، نه ریپو).
+
