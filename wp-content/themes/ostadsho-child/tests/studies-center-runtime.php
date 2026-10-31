@@ -7,10 +7,19 @@ declare(strict_types=1);
 
 define('ABSPATH', __DIR__ . '/');
 
+$GLOBALS['t_term_taxonomies'] = array(
+	1 => 'ba_study_area', 2 => 'ba_study_area',
+	3 => 'publications-cat', 4 => 'publications-cat',
+	5 => 'publications-cat', 6 => 'publications-cat',
+	7 => 'publications-cat', 9 => 'publications-cat',
+	41 => 'post_tag', 42 => 'category', 43 => 'ba_research_type',
+);
 $GLOBALS['t_options'] = array();
 $GLOBALS['t_terms']   = array();
 $GLOBALS['t_inserts'] = 0;
 
+function get_term($id) { $taxonomy = $GLOBALS['t_term_taxonomies'][(int) $id] ?? null; return $taxonomy ? (object) array('term_id' => (int) $id, 'taxonomy' => $taxonomy) : null; }
+function is_wp_error($value) { return false; }
 function get_option($name, $default = false) { return $GLOBALS['t_options'][$name] ?? $default; }
 function update_option($name, $value, $autoload = null) { $GLOBALS['t_options'][$name] = $value; return true; }
 function wp_parse_args($args, $defaults = array()) { return array_merge($defaults, (array) $args); }
@@ -89,6 +98,16 @@ $check('books-widget-categories', $widget_books['tax_query'][0]['terms'] === arr
 $widget_research = BA_Studies_Query_Service::build_args('research', array('categories' => '5,6'));
 $check('research-widget-categories', $widget_research['tax_query'][0]['terms'] === array(5, 6));
 $check('research-empty-preserved', BA_Studies_Query_Service::build_args('research', array('categories' => '')) === null);
+$all_terms = BA_Studies_Query_Service::build_args('books', array('categories' => '41,43'));
+$check('all-taxonomies-supported', $all_terms['tax_query'][0]['taxonomy'] === 'post_tag'
+	&& $all_terms['tax_query'][1]['taxonomy'] === 'ba_research_type'
+	&& $all_terms['tax_query']['relation'] === 'AND');
+$mixed_terms = BA_Studies_Query_Service::build_args('research', array('categories' => '4,5,41'));
+$check('same-taxonomy-or-different-taxonomy-and', $mixed_terms['tax_query'][0]['terms'] === array(4, 5)
+	&& $mixed_terms['tax_query'][0]['taxonomy'] === 'publications-cat'
+	&& $mixed_terms['tax_query'][1]['taxonomy'] === 'post_tag');
+$check('invalid-term-does-not-broaden', BA_Studies_Query_Service::build_args('books', array('categories' => '999999')) === null);
+$check('invalid-research-term-empty', BA_Studies_Query_Service::build_args('research', array('categories' => '999999')) === null);
 $session_categories = BA_Studies_Query_Service::build_args('sessions', array('categories' => '1,2', 'area' => 'health'));
 $check('session-area-intersection', $session_categories['tax_query'][0]['taxonomy'] === 'ba_study_area'
 	&& $session_categories['tax_query'][0]['field'] === 'term_id'

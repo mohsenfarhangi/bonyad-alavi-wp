@@ -82,6 +82,8 @@ $checks = array(
 	'carousel-category-controls'      => str_contains($carousel, "'publication_categories'") && str_contains($carousel, "'session_categories'") && str_contains($carousel, 'Controls_Manager::SELECT2') && str_contains($carousel, 'get_category_options'),
 	'carousel-category-rest-parity'   => str_contains($carousel, "BA_Studies_Query_Service::sanitize_category_csv( \$selected_categories )") && str_contains($rest, "'categories' => \$request['categories']") && str_contains($rest, 'sanitize_category_csv'),
 	'query-admin-category-precedence' => str_contains($query, "! empty( \$settings['research_cats'] ) ? \$settings['research_cats'] : \$selected_categories") && str_contains($query, 'elseif ( $selected_categories )'),
+	'category-options-sitewide'       => str_contains($carousel, "get_taxonomies( array(), 'objects' )") && str_contains($carousel, "'taxonomy'   => array_keys( \$taxonomies )") && substr_count($carousel, 'self::get_category_options()') === 2,
+	'category-queries-tax-aware'     => str_contains($query, 'get_term( $id )') && str_contains($query, 'selected_term_clauses( array $ids )') && str_contains($query, "'taxonomy'         => \$taxonomy") && str_contains($query, 'array_merge( $tax, $clauses )'),
 	'area-filter-shared-tax'         => str_contains($query, "'taxonomy'         => BA_Studies_Content_Types::AREA_TAXONOMY"),
 	'separate-counts'                => str_contains($query, 'public static function count( $type )') && str_contains($query, "\$args['fields']                 = 'ids';") && str_contains($query, 'get_stat_override'),
 	'settings-no-overlap'            => str_contains($settings, "array_diff( \$output['books_cats'], \$output['research_cats'] )"),

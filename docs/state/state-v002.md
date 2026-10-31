@@ -729,3 +729,10 @@ Modules: [MODULE-AFE](../modules/alavi-form-engine.md), [MODULE-JIHADI-FORM](../
 - اولویت فیلتر دسته برای کتاب/پژوهش: non-empty تنظیمات مدیریت > انتخاب ویجت > پیش‌فرض فعلی. پژوهش بدون انتخاب هیچ منبعی ندارد؛ کتاب همچنان دسته‌های پژوهش سراسری را exclude می‌کند.
 - افزودن categories امن و یکسان به REST برای حفظ نتایج هنگام تعویض فیلتر حوزه و پوشش جدید contract/runtime.
 - راهنمای ماژول و CURRENT به‌روزرسانی شدند. WordPress/Elementor live acceptance همچنان لازم است.
+
+## STATE-002-034 — Site-wide taxonomy terms in Studies carousel (2026-10-31)
+
+- کنترل SELECT2 کاروسل اکنون termهای تمامی taxonomyهای ثبت‌شده سایت را همراه برچسب taxonomy نمایش داده و جست‌وجو می‌کند.
+- شناسه term و پارامتر categories ثابت مانده تا تنظیمات قبلی سازگار بمانند. Query بر اساس taxonomy واقعی Term ساخته می‌شود، OR در هر taxonomy و AND بین taxonomyها.
+- اولویت تنظیمات مدیریت و حذف دسته پژوهش از کتاب حفظ شد. انتخاب نامعتبر به query گسترده‌تر تبدیل نمی‌شود.
+- تست‌های runtime/contract و harness توسعه یافتند؛ تست زنده WordPress/Elementor باز است.
