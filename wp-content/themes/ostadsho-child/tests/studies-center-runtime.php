@@ -19,6 +19,24 @@ $GLOBALS['t_terms']   = array();
 $GLOBALS['t_inserts'] = 0;
 
 function get_term($id) { $taxonomy = $GLOBALS['t_term_taxonomies'][(int) $id] ?? null; return $taxonomy ? (object) array('term_id' => (int) $id, 'taxonomy' => $taxonomy) : null; }
+function get_taxonomy($tax) {
+	$map = array(
+		'ba_study_area'    => array('ba_study_session', 'publications'),
+		'publications-cat' => array('publications'),
+		'ba_research_type' => array('publications'),
+		'category'         => array('post'),
+		'post_tag'         => array('post'),
+	);
+	return isset($map[$tax]) ? (object) array('object_type' => $map[$tax]) : false;
+}
+function get_post_thumbnail_id($post) { return 0; }
+function get_the_terms($post, $tax) { return false; }
+function has_excerpt($post) { return true; }
+function get_the_excerpt($post) { return 'x'; }
+function get_the_title($post) { return 'T' . $post->ID; }
+function get_permalink($post) { return 'https://example.test/' . $post->ID . '/'; }
+/* مثل افزونه‌های تاریخ شمسی: تاریخ را از پست سراسری می‌خواند و آرگومان $post را نادیده می‌گیرد. */
+function get_the_date($format, $post = null) { return $GLOBALS['post']->post_date; }
 function is_wp_error($value) { return false; }
 function get_option($name, $default = false) { return $GLOBALS['t_options'][$name] ?? $default; }
 function update_option($name, $value, $autoload = null) { $GLOBALS['t_options'][$name] = $value; return true; }
@@ -114,6 +132,15 @@ $check('session-area-intersection', $session_categories['tax_query'][0]['taxonom
 	&& $session_categories['tax_query'][0]['terms'] === array(1, 2)
 	&& $session_categories['tax_query'][1]['field'] === 'slug'
 	&& $session_categories['tax_query'][1]['terms'] === array('health'));
+$check('session-area-keeps-session-cpt', $session_categories['post_type'] === 'ba_study_session');
+$check('session-without-categories-keeps-session-cpt', BA_Studies_Query_Service::build_args('sessions', array())['post_type'] === 'ba_study_session');
+$session_posts = BA_Studies_Query_Service::build_args('sessions', array('categories' => '42'));
+$check('session-post-category-uses-post-type', $session_posts['post_type'] === 'post'
+	&& $session_posts['tax_query'][0]['taxonomy'] === 'category'
+	&& $session_posts['tax_query'][0]['terms'] === array(42));
+$check('session-post-category-with-area-does-not-broaden', BA_Studies_Query_Service::build_args('sessions', array('categories' => '42', 'area' => 'health'))['post_type'] === 'post');
+$check('session-incompatible-taxonomies-empty', BA_Studies_Query_Service::build_args('sessions', array('categories' => '42,1')) === null);
+$check('session-unregistered-taxonomy-empty', BA_Studies_Query_Service::build_args('sessions', array('categories' => '43,41')) === null);
 $GLOBALS['t_options'][BA_Studies_Center_Settings_Service::OPTION_NAME] = array('books_cats' => array(3), 'research_cats' => array(9));
 $admin_books = BA_Studies_Query_Service::build_args('books', array('categories' => '4,7'));
 $admin_research = BA_Studies_Query_Service::build_args('research', array('categories' => '5,6'));
@@ -177,6 +204,11 @@ $check('empty-hidden', str_contains(BA_Studies_Card_Renderer::render_empty('مو
 $check('rest-date-format', BA_Studies_Rest_Controller::sanitize_date_format('j F Y<script>') === 'j F Yscript' && BA_Studies_Rest_Controller::sanitize_date_format('<>') === 'j F Y');
 $check('rest-area-empty-is-string', BA_Studies_Rest_Controller::sanitize_area('') === '' && BA_Studies_Rest_Controller::sanitize_area(new stdClass()) === '');
 $check('rest-area-slug', BA_Studies_Rest_Controller::sanitize_area('Health<b>') === 'healthb');
+$GLOBALS['post'] = (object) array('ID' => 1, 'post_date' => 'PAGE-DATE');
+$card_a = BA_Studies_Query_Service::normalize((object) array('ID' => 10, 'post_date' => '2026-08-01', 'post_content' => ''), 'books');
+$card_b = BA_Studies_Query_Service::normalize((object) array('ID' => 11, 'post_date' => '2026-07-15', 'post_content' => ''), 'books');
+$check('card-date-uses-own-post', $card_a['date'] !== $card_b['date'] && strpos($card_a['date'], 'PAGE') === false && strpos($card_b['date'], 'PAGE') === false);
+$check('card-date-restores-global-post', $GLOBALS['post']->ID === 1);
 $check('rest-short-text', mb_strlen(BA_Studies_Rest_Controller::sanitize_short_text(str_repeat('ا', 90))) === 40);
 
 $failed = false;

@@ -103,6 +103,36 @@ final class BA_Studies_Query_Service {
 	}
 
 	/**
+	 * Post Typeهای قابل Query برای کاروسل نشست‌ها بر اساس taxonomyهای انتخاب‌شده.
+	 *
+	 * اگر taxonomy انتخاب‌شده روی CPT نشست ثبت باشد (مثل حوزه)، فقط نشست‌ها می‌آیند.
+	 * اگر روی CPT نشست ثبت نباشد (مثل دسته‌بندی نوشته‌ها)، Post Typeهای مشترک همه
+	 * taxonomyهای انتخاب‌شده استفاده می‌شوند؛ شروط taxonomyها همچنان با AND ترکیب‌اند.
+	 *
+	 * @param array $clauses شروط tax_query ساخته‌شده از termهای انتخاب‌شده.
+	 * @return string[] خالی یعنی هیچ Post Type مشترکی وجود ندارد.
+	 */
+	private static function post_types_for_clauses( array $clauses ) {
+		$common = null;
+
+		foreach ( $clauses as $clause ) {
+			$taxonomy = get_taxonomy( $clause['taxonomy'] );
+			$types    = $taxonomy && ! empty( $taxonomy->object_type ) ? array_values( (array) $taxonomy->object_type ) : array();
+			$common   = null === $common ? $types : array_values( array_intersect( $common, $types ) );
+		}
+
+		if ( null === $common ) {
+			return array( BA_Studies_Content_Types::SESSION_POST_TYPE );
+		}
+
+		if ( in_array( BA_Studies_Content_Types::SESSION_POST_TYPE, $common, true ) ) {
+			return array( BA_Studies_Content_Types::SESSION_POST_TYPE );
+		}
+
+		return $common;
+	}
+
+	/**
 	 * آرگومان‌های WP_Query یک نوع خروجی؛ null یعنی منبع پیکربندی نشده است.
 	 *
 	 * @param string $type books|sessions|research.
@@ -143,6 +173,12 @@ final class BA_Studies_Query_Service {
 					return null;
 				}
 				$tax = array_merge( $tax, $clauses );
+
+				$post_types = self::post_types_for_clauses( $clauses );
+				if ( ! $post_types ) {
+					return null;
+				}
+				$args['post_type'] = 1 === count( $post_types ) ? reset( $post_types ) : $post_types;
 			}
 		} else {
 			$settings          = BA_Studies_Center_Settings_Service::get_settings();
@@ -290,7 +326,11 @@ final class BA_Studies_Query_Service {
 	 */
 	public static function normalize( $post, $type, $date_format = 'j F Y' ) {
 		$thumb_id = get_post_thumbnail_id( $post );
+		// افزونه‌های تاریخ شمسی تاریخ را از پست سراسری می‌گیرند، نه آرگومان $post؛ پس موقتاً همان پست کارت را سراسری می‌گذاریم.
+		$previous_post = isset( $GLOBALS['post'] ) ? $GLOBALS['post'] : null;
+		$GLOBALS['post'] = $post; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 		$date     = get_the_date( $date_format, $post );
+		$GLOBALS['post'] = $previous_post; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 
 		if ( 'sessions' === $type ) {
 			$meta = BA_Studies_Session_Meta::get( $post->ID );
