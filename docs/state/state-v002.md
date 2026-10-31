@@ -742,3 +742,9 @@ Modules: [MODULE-AFE](../modules/alavi-form-engine.md), [MODULE-JIHADI-FORM](../
 - علت ۵۰۰ endpoint `ba/v1/studies/items` بدون `area` از `error_log` سرور: `Object of class WP_REST_Request could not be converted to string` در `build_args()`. وردپرس به `sanitize_callback` سه آرگومان (مقدار، درخواست، نام) می‌دهد؛ `sanitize_title` مستقیم، درخواست را `$fallback_title` می‌گیرد و برای `area` خالی همان شیء را برمی‌گرداند.
 - رفع: `BA_Studies_Rest_Controller::sanitize_area()` فقط مقدار را می‌گیرد. تست‌های `rest-area-empty-is-string` و `rest-area-slug` افزوده شدند. تا deploy این فایل، فیلتر live کاروسل‌ها با حوزه «همه» ۵۰۰ می‌دهد.
 
+## STATE-002-035 — Studies area filter double arrow (2026-10-31)
+
+- علت فلش دوم: Select2 سایت (مثلاً از WooCommerce) روی `select` فیلتر حوزه اعمال می‌شود، `span.select2` با فلش پیش‌فرض خودش اضافه می‌کند و کنار `__chevron` ویجت دو فلش دیده می‌شود. با probe در Chrome headless روی صفحه زنده تأیید شد.
+- رفع فقط در CSS ویجت: کانتینر Select2 در `.ba-studies-filter__control` مخفی و `select` بومی با ظاهر ویجت نمایش داده می‌شود؛ رویدادهای `change` و JS ویجت بدون تغییرند. با تزریق CSS جدید به نسخه محلی صفحه زنده، یک فلش دیده شد. روی سایت واقعی تا deploy این فایل اعمال نمی‌شود.
+- فلش‌های اسلایدر Hero با کنترل `show_arrows` خود ویجت در Elementor خاموش شد (داده سایت، نه ریپو).
+
