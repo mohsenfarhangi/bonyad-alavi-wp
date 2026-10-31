@@ -50,6 +50,7 @@
 - معرفی بنیاد صفحه اصلی / `#about` / `ba-impact` → `MODULE-HOME-ABOUT`
 - آخرین اخبار صفحه اصلی / `#news` / `ba-news` → `MODULE-HOME-NEWS`
 - عنوان سکشن عمومی Elementor / `ba-section-heading` → `MODULE-SECTION-HEADING`
+- مرکز مطالعات / نشست‌ها / حوزه‌ها / `ba_study_session` → `MODULE-STUDIES-CENTER`
 
 شناسه و لینک دقیق همه آن‌ها در [docs/modules/INDEX.md](docs/modules/INDEX.md) است.
 

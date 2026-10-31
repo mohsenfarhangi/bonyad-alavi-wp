@@ -1,0 +1,151 @@
+{
+ "content": [
+  {
+   "id": "d0c3269",
+   "elType": "container",
+   "isInner": false,
+   "settings": {
+    "content_width": "boxed",
+    "flex_direction": "column",
+    "flex_gap": {
+     "unit": "px",
+     "size": 24,
+     "column": "24",
+     "row": "24",
+     "isLinked": true
+    },
+    "padding": {
+     "unit": "px",
+     "top": "32",
+     "right": "0",
+     "bottom": "80",
+     "left": "0",
+     "isLinked": false
+    },
+    "padding_tablet": {
+     "unit": "px",
+     "top": "20",
+     "right": "20",
+     "bottom": "56",
+     "left": "20",
+     "isLinked": false
+    },
+    "padding_mobile": {
+     "unit": "px",
+     "top": "20",
+     "right": "16",
+     "bottom": "56",
+     "left": "16",
+     "isLinked": false
+    }
+   },
+   "elements": [
+    {
+     "id": "434eb39",
+     "elType": "container",
+     "isInner": true,
+     "settings": {
+      "content_width": "full",
+      "flex_direction": "row",
+      "flex_direction_mobile": "column",
+      "flex_justify_content": "space-between",
+      "flex_align_items": "flex-end",
+      "flex_gap": {
+       "unit": "px",
+       "size": 20,
+       "column": "20",
+       "row": "20",
+       "isLinked": true
+      },
+      "padding": {
+       "unit": "px",
+       "top": "0",
+       "right": "0",
+       "bottom": "0",
+       "left": "0",
+       "isLinked": false
+      }
+     },
+     "elements": [
+      {
+       "id": "18d93a6",
+       "elType": "widget",
+       "isInner": false,
+       "widgetType": "bonyad_alavi_section_heading",
+       "settings": {
+        "layout": "stack",
+        "eyebrow": "مرکز مطالعات",
+        "title": "نشست‌ها و رویدادهای تخصصی",
+        "title_tag": "h1"
+       },
+       "elements": []
+      },
+      {
+       "id": "763d15e",
+       "elType": "container",
+       "isInner": true,
+       "settings": {
+        "content_width": "full",
+        "width": {
+         "unit": "px",
+         "size": 320
+        },
+        "width_mobile": {
+         "unit": "%",
+         "size": 100
+        },
+        "flex_direction": "column",
+        "overflow": "hidden",
+        "border_radius": {
+         "unit": "px",
+         "top": "14",
+         "right": "14",
+         "bottom": "14",
+         "left": "14",
+         "isLinked": false
+        },
+        "padding": {
+         "unit": "px",
+         "top": "0",
+         "right": "0",
+         "bottom": "0",
+         "left": "0",
+         "isLinked": false
+        }
+       },
+       "elements": [
+        {
+         "id": "eb8cf82",
+         "elType": "widget",
+         "isInner": false,
+         "widgetType": "bonyad_alavi_studies_area_filter",
+         "settings": {
+          "mode": "url",
+          "help": ""
+         },
+         "elements": []
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "id": "8a9db43",
+     "elType": "widget",
+     "isInner": false,
+     "widgetType": "bonyad_alavi_studies_grid",
+     "settings": {
+      "content_type": "sessions"
+     },
+     "elements": []
+    }
+   ]
+  }
+ ],
+ "page_settings": {
+  "hide_title": "yes"
+ },
+ "version": "0.4",
+ "title": "مرکز مطالعات — آرشیو نشست‌ها",
+ "type": "page"
+}

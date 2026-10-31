@@ -1,0 +1,50 @@
+/* متاباکس نشست مرکز مطالعات */
+
+.ba-session-meta__title {
+  margin: 22px 0 10px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid #dcdcde;
+  font-size: 14px;
+}
+
+.ba-session-meta__title:first-of-type {
+  margin-top: 8px;
+}
+
+.ba-session-meta__hint {
+  color: #646970;
+  font-size: 12px;
+}
+
+.ba-session-meta__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 0 16px;
+}
+
+.ba-session-meta__field label,
+.ba-session-media__label {
+  display: block;
+  margin-bottom: 4px;
+  font-weight: 600;
+}
+
+.ba-session-media {
+  margin: 1em 0;
+}
+
+.ba-session-media__name {
+  display: inline-block;
+  max-width: 100%;
+  margin-inline-end: 8px;
+  overflow: hidden;
+  color: #2c3338;
+  text-overflow: ellipsis;
+  vertical-align: middle;
+  white-space: nowrap;
+  direction: ltr;
+}
+
+.ba-session-media [hidden] {
+  display: none !important;
+}

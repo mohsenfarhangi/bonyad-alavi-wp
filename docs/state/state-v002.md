@@ -710,3 +710,15 @@ Modules: [MODULE-AFE](../modules/alavi-form-engine.md), [MODULE-JIHADI-FORM](../
 - هشدار: `.elementor-element-964556b .ba-hero__grid { grid-template-rows: ... !important }` و مخفی‌سازی سراسری controls همان overrideهایی هستند که `theme-home-hero-widget.md` درباره‌شان هشدار می‌دهد؛ با قرارداد aspect-ratio هیرو ممکن است تداخل کنند. بازبینی نشده است.
 - بقیه فایل‌های قالب از نظر محتوا با repository یکسان بودند. پلاگین `alavi-pages` track نمی‌شود.
 
+## STATE-002-032 — Studies Center page (2026-10-31)
+
+- branch `feat/studies-center-page`: صفحه «مرکز مطالعات» و صفحه داخلی نشست طبق طرح تأییدشده (۴ تصویر دسکتاپ/موبایل). [MODULE-STUDIES-CENTER](../modules/studies-center.md)، [ADR-008](../decisions/ADR-008-studies-center-data-model.md).
+- مدل داده: CPT `ba_study_session`، Taxonomy مشترک `ba_study_area` (۸ حوزه، seed یک‌باره)، `ba_research_type` روی publications؛ کتاب/پژوهش از دسته‌های انتخابی تب تنظیمات با exclude پژوهش از کتاب.
+- دسترسی: `ba_manage_studies_center` برای تب + همه caps نشست؛ publications دست نخورده.
+- ۸ ویجت Elementor، REST فقط‌خواندنی فیلتر، exportهای JSON (single نشست، صفحه اصلی، آرشیو نشست‌ها).
+- `functions.php`: فقط یک خط `require_once` (مجوز صریح مدیر پروژه).
+- آزمون محلی PHP 8.5: contract ۴۱/۴۱ و runtime ۲۷/۲۷ PASS، php -l همه فایل‌های جدید و `node --check` سه JS PASS. harness ایزوله با Chromium headless در ۱۲۸۰ و ۳۹۰ رندر و با طرح مقایسه شد (اصلاح‌ها: عرض صفر اسلایدر به‌علت `margin:auto` در CSS خود Swiper، چیدمان footer کارت در موبایل، تعداد کارت در نمای موبایل، ارتفاع Hero موبایل).
+- GitHub Actions [run 41186040854](https://github.com/mohsenfarhangi/bonyad-alavi-wp/actions/runs/41186040854) روی branch PASS شد.
+- پیش‌ازاین روی `main` هم: `tests/home-news-widget-contract.php` در `default-date-format` FAIL است (مرتبط با این task نیست).
+- باز: Theme Builder/Elementor Pro و import templateها، پذیرش زنده، تصمیم جایگزینی page 7930، افزودن منو.
+
