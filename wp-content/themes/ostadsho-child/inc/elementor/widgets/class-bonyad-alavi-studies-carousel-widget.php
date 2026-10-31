@@ -62,7 +62,7 @@ final class Bonyad_Alavi_Studies_Carousel_Widget extends Widget_Base {
 	 *
 	 * @return array
 	 */
-	private static function get_category_options() {
+	public static function category_options() {
 		$taxonomies = get_taxonomies( array(), 'objects' );
 		if ( ! is_array( $taxonomies ) || ! $taxonomies ) {
 			return array();
@@ -88,6 +88,15 @@ final class Bonyad_Alavi_Studies_Carousel_Widget extends Widget_Base {
 			$options[ (string) $term->term_id ] = $label . ' — ' . $term->name . ' (' . $term->taxonomy . ')';
 		}
 		return $options;
+	}
+
+	/**
+	 * سازگاری با فراخوانی‌های قبلی داخل کلاس.
+	 *
+	 * @return array
+	 */
+	private static function get_category_options() {
+		return self::category_options();
 	}
 
 	protected function register_controls() {

@@ -37,6 +37,11 @@ function get_the_title($post) { return 'T' . $post->ID; }
 function get_permalink($post) { return 'https://example.test/' . $post->ID . '/'; }
 /* مثل افزونه‌های تاریخ شمسی: تاریخ را از پست سراسری می‌خواند و آرگومان $post را نادیده می‌گیرد. */
 function get_the_date($format, $post = null) { return $GLOBALS['post']->post_date; }
+class WP_Query {
+	public $found_posts = 7;
+	public $posts = array();
+	public function __construct($args = array()) { $GLOBALS['t_last_query'] = $args; }
+}
 function is_wp_error($value) { return false; }
 function get_option($name, $default = false) { return $GLOBALS['t_options'][$name] ?? $default; }
 function update_option($name, $value, $autoload = null) { $GLOBALS['t_options'][$name] = $value; return true; }
@@ -210,6 +215,34 @@ $card_b = BA_Studies_Query_Service::normalize((object) array('ID' => 11, 'post_d
 $check('card-date-uses-own-post', $card_a['date'] !== $card_b['date'] && strpos($card_a['date'], 'PAGE') === false && strpos($card_b['date'], 'PAGE') === false);
 $check('card-date-restores-global-post', $GLOBALS['post']->ID === 1);
 $check('rest-short-text', mb_strlen(BA_Studies_Rest_Controller::sanitize_short_text(str_repeat('ا', 90))) === 40);
+
+/* ---------- شمارش آمار با همان منطق کاروسل ---------- */
+$GLOBALS['t_options'][BA_Studies_Center_Settings_Service::OPTION_NAME] = array();
+$carousel_args = BA_Studies_Query_Service::build_args('sessions', array('categories' => '42', 'limit' => 8));
+$stat_total    = BA_Studies_Query_Service::stat('sessions', array('42'));
+$stat_args     = $GLOBALS['t_last_query'];
+$check('stat-sessions-total-found-posts', $stat_total === 7);
+$check('stat-sessions-same-source-as-carousel', $stat_args['post_type'] === $carousel_args['post_type']
+	&& $stat_args['tax_query'] === $carousel_args['tax_query']
+	&& $stat_args['post_status'] === $carousel_args['post_status']);
+$check('stat-sessions-not-limited-by-carousel-limit', $stat_args['posts_per_page'] === 1 && $stat_args['fields'] === 'ids');
+BA_Studies_Query_Service::stat('sessions');
+$check('stat-sessions-without-categories-keeps-session-cpt', $GLOBALS['t_last_query']['post_type'] === 'ba_study_session' && !isset($GLOBALS['t_last_query']['tax_query']));
+$check('stat-incompatible-categories-zero', BA_Studies_Query_Service::stat('sessions', '42,1') === 0);
+$check('count-csv-and-array-equal', (function () {
+	BA_Studies_Query_Service::count('sessions', '42'); $a = $GLOBALS['t_last_query'];
+	BA_Studies_Query_Service::count('sessions', array('42')); $b = $GLOBALS['t_last_query'];
+	return $a === $b;
+})());
+$GLOBALS['t_options'][BA_Studies_Center_Settings_Service::OPTION_NAME] = array('research_cats' => array(9));
+BA_Studies_Query_Service::stat('books', array('4'));
+$books_stat_args = $GLOBALS['t_last_query'];
+$books_card_args = BA_Studies_Query_Service::build_args('books', array('categories' => '4'));
+$check('stat-books-same-source-as-carousel', $books_stat_args['tax_query'] === $books_card_args['tax_query'] && $books_stat_args['post_type'] === $books_card_args['post_type']);
+$GLOBALS['t_options'][BA_Studies_Center_Settings_Service::OPTION_NAME] = array('stats_sessions' => '3');
+$GLOBALS['t_last_query'] = null;
+$check('stat-manual-override-wins', BA_Studies_Query_Service::stat('sessions', array('42')) === 3 && $GLOBALS['t_last_query'] === null);
+$GLOBALS['t_options'][BA_Studies_Center_Settings_Service::OPTION_NAME] = array();
 
 $failed = false;
 foreach ($results as $name => $ok) {

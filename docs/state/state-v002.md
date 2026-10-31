@@ -761,3 +761,10 @@ Modules: [MODULE-AFE](../modules/alavi-form-engine.md), [MODULE-JIHADI-FORM](../
 - روی سایت زنده تاریخ همه کارت‌های کاروسل «۲۴ خرداد ۱۴۰۴» بود (تاریخ خود صفحه 7930). افزونه تاریخ شمسی سایت `get_the_date` را از پست سراسری می‌خواند و آرگومان `$post` را نادیده می‌گیرد.
 - رفع: `BA_Studies_Query_Service::normalize()` هنگام ساخت تاریخ، `$GLOBALS['post']` را موقتاً برابر پست کارت می‌گذارد و بعد برمی‌گرداند. تست‌های `card-date-uses-own-post` و `card-date-restores-global-post` (شکست بدون اصلاح، پاس با اصلاح) افزوده شدند.
 
+## STATE-002-039 — Hero stat count uses carousel query (2026-10-31)
+
+- مشکل: کارت آمار «نشست‌ها» ۰ نشان می‌داد ولی کاروسل ۷ نشست (نوشته‌های دسته 317) نمایش می‌داد؛ شمارش فقط CPT نشست را می‌دید.
+- رفع: `BA_Studies_Query_Service::count()` و `stat()` پارامتر اختیاری `$categories` گرفتند و از همان `build_args()` کاروسل استفاده می‌کنند (تعداد کل `found_posts`). هر کارت آمار Hero کنترل SELECT2 دسته دارد (همان فهرست termهای کاروسل از `Bonyad_Alavi_Studies_Carousel_Widget::category_options()`).
+- override تب «مرکز مطالعات» (`stats_*`) همچنان اولویت دارد. ۸ تست runtime جدید و یک بررسی contract؛ قرارداد `separate-counts` با امضای جدید به‌روز شد.
+- روی سایت زنده برای کارت نشست‌ها دسته `317` در همان کارت انتخاب شد (داده Elementor؛ خود دسته و نوشته‌ها تغییر نکردند).
+

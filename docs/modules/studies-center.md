@@ -63,7 +63,7 @@ Repeater فایل‌ها از `BA_Admin_Repeater_Component` استفاده می�
 
 | Widget | Name | توضیح |
 |---|---|---|
-| Hero | `bonyad_alavi_studies_hero` | اسلایدر Swiper داخلی Elementor: پیش‌فرض خودکار ۴ نشست آخر، قابل سوئیچ به repeater دستی؛ برچسب، عنوان، متا «تاریخ · متن»، فلش، نقطه، لینک کل اسلاید. سه کارت آمار repeater با منبع books/sessions/research/manual، آیکون پوشه/دوربین/سند، ارقام فارسی با `٬`، لینک پیش‌فرض `#studies-*`. |
+| Hero | `bonyad_alavi_studies_hero` | اسلایدر Swiper داخلی Elementor: پیش‌فرض خودکار ۴ نشست آخر، قابل سوئیچ به repeater دستی؛ برچسب، عنوان، متا «تاریخ · متن»، فلش، نقطه، لینک کل اسلاید. سه کارت آمار repeater با منبع books/sessions/research/manual (هر کارت کنترل اختیاری «انتخاب از همه تکسونومی‌ها» دارد؛ عدد با همان `build_args` و همان دسته‌های کاروسل شمرده می‌شود و تعداد **کل** نتایج است، نه حداکثر تعداد نمایش؛ override تب مدیریت اولویت دارد)، آیکون پوشه/دوربین/سند، ارقام فارسی با `٬`، لینک پیش‌فرض `#studies-*`. |
 | فیلتر حوزه | `bonyad_alavi_studies_area_filter` | dropdown «همه حوزه‌ها». حالت `live` رویداد `ba:studies-area-change` منتشر و `?area=` را با `replaceState` همگام می‌کند؛ حالت `url` صفحه مقصد را با `?area=` باز می‌کند. |
 | کاروسل | `bonyad_alavi_studies_carousel` | `content_type` = books/sessions/research. در Query فهرست termهای تمام taxonomyهای ثبت‌شده سایت برای هر سه نوع محتوا قابل جست‌وجو است؛ انتخاب‌های ذخیره‌شده قبلی معتبر می‌مانند و fallback و تقدم تنظیمات مدیریت حفظ می‌شود. هدر داخل ویجت (عنوان، «بیشتر ←»، قبلی/بعدی). کارت‌در‌نما responsive (پیش‌فرض کتاب ۴/۳/۲٫۳، نشست ۳/۲/۱٫۲۵، پژوهش ۳/۲/۱٫۱۲)، نقطه‌ها پیش‌فرض فقط موبایل، «موردی یافت نشد». anchor پیش‌فرض `studies-<type>`. |
 | آرشیو | `bonyad_alavi_studies_grid` | گرید همان کارت‌ها با صفحه‌بندی `?ba_page=` و فیلتر `?area=`؛ پیش‌فرض نشست‌ها. |

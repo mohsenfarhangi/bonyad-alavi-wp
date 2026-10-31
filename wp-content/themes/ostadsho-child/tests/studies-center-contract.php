@@ -85,7 +85,7 @@ $checks = array(
 	'category-options-sitewide'       => str_contains($carousel, "get_taxonomies( array(), 'objects' )") && str_contains($carousel, "'taxonomy'   => array_keys( \$taxonomies )") && substr_count($carousel, 'self::get_category_options()') === 2,
 	'category-queries-tax-aware'     => str_contains($query, 'get_term( $id )') && str_contains($query, 'selected_term_clauses( array $ids )') && str_contains($query, "'taxonomy'         => \$taxonomy") && str_contains($query, 'array_merge( $tax, $clauses )'),
 	'area-filter-shared-tax'         => str_contains($query, "'taxonomy'         => BA_Studies_Content_Types::AREA_TAXONOMY"),
-	'separate-counts'                => str_contains($query, 'public static function count( $type )') && str_contains($query, "\$args['fields']                 = 'ids';") && str_contains($query, 'get_stat_override'),
+	'separate-counts'                => str_contains($query, 'public static function count( $type, $categories = array() )') && str_contains($query, 'public static function stat( $type, $categories = array() )') && str_contains($query, "\$args['fields']                 = 'ids';") && str_contains($query, 'get_stat_override'),
 	'settings-no-overlap'            => str_contains($settings, "array_diff( \$output['books_cats'], \$output['research_cats'] )"),
 
 	// REST فقط خواندنی.
@@ -102,6 +102,7 @@ $checks = array(
 	'widget-registration'            => substr_count($widgets, 'new \\Bonyad_Alavi_Studies_') === 8 && str_contains($widgets, 'abstract-bonyad-alavi-studies-session-widget.php') && str_contains($widgets, "'bonyad-alavi-studies-center'") && str_contains($widgets, "'bonyad-alavi-studies-session'"),
 	'hero-slider-source'             => str_contains($hero, "'slider_source'") && str_contains($hero, "'default' => 'auto'") && str_contains($hero, "'auto_count'") && str_contains($hero, "'default'   => 4") && str_contains($hero, "'manual_slides'"),
 	'hero-stats-real-count'          => str_contains($hero, 'BA_Studies_Query_Service::stat(') && str_contains($hero, 'BA_Studies_Formatter::number(') && str_contains($hero, "'#studies-books'") && str_contains($hero, "'#studies-sessions'") && str_contains($hero, "'#studies-research'"),
+	'hero-stat-categories-same-as-carousel' => str_contains($hero, "'categories'") && str_contains($hero, "\$stat['categories']") && str_contains($hero, 'Bonyad_Alavi_Studies_Carousel_Widget::category_options()') && str_contains($carousel, 'public static function category_options()'),
 	'carousel-types-and-more-link'   => str_contains($carousel, "'books'    => 'کتاب‌ها و انتشارات'") && str_contains($carousel, 'BA_Studies_Center_Settings_Service::get_archive_url( $type )') && str_contains($carousel, "'respond_to_filter'") && str_contains($carousel, "'default' => 'موردی یافت نشد'"),
 	'filter-areas-default'           => str_contains($filter, "'همه حوزه‌ها'") && str_contains($filter, 'BA_Studies_Content_Types::AREA_TAXONOMY') && str_contains($filter, "'live'") && str_contains($filter, "'url'"),
 	'grid-area-param'                => str_contains($grid, 'BA_Studies_Query_Service::get_requested_area()') && str_contains($grid, "const PAGE_VAR = 'ba_page';"),

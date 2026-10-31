@@ -250,6 +250,19 @@ final class Bonyad_Alavi_Studies_Hero_Widget extends Widget_Base {
 			)
 		);
 		$repeater->add_control(
+			'categories',
+			array(
+				'label'       => 'انتخاب از همه تکسونومی‌ها',
+				'type'        => Controls_Manager::SELECT2,
+				'multiple'    => true,
+				'default'     => array(),
+				'label_block' => true,
+				'options'     => class_exists( 'Bonyad_Alavi_Studies_Carousel_Widget' ) ? Bonyad_Alavi_Studies_Carousel_Widget::category_options() : array(),
+				'condition'   => array( 'source' => array( 'books', 'sessions', 'research' ) ),
+				'description' => 'همان دسته‌هایی را انتخاب کنید که کاروسل همین بخش استفاده می‌کند تا عدد آمار برابر تعداد نتایج کاروسل شود. خالی = بدون فیلتر دسته. override تب «مرکز مطالعات» اولویت دارد.',
+			)
+		);
+		$repeater->add_control(
 			'number',
 			array(
 				'label'     => 'عدد',
@@ -469,7 +482,7 @@ final class Bonyad_Alavi_Studies_Hero_Widget extends Widget_Base {
 			return (int) ( $stat['number'] ?? 0 );
 		}
 
-		return BA_Studies_Query_Service::stat( (string) ( $stat['source'] ?? 'books' ) );
+		return BA_Studies_Query_Service::stat( (string) ( $stat['source'] ?? 'books' ), $stat['categories'] ?? array() );
 	}
 
 	protected function render() {
