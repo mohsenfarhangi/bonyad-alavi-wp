@@ -22,12 +22,20 @@
      "left": "0",
      "isLinked": false
     },
+    "padding_tablet": {
+     "unit": "px",
+     "top": "20",
+     "right": "20",
+     "bottom": "56",
+     "left": "20",
+     "isLinked": false
+    },
     "padding_mobile": {
      "unit": "px",
      "top": "20",
-     "right": "0",
+     "right": "16",
      "bottom": "56",
-     "left": "0",
+     "left": "16",
      "isLinked": false
     }
    },

@@ -33,12 +33,20 @@
      "left": "0",
      "isLinked": false
     },
+    "padding_tablet": {
+     "unit": "px",
+     "top": "14",
+     "right": "20",
+     "bottom": "40",
+     "left": "20",
+     "isLinked": false
+    },
     "padding_mobile": {
      "unit": "px",
      "top": "14",
-     "right": "0",
+     "right": "16",
      "bottom": "40",
-     "left": "0",
+     "left": "16",
      "isLinked": false
     }
    },
