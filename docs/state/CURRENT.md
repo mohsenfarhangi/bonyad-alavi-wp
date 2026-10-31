@@ -20,6 +20,10 @@ AFE release goal همچنان live acceptance نسخه 1.0.28 و رفع blocker 
 
 ## Recently Completed
 
+### Studies Center carousel category query (2026-10-31)
+- Query ویجت `bonyad_alavi_studies_carousel` امکان انتخاب چندگانه دسته انتشارات برای کتاب/پژوهش و حوزه برای نشست دارد. فقط انتخاب غیرخالی تب تنظیمات مدیریت، انتخاب همان نوع در ویجت را override می‌کند؛ در غیر این صورت تنظیم ویجت و سپس رفتار پیش‌فرض قبلی حاکم است. تفکیک پژوهش از کتاب حفظ شده است.
+- پارامتر `categories` در REST و رندر اولیه مشترک، sanitize می‌شود تا فیلتر زنده حوزه همان منبع کاروسل را حفظ کند. پوشش regression در contract/runtime افزوده شد. پذیرش زنده Elementor باز است.
+
 ### Studies Center page — branch `feat/studies-center-page` (2026-10-31)
 - صفحه «مرکز مطالعات» (Hero با اسلایدر و آمار واقعی، باکس معرفی و فیلتر حوزه، کاروسل کتاب/نشست/پژوهش) و صفحه داخلی نشست (ویدئو، لید/گزارش، کارت اطلاعات و فایل‌ها) طبق طرح تأییدشده. جزئیات: [MODULE-STUDIES-CENTER](../modules/studies-center.md)، تصمیم: [ADR-008](../decisions/ADR-008-studies-center-data-model.md).
 - CPT `ba_study_session`، Taxonomy مشترک `ba_study_area` (۸ حوزه یک‌بار)، `ba_research_type`. کتاب/پژوهش در publications با دسته‌های انتخابی تب «مرکز مطالعات». Capability `ba_manage_studies_center` برای تب و مدیریت کامل نشست‌ها.
@@ -261,7 +265,7 @@ AFE changes در آن baseline:
 
 ## Currently In Progress
 
-هیچ feature task نیمه‌تمام قابل اثبات در repository ثبت نشده است.
+تغییر Query کاروسل مرکز مطالعات برای انتخاب دسته‌ها پیاده‌سازی شده است؛ پذیرش زنده WordPress/Elementor هنوز باز است.
 
 Open release work برای AFE:
 - live acceptance WordPress/MySQL/Elementor

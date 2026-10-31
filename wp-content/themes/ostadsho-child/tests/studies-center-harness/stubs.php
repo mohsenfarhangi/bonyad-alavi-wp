@@ -127,10 +127,13 @@ namespace {
 	function get_post_type( $id ) { return BA_Studies_Content_Types::SESSION_POST_TYPE; }
 	function get_post_field( $field, $id ) { return $GLOBALS['harness_session']['body'] ?? ''; }
 	function get_terms( $args ) { return $GLOBALS['harness_terms'] ?? array(); }
+	function taxonomy_exists( $taxonomy ) { return true; }
+	function is_wp_error( $value ) { return false; }
 
 	final class BA_Studies_Content_Types {
 		const SESSION_POST_TYPE = 'ba_study_session';
 		const AREA_TAXONOMY     = 'ba_study_area';
+		const PUBLICATION_CAT_TAX = 'publications-cat';
 	}
 
 	final class BA_Studies_Center_Settings_Service {
@@ -146,6 +149,9 @@ namespace {
 		const TYPES = array( 'books', 'sessions', 'research' );
 		public static function sanitize_type( $type ) { return in_array( $type, self::TYPES, true ) ? $type : 'books'; }
 		public static function get_requested_area() { return ''; }
+		public static function sanitize_category_csv( $value ) {
+			return implode( ',', array_values( array_unique( array_filter( array_map( 'intval', (array) $value ) ) ) ) );
+		}
 		public static function get_items( $type, array $opts = array(), $date_format = '' ) {
 			$items = $GLOBALS['harness_items'][ $type ] ?? array();
 			$items = array_slice( $items, 0, (int) ( $opts['limit'] ?? 8 ) );
