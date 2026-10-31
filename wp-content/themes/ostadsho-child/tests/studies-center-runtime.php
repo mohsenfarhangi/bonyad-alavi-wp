@@ -29,6 +29,14 @@ function get_taxonomy($tax) {
 	);
 	return isset($map[$tax]) ? (object) array('object_type' => $map[$tax]) : false;
 }
+function get_post_thumbnail_id($post) { return 0; }
+function get_the_terms($post, $tax) { return false; }
+function has_excerpt($post) { return true; }
+function get_the_excerpt($post) { return 'x'; }
+function get_the_title($post) { return 'T' . $post->ID; }
+function get_permalink($post) { return 'https://example.test/' . $post->ID . '/'; }
+/* مثل افزونه‌های تاریخ شمسی: تاریخ را از پست سراسری می‌خواند و آرگومان $post را نادیده می‌گیرد. */
+function get_the_date($format, $post = null) { return $GLOBALS['post']->post_date; }
 function is_wp_error($value) { return false; }
 function get_option($name, $default = false) { return $GLOBALS['t_options'][$name] ?? $default; }
 function update_option($name, $value, $autoload = null) { $GLOBALS['t_options'][$name] = $value; return true; }
@@ -194,6 +202,11 @@ $check('empty-hidden', str_contains(BA_Studies_Card_Renderer::render_empty('مو
 
 /* ---------- REST sanitizers ---------- */
 $check('rest-date-format', BA_Studies_Rest_Controller::sanitize_date_format('j F Y<script>') === 'j F Yscript' && BA_Studies_Rest_Controller::sanitize_date_format('<>') === 'j F Y');
+$GLOBALS['post'] = (object) array('ID' => 1, 'post_date' => 'PAGE-DATE');
+$card_a = BA_Studies_Query_Service::normalize((object) array('ID' => 10, 'post_date' => '2026-08-01', 'post_content' => ''), 'books');
+$card_b = BA_Studies_Query_Service::normalize((object) array('ID' => 11, 'post_date' => '2026-07-15', 'post_content' => ''), 'books');
+$check('card-date-uses-own-post', $card_a['date'] !== $card_b['date'] && strpos($card_a['date'], 'PAGE') === false && strpos($card_b['date'], 'PAGE') === false);
+$check('card-date-restores-global-post', $GLOBALS['post']->ID === 1);
 $check('rest-short-text', mb_strlen(BA_Studies_Rest_Controller::sanitize_short_text(str_repeat('ا', 90))) === 40);
 
 $failed = false;

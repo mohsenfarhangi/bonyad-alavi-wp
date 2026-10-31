@@ -326,7 +326,11 @@ final class BA_Studies_Query_Service {
 	 */
 	public static function normalize( $post, $type, $date_format = 'j F Y' ) {
 		$thumb_id = get_post_thumbnail_id( $post );
+		// افزونه‌های تاریخ شمسی تاریخ را از پست سراسری می‌گیرند، نه آرگومان $post؛ پس موقتاً همان پست کارت را سراسری می‌گذاریم.
+		$previous_post = isset( $GLOBALS['post'] ) ? $GLOBALS['post'] : null;
+		$GLOBALS['post'] = $post; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 		$date     = get_the_date( $date_format, $post );
+		$GLOBALS['post'] = $previous_post; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 
 		if ( 'sessions' === $type ) {
 			$meta = BA_Studies_Session_Meta::get( $post->ID );
