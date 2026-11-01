@@ -46,7 +46,8 @@
 
 .ba-studies-hero {
   --ba-studies-hero-height: 300px;
-  --ba-studies-stats-width: 290px;
+  /* هم‌اندازه صفحه «جمع‌سپاری مردمی»: ستون آمار ۰٫۳۶fr و اسلایدر ۱fr با فاصله ۱۶px */
+  --ba-studies-stats-width: minmax(0, .36fr);
   --ba-studies-hero-overlay: rgba(6, 92, 47, .78);
 }
 
@@ -111,7 +112,9 @@
   background: linear-gradient(270deg, var(--ba-studies-hero-overlay) 0%, rgba(6, 92, 47, .55) 42%, rgba(6, 92, 47, .12) 75%, rgba(6, 92, 47, 0) 100%);
 }
 
-/* تصویر انتخابی: <picture> بدون جعبه و ارتفاع اسلایدر از نسبت خود تصویر (تصویر بریده نمی‌شود) */
+/* <picture> بدون جعبه. ارتفاع اسلایدر دسکتاپ از نسبت ثابت هم‌اندازه صفحه «جمع‌سپاری مردمی»
+   (۸۸۵×۳۰۱ ≈ ۲٫۹۴۵:۱) می‌آید؛ «ارتفاع اسلایدر» Elementor در صورت تنظیم اولویت دارد.
+   در تبلت و موبایل نسبت تصویر موبایل استفاده می‌شود تا بنر بریده نشود. */
 .ba-studies-hero__slide picture {
   display: contents;
 }
@@ -125,13 +128,18 @@
 }
 
 .ba-studies-hero__slider--ratio .ba-studies-hero__slide {
-  height: auto;
-  aspect-ratio: var(--ba-studies-hero-ratio);
+  height: var(--ba-studies-hero-height-custom, auto);
+  aspect-ratio: 2.945 / 1;
+}
+
+/* متن بنر معمولاً پایین تصویر چاپ شده؛ اگر نسبت‌ها فرق کند از بالا بریده شود */
+.ba-studies-hero__slide--image-only .ba-studies-hero__image {
+  object-position: 50% 100%;
 }
 
 @media (max-width: 1080px) {
   .ba-studies-hero__slider--ratio .ba-studies-hero__slide {
-    aspect-ratio: var(--ba-studies-hero-ratio-mobile, var(--ba-studies-hero-ratio));
+    aspect-ratio: var(--ba-studies-hero-ratio-mobile, 2.945 / 1);
   }
 }
 

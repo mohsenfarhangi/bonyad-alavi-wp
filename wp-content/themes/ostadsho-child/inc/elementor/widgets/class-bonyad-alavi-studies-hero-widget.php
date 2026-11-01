@@ -346,11 +346,12 @@ final class Bonyad_Alavi_Studies_Hero_Widget extends Widget_Base {
 		$this->add_responsive_control(
 			'ref_slider_height',
 			array(
-				'label'      => 'ارتفاع اسلایدر',
-				'type'       => Controls_Manager::SLIDER,
-				'size_units' => array( 'px', 'vh' ),
-				'range'      => array( 'px' => array( 'min' => 160, 'max' => 720 ) ),
-				'selectors'  => array( '{{WRAPPER}} .ba-studies-hero' => '--ba-studies-hero-height: {{SIZE}}{{UNIT}};' ),
+				'label'       => 'ارتفاع اسلایدر',
+				'type'        => Controls_Manager::SLIDER,
+				'size_units'  => array( 'px', 'vh' ),
+				'range'       => array( 'px' => array( 'min' => 160, 'max' => 720 ) ),
+				'description' => 'خالی = هم‌اندازه اسلایدر صفحه «جمع‌سپاری مردمی» (دسکتاپ نسبت ثابت ≈ ۲٫۹۴:۱). فقط برای تغییر دستی ارتفاع پر کنید.',
+				'selectors'   => array( '{{WRAPPER}} .ba-studies-hero' => '--ba-studies-hero-height-custom: {{SIZE}}{{UNIT}};' ),
 			)
 		);
 
@@ -568,11 +569,9 @@ final class Bonyad_Alavi_Studies_Hero_Widget extends Widget_Base {
 		$meta     = trim( (string) $settings['meta_text'] );
 		$first    = $slides ? reset( $slides ) : array();
 		$ratio    = '';
-		if ( ! empty( $first['image_w'] ) && ! empty( $first['image_h'] ) ) {
-			$ratio = '--ba-studies-hero-ratio:' . (int) $first['image_w'] . ' / ' . (int) $first['image_h'] . ';';
-			if ( ! empty( $first['mobile_w'] ) && ! empty( $first['mobile_h'] ) ) {
-				$ratio .= '--ba-studies-hero-ratio-mobile:' . (int) $first['mobile_w'] . ' / ' . (int) $first['mobile_h'] . ';';
-			}
+		if ( ! empty( $first['mobile_w'] ) && ! empty( $first['mobile_h'] ) ) {
+			// فقط نسبت تصویر تبلت/موبایل از خود تصویر می‌آید؛ نسبت دسکتاپ ثابت و در CSS است.
+			$ratio = '--ba-studies-hero-ratio-mobile:' . (int) $first['mobile_w'] . ' / ' . (int) $first['mobile_h'] . ';';
 		}
 		$config   = array(
 			'autoplay' => 'yes' === $settings['autoplay'],
@@ -582,7 +581,7 @@ final class Bonyad_Alavi_Studies_Hero_Widget extends Widget_Base {
 		?>
 		<section class="ba-studies-hero ba-studies-widget">
 			<div class="ba-studies-hero__grid">
-				<div class="ba-studies-hero__slider swiper<?php echo '' !== $ratio ? ' ba-studies-hero__slider--ratio' : ''; ?>" dir="rtl"<?php echo '' !== $ratio ? ' style="' . esc_attr( $ratio ) . '"' : ''; ?> data-ba-studies-hero="<?php echo esc_attr( wp_json_encode( $config ) ); ?>">
+				<div class="ba-studies-hero__slider swiper ba-studies-hero__slider--ratio" dir="rtl"<?php echo '' !== $ratio ? ' style="' . esc_attr( $ratio ) . '"' : ''; ?> data-ba-studies-hero="<?php echo esc_attr( wp_json_encode( $config ) ); ?>">
 					<div class="swiper-wrapper">
 						<?php foreach ( $slides as $index => $slide ) : ?>
 							<?php

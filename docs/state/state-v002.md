@@ -775,3 +775,9 @@ Modules: [MODULE-AFE](../modules/alavi-form-engine.md), [MODULE-JIHADI-FORM](../
 - تنظیمات: `hero_slides` در `ba_studies_center_settings` + Repeater مشترک و انتخاب رسانه در تب «مرکز مطالعات»؛ `BA_Studies_Center_Settings_Service::get_hero_slides()` در `get_slides()` مقدم بر ویجت است.
 - تست: ۱۲ تست runtime و ۵ بررسی contract جدید؛ قرارداد `hero-slider-source` برای پیش‌فرض جدید به‌روز شد.
 
+## STATE-002-041 — Studies hero desktop size matches participation page (2026-11-01)
+
+- درخواست: اندازه اسلایدر دسکتاپ صفحه مطالعات برابر اسلایدر صفحه «جمع‌سپاری مردمی» باشد. اندازه‌گیری با Chrome headless روی صفحه زنده: grid با ستون‌های `318.7px / 885.3px` و gap `16px` (۰٫۳۶fr : ۱fr) و اسلایدر `885.3×300.6` (نسبت ≈ 2.945) در عرض ۱۲۸۰ و ۱۹۲۰.
+- تغییر: CSS Hero از ستون آمار ثابت ۲۹۰px به `minmax(0, .36fr)` و از ارتفاع ثابت/نسبت تصویر به `aspect-ratio: 2.945 / 1` رفت؛ نسبت تصویر دسکتاپ دیگر از ابعاد پیوست خوانده نمی‌شود، فقط نسبت تصویر موبایل برای ≤1080px. کنترل «ارتفاع اسلایدر» به `--ba-studies-hero-height-custom` منتقل شد.
+- نتیجه روی نسخه محلی صفحه زنده: دسکتاپ ۱۲۸۰ دقیقاً برابر (۸۸۵٫۳×۳۰۰٫۶، آمار ۳۱۸٫۷). در بازه ۱۰۸۱–۱۱۰۰px صفحه مشارکت رفتار خاصی دارد و یکسان نیست.
+
