@@ -37,10 +37,11 @@ final class Bonyad_Alavi_Studies_Session_Files_Widget extends Bonyad_Alavi_Studi
 			)
 		);
 
-		$this->add_control( 'files_title', array( 'label' => 'عنوان', 'type' => Controls_Manager::TEXT, 'default' => 'فایل‌های نشست' ) );
-		$this->add_control( 'download_text', array( 'label' => 'متن دکمه دانلود', 'type' => Controls_Manager::TEXT, 'default' => 'دانلود' ) );
+		$this->register_files_content_controls();
 
 		$this->end_controls_section();
+
+		$this->register_files_style_controls();
 	}
 
 	protected function render() {
@@ -54,6 +55,8 @@ final class Bonyad_Alavi_Studies_Session_Files_Widget extends Bonyad_Alavi_Studi
 		$settings = $this->get_settings_for_display();
 		$data     = BA_Studies_Session_Meta::get_view_data( $post_id );
 
-		echo self::render_files( $data['files'], (string) $settings['files_title'], (string) $settings['download_text'] ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped in renderer
+		$title    = 'yes' === ( $settings['show_files_title'] ?? 'yes' ) ? (string) $settings['files_title'] : '';
+
+		echo self::render_files( $data['files'], $title, (string) $settings['download_text'], self::files_render_options( $settings ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped in renderer
 	}
 }

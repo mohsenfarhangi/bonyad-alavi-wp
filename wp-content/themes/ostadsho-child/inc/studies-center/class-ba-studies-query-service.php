@@ -285,11 +285,21 @@ final class BA_Studies_Query_Service {
 	/**
 	 * تعداد واقعی محتوای منتشرشده یک نوع.
 	 *
-	 * @param string $type نوع.
+	 * همان build_args کاروسل را با همان دسته‌های انتخابی استفاده می‌کند تا عدد آمار دقیقاً
+	 * برابر تعداد کل نتایجی باشد که کاروسل از آن‌ها می‌خواند (نه فقط حداکثر تعداد نمایش).
+	 *
+	 * @param string $type       نوع.
+	 * @param mixed  $categories شناسه termها (آرایه یا CSV)؛ خالی = بدون فیلتر دسته ویجت.
 	 * @return int
 	 */
-	public static function count( $type ) {
-		$args = self::build_args( $type, array( 'limit' => 1 ) );
+	public static function count( $type, $categories = array() ) {
+		$args = self::build_args(
+			$type,
+			array(
+				'limit'      => 1,
+				'categories' => $categories,
+			)
+		);
 
 		if ( null === $args ) {
 			return 0;
@@ -307,13 +317,14 @@ final class BA_Studies_Query_Service {
 	/**
 	 * مقدار نمایشی آمار: override تب تنظیمات یا شمارش خودکار.
 	 *
-	 * @param string $type نوع.
+	 * @param string $type       نوع.
+	 * @param mixed  $categories دسته‌های انتخابی همان کارت آمار (اختیاری).
 	 * @return int
 	 */
-	public static function stat( $type ) {
+	public static function stat( $type, $categories = array() ) {
 		$override = BA_Studies_Center_Settings_Service::get_stat_override( self::sanitize_type( $type ) );
 
-		return null === $override ? self::count( $type ) : $override;
+		return null === $override ? self::count( $type, $categories ) : $override;
 	}
 
 	/**

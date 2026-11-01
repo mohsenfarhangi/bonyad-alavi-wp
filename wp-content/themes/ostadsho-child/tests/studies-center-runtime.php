@@ -37,6 +37,14 @@ function get_the_title($post) { return 'T' . $post->ID; }
 function get_permalink($post) { return 'https://example.test/' . $post->ID . '/'; }
 /* مثل افزونه‌های تاریخ شمسی: تاریخ را از پست سراسری می‌خواند و آرگومان $post را نادیده می‌گیرد. */
 function get_the_date($format, $post = null) { return $GLOBALS['post']->post_date; }
+class WP_Query {
+	public $found_posts = 7;
+	public $posts = array();
+	public function __construct($args = array()) { $GLOBALS['t_last_query'] = $args; }
+}
+$GLOBALS['t_images'] = array(101 => array('https://example.test/d.jpg', 1500, 675), 102 => array('https://example.test/m.jpg', 1500, 843), 103 => array('https://example.test/x.jpg', 800, 400));
+function wp_attachment_is_image($id) { return isset($GLOBALS['t_images'][(int) $id]); }
+function wp_get_attachment_image_src($id, $size = 'full') { return $GLOBALS['t_images'][(int) $id] ?? false; }
 function is_wp_error($value) { return false; }
 function get_option($name, $default = false) { return $GLOBALS['t_options'][$name] ?? $default; }
 function update_option($name, $value, $autoload = null) { $GLOBALS['t_options'][$name] = $value; return true; }
@@ -210,6 +218,66 @@ $card_b = BA_Studies_Query_Service::normalize((object) array('ID' => 11, 'post_d
 $check('card-date-uses-own-post', $card_a['date'] !== $card_b['date'] && strpos($card_a['date'], 'PAGE') === false && strpos($card_b['date'], 'PAGE') === false);
 $check('card-date-restores-global-post', $GLOBALS['post']->ID === 1);
 $check('rest-short-text', mb_strlen(BA_Studies_Rest_Controller::sanitize_short_text(str_repeat('ا', 90))) === 40);
+
+/* ---------- شمارش آمار با همان منطق کاروسل ---------- */
+$GLOBALS['t_options'][BA_Studies_Center_Settings_Service::OPTION_NAME] = array();
+$carousel_args = BA_Studies_Query_Service::build_args('sessions', array('categories' => '42', 'limit' => 8));
+$stat_total    = BA_Studies_Query_Service::stat('sessions', array('42'));
+$stat_args     = $GLOBALS['t_last_query'];
+$check('stat-sessions-total-found-posts', $stat_total === 7);
+$check('stat-sessions-same-source-as-carousel', $stat_args['post_type'] === $carousel_args['post_type']
+	&& $stat_args['tax_query'] === $carousel_args['tax_query']
+	&& $stat_args['post_status'] === $carousel_args['post_status']);
+$check('stat-sessions-not-limited-by-carousel-limit', $stat_args['posts_per_page'] === 1 && $stat_args['fields'] === 'ids');
+BA_Studies_Query_Service::stat('sessions');
+$check('stat-sessions-without-categories-keeps-session-cpt', $GLOBALS['t_last_query']['post_type'] === 'ba_study_session' && !isset($GLOBALS['t_last_query']['tax_query']));
+$check('stat-incompatible-categories-zero', BA_Studies_Query_Service::stat('sessions', '42,1') === 0);
+$check('count-csv-and-array-equal', (function () {
+	BA_Studies_Query_Service::count('sessions', '42'); $a = $GLOBALS['t_last_query'];
+	BA_Studies_Query_Service::count('sessions', array('42')); $b = $GLOBALS['t_last_query'];
+	return $a === $b;
+})());
+$GLOBALS['t_options'][BA_Studies_Center_Settings_Service::OPTION_NAME] = array('research_cats' => array(9));
+BA_Studies_Query_Service::stat('books', array('4'));
+$books_stat_args = $GLOBALS['t_last_query'];
+$books_card_args = BA_Studies_Query_Service::build_args('books', array('categories' => '4'));
+$check('stat-books-same-source-as-carousel', $books_stat_args['tax_query'] === $books_card_args['tax_query'] && $books_stat_args['post_type'] === $books_card_args['post_type']);
+$GLOBALS['t_options'][BA_Studies_Center_Settings_Service::OPTION_NAME] = array('stats_sessions' => '3');
+$GLOBALS['t_last_query'] = null;
+$check('stat-manual-override-wins', BA_Studies_Query_Service::stat('sessions', array('42')) === 3 && $GLOBALS['t_last_query'] === null);
+$GLOBALS['t_options'][BA_Studies_Center_Settings_Service::OPTION_NAME] = array();
+
+/* ---------- اسلایدهای تصویری Hero در تنظیمات ---------- */
+$S = 'BA_Studies_Center_Settings_Service';
+$check('hero-slides-default-empty', $S::get_defaults()['hero_slides'] === array());
+$rows = array(
+	array('image_id' => '101', 'mobile_image_id' => '102', 'url' => 'https://example.test/a', 'alt' => '<b>دیدار</b>'),
+	array('image_id' => '999', 'mobile_image_id' => '0'),
+	'junk',
+	array('image_id' => '0', 'mobile_image_id' => '103', 'url' => 'javascript:alert(1)'),
+	array('image_id' => '', 'mobile_image_id' => ''),
+);
+$clean = $S::sanitize_hero_slides($rows);
+$check('hero-slides-drop-invalid-and-empty', count($clean) === 2);
+$check('hero-slides-keep-order-and-ids', $clean[0]['image_id'] === 101 && $clean[0]['mobile_image_id'] === 102 && $clean[1]['image_id'] === 0 && $clean[1]['mobile_image_id'] === 103);
+$check('hero-slides-sanitize-alt-and-url', $clean[0]['alt'] === 'دیدار' && $clean[0]['url'] === 'https://example.test/a' && $clean[1]['url'] === '');
+$check('hero-slides-limit', count($S::sanitize_hero_slides(array_fill(0, 30, array('image_id' => 101)))) === $S::HERO_SLIDES_MAX);
+$check('hero-slides-not-array', $S::sanitize_hero_slides('x') === array());
+$check('hero-slides-in-sanitize-output', count($S::sanitize(array('hero_slides' => $rows))['hero_slides']) === 2);
+
+$GLOBALS['t_options'][$S::OPTION_NAME] = array();
+$check('hero-slides-empty-without-settings', $S::get_hero_slides() === array());
+$GLOBALS['t_options'][$S::OPTION_NAME] = array('hero_slides' => $clean);
+$slides = $S::get_hero_slides();
+$check('hero-slides-both-images', $slides[0]['image'] === 'https://example.test/d.jpg' && $slides[0]['image_w'] === 1500 && $slides[0]['image_h'] === 675
+	&& $slides[0]['mobile_image'] === 'https://example.test/m.jpg' && $slides[0]['mobile_h'] === 843);
+$check('hero-slides-mobile-only-falls-back-for-desktop', $slides[1]['image'] === 'https://example.test/x.jpg' && $slides[1]['mobile_image'] === 'https://example.test/x.jpg');
+$GLOBALS['t_options'][$S::OPTION_NAME] = array('hero_slides' => array(array('image_id' => 101, 'mobile_image_id' => 0)));
+$only_desktop = $S::get_hero_slides();
+$check('hero-slides-desktop-only-falls-back-for-mobile', $only_desktop[0]['mobile_image'] === 'https://example.test/d.jpg' && $only_desktop[0]['mobile_w'] === 1500);
+$GLOBALS['t_options'][$S::OPTION_NAME] = array('hero_slides' => array(array('image_id' => 555, 'mobile_image_id' => 0)));
+$check('hero-slides-deleted-attachment-skipped', $S::get_hero_slides() === array());
+$GLOBALS['t_options'][$S::OPTION_NAME] = array();
 
 $failed = false;
 foreach ($results as $name => $ok) {

@@ -19,6 +19,7 @@ final class BA_Studies_Center_Settings_Service {
 
 	const OPTION_NAME = 'ba_studies_center_settings';
 	const CAPABILITY  = 'ba_manage_studies_center';
+	const HERO_SLIDES_MAX = 12;
 
 	/**
 	 * مقادیر پیش‌فرض.
@@ -35,6 +36,7 @@ final class BA_Studies_Center_Settings_Service {
 			'books_url'      => '',
 			'sessions_url'   => '',
 			'research_url'   => '',
+			'hero_slides'    => array(),
 		);
 	}
 
@@ -83,7 +85,127 @@ final class BA_Studies_Center_Settings_Service {
 			$output[ $key ] = isset( $input[ $key ] ) ? esc_url_raw( trim( (string) $input[ $key ] ) ) : '';
 		}
 
+		$output['hero_slides'] = self::sanitize_hero_slides( $input['hero_slides'] ?? array() );
+
 		return $output;
+	}
+
+	/**
+	 * اسلایدهای تصویری Hero را sanitize می‌کند.
+	 *
+	 * هر ردیف: تصویر دسکتاپ، تصویر تبلت/موبایل (هر دو پیوست تصویری)، لینک و alt. ردیفی که
+	 * هیچ تصویر معتبری ندارد حذف می‌شود؛ اگر فقط یکی از دو تصویر انتخاب شده باشد، همان برای
+	 * همه اندازه‌ها استفاده می‌شود. ترتیب ردیف‌ها حفظ می‌شود.
+	 *
+	 * @param mixed $rows ردیف‌های خام.
+	 * @return array[]
+	 */
+	public static function sanitize_hero_slides( $rows ) {
+		if ( ! is_array( $rows ) ) {
+			return array();
+		}
+
+		$slides = array();
+
+		foreach ( $rows as $row ) {
+			if ( ! is_array( $row ) ) {
+				continue;
+			}
+
+			$desktop = self::sanitize_image_id( $row['image_id'] ?? 0 );
+			$mobile  = self::sanitize_image_id( $row['mobile_image_id'] ?? 0 );
+
+			if ( ! $desktop && ! $mobile ) {
+				continue;
+			}
+
+			$slides[] = array(
+				'image_id'        => $desktop,
+				'mobile_image_id' => $mobile,
+				'url'             => esc_url_raw( trim( (string) ( $row['url'] ?? '' ) ) ),
+				'alt'             => sanitize_text_field( (string) ( $row['alt'] ?? '' ) ),
+			);
+
+			if ( count( $slides ) >= self::HERO_SLIDES_MAX ) {
+				break;
+			}
+		}
+
+		return $slides;
+	}
+
+	/**
+	 * شناسه پیوست فقط وقتی معتبر است که واقعاً یک تصویر باشد.
+	 *
+	 * @param mixed $value مقدار خام.
+	 * @return int
+	 */
+	private static function sanitize_image_id( $value ) {
+		$id = absint( $value );
+
+		return $id && wp_attachment_is_image( $id ) ? $id : 0;
+	}
+
+	/**
+	 * اسلایدهای تصویری ذخیره‌شده در تنظیمات، آماده رندر.
+	 *
+	 * اگر حداقل یک اسلاید معتبر باشد، اولویت با همین‌هاست و تصاویر ویجت Elementor نادیده
+	 * گرفته می‌شوند. خروجی خالی یعنی تنظیمات تصویری وجود ندارد.
+	 *
+	 * @return array[] هر آیتم: image, image_w, image_h, mobile_image, mobile_w, mobile_h, alt, url.
+	 */
+	public static function get_hero_slides() {
+		$settings = self::get_settings();
+		$slides   = array();
+
+		foreach ( (array) $settings['hero_slides'] as $row ) {
+			$desktop = self::get_image_source( (int) ( $row['image_id'] ?? 0 ) );
+			$mobile  = self::get_image_source( (int) ( $row['mobile_image_id'] ?? 0 ) );
+
+			if ( ! $desktop && ! $mobile ) {
+				continue;
+			}
+
+			$desktop = $desktop ? $desktop : $mobile;
+			$mobile  = $mobile ? $mobile : $desktop;
+
+			$slides[] = array(
+				'image'        => $desktop['url'],
+				'image_w'      => $desktop['width'],
+				'image_h'      => $desktop['height'],
+				'mobile_image' => $mobile['url'],
+				'mobile_w'     => $mobile['width'],
+				'mobile_h'     => $mobile['height'],
+				'alt'          => (string) ( $row['alt'] ?? '' ),
+				'url'          => (string) ( $row['url'] ?? '' ),
+			);
+		}
+
+		return $slides;
+	}
+
+	/**
+	 * آدرس و ابعاد اصلی یک پیوست تصویری.
+	 *
+	 * @param int $id شناسه پیوست.
+	 * @return array{url: string, width: int, height: int}|null
+	 */
+	private static function get_image_source( $id ) {
+		if ( ! $id ) {
+			return null;
+		}
+
+		$src = wp_get_attachment_image_src( $id, 'full' );
+
+		if ( ! is_array( $src ) || empty( $src[0] ) ) {
+			return null;
+		}
+
+		return array(
+			'url'    => (string) $src[0],
+			'width'  => (int) ( $src[1] ?? 0 ),
+			'height' => (int) ( $src[2] ?? 0 ),
+		);
 	}
 
 	/**

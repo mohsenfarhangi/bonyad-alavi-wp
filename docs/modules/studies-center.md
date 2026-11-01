@@ -48,6 +48,7 @@ Repeater فایل‌ها از `BA_Admin_Repeater_Component` استفاده می�
 `inc/admin/settings/class-ba-studies-center-settings-tab.php`، option `ba_studies_center_settings` (ADR-003، ذخیره از savebar مشترک):
 
 - `research_cats`، `books_cats` (checkbox دسته‌های publications؛ هم‌پوشانی هنگام sanitize از کتاب‌ها حذف می‌شود)
+- `hero_slides`: Repeater مشترک (ADR-005) تا ۱۲ اسلاید با `image_id` (دسکتاپ)، `mobile_image_id` (تبلت/موبایل)، `url` و `alt`. فقط پیوست‌های تصویری معتبر ذخیره می‌شوند؛ ردیف بدون تصویر حذف و اگر فقط یکی از دو تصویر باشد برای همه اندازه‌ها استفاده می‌شود. اولویت با این بخش و بالاتر از تصاویر ویجت است؛ خالی = تصاویر ویجت.
 - `stats_books|sessions|research`: خالی = شمارش خودکار؛ عدد = مقدار ثابت
 - `books_url|sessions_url|research_url`: پیش‌فرض لینک «بیشتر» و کارت‌های آمار وقتی Elementor لینکی ندارد. کتاب/پژوهش خالی → آرشیو اولین دسته انتخاب‌شده → آرشیو publications.
 
@@ -63,14 +64,14 @@ Repeater فایل‌ها از `BA_Admin_Repeater_Component` استفاده می�
 
 | Widget | Name | توضیح |
 |---|---|---|
-| Hero | `bonyad_alavi_studies_hero` | اسلایدر Swiper داخلی Elementor: پیش‌فرض خودکار ۴ نشست آخر، قابل سوئیچ به repeater دستی؛ برچسب، عنوان، متا «تاریخ · متن»، فلش، نقطه، لینک کل اسلاید. سه کارت آمار repeater با منبع books/sessions/research/manual، آیکون پوشه/دوربین/سند، ارقام فارسی با `٬`، لینک پیش‌فرض `#studies-*`. |
+| Hero | `bonyad_alavi_studies_hero` | اسلایدر Swiper داخلی Elementor: پیش‌فرض **تصاویر انتخابی** (repeater با «تصویر دسکتاپ» و «تصویر تبلت و موبایل»، `<picture>` با breakpoint ۱۰۸۰px)؛ حالت «خودکار (آخرین محتوا)» فقط اگر صریحاً انتخاب شود. اسلاید بدون برچسب/عنوان/تاریخ فقط تصویر است (بدون گرادیان و متن). اندازه دسکتاپ **هم‌اندازه اسلایدر صفحه «جمع‌سپاری مردمی» (`/مشارکت-مردمی/`، Image Carousel خود Elementor)**: گرید `0.36fr : 1fr` با فاصله ۱۶px و نسبت ثابت `2.945 / 1` (در عرض ۱۲۸۰ و بالاتر ۸۸۵×۳۰۱ و ستون آمار ≈۳۱۹)؛ تصویر اسلاید بدون متن از پایین تراز می‌شود (`object-position: 50% 100%`) تا متن چاپ‌شده بنر بریده نشود، پس بنر ایده‌آل نسبت ≈ ۲٫۹۴:۱ دارد. کنترل Style «ارتفاع اسلایدر» (متغیر `--ba-studies-hero-height-custom`) در صورت تنظیم اولویت دارد. در تبلت/موبایل (≤۱۰۸۰px) نسبت خود تصویر موبایل (`--ba-studies-hero-ratio-mobile`) استفاده می‌شود. **تصاویر تب «مرکز مطالعات» (`hero_slides`) بر هر حالت ویجت اولویت دارند.** برچسب، عنوان، متا «تاریخ · متن»، فلش، نقطه، لینک کل اسلاید. سه کارت آمار repeater با منبع books/sessions/research/manual (هر کارت کنترل اختیاری «انتخاب از همه تکسونومی‌ها» دارد؛ عدد با همان `build_args` و همان دسته‌های کاروسل شمرده می‌شود و تعداد **کل** نتایج است، نه حداکثر تعداد نمایش؛ override تب مدیریت اولویت دارد)، آیکون پوشه/دوربین/سند، ارقام فارسی با `٬`، لینک پیش‌فرض `#studies-*`. |
 | فیلتر حوزه | `bonyad_alavi_studies_area_filter` | dropdown «همه حوزه‌ها». حالت `live` رویداد `ba:studies-area-change` منتشر و `?area=` را با `replaceState` همگام می‌کند؛ حالت `url` صفحه مقصد را با `?area=` باز می‌کند. |
 | کاروسل | `bonyad_alavi_studies_carousel` | `content_type` = books/sessions/research. در Query فهرست termهای تمام taxonomyهای ثبت‌شده سایت برای هر سه نوع محتوا قابل جست‌وجو است؛ انتخاب‌های ذخیره‌شده قبلی معتبر می‌مانند و fallback و تقدم تنظیمات مدیریت حفظ می‌شود. هدر داخل ویجت (عنوان، «بیشتر ←»، قبلی/بعدی). کارت‌در‌نما responsive (پیش‌فرض کتاب ۴/۳/۲٫۳، نشست ۳/۲/۱٫۲۵، پژوهش ۳/۲/۱٫۱۲)، نقطه‌ها پیش‌فرض فقط موبایل، «موردی یافت نشد». anchor پیش‌فرض `studies-<type>`. |
 | آرشیو | `bonyad_alavi_studies_grid` | گرید همان کارت‌ها با صفحه‌بندی `?ba_page=` و فیلتر `?area=`؛ پیش‌فرض نشست‌ها. |
-| ویدئوی نشست | `bonyad_alavi_studies_session_video` | پوستر + play وسط + برچسب «کلیپ کوتاه نشست · مدت». بدون ویدئو فقط پوستر. |
-| لید و گزارش | `bonyad_alavi_studies_session_content` | لید پررنگ + `the_content` با guard ضد بازگشت. |
-| کارت اطلاعات | `bonyad_alavi_studies_session_info` | کارت حاشیه سبز: عنوان (پیش‌فرض H1)، جدول نوع/تاریخ/ساعت/سخنرانان/حوزه/مکان (ردیف خالی حذف)، «فایل‌های نشست» با دکمه دانلود. برچسب‌ها قابل ویرایش. |
-| فایل‌ها | `bonyad_alavi_studies_session_files` | فهرست مستقل فایل‌ها برای چیدمان‌های دیگر. |
+| ویدئوی نشست | `bonyad_alavi_studies_session_video` | پوستر + دکمه play وسط + برچسب «کلیپ کوتاه نشست · مدت» (پیش‌فرض **پایین-چپ** مطابق طرح، قابل تغییر به راست). بدون ویدئو فقط پوستر. کنترل‌ها: نمایش دکمه play/برچسب/مدت، متن و جای برچسب، نسبت تصویر؛ Style: گردی، رنگ پس‌زمینه، اندازه/رنگ دکمه play، تایپوگرافی/رنگ/پس‌زمینه/گردی/فاصله برچسب. وقتی دکمه play خاموش باشد کل پوستر قابل کلیک است. |
+| لید و گزارش | `bonyad_alavi_studies_session_content` | لید پررنگ + `the_content` با guard ضد بازگشت. کنترل‌ها: نمایش لید/گزارش، تگ لید (p/h2/h3/div)؛ Style: رنگ و تایپوگرافی و تراز لید، فاصله لید تا گزارش، رنگ/تایپوگرافی/تراز متن، فاصله پاراگراف‌ها، رنگ پیوندها. |
+| کارت اطلاعات | `bonyad_alavi_studies_session_info` | کارت حاشیه سبز: عنوان (پیش‌فرض H1)، جدول نوع/تاریخ/ساعت/سخنرانان/حوزه/مکان (ردیف خالی حذف) و «فایل‌های نشست». کنترل‌ها: نمایش عنوان و تگ، فرمت تاریخ، جداکننده ساعت و حوزه‌ها، **نمایش و برچسب هر ردیف جدا**، نمایش فایل‌ها؛ Style: کارت (حاشیه، ضخامت، گردی، پس‌زمینه، padding، سایه)، عنوان، جدول (پس‌زمینه، حاشیه، padding، خط ردیف‌ها، فاصله ردیف، عرض ستون برچسب)، برچسب و مقدار، و بخش‌های مشترک فایل‌ها. |
+| فایل‌ها | `bonyad_alavi_studies_session_files` | فهرست مستقل فایل‌ها برای چیدمان‌های دیگر؛ همان کنترل‌های محتوا و Style فایل‌های کارت اطلاعات (نمایش عنوان/آیکون/مشخصات، تگ عنوان، متن دکمه؛ Style عنوان، ردیف، آیکون و دکمه دانلود شامل hover). هر دو ویجت از `Bonyad_Alavi_Studies_Session_Widget_Base::register_files_*_controls()` استفاده می‌کنند. |
 
 ویجت‌های نشست در ویرایشگر Theme Builder (که پست جاری template است) آخرین نشست منتشرشده را برای پیش‌نمایش استفاده می‌کنند.
 
@@ -80,6 +81,7 @@ Assets (فقط هنگام استفاده ویجت):
 - `assets/css/bonyad-alavi-studies-center.css` + `assets/js/bonyad-alavi-studies-center.js` (deps: `elementor-frontend`, `swiper`)
 - `assets/css/bonyad-alavi-studies-session.css` + `assets/js/bonyad-alavi-studies-session.js`
 - admin: `assets/css|js/ba-studies-session-admin.*` فقط روی صفحه ویرایش نشست
+- admin: `assets/css|js/ba-studies-settings.*` فقط روی تب «مرکز مطالعات» (انتخاب رسانه اسلایدهای Hero)
 
 CSS با `.ba-studies-widget` / `.ba-session-*` scope شده و توکن‌های ویجت‌های home (سبز `#069043`، طلایی `#b79254`، peyda، radius 14–18) را تکرار می‌کند. نکته: CSS خود Swiper روی `.swiper` مقدار `margin:auto` دارد و آیتم grid را به عرض صفر می‌برد؛ اسلایدر Hero صریحاً `width:100%; margin:0` دارد.
 
@@ -89,7 +91,7 @@ CSS با `.ba-studies-widget` / `.ba-session-*` scope شده و توکن‌ها�
 
 | فایل | نوع | کاربرد |
 |---|---|---|
-| `studies-session-single.json` | `single-post` (Theme Builder) | صفحه داخلی نشست: container دوستونه (اصلی ۶۱٪: ویدئو + لید/گزارش؛ کناری ۳۷٪: کارت اطلاعات)، پس‌زمینه `#F4F4F4`، موبایل ستونی. فقط ویجت‌های اختصاصی. |
+| `studies-session-single.json` | `single-post` (Theme Builder) | صفحه داخلی نشست: container دوستونه (اصلی ۵۸٫۳٪ ≈ ۷۰۰px: ویدئو + لید/گزارش؛ کناری ۳۹٫۲٪ ≈ ۴۷۰px: کارت اطلاعات، فاصله ۳۰px، مطابق طرح)، پس‌زمینه `#F4F4F4`، موبایل ستونی. فقط ویجت‌های اختصاصی. |
 | `studies-center-page.json` | `page` | صفحه اصلی: Hero، باکس معرفی (section heading + text editor + فیلتر)، سه کاروسل. |
 | `studies-sessions-archive-page.json` | `page` | آرشیو نشست‌ها: عنوان، فیلتر حالت url، گرید. |
 
@@ -107,6 +109,7 @@ CSS با `.ba-studies-widget` / `.ba-session-*` scope شده و توکن‌ها�
 ## Tests / Harness
 
 - `tests/studies-center-contract.php`: قرارداد استاتیک (functions.php تک‌خطی، CPT/caps، taxonomy مشترک، seed یک‌باره، exclude پژوهش از کتاب، REST فقط‌خواندنی، رجیستری تب، ۸ ویجت، assetها، CSS scoped، templateها).
+- `tests/studies-center-session-widgets.php`: رندر واقعی چهار ویجت صفحه داخلی نشست با stubهای harness و تنظیمات مختلف (نمایش/پنهان‌کردن ردیف‌ها، برچسب‌ها، جداکننده‌ها، تگ‌های whitelist، فایل‌ها، ویدئو و لید)؛ با جهش (mutation) راستی‌آزمایی شده است.
 - `tests/studies-center-runtime.php`: منطق واقعی با stubهای WP (sanitize تنظیمات و متا، `build_args`، caps، seed، renderer escaping، sanitizerهای REST).
 - `tests/studies-center-harness/`: رندر ایزوله فقط CLI (`PHP_SAPI` guard) با stubهای Elementor/WP و داده fixture طرح؛ از هیچ فایل production لود نمی‌شود. اجرا:
   `php wp-content/themes/ostadsho-child/tests/studies-center-harness/render.php <out> <deps>` که `<deps>/node_modules` شامل `swiper@8` و `vazirmatn` است (peyda در دسترس نبود و Vazirmatn جایگزین شد).
