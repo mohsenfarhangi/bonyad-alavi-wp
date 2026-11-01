@@ -111,6 +111,30 @@
   background: linear-gradient(270deg, var(--ba-studies-hero-overlay) 0%, rgba(6, 92, 47, .55) 42%, rgba(6, 92, 47, .12) 75%, rgba(6, 92, 47, 0) 100%);
 }
 
+/* تصویر انتخابی: <picture> بدون جعبه و ارتفاع اسلایدر از نسبت خود تصویر (تصویر بریده نمی‌شود) */
+.ba-studies-hero__slide picture {
+  display: contents;
+}
+
+.ba-studies-hero__slider--ratio {
+  height: auto;
+}
+
+.ba-studies-hero__slider--ratio .swiper-wrapper {
+  height: auto;
+}
+
+.ba-studies-hero__slider--ratio .ba-studies-hero__slide {
+  height: auto;
+  aspect-ratio: var(--ba-studies-hero-ratio);
+}
+
+@media (max-width: 1080px) {
+  .ba-studies-hero__slider--ratio .ba-studies-hero__slide {
+    aspect-ratio: var(--ba-studies-hero-ratio-mobile, var(--ba-studies-hero-ratio));
+  }
+}
+
 .ba-studies-hero__content {
   position: absolute;
   inset-inline-start: 0;

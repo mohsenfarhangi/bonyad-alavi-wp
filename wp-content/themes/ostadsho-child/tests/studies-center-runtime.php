@@ -42,6 +42,9 @@ class WP_Query {
 	public $posts = array();
 	public function __construct($args = array()) { $GLOBALS['t_last_query'] = $args; }
 }
+$GLOBALS['t_images'] = array(101 => array('https://example.test/d.jpg', 1500, 675), 102 => array('https://example.test/m.jpg', 1500, 843), 103 => array('https://example.test/x.jpg', 800, 400));
+function wp_attachment_is_image($id) { return isset($GLOBALS['t_images'][(int) $id]); }
+function wp_get_attachment_image_src($id, $size = 'full') { return $GLOBALS['t_images'][(int) $id] ?? false; }
 function is_wp_error($value) { return false; }
 function get_option($name, $default = false) { return $GLOBALS['t_options'][$name] ?? $default; }
 function update_option($name, $value, $autoload = null) { $GLOBALS['t_options'][$name] = $value; return true; }
@@ -243,6 +246,38 @@ $GLOBALS['t_options'][BA_Studies_Center_Settings_Service::OPTION_NAME] = array('
 $GLOBALS['t_last_query'] = null;
 $check('stat-manual-override-wins', BA_Studies_Query_Service::stat('sessions', array('42')) === 3 && $GLOBALS['t_last_query'] === null);
 $GLOBALS['t_options'][BA_Studies_Center_Settings_Service::OPTION_NAME] = array();
+
+/* ---------- اسلایدهای تصویری Hero در تنظیمات ---------- */
+$S = 'BA_Studies_Center_Settings_Service';
+$check('hero-slides-default-empty', $S::get_defaults()['hero_slides'] === array());
+$rows = array(
+	array('image_id' => '101', 'mobile_image_id' => '102', 'url' => 'https://example.test/a', 'alt' => '<b>دیدار</b>'),
+	array('image_id' => '999', 'mobile_image_id' => '0'),
+	'junk',
+	array('image_id' => '0', 'mobile_image_id' => '103', 'url' => 'javascript:alert(1)'),
+	array('image_id' => '', 'mobile_image_id' => ''),
+);
+$clean = $S::sanitize_hero_slides($rows);
+$check('hero-slides-drop-invalid-and-empty', count($clean) === 2);
+$check('hero-slides-keep-order-and-ids', $clean[0]['image_id'] === 101 && $clean[0]['mobile_image_id'] === 102 && $clean[1]['image_id'] === 0 && $clean[1]['mobile_image_id'] === 103);
+$check('hero-slides-sanitize-alt-and-url', $clean[0]['alt'] === 'دیدار' && $clean[0]['url'] === 'https://example.test/a' && $clean[1]['url'] === '');
+$check('hero-slides-limit', count($S::sanitize_hero_slides(array_fill(0, 30, array('image_id' => 101)))) === $S::HERO_SLIDES_MAX);
+$check('hero-slides-not-array', $S::sanitize_hero_slides('x') === array());
+$check('hero-slides-in-sanitize-output', count($S::sanitize(array('hero_slides' => $rows))['hero_slides']) === 2);
+
+$GLOBALS['t_options'][$S::OPTION_NAME] = array();
+$check('hero-slides-empty-without-settings', $S::get_hero_slides() === array());
+$GLOBALS['t_options'][$S::OPTION_NAME] = array('hero_slides' => $clean);
+$slides = $S::get_hero_slides();
+$check('hero-slides-both-images', $slides[0]['image'] === 'https://example.test/d.jpg' && $slides[0]['image_w'] === 1500 && $slides[0]['image_h'] === 675
+	&& $slides[0]['mobile_image'] === 'https://example.test/m.jpg' && $slides[0]['mobile_h'] === 843);
+$check('hero-slides-mobile-only-falls-back-for-desktop', $slides[1]['image'] === 'https://example.test/x.jpg' && $slides[1]['mobile_image'] === 'https://example.test/x.jpg');
+$GLOBALS['t_options'][$S::OPTION_NAME] = array('hero_slides' => array(array('image_id' => 101, 'mobile_image_id' => 0)));
+$only_desktop = $S::get_hero_slides();
+$check('hero-slides-desktop-only-falls-back-for-mobile', $only_desktop[0]['mobile_image'] === 'https://example.test/d.jpg' && $only_desktop[0]['mobile_w'] === 1500);
+$GLOBALS['t_options'][$S::OPTION_NAME] = array('hero_slides' => array(array('image_id' => 555, 'mobile_image_id' => 0)));
+$check('hero-slides-deleted-attachment-skipped', $S::get_hero_slides() === array());
+$GLOBALS['t_options'][$S::OPTION_NAME] = array();
 
 $failed = false;
 foreach ($results as $name => $ok) {

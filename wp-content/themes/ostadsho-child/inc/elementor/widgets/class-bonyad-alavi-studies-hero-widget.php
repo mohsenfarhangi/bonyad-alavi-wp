@@ -65,13 +65,14 @@ final class Bonyad_Alavi_Studies_Hero_Widget extends Widget_Base {
 		$this->add_control(
 			'slider_source',
 			array(
-				'label'   => 'منبع اسلایدها',
-				'type'    => Controls_Manager::SELECT,
-				'default' => 'auto',
-				'options' => array(
+				'label'       => 'منبع اسلایدها',
+				'type'        => Controls_Manager::SELECT,
+				'default'     => 'manual',
+				'options'     => array(
+					'manual' => 'تصاویر انتخابی',
 					'auto'   => 'خودکار (آخرین محتوا)',
-					'manual' => 'دستی',
 				),
+				'description' => 'اگر در «تنظیمات بنیاد علوی ← مرکز مطالعات» اسلاید تصویری انتخاب شده باشد، همان‌ها اولویت دارند و تصاویر این ویجت نمایش داده نمی‌شوند.',
 			)
 		);
 
@@ -137,8 +138,17 @@ final class Bonyad_Alavi_Studies_Hero_Widget extends Widget_Base {
 		$repeater->add_control(
 			'image',
 			array(
-				'label' => 'تصویر',
-				'type'  => Controls_Manager::MEDIA,
+				'label'       => 'تصویر دسکتاپ',
+				'type'        => Controls_Manager::MEDIA,
+				'description' => 'برای عرض بیش از ۱۰۸۰ پیکسل. ارتفاع اسلایدر از نسبت همین تصویر می‌آید.',
+			)
+		);
+		$repeater->add_control(
+			'mobile_image',
+			array(
+				'label'       => 'تصویر تبلت و موبایل',
+				'type'        => Controls_Manager::MEDIA,
+				'description' => 'برای عرض ۱۰۸۰ پیکسل و کمتر. خالی = همان تصویر دسکتاپ.',
 			)
 		);
 		$repeater->add_control(
@@ -178,7 +188,7 @@ final class Bonyad_Alavi_Studies_Hero_Widget extends Widget_Base {
 		$this->add_control(
 			'manual_slides',
 			array(
-				'label'       => 'اسلایدهای دستی',
+				'label'       => 'اسلایدهای تصویری',
 				'type'        => Controls_Manager::REPEATER,
 				'fields'      => $repeater->get_controls(),
 				'title_field' => '{{{ title }}}',
@@ -423,6 +433,35 @@ final class Bonyad_Alavi_Studies_Hero_Widget extends Widget_Base {
 	}
 
 	/**
+	 * آدرس و ابعاد یک مقدار کنترل MEDIA المنتور.
+	 *
+	 * @param mixed $media مقدار کنترل.
+	 * @param int   $id    شناسه پیوست.
+	 * @return array{url: string, width: int, height: int}
+	 */
+	private function media_source( $media, $id ) {
+		$url    = is_array( $media ) && ! empty( $media['url'] ) ? (string) $media['url'] : '';
+		$width  = 0;
+		$height = 0;
+
+		if ( $id ) {
+			$src = wp_get_attachment_image_src( $id, 'full' );
+
+			if ( is_array( $src ) && ! empty( $src[0] ) ) {
+				$url    = (string) $src[0];
+				$width  = (int) ( $src[1] ?? 0 );
+				$height = (int) ( $src[2] ?? 0 );
+			}
+		}
+
+		return array(
+			'url'    => $url,
+			'width'  => $width,
+			'height' => $height,
+		);
+	}
+
+	/**
 	 * اسلایدهای نهایی (خودکار یا دستی) به‌صورت آرایه نرمال.
 	 *
 	 * @param array $settings تنظیمات.
@@ -431,18 +470,55 @@ final class Bonyad_Alavi_Studies_Hero_Widget extends Widget_Base {
 	private function get_slides( array $settings ) {
 		$date_format = '' !== trim( (string) $settings['date_format'] ) ? $settings['date_format'] : 'j F Y';
 
+		// تصاویر تنظیمات بنیاد علوی بر تصاویر ویجت و حالت خودکار اولویت دارند.
+		$admin_slides = BA_Studies_Center_Settings_Service::get_hero_slides();
+
+		if ( $admin_slides ) {
+			return array_map(
+				static function ( $slide ) {
+					return array_merge(
+						array(
+							'label'    => '',
+							'title'    => '',
+							'date'     => '',
+							'external' => false,
+						),
+						$slide
+					);
+				},
+				$admin_slides
+			);
+		}
+
 		if ( 'manual' === $settings['slider_source'] ) {
 			$slides = array();
 
 			foreach ( (array) $settings['manual_slides'] as $slide ) {
+				$desktop_id = isset( $slide['image']['id'] ) ? (int) $slide['image']['id'] : 0;
+				$mobile_id  = isset( $slide['mobile_image']['id'] ) ? (int) $slide['mobile_image']['id'] : 0;
+				$desktop    = $this->media_source( $slide['image'] ?? array(), $desktop_id );
+				$mobile     = $this->media_source( $slide['mobile_image'] ?? array(), $mobile_id );
+
+				if ( ! $desktop['url'] && ! $mobile['url'] ) {
+					continue;
+				}
+
+				$desktop = $desktop['url'] ? $desktop : $mobile;
+				$mobile  = $mobile['url'] ? $mobile : $desktop;
+
 				$slides[] = array(
-					'image'    => isset( $slide['image']['url'] ) ? $slide['image']['url'] : '',
-					'alt'      => isset( $slide['image']['alt'] ) ? $slide['image']['alt'] : '',
-					'label'    => (string) ( $slide['label'] ?? '' ),
-					'title'    => (string) ( $slide['title'] ?? '' ),
-					'date'     => BA_Studies_Formatter::fa_digits( (string) ( $slide['date_text'] ?? '' ) ),
-					'url'      => isset( $slide['link']['url'] ) ? $slide['link']['url'] : '',
-					'external' => ! empty( $slide['link']['is_external'] ),
+					'image'        => $desktop['url'],
+					'image_w'      => $desktop['width'],
+					'image_h'      => $desktop['height'],
+					'mobile_image' => $mobile['url'],
+					'mobile_w'     => $mobile['width'],
+					'mobile_h'     => $mobile['height'],
+					'alt'          => isset( $slide['image']['alt'] ) ? (string) $slide['image']['alt'] : '',
+					'label'        => (string) ( $slide['label'] ?? '' ),
+					'title'        => (string) ( $slide['title'] ?? '' ),
+					'date'         => BA_Studies_Formatter::fa_digits( (string) ( $slide['date_text'] ?? '' ) ),
+					'url'          => isset( $slide['link']['url'] ) ? $slide['link']['url'] : '',
+					'external'     => ! empty( $slide['link']['is_external'] ),
 				);
 			}
 
@@ -458,7 +534,8 @@ final class Bonyad_Alavi_Studies_Hero_Widget extends Widget_Base {
 
 		foreach ( $result['items'] as $item ) {
 			$slides[] = array(
-				'image'    => $item['image'],
+				'image'        => $item['image'],
+				'mobile_image' => $item['image'],
 				'alt'      => $item['image_alt'],
 				'label'    => (string) $settings['auto_label'],
 				'title'    => $item['title'],
@@ -489,6 +566,14 @@ final class Bonyad_Alavi_Studies_Hero_Widget extends Widget_Base {
 		$settings = $this->get_settings_for_display();
 		$slides   = $this->get_slides( $settings );
 		$meta     = trim( (string) $settings['meta_text'] );
+		$first    = $slides ? reset( $slides ) : array();
+		$ratio    = '';
+		if ( ! empty( $first['image_w'] ) && ! empty( $first['image_h'] ) ) {
+			$ratio = '--ba-studies-hero-ratio:' . (int) $first['image_w'] . ' / ' . (int) $first['image_h'] . ';';
+			if ( ! empty( $first['mobile_w'] ) && ! empty( $first['mobile_h'] ) ) {
+				$ratio .= '--ba-studies-hero-ratio-mobile:' . (int) $first['mobile_w'] . ' / ' . (int) $first['mobile_h'] . ';';
+			}
+		}
 		$config   = array(
 			'autoplay' => 'yes' === $settings['autoplay'],
 			'delay'    => max( 2000, (int) $settings['autoplay_delay'] ),
@@ -497,27 +582,39 @@ final class Bonyad_Alavi_Studies_Hero_Widget extends Widget_Base {
 		?>
 		<section class="ba-studies-hero ba-studies-widget">
 			<div class="ba-studies-hero__grid">
-				<div class="ba-studies-hero__slider swiper" dir="rtl" data-ba-studies-hero="<?php echo esc_attr( wp_json_encode( $config ) ); ?>">
+				<div class="ba-studies-hero__slider swiper<?php echo '' !== $ratio ? ' ba-studies-hero__slider--ratio' : ''; ?>" dir="rtl"<?php echo '' !== $ratio ? ' style="' . esc_attr( $ratio ) . '"' : ''; ?> data-ba-studies-hero="<?php echo esc_attr( wp_json_encode( $config ) ); ?>">
 					<div class="swiper-wrapper">
 						<?php foreach ( $slides as $index => $slide ) : ?>
 							<?php
-							$tag   = '' !== $slide['url'] ? 'a' : 'div';
-							$attrs = 'a' === $tag ? ' href="' . esc_url( $slide['url'] ) . '"' . ( $slide['external'] ? ' target="_blank" rel="noopener"' : '' ) : '';
+							$tag        = '' !== $slide['url'] ? 'a' : 'div';
+							$attrs      = 'a' === $tag ? ' href="' . esc_url( $slide['url'] ) . '"' . ( $slide['external'] ? ' target="_blank" rel="noopener"' : '' ) : '';
+							$has_text   = '' !== $slide['title'] || '' !== $slide['label'] || '' !== $slide['date'];
+							$slide_cls  = 'swiper-slide ba-studies-hero__slide' . ( $has_text ? '' : ' ba-studies-hero__slide--image-only' );
+							$mobile_src = (string) ( $slide['mobile_image'] ?? '' );
+							$img_attrs  = ! empty( $slide['image_w'] ) && ! empty( $slide['image_h'] ) ? ' width="' . (int) $slide['image_w'] . '" height="' . (int) $slide['image_h'] . '"' : '';
+							$src_attrs  = ! empty( $slide['mobile_w'] ) && ! empty( $slide['mobile_h'] ) ? ' width="' . (int) $slide['mobile_w'] . '" height="' . (int) $slide['mobile_h'] . '"' : '';
 							?>
-							<<?php echo $tag; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- a|div ?> class="swiper-slide ba-studies-hero__slide"<?php echo $attrs; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped above ?>>
+							<<?php echo $tag; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- a|div ?> class="<?php echo esc_attr( $slide_cls ); ?>"<?php echo $attrs; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped above ?>>
 								<?php if ( '' !== $slide['image'] ) : ?>
-									<img class="ba-studies-hero__image" src="<?php echo esc_url( $slide['image'] ); ?>" alt="<?php echo esc_attr( $slide['alt'] ); ?>" <?php echo 0 === $index ? 'fetchpriority="high"' : 'loading="lazy"'; ?> decoding="async">
+									<picture>
+										<?php if ( '' !== $mobile_src && $mobile_src !== $slide['image'] ) : ?>
+											<source media="(max-width: 1080px)" srcset="<?php echo esc_url( $mobile_src ); ?>"<?php echo $src_attrs; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- ints ?>>
+										<?php endif; ?>
+										<img class="ba-studies-hero__image" src="<?php echo esc_url( $slide['image'] ); ?>"<?php echo $img_attrs; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- ints ?> alt="<?php echo esc_attr( $slide['alt'] ); ?>" <?php echo 0 === $index ? 'fetchpriority="high"' : 'loading="lazy"'; ?> decoding="async">
+									</picture>
 								<?php endif; ?>
-								<span class="ba-studies-hero__overlay" aria-hidden="true"></span>
-								<span class="ba-studies-hero__content">
-									<?php if ( '' !== $slide['label'] ) : ?>
-										<span class="ba-studies-hero__label"><?php echo esc_html( $slide['label'] ); ?></span>
-									<?php endif; ?>
-									<span class="ba-studies-hero__title"><?php echo esc_html( $slide['title'] ); ?></span>
-									<?php if ( '' !== $slide['date'] || '' !== $meta ) : ?>
-										<span class="ba-studies-hero__meta"><?php echo esc_html( implode( ' · ', array_filter( array( $slide['date'], $meta ) ) ) ); ?></span>
-									<?php endif; ?>
-								</span>
+								<?php if ( $has_text ) : ?>
+									<span class="ba-studies-hero__overlay" aria-hidden="true"></span>
+									<span class="ba-studies-hero__content">
+										<?php if ( '' !== $slide['label'] ) : ?>
+											<span class="ba-studies-hero__label"><?php echo esc_html( $slide['label'] ); ?></span>
+										<?php endif; ?>
+										<span class="ba-studies-hero__title"><?php echo esc_html( $slide['title'] ); ?></span>
+										<?php if ( '' !== $slide['date'] || '' !== $meta ) : ?>
+											<span class="ba-studies-hero__meta"><?php echo esc_html( implode( ' · ', array_filter( array( $slide['date'], $meta ) ) ) ); ?></span>
+										<?php endif; ?>
+									</span>
+								<?php endif; ?>
 							</<?php echo $tag; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- a|div ?>>
 						<?php endforeach; ?>
 						<?php if ( ! $slides ) : ?>

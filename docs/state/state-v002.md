@@ -768,3 +768,10 @@ Modules: [MODULE-AFE](../modules/alavi-form-engine.md), [MODULE-JIHADI-FORM](../
 - override تب «مرکز مطالعات» (`stats_*`) همچنان اولویت دارد. ۸ تست runtime جدید و یک بررسی contract؛ قرارداد `separate-counts` با امضای جدید به‌روز شد.
 - روی سایت زنده برای کارت نشست‌ها دسته `317` در همان کارت انتخاب شد (داده Elementor؛ خود دسته و نوشته‌ها تغییر نکردند).
 
+## STATE-002-040 — Studies hero shows chosen images (2026-11-01)
+
+- درخواست: اسلایدر Hero صفحه مطالعات باید تصویر انتخابی نشان بدهد نه آخرین مطالب؛ تصویر دسکتاپ و تصویر تبلت/موبایل جدا؛ انتخاب هم از ویجت و هم از تنظیمات بنیاد علوی با اولویت تنظیمات.
+- ویجت: پیش‌فرض `slider_source` از `auto` به `manual` («تصاویر انتخابی»)؛ فیلد `mobile_image` در repeater؛ خروجی `<picture>` با `max-width: 1080px`؛ اسلاید بدون متن بدون overlay/متن؛ ارتفاع از `aspect-ratio` تصویر (متغیرهای `--ba-studies-hero-ratio[-mobile]`).
+- تنظیمات: `hero_slides` در `ba_studies_center_settings` + Repeater مشترک و انتخاب رسانه در تب «مرکز مطالعات»؛ `BA_Studies_Center_Settings_Service::get_hero_slides()` در `get_slides()` مقدم بر ویجت است.
+- تست: ۱۲ تست runtime و ۵ بررسی contract جدید؛ قرارداد `hero-slider-source` برای پیش‌فرض جدید به‌روز شد.
+

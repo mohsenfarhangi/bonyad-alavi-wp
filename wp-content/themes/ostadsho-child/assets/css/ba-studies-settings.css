@@ -1,0 +1,49 @@
+/* تب تنظیمات «مرکز مطالعات»: اسلایدهای تصویری Hero */
+
+.ba-studies-settings__slide-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px 20px;
+}
+
+.ba-studies-settings__field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.ba-studies-settings__label {
+  font-weight: 600;
+}
+
+.ba-studies-settings__field input.regular-text {
+  width: 100%;
+  max-width: none;
+}
+
+.ba-studies-settings__preview:empty {
+  display: none;
+}
+
+.ba-studies-settings__preview img {
+  display: block;
+  width: 100%;
+  max-width: 320px;
+  height: auto;
+  border: 1px solid #dcdcde;
+  border-radius: 6px;
+  background: #f6f7f7;
+}
+
+.ba-studies-settings__media-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+@media (max-width: 782px) {
+  .ba-studies-settings__slide-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

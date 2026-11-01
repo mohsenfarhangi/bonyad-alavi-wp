@@ -48,6 +48,7 @@ Repeater فایل‌ها از `BA_Admin_Repeater_Component` استفاده می�
 `inc/admin/settings/class-ba-studies-center-settings-tab.php`، option `ba_studies_center_settings` (ADR-003، ذخیره از savebar مشترک):
 
 - `research_cats`، `books_cats` (checkbox دسته‌های publications؛ هم‌پوشانی هنگام sanitize از کتاب‌ها حذف می‌شود)
+- `hero_slides`: Repeater مشترک (ADR-005) تا ۱۲ اسلاید با `image_id` (دسکتاپ)، `mobile_image_id` (تبلت/موبایل)، `url` و `alt`. فقط پیوست‌های تصویری معتبر ذخیره می‌شوند؛ ردیف بدون تصویر حذف و اگر فقط یکی از دو تصویر باشد برای همه اندازه‌ها استفاده می‌شود. اولویت با این بخش و بالاتر از تصاویر ویجت است؛ خالی = تصاویر ویجت.
 - `stats_books|sessions|research`: خالی = شمارش خودکار؛ عدد = مقدار ثابت
 - `books_url|sessions_url|research_url`: پیش‌فرض لینک «بیشتر» و کارت‌های آمار وقتی Elementor لینکی ندارد. کتاب/پژوهش خالی → آرشیو اولین دسته انتخاب‌شده → آرشیو publications.
 
@@ -63,7 +64,7 @@ Repeater فایل‌ها از `BA_Admin_Repeater_Component` استفاده می�
 
 | Widget | Name | توضیح |
 |---|---|---|
-| Hero | `bonyad_alavi_studies_hero` | اسلایدر Swiper داخلی Elementor: پیش‌فرض خودکار ۴ نشست آخر، قابل سوئیچ به repeater دستی؛ برچسب، عنوان، متا «تاریخ · متن»، فلش، نقطه، لینک کل اسلاید. سه کارت آمار repeater با منبع books/sessions/research/manual (هر کارت کنترل اختیاری «انتخاب از همه تکسونومی‌ها» دارد؛ عدد با همان `build_args` و همان دسته‌های کاروسل شمرده می‌شود و تعداد **کل** نتایج است، نه حداکثر تعداد نمایش؛ override تب مدیریت اولویت دارد)، آیکون پوشه/دوربین/سند، ارقام فارسی با `٬`، لینک پیش‌فرض `#studies-*`. |
+| Hero | `bonyad_alavi_studies_hero` | اسلایدر Swiper داخلی Elementor: پیش‌فرض **تصاویر انتخابی** (repeater با «تصویر دسکتاپ» و «تصویر تبلت و موبایل»، `<picture>` با breakpoint ۱۰۸۰px)؛ حالت «خودکار (آخرین محتوا)» فقط اگر صریحاً انتخاب شود. اسلاید بدون برچسب/عنوان/تاریخ فقط تصویر است (بدون گرادیان و متن). ارتفاع اسلایدر از نسبت تصویر اسلاید اول (`aspect-ratio` از ابعاد پیوست) می‌آید تا تصویر بنر بریده نشود؛ بدون ابعاد، ارتفاع ثابت قبلی. **تصاویر تب «مرکز مطالعات» (`hero_slides`) بر هر حالت ویجت اولویت دارند.** برچسب، عنوان، متا «تاریخ · متن»، فلش، نقطه، لینک کل اسلاید. سه کارت آمار repeater با منبع books/sessions/research/manual (هر کارت کنترل اختیاری «انتخاب از همه تکسونومی‌ها» دارد؛ عدد با همان `build_args` و همان دسته‌های کاروسل شمرده می‌شود و تعداد **کل** نتایج است، نه حداکثر تعداد نمایش؛ override تب مدیریت اولویت دارد)، آیکون پوشه/دوربین/سند، ارقام فارسی با `٬`، لینک پیش‌فرض `#studies-*`. |
 | فیلتر حوزه | `bonyad_alavi_studies_area_filter` | dropdown «همه حوزه‌ها». حالت `live` رویداد `ba:studies-area-change` منتشر و `?area=` را با `replaceState` همگام می‌کند؛ حالت `url` صفحه مقصد را با `?area=` باز می‌کند. |
 | کاروسل | `bonyad_alavi_studies_carousel` | `content_type` = books/sessions/research. در Query فهرست termهای تمام taxonomyهای ثبت‌شده سایت برای هر سه نوع محتوا قابل جست‌وجو است؛ انتخاب‌های ذخیره‌شده قبلی معتبر می‌مانند و fallback و تقدم تنظیمات مدیریت حفظ می‌شود. هدر داخل ویجت (عنوان، «بیشتر ←»، قبلی/بعدی). کارت‌در‌نما responsive (پیش‌فرض کتاب ۴/۳/۲٫۳، نشست ۳/۲/۱٫۲۵، پژوهش ۳/۲/۱٫۱۲)، نقطه‌ها پیش‌فرض فقط موبایل، «موردی یافت نشد». anchor پیش‌فرض `studies-<type>`. |
 | آرشیو | `bonyad_alavi_studies_grid` | گرید همان کارت‌ها با صفحه‌بندی `?ba_page=` و فیلتر `?area=`؛ پیش‌فرض نشست‌ها. |
@@ -80,6 +81,7 @@ Assets (فقط هنگام استفاده ویجت):
 - `assets/css/bonyad-alavi-studies-center.css` + `assets/js/bonyad-alavi-studies-center.js` (deps: `elementor-frontend`, `swiper`)
 - `assets/css/bonyad-alavi-studies-session.css` + `assets/js/bonyad-alavi-studies-session.js`
 - admin: `assets/css|js/ba-studies-session-admin.*` فقط روی صفحه ویرایش نشست
+- admin: `assets/css|js/ba-studies-settings.*` فقط روی تب «مرکز مطالعات» (انتخاب رسانه اسلایدهای Hero)
 
 CSS با `.ba-studies-widget` / `.ba-session-*` scope شده و توکن‌های ویجت‌های home (سبز `#069043`، طلایی `#b79254`، peyda، radius 14–18) را تکرار می‌کند. نکته: CSS خود Swiper روی `.swiper` مقدار `margin:auto` دارد و آیتم grid را به عرض صفر می‌برد؛ اسلایدر Hero صریحاً `width:100%; margin:0` دارد.
 
