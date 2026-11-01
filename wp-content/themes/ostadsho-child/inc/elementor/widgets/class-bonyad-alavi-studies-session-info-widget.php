@@ -10,7 +10,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 use Elementor\Controls_Manager;
-use Elementor\Group_Control_Typography;
+use Elementor\Group_Control_Box_Shadow;
 
 /**
  * کارت با حاشیه سبز: عنوان، جدول اطلاعات و (اختیاری) «فایل‌های نشست».
@@ -42,20 +42,31 @@ final class Bonyad_Alavi_Studies_Session_Info_Widget extends Bonyad_Alavi_Studie
 		$this->add_control(
 			'title_tag',
 			array(
-				'label'   => 'تگ HTML عنوان',
-				'type'    => Controls_Manager::SELECT,
-				'default' => 'h1',
-				'options' => array( 'h1' => 'H1', 'h2' => 'H2', 'h3' => 'H3', 'div' => 'DIV' ),
+				'label'     => 'تگ HTML عنوان',
+				'type'      => Controls_Manager::SELECT,
+				'default'   => 'h1',
+				'options'   => array( 'h1' => 'H1', 'h2' => 'H2', 'h3' => 'H3', 'div' => 'DIV' ),
+				'condition' => array( 'show_title' => 'yes' ),
 			)
 		);
-		$this->add_control( 'label_type', array( 'label' => 'برچسب نوع رویداد', 'type' => Controls_Manager::TEXT, 'default' => 'نوع رویداد' ) );
-		$this->add_control( 'label_date', array( 'label' => 'برچسب تاریخ', 'type' => Controls_Manager::TEXT, 'default' => 'تاریخ برگزاری' ) );
-		$this->add_control( 'label_time', array( 'label' => 'برچسب ساعت', 'type' => Controls_Manager::TEXT, 'default' => 'ساعت' ) );
-		$this->add_control( 'time_separator', array( 'label' => 'جداکننده ساعت', 'type' => Controls_Manager::TEXT, 'default' => 'تا' ) );
-		$this->add_control( 'label_speakers', array( 'label' => 'برچسب سخنرانان', 'type' => Controls_Manager::TEXT, 'default' => 'سخنرانان' ) );
-		$this->add_control( 'label_area', array( 'label' => 'برچسب حوزه', 'type' => Controls_Manager::TEXT, 'default' => 'حوزه' ) );
-		$this->add_control( 'label_location', array( 'label' => 'برچسب مکان', 'type' => Controls_Manager::TEXT, 'default' => 'مکان' ) );
 		$this->add_control( 'date_format', array( 'label' => 'فرمت تاریخ', 'type' => Controls_Manager::TEXT, 'default' => 'j F Y' ) );
+		$this->add_control( 'time_separator', array( 'label' => 'جداکننده ساعت', 'type' => Controls_Manager::TEXT, 'default' => 'تا' ) );
+		$this->add_control( 'area_separator', array( 'label' => 'جداکننده حوزه‌ها', 'type' => Controls_Manager::TEXT, 'default' => '،' ) );
+
+		$this->end_controls_section();
+
+		$this->start_controls_section(
+			'content_rows',
+			array(
+				'label' => 'ردیف‌های جدول',
+				'tab'   => Controls_Manager::TAB_CONTENT,
+			)
+		);
+
+		foreach ( self::get_rows_schema() as $key => $row ) {
+			$this->add_control( 'show_row_' . $key, array( 'label' => 'نمایش «' . $row['default'] . '»', 'type' => Controls_Manager::SWITCHER, 'default' => 'yes' ) );
+			$this->add_control( $row['control'], array( 'label' => 'برچسب «' . $row['default'] . '»', 'type' => Controls_Manager::TEXT, 'default' => $row['default'], 'condition' => array( 'show_row_' . $key => 'yes' ) ) );
+		}
 
 		$this->end_controls_section();
 
@@ -68,44 +79,110 @@ final class Bonyad_Alavi_Studies_Session_Info_Widget extends Bonyad_Alavi_Studie
 		);
 
 		$this->add_control( 'show_files', array( 'label' => 'نمایش فایل‌ها داخل کارت', 'type' => Controls_Manager::SWITCHER, 'default' => 'yes' ) );
-		$this->add_control( 'files_title', array( 'label' => 'عنوان بخش فایل‌ها', 'type' => Controls_Manager::TEXT, 'default' => 'فایل‌های نشست' ) );
-		$this->add_control( 'download_text', array( 'label' => 'متن دکمه دانلود', 'type' => Controls_Manager::TEXT, 'default' => 'دانلود' ) );
+		$this->register_files_content_controls();
 
 		$this->end_controls_section();
 
-		$this->start_controls_section(
-			'style_card',
-			array(
-				'label' => 'کارت',
-				'tab'   => Controls_Manager::TAB_STYLE,
-			)
-		);
+		$this->register_card_style_controls();
+		$this->register_files_style_controls();
+	}
 
-		$this->add_control(
-			'ref_border_color',
+	/**
+	 * ردیف‌های جدول اطلاعات: کلید، کنترل برچسب و برچسب پیش‌فرض.
+	 *
+	 * @return array
+	 */
+	private static function get_rows_schema() {
+		return array(
+			'type'     => array( 'control' => 'label_type', 'default' => 'نوع رویداد' ),
+			'date'     => array( 'control' => 'label_date', 'default' => 'تاریخ برگزاری' ),
+			'time'     => array( 'control' => 'label_time', 'default' => 'ساعت' ),
+			'speakers' => array( 'control' => 'label_speakers', 'default' => 'سخنرانان' ),
+			'area'     => array( 'control' => 'label_area', 'default' => 'حوزه' ),
+			'location' => array( 'control' => 'label_location', 'default' => 'مکان' ),
+		);
+	}
+
+	/**
+	 * بخش‌های Style کارت، عنوان، جدول، برچسب و مقدار.
+	 *
+	 * @return void
+	 */
+	private function register_card_style_controls() {
+		$this->start_controls_section( 'style_card', array( 'label' => 'کارت', 'tab' => Controls_Manager::TAB_STYLE ) );
+		$this->add_color_control( 'ref_border_color', 'رنگ حاشیه', '.ba-session-info', 'border-color' );
+		$this->add_size_control( 'ref_border_width', 'ضخامت حاشیه', '.ba-session-info', 'border-width', 8 );
+		$this->add_size_control( 'ref_card_radius', 'گردی گوشه', '.ba-session-info', 'border-radius', 40 );
+		$this->add_color_control( 'ref_card_bg', 'رنگ پس‌زمینه', '.ba-session-info', 'background-color' );
+		$this->add_responsive_control(
+			'ref_card_padding',
 			array(
-				'label'     => 'رنگ حاشیه',
-				'type'      => Controls_Manager::COLOR,
-				'selectors' => array( '{{WRAPPER}} .ba-session-info' => 'border-color: {{VALUE}};' ),
+				'label'      => 'فاصله داخلی',
+				'type'       => Controls_Manager::DIMENSIONS,
+				'size_units' => array( 'px' ),
+				'selectors'  => array( '{{WRAPPER}} .ba-session-info' => 'padding: {{TOP}}{{UNIT}} {{RIGHT}}{{UNIT}} {{BOTTOM}}{{UNIT}} {{LEFT}}{{UNIT}};' ),
 			)
 		);
 		$this->add_group_control(
-			Group_Control_Typography::get_type(),
+			Group_Control_Box_Shadow::get_type(),
 			array(
-				'name'     => 'ref_title_typography',
-				'label'    => 'تایپوگرافی عنوان',
-				'selector' => '{{WRAPPER}} .ba-session-info__title',
+				'name'     => 'ref_card_shadow',
+				'selector' => '{{WRAPPER}} .ba-session-info',
 			)
 		);
-		$this->add_control(
-			'ref_button_bg',
-			array(
-				'label'     => 'رنگ دکمه دانلود',
-				'type'      => Controls_Manager::COLOR,
-				'selectors' => array( '{{WRAPPER}} .ba-session-file__download' => 'background-color: {{VALUE}};' ),
-			)
-		);
+		$this->end_controls_section();
 
+		$this->start_controls_section( 'style_title', array( 'label' => 'عنوان نشست', 'tab' => Controls_Manager::TAB_STYLE ) );
+		$this->add_typography_control( 'ref_title_typography', 'تایپوگرافی', '.ba-session-info__title' );
+		$this->add_color_control( 'ref_title_color', 'رنگ', '.ba-session-info__title' );
+		$this->add_responsive_control(
+			'ref_title_align',
+			array(
+				'label'     => 'تراز',
+				'type'      => Controls_Manager::CHOOSE,
+				'options'   => array(
+					'right'  => array( 'title' => 'راست', 'icon' => 'eicon-text-align-right' ),
+					'center' => array( 'title' => 'وسط', 'icon' => 'eicon-text-align-center' ),
+					'left'   => array( 'title' => 'چپ', 'icon' => 'eicon-text-align-left' ),
+				),
+				'selectors' => array( '{{WRAPPER}} .ba-session-info__title' => 'text-align: {{VALUE}};' ),
+			)
+		);
+		$this->add_size_control( 'ref_title_gap', 'فاصله تا جدول', '.ba-session-info__title', 'margin-bottom', 80, true );
+		$this->end_controls_section();
+
+		$this->start_controls_section( 'style_table', array( 'label' => 'جدول اطلاعات', 'tab' => Controls_Manager::TAB_STYLE ) );
+		$this->add_color_control( 'ref_table_bg', 'رنگ پس‌زمینه', '.ba-session-info__table', 'background-color' );
+		$this->add_color_control( 'ref_table_border', 'رنگ حاشیه', '.ba-session-info__table', 'border-color' );
+		$this->add_size_control( 'ref_table_radius', 'گردی گوشه', '.ba-session-info__table', 'border-radius', 40 );
+		$this->add_responsive_control(
+			'ref_table_padding',
+			array(
+				'label'      => 'فاصله داخلی',
+				'type'       => Controls_Manager::DIMENSIONS,
+				'size_units' => array( 'px' ),
+				'selectors'  => array( '{{WRAPPER}} .ba-session-info__table' => 'padding: {{TOP}}{{UNIT}} {{RIGHT}}{{UNIT}} {{BOTTOM}}{{UNIT}} {{LEFT}}{{UNIT}};' ),
+			)
+		);
+		$this->add_color_control( 'ref_row_divider', 'رنگ خط بین ردیف‌ها', '.ba-session-info__row', 'border-bottom-color' );
+		$this->add_size_control( 'ref_row_padding', 'فاصله عمودی ردیف‌ها', '.ba-session-info__row', 'padding-block', 40, true );
+		$this->add_responsive_control(
+			'ref_label_width',
+			array(
+				'label'      => 'عرض ستون برچسب',
+				'type'       => Controls_Manager::SLIDER,
+				'size_units' => array( 'px' ),
+				'range'      => array( 'px' => array( 'min' => 60, 'max' => 240 ) ),
+				'selectors'  => array( '{{WRAPPER}} .ba-session-info__row' => 'grid-template-columns: {{SIZE}}{{UNIT}} minmax(0, 1fr);' ),
+			)
+		);
+		$this->end_controls_section();
+
+		$this->start_controls_section( 'style_labels', array( 'label' => 'برچسب‌ها و مقدارها', 'tab' => Controls_Manager::TAB_STYLE ) );
+		$this->add_typography_control( 'ref_label_typography', 'تایپوگرافی برچسب', '.ba-session-info__row dt' );
+		$this->add_color_control( 'ref_label_color', 'رنگ برچسب', '.ba-session-info__row dt' );
+		$this->add_typography_control( 'ref_value_typography', 'تایپوگرافی مقدار', '.ba-session-info__row dd' );
+		$this->add_color_control( 'ref_value_color', 'رنگ مقدار', '.ba-session-info__row dd' );
 		$this->end_controls_section();
 	}
 
@@ -122,14 +199,24 @@ final class Bonyad_Alavi_Studies_Session_Info_Widget extends Bonyad_Alavi_Studie
 		$data     = BA_Studies_Session_Meta::get_view_data( $post_id, $format );
 		$tag      = in_array( $settings['title_tag'], array( 'h1', 'h2', 'h3', 'div' ), true ) ? $settings['title_tag'] : 'h1';
 		$time     = implode( ' ' . trim( (string) $settings['time_separator'] ) . ' ', array_filter( array( $data['time_start'], $data['time_end'] ) ) );
-		$rows     = array(
-			array( $settings['label_type'], $data['event_type'] ),
-			array( $settings['label_date'], $data['event_date'] ),
-			array( $settings['label_time'], $time ),
-			array( $settings['label_speakers'], $data['speakers'] ),
-			array( $settings['label_area'], implode( '، ', $data['areas'] ) ),
-			array( $settings['label_location'], $data['location'] ),
+		$area_sep = trim( (string) ( $settings['area_separator'] ?? '،' ) );
+		$values   = array(
+			'type'     => $data['event_type'],
+			'date'     => $data['event_date'],
+			'time'     => $time,
+			'speakers' => $data['speakers'],
+			'area'     => implode( '' !== $area_sep ? $area_sep . ' ' : ' ', $data['areas'] ),
+			'location' => $data['location'],
 		);
+		$rows     = array();
+
+		foreach ( self::get_rows_schema() as $key => $schema ) {
+			if ( 'yes' !== ( $settings[ 'show_row_' . $key ] ?? 'yes' ) ) {
+				continue;
+			}
+
+			$rows[] = array( (string) ( $settings[ $schema['control'] ] ?? $schema['default'] ), (string) $values[ $key ] );
+		}
 		?>
 		<aside class="ba-session-info">
 			<?php if ( 'yes' === $settings['show_title'] ) : ?>
@@ -137,16 +224,18 @@ final class Bonyad_Alavi_Studies_Session_Info_Widget extends Bonyad_Alavi_Studie
 			<?php endif; ?>
 			<dl class="ba-session-info__table">
 				<?php foreach ( $rows as $row ) : ?>
-					<?php if ( '' === trim( (string) $row[1] ) ) { continue; } ?>
+					<?php if ( '' === trim( $row[1] ) ) { continue; } ?>
 					<div class="ba-session-info__row">
-						<dt><?php echo esc_html( (string) $row[0] ); ?></dt>
-						<dd><?php echo nl2br( esc_html( (string) $row[1] ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></dd>
+						<dt><?php echo esc_html( $row[0] ); ?></dt>
+						<dd><?php echo nl2br( esc_html( $row[1] ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></dd>
 					</div>
 				<?php endforeach; ?>
 			</dl>
 			<?php
 			if ( 'yes' === $settings['show_files'] ) {
-				echo self::render_files( $data['files'], (string) $settings['files_title'], (string) $settings['download_text'] ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped in renderer
+				$files_title = 'yes' === ( $settings['show_files_title'] ?? 'yes' ) ? (string) $settings['files_title'] : '';
+
+				echo self::render_files( $data['files'], $files_title, (string) $settings['download_text'], self::files_render_options( $settings ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped in renderer
 			}
 			?>
 		</aside>

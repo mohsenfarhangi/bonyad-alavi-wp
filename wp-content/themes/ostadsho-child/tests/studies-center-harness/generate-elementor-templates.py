@@ -22,12 +22,12 @@ session = [con("s-root",{
     "flex_gap":gap(30),"flex_gap_mobile":gap(26),
     "background_background":"classic","background_color":"#F4F4F4",
     "padding":pad(20,0,60,0),"padding_tablet":pad(14,20,40,20),"padding_mobile":pad(14,16,40,16)},[
-    con("s-main",{"content_width":"full","width":{"unit":"%","size":61},"width_mobile":{"unit":"%","size":100},
+    con("s-main",{"content_width":"full","width":{"unit":"%","size":58.3},"width_mobile":{"unit":"%","size":100},
         "flex_direction":"column","flex_gap":gap(22),"padding":pad(0,0,0,0)},[
         wid("s-video","bonyad_alavi_studies_session_video"),
         wid("s-content","bonyad_alavi_studies_session_content"),
     ],True),
-    con("s-side",{"content_width":"full","width":{"unit":"%","size":37},"width_mobile":{"unit":"%","size":100},
+    con("s-side",{"content_width":"full","width":{"unit":"%","size":39.2},"width_mobile":{"unit":"%","size":100},
         "flex_direction":"column","padding":pad(0,0,0,0)},[
         wid("s-info","bonyad_alavi_studies_session_info"),
     ],True),

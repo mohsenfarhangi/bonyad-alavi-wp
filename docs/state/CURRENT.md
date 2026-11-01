@@ -20,6 +20,9 @@ AFE release goal همچنان live acceptance نسخه 1.0.28 و رفع blocker 
 
 ## Recently Completed
 
+### Studies Center session inner page (2026-11-02)
+- صفحه داخلی نشست با طرح دسکتاپ/موبایل مقایسه و اصلاح شد (برچسب ویدئو چپ، وزن‌ها، ارتفاع ردیف فایل، عرض ستون‌های قالب ۵۸٫۳/۳۹٫۲) و هر چهار ویجت نشست کنترل‌های محتوا و Style کامل گرفتند؛ جزئیات و تست‌ها: [MODULE-STUDIES-CENTER](../modules/studies-center.md)، STATE-002-042. شاخه `feat/studies-session-page-widgets-20261102` روی سه شاخه merge‌نشده قبلی ساخته شده (merge یک‌جا). **قالب Theme Builder هنوز روی سایت import نشده و نشست واقعی منتشر نیست؛ پذیرش زنده انجام نشده.**
+
 ### Studies Center live page data + sessions from post categories (2026-10-31)
 - روی سایت زنده (صفحه 7930، از پنل): دسته پژوهش در تب «مرکز مطالعات» = `333`، ویجت کتاب = `334`، ویجت پژوهش = `333`، و اسلایدر Hero حالت دستی با ۴ اسلاید از نوشته‌های دسته `317` (عکس شاخص، تاریخ شمسی، لینک). این‌ها داده سایت‌اند و در ریپو نیستند. پشتیبان `_elementor_data` قبل از تغییر گرفته شد.
 - کد: کاروسل نشست‌ها با دسته نوشته‌ها (`category`) از Post Type همان taxonomy می‌خواند؛ شاخه `fix/studies-sessions-from-post-taxonomies-20261031`. **تا deploy/merge این شاخه کاروسل نشست‌ها روی سایت خالی است.** ۵۰۰ endpoint REST فیلتر حوزه بدون پارامتر `area` هنوز علت‌یابی نشده (نیاز به error_log).

@@ -8,10 +8,11 @@
         if (!root || root.dataset.baSessionVideoReady) return;
         var video = root.querySelector('[data-ba-session-video-media]');
         var button = root.querySelector('[data-ba-session-video-play]');
-        if (!video || !button) return;
+        if (!video) return;
         root.dataset.baSessionVideoReady = '1';
 
-        button.addEventListener('click', function () {
+        function start() {
+            if (root.classList.contains('is-playing')) return;
             root.classList.add('is-playing');
             video.setAttribute('controls', '');
             video.preload = 'auto';
@@ -20,7 +21,15 @@
                 playing.catch(function () { /* مرورگر پخش را رد کرد؛ کنترل‌ها در دسترس‌اند. */ });
             }
             video.focus();
-        });
+        }
+
+        if (button) {
+            button.addEventListener('click', start);
+        } else {
+            // دکمه پخش در ویجت خاموش شده است: کلیک روی خود پوستر ویدئو را شروع می‌کند.
+            root.classList.add('is-clickable');
+            root.addEventListener('click', start);
+        }
 
         video.addEventListener('ended', function () {
             root.classList.remove('is-playing');

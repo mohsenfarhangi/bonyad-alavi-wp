@@ -32,5 +32,6 @@ main.e-con-boxed { padding-bottom: 80px; }
   .harness-intro__main { padding: 22px 18px 16px; }
   .harness-intro__side .ba-studies-filter { border-top: 0; }
   .harness-session { grid-template-columns: minmax(0, 1fr); gap: 26px; }
-  .harness-session-bg { background: #fff; padding-top: 14px; }
+  .harness-session-bg { background: #f4f4f4; padding: 14px 0 40px; }
+  .e-con-boxed.harness-session { width: calc(100% - 32px); }
 }

@@ -37,6 +37,7 @@ $files     = $read('inc/elementor/widgets/class-bonyad-alavi-studies-session-fil
 $css       = $read('assets/css/bonyad-alavi-studies-center.css');
 $css_s     = $read('assets/css/bonyad-alavi-studies-session.css');
 $js        = $read('assets/js/bonyad-alavi-studies-center.js');
+$sjs       = $read('assets/js/bonyad-alavi-studies-session.js');
 
 $studies_lines = array_values(array_filter(explode("\n", $functions), static fn ($l) => str_contains($l, 'studies')));
 $templates     = array();
@@ -113,7 +114,12 @@ $checks = array(
 	'grid-area-param'                => str_contains($grid, 'BA_Studies_Query_Service::get_requested_area()') && str_contains($grid, "const PAGE_VAR = 'ba_page';"),
 	'session-widgets-editor-preview' => str_contains($base, 'is_edit_mode()') && str_contains($base, 'is_preview_mode()') && str_contains($base, "'posts_per_page' => 1"),
 	'session-content-no-recursion'   => str_contains($content, 'self::$rendering = true;') && str_contains($content, '|| self::$rendering'),
-	'session-info-files-in-card'     => str_contains($info, "'show_files'") && str_contains($info, "'default' => 'فایل‌های نشست'") && str_contains($info, "'default' => 'دانلود'") && str_contains($info, '<dl class="ba-session-info__table">'),
+	'session-info-files-in-card'     => str_contains($info, "'show_files'") && str_contains($info, 'register_files_content_controls()') && str_contains($info, 'register_files_style_controls()') && str_contains($base, "'default' => 'فایل‌های نشست'") && str_contains($base, "'default' => 'دانلود'") && str_contains($info, '<dl class="ba-session-info__table">'),
+	'session-widgets-rich-controls'  => str_contains($base, 'protected function add_color_control') && str_contains($base, 'protected function add_typography_control') && str_contains($base, 'protected function add_size_control') && str_contains($base, 'protected function register_files_style_controls') && str_contains($info, "'show_row_' . \$key") && str_contains($info, 'register_card_style_controls') && str_contains($info, "'ref_label_width'") && str_contains($info, 'Group_Control_Box_Shadow') && str_contains($video, "'show_play'") && str_contains($video, "'show_badge'") && str_contains($video, "'badge_position'") && str_contains($video, "'ref_play_size'") && str_contains($video, "'ref_badge_offset'") && str_contains($content, "'lead_tag'") && str_contains($content, "'ref_body_align'") && str_contains($content, "'ref_lead_gap'") && str_contains($files, 'register_files_style_controls()'),
+	'session-keeps-saved-control-ids' => str_contains($info, "'ref_border_color'") && str_contains($info, "'ref_title_typography'") && str_contains($base, "'ref_button_bg'") && str_contains($video, "'ref_ratio'") && str_contains($video, "'ref_radius'") && str_contains($content, "'ref_lead_color'") && str_contains($content, "'ref_body_typography'"),
+	'session-css-matches-design'     => str_contains($css_s, 'left: var(--ba-session-badge-offset, 12px);') && str_contains($css_s, 'transform: translate(-50%, -50%);') && str_contains($css_s, 'transform: translate(-50%, -50%) scale(1.07);') && !str_contains($css_s, 'margin: -34px 0 0 -34px') && str_contains($css_s, '.ba-session-video.is-clickable') && str_contains($css_s, "font-size: 18px;\n  font-weight: 700;"),
+	'session-js-clickable-without-play' => str_contains($sjs, "root.classList.add('is-clickable')") && str_contains($sjs, "root.addEventListener('click', start)") && str_contains($sjs, 'if (!video) return;'),
+	'session-template-design-widths' => ($templates['studies-session-single.json']['content'][0]['elements'][0]['settings']['width']['size'] ?? 0) === 58.3 && ($templates['studies-session-single.json']['content'][0]['elements'][1]['settings']['width']['size'] ?? 0) === 39.2 && ($templates['studies-session-single.json']['content'][0]['settings']['background_color'] ?? '') === '#F4F4F4' && !isset($templates['studies-session-single.json']['content'][0]['settings']['background_color_mobile']),
 
 	// Frontend.
 	'js-uses-elementor-swiper'       => str_contains($js, 'frontend.utils.swiper') && str_contains($js, "'ba:studies-area-change'") && str_contains($js, 'AbortController') && str_contains($js, "frontend/element_ready/bonyad_alavi_studies_carousel.default"),

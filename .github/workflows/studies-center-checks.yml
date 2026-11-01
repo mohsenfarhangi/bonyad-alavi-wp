@@ -56,6 +56,8 @@ jobs:
         run: php tests/studies-center-contract.php
       - name: Studies center runtime logic
         run: php tests/studies-center-runtime.php
+      - name: Session widgets render behavior
+        run: php tests/studies-center-session-widgets.php
       - name: Shared Elementor bootstrap regressions
         run: |
           php tests/home-hero-widget-contract.php
@@ -68,6 +70,7 @@ jobs:
           node --check assets/js/bonyad-alavi-studies-center.js
           node --check assets/js/bonyad-alavi-studies-session.js
           node --check assets/js/ba-studies-session-admin.js
+          node --check assets/js/ba-studies-settings.js
       - name: Elementor template JSON
         run: |
           for file in elementor-templates/*.json; do

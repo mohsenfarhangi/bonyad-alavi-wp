@@ -32,6 +32,10 @@ namespace Elementor {
 		const CHOOSE      = 'choose';
 	}
 
+	final class Group_Control_Box_Shadow {
+		public static function get_type() { return 'box-shadow'; }
+	}
+
 	final class Group_Control_Typography {
 		public static function get_type() {
 			return 'typography';
@@ -154,6 +158,8 @@ namespace {
 
 	final class BA_Studies_Center_Settings_Service {
 		public static function get_archive_url( $type ) { return '#archive-' . $type; }
+		/** اسلایدهای تصویری تنظیمات؛ harness فقط حالت «بدون تنظیمات» را شبیه‌سازی می‌کند. */
+		public static function get_hero_slides() { return array(); }
 	}
 
 	final class BA_Studies_Rest_Controller {
