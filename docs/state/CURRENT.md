@@ -21,7 +21,7 @@ AFE release goal همچنان live acceptance نسخه 1.0.28 و رفع blocker 
 ## Recently Completed
 
 ### Studies Center session inner page (2026-11-02)
-- صفحه داخلی نشست با طرح دسکتاپ/موبایل مقایسه و اصلاح شد (برچسب ویدئو چپ، وزن‌ها، ارتفاع ردیف فایل، عرض ستون‌های قالب ۵۸٫۳/۳۹٫۲) و هر چهار ویجت نشست کنترل‌های محتوا و Style کامل گرفتند؛ جزئیات و تست‌ها: [MODULE-STUDIES-CENTER](../modules/studies-center.md)، STATE-002-042. شاخه `feat/studies-session-page-widgets-20261102` روی سه شاخه merge‌نشده قبلی ساخته شده (merge یک‌جا). **قالب Theme Builder هنوز روی سایت import نشده و نشست واقعی منتشر نیست؛ پذیرش زنده انجام نشده.**
+- صفحه داخلی نشست با طرح دسکتاپ/موبایل مقایسه و اصلاح شد (برچسب ویدئو چپ، وزن‌ها، ارتفاع ردیف فایل، عرض ستون‌های قالب ۵۸٫۳/۳۹٫۲) و هر چهار ویجت نشست کنترل‌های محتوا و Style کامل گرفتند؛ جزئیات و تست‌ها: [MODULE-STUDIES-CENTER](../modules/studies-center.md)، STATE-002-042. شاخه `feat/studies-session-page-widgets-20261102` روی سه شاخه merge‌نشده قبلی ساخته شده (merge یک‌جا). **استقرار روی هاست انجام شد (۲۰۲۶-۱۱-۰۲، STATE-002-043)؛ قالب Theme Builder هنوز import نشده و نشست واقعی منتشر نیست؛ پذیرش زنده انجام نشده.**
 
 ### Studies Center live page data + sessions from post categories (2026-10-31)
 - روی سایت زنده (صفحه 7930، از پنل): دسته پژوهش در تب «مرکز مطالعات» = `333`، ویجت کتاب = `334`، ویجت پژوهش = `333`، و اسلایدر Hero حالت دستی با ۴ اسلاید از نوشته‌های دسته `317` (عکس شاخص، تاریخ شمسی، لینک). این‌ها داده سایت‌اند و در ریپو نیستند. پشتیبان `_elementor_data` قبل از تغییر گرفته شد.
@@ -373,7 +373,7 @@ Historical PASSهای AFE/Theme به HEAD جدید تعمیم داده نمی‌
 
 **Tracked since 2026-10-30:** `wp-content/plugins/alavi-pages/` اکنون در whitelist `.gitignore` است (نسخه سرور مرجع است).
 
-**Studies Center (branch `feat/studies-center-page`, PR باز نشده/merge نشده):** پیش از هر چیز روی سایت بررسی شود که Elementor Pro با Theme Builder فعال و مجاز است. اگر نبود، متوقف شو و گزارش بده و قالب PHP جایگزین نساز. سپس طبق «مراحل import» در [MODULE-STUDIES-CENTER](../modules/studies-center.md): import سه JSON، شرط نمایش single نشست، ساخت برگه پیش‌نویس، انتخاب دسته‌های کتاب/پژوهش در تب، دادن Capability، و افزودن منو از پنل. صفحه 7930 بدون تأیید مدیر پروژه بازنویسی نشود.
+**Studies Center (merge و استقرار انجام شده، پذیرش زنده باز):** همه‌ی کار روی `main` (PR #17، commit `8e8f0ff`، تگ `deploy-2026-11-02`) و **هر ۲۸ فایل زمان‌اجرای مطالعات روی هاست با main یکی است** (راستی‌آزمایی ۲۰۲۶-۱۱-۰۲). مانده: ۱) import سه JSON قالب (`elementor-templates/`) از «قالب‌ها ← درون‌ریزی» و تنظیم شرط نمایش single برای «نشست‌ها و رویدادها» در Theme Builder (Elementor Pro 4.1.3 روی هاست)؛ ۲) انتشار یک نشست واقعی/آزمایشی و مقایسه با طرح؛ ۳) برچسب‌گذاری حوزه برای انتشارات و نشست‌ها و نوع پژوهش؛ ۴) منوی «مرکز مطالعات»؛ ۵) تغییر رمزهای افشاشده. صفحه 7930 بدون تأیید مدیر پروژه بازنویسی نشود. روش استقرار و Rollback: STATE-002-043.
 
 **Start here:** [../INDEX.md](../INDEX.md) → [../modules/INDEX.md](../modules/INDEX.md).
 
