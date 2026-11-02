@@ -63,9 +63,10 @@ $checks = array(
 	'bootstrap-loads-modules'        => str_contains($bootstrap, 'class-ba-studies-content-types.php') && str_contains($bootstrap, 'class-ba-studies-session-meta.php') && str_contains($bootstrap, 'class-ba-studies-rest-controller.php') && str_contains($bootstrap, 'class-ba-studies-center-settings-tab.php') && str_contains($bootstrap, 'class-ba-studies-center-settings-service.php'),
 
 	// مدل داده.
-	'session-cpt'                    => str_contains($types, "const SESSION_POST_TYPE    = 'ba_study_session';") && str_contains($types, "register_post_type(") && str_contains($types, "'supports'        => array( 'title', 'editor', 'excerpt', 'thumbnail', 'revisions' )"),
+	'session-cpt-hidden-legacy'      => str_contains($types, "const SESSION_POST_TYPE    = 'ba_study_session';") && str_contains($types, "const SESSION_HOST_TYPE    = 'post';") && str_contains($types, "register_post_type(") && str_contains($types, "'show_ui'         => false") && str_contains($types, "'show_in_menu'    => false") && !str_contains($types, "'menu_icon'"),
 	'session-caps-mapped-to-studies' => str_contains($types, "'capability_type' => array( 'ba_study_session', 'ba_study_sessions' )") && str_contains($types, "'map_meta_cap'    => true") && str_contains($types, "'capabilities'    => self::get_session_capabilities()") && substr_count($types, '=> $cap,') >= 11 && str_contains($types, "'create_posts'           => \$cap"),
-	'area-taxonomy-shared'           => str_contains($types, "const AREA_TAXONOMY        = 'ba_study_area';") && str_contains($types, 'array( self::SESSION_POST_TYPE, self::PUBLICATION_TYPE )'),
+	'area-taxonomy-shared'           => str_contains($types, "const AREA_TAXONOMY        = 'ba_study_area';") && str_contains($types, 'array( self::SESSION_HOST_TYPE, self::PUBLICATION_TYPE )'),
+	'session-metabox-on-posts'       => str_contains($meta, "'add_meta_boxes_' . BA_Studies_Content_Types::SESSION_HOST_TYPE") && str_contains($meta, "'save_post_' . BA_Studies_Content_Types::SESSION_HOST_TYPE") && !str_contains($meta, 'SESSION_POST_TYPE'),
 	'research-type-taxonomy'         => str_contains($types, "const RESEARCH_TYPE_TAX    = 'ba_research_type';") && str_contains($types, 'register_research_type_taxonomy'),
 	'publications-caps-untouched'    => !preg_match("/register_post_type\(\s*self::PUBLICATION_TYPE/", $types) && !str_contains($types, "'publications', array( 'capability"),
 	'assign-terms-derived-cap'       => str_contains($types, "'assign_terms' => self::ASSIGN_TERMS_CAP") && str_contains($types, "add_filter( 'user_has_cap'") && str_contains($types, "! empty( \$allcaps['edit_posts'] )"),
@@ -78,16 +79,17 @@ $checks = array(
 	'session-meta-fields'            => str_contains($meta, "'video_id'") && str_contains($meta, "'video_duration'") && str_contains($meta, "'lead'") && str_contains($meta, "'event_type'") && str_contains($meta, "'event_date'") && str_contains($meta, "'time_start'") && str_contains($meta, "'speakers'") && str_contains($meta, "'location'") && str_contains($meta, "'files'"),
 
 	// Query و تفکیک کتاب/پژوهش.
-	'books-exclude-research'         => str_contains($query, "self::cat_clause( \$settings['research_cats'], 'NOT IN' )") && str_contains($query, "self::cat_clause( \$settings['books_cats'], 'IN' )"),
-	'research-requires-config'       => str_contains($query, 'if ( ! $research_cats ) {') && str_contains($query, 'return null;'),
+	'query-no-global-settings'       => !str_contains($query, 'research_cats') && !str_contains($query, 'books_cats') && !str_contains($query, 'cat_clause') && !str_contains($query, 'BA_Studies_Center_Settings_Service::get_settings'),
+	'sessions-are-posts'             => str_contains($query, "\$args['post_type'] = BA_Studies_Content_Types::SESSION_HOST_TYPE;") && !str_contains($query, "\$args['post_type'] = BA_Studies_Content_Types::SESSION_POST_TYPE;"),
+	'research-sessions-require-categories' => str_contains($query, "'research' === \$type && ! \$selected_categories") && str_contains($query, 'if ( ! $selected_categories ) {') && str_contains($query, 'return null;'),
 	'carousel-category-controls'      => str_contains($carousel, "'publication_categories'") && str_contains($carousel, "'session_categories'") && str_contains($carousel, 'Controls_Manager::SELECT2') && str_contains($carousel, 'get_category_options'),
 	'carousel-category-rest-parity'   => str_contains($carousel, "BA_Studies_Query_Service::sanitize_category_csv( \$selected_categories )") && str_contains($rest, "'categories' => \$request['categories']") && str_contains($rest, 'sanitize_category_csv'),
-	'query-admin-category-precedence' => str_contains($query, "! empty( \$settings['research_cats'] ) ? \$settings['research_cats'] : \$selected_categories") && str_contains($query, 'elseif ( $selected_categories )'),
+	'settings-tab-no-query-section'  => !str_contains($tab, 'research_cats') && !str_contains($tab, 'books_cats') && !str_contains($tab, 'render_term_checkboxes') && !str_contains($tab, 'منبع کتاب‌ها و پژوهش‌ها'),
 	'category-options-sitewide'       => str_contains($carousel, "get_taxonomies( array(), 'objects' )") && str_contains($carousel, "'taxonomy'   => array_keys( \$taxonomies )") && substr_count($carousel, 'self::get_category_options()') === 2,
 	'category-queries-tax-aware'     => str_contains($query, 'get_term( $id )') && str_contains($query, 'selected_term_clauses( array $ids )') && str_contains($query, "'taxonomy'         => \$taxonomy") && str_contains($query, 'array_merge( $tax, $clauses )'),
 	'area-filter-shared-tax'         => str_contains($query, "'taxonomy'         => BA_Studies_Content_Types::AREA_TAXONOMY"),
 	'separate-counts'                => str_contains($query, 'public static function count( $type, $categories = array() )') && str_contains($query, 'public static function stat( $type, $categories = array() )') && str_contains($query, "\$args['fields']                 = 'ids';") && str_contains($query, 'get_stat_override'),
-	'settings-no-overlap'            => str_contains($settings, "array_diff( \$output['books_cats'], \$output['research_cats'] )"),
+	'settings-service-no-query-keys' => !str_contains($settings, 'books_cats') && !str_contains($settings, 'research_cats'),
 
 	// REST فقط خواندنی.
 	'rest-readonly-public'           => str_contains($rest, 'WP_REST_Server::READABLE') && str_contains($rest, "'permission_callback' => '__return_true'") && str_contains($rest, "'enum' => BA_Studies_Query_Service::TYPES") && str_contains($rest, "'maximum' => 24") && !str_contains($rest, 'EDITABLE'),

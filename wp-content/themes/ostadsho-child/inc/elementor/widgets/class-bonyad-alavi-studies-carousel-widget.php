@@ -198,7 +198,7 @@ final class Bonyad_Alavi_Studies_Carousel_Widget extends Widget_Base {
 				'label_block' => true,
 				'options'     => self::get_category_options(),
 				'condition'   => array( 'content_type' => array( 'books', 'research' ) ),
-				'description' => 'در میان Termهای همه تکسونومی‌های سایت جست‌وجو کنید. خالی = پیش‌فرض. تنظیمات غیرخالی بنیاد علوی اولویت بالاتری دارند. تکسونومی نامرتبط با نوع محتوا ممکن است خروجی نداشته باشد.',
+				'description' => 'در میان Termهای همه تکسونومی‌های سایت جست‌وجو کنید. کتاب‌ها: خالی = همه انتشارات. پژوهش‌ها: بدون انتخاب سکشن خالی است. تکسونومی نامرتبط با نوع محتوا ممکن است خروجی نداشته باشد.',
 			)
 		);
 		$this->add_control(
@@ -211,7 +211,7 @@ final class Bonyad_Alavi_Studies_Carousel_Widget extends Widget_Base {
 				'label_block' => true,
 				'options'     => self::get_category_options(),
 				'condition'   => array( 'content_type' => 'sessions' ),
-				'description' => 'جست‌وجو در Termهای تمام تکسونومی‌های سایت. خالی = همه نشست‌ها؛ فیلتر حوزه نیز اعمال می‌شود. تکسونومی نامرتبط ممکن است نتیجه‌ای نداشته باشد.',
+				'description' => 'دسته‌ی مقالاتی که نشست محسوب می‌شوند را انتخاب کنید (نشست‌ها همان مقاله‌اند). بدون انتخاب سکشن خالی است؛ فیلتر حوزه نیز اعمال می‌شود. تعداد کارت آمار نشست‌ها از همین دسته‌ها شمرده می‌شود.',
 			)
 		);
 

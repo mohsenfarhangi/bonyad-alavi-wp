@@ -130,6 +130,21 @@ $check('content-hide-lead', !str_contains($html, 'ba-session-content__lead') && 
 $html = $render($content, array('show_body' => ''));
 $check('content-hide-body', !str_contains($html, 'ba-session-content__body') && str_contains($html, 'ba-session-content__lead'));
 
+/* ---------- مقاله ناقص: بدون ویدئو، پوستر، لید، فایل و مشخصات ---------- */
+$GLOBALS['harness_session'] = array_merge($fixture, array('poster' => '', 'video' => '', 'duration' => '', 'lead' => '', 'event_type' => '', 'time_start' => '', 'time_end' => '', 'speakers' => '', 'areas' => array(), 'location' => '', 'files' => array(), 'body' => 'متن خبر'));
+$html = $render($video);
+$check('empty-video-renders-nothing', trim($html) === '');
+$html = $render($info);
+$check('empty-info-keeps-title-and-date-only', str_contains($html, 'ba-session-info__title') && $count('ba-session-info__row', $html) === 1 && str_contains($html, '۱۶ شهریور ۱۴۰۵') && !str_contains($html, 'ba-session-files'));
+$html = $render($content);
+$check('empty-content-body-only', !str_contains($html, 'ba-session-content__lead') && str_contains($html, 'متن خبر'));
+$GLOBALS['harness_session'] = array_merge($GLOBALS['harness_session'], array('event_date' => ''));
+$html = $render($info);
+$check('no-rows-no-empty-table', str_contains($html, 'ba-session-info__title') && !str_contains($html, '<dl') && !str_contains($html, 'ba-session-info__row'));
+$GLOBALS['harness_session'] = array_merge($fixture, array('video' => '', 'poster' => 'poster.jpg'));
+$check('poster-only-still-renders', str_contains($render($video), 'ba-session-video--poster'));
+$GLOBALS['harness_session'] = $fixture;
+
 $failed = false;
 foreach ($results as $name => $ok) {
 	echo ($ok ? 'PASS ' : 'FAIL ') . $name . PHP_EOL;

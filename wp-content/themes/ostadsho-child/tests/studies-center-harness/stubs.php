@@ -128,7 +128,7 @@ namespace {
 	function selected( $a, $b ) { if ( (string) $a === (string) $b ) { echo ' selected'; } }
 	function apply_filters( $tag, $value ) { return 'the_content' === $tag ? '<p>' . str_replace( "\n\n", '</p><p>', (string) $value ) . '</p>' : $value; }
 	function get_the_ID() { return $GLOBALS['harness_post_id'] ?? 0; }
-	function get_post_type( $id ) { return BA_Studies_Content_Types::SESSION_POST_TYPE; }
+	function get_post_type( $id ) { return BA_Studies_Content_Types::SESSION_HOST_TYPE; }
 	function get_post_field( $field, $id ) { return $GLOBALS['harness_session']['body'] ?? ''; }
 	function get_terms( $args ) {
 		$taxonomies = (array) ( $args['taxonomy'] ?? array() );
@@ -152,6 +152,7 @@ namespace {
 
 	final class BA_Studies_Content_Types {
 		const SESSION_POST_TYPE = 'ba_study_session';
+		const SESSION_HOST_TYPE = 'post';
 		const AREA_TAXONOMY     = 'ba_study_area';
 		const PUBLICATION_CAT_TAX = 'publications-cat';
 	}

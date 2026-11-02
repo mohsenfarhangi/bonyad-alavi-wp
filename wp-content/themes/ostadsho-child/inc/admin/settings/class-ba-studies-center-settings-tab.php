@@ -203,44 +203,13 @@ final class BA_Studies_Center_Settings_Tab {
 	public static function render( $tab ) {
 		$settings = BA_Studies_Center_Settings_Service::get_settings();
 		$name     = $tab['option_name'];
-		$terms    = taxonomy_exists( BA_Studies_Content_Types::PUBLICATION_CAT_TAX )
-			? get_terms(
-				array(
-					'taxonomy'   => BA_Studies_Content_Types::PUBLICATION_CAT_TAX,
-					'hide_empty' => false,
-				)
-			)
-			: array();
-		$terms    = is_array( $terms ) ? $terms : array();
 		?>
 		<form id="<?php echo esc_attr( $tab['form_id'] ); ?>" method="post" action="options.php" class="ba-studies-settings ba-settings-form" data-ba-settings-form>
 			<input type="hidden" name="ba_settings_tab" value="<?php echo esc_attr( $tab['id'] ); ?>" />
 			<?php settings_fields( $tab['option_group'] ); ?>
-			<p>متن‌ها و ظاهر صفحه مرکز مطالعات در Elementor مدیریت می‌شوند. این تب منبع داده کتاب‌ها و پژوهش‌ها، آمار و لینک آرشیوها را تعیین می‌کند. نشست‌ها از منوی «نشست‌های مرکز مطالعات» و حوزه‌ها از زیرمنوی «حوزه‌ها» مدیریت می‌شوند.</p>
+			<p>متن‌ها و ظاهر صفحه مرکز مطالعات در Elementor مدیریت می‌شوند. این تب فقط اسلایدهای Hero، مقدار دستی آمار و لینک آرشیوها را تعیین می‌کند. دسته‌های کتاب، پژوهش و نشست داخل ویجت‌های Elementor انتخاب می‌شوند. نشست‌ها مقاله‌اند و اطلاعات و حوزه آن‌ها در صفحه ویرایش مقاله است.</p>
 
 			<?php self::render_hero_slides( $name, $settings ); ?>
-
-			<?php if ( ! $terms ) : ?>
-				<div class="notice notice-warning inline"><p>Taxonomy دسته‌های انتشارات (<code>publications-cat</code>) پیدا نشد یا خالی است.</p></div>
-			<?php endif; ?>
-
-			<h2>منبع کتاب‌ها و پژوهش‌ها (انتشارات)</h2>
-			<table class="form-table" role="presentation">
-				<tr>
-					<th scope="row">دسته‌های پژوهش‌ها و گزارش‌های تحلیلی</th>
-					<td>
-						<?php self::render_term_checkboxes( $name . '[research_cats][]', $terms, $settings['research_cats'] ); ?>
-						<p class="description">انتشارات این دسته‌ها در سکشن پژوهش‌ها نمایش داده و از سکشن کتاب‌ها حذف می‌شوند. تا وقتی دسته‌ای انتخاب نشود، سکشن پژوهش‌ها خالی است.</p>
-					</td>
-				</tr>
-				<tr>
-					<th scope="row">دسته‌های کتاب‌ها و انتشارات</th>
-					<td>
-						<?php self::render_term_checkboxes( $name . '[books_cats][]', $terms, $settings['books_cats'] ); ?>
-						<p class="description">هیچ انتخاب = همه انتشارات به‌جز دسته‌های پژوهش. دسته‌ای که هم‌زمان پژوهش باشد هنگام ذخیره از این فهرست حذف می‌شود.</p>
-					</td>
-				</tr>
-			</table>
 
 			<h2>آمار Hero</h2>
 			<p class="description">خالی = شمارش خودکار محتوای منتشرشده. عدد = مقدار ثابت.</p>
@@ -251,7 +220,7 @@ final class BA_Studies_Center_Settings_Tab {
 			</table>
 
 			<h2>لینک آرشیوها</h2>
-			<p class="description">پیش‌فرض لینک «بیشتر» و کارت‌های آمار وقتی در Elementor لینکی تعیین نشده باشد. خالی برای کتاب/پژوهش = آرشیو اولین دسته انتخاب‌شده.</p>
+			<p class="description">پیش‌فرض لینک «بیشتر» و کارت‌های آمار وقتی در Elementor لینکی تعیین نشده باشد. خالی برای کتاب/پژوهش = آرشیو انتشارات.</p>
 			<table class="form-table" role="presentation">
 				<?php self::render_url_row( $name, 'books_url', 'آرشیو کتاب‌ها', $settings['books_url'] ); ?>
 				<?php self::render_url_row( $name, 'sessions_url', 'صفحه آرشیو نشست‌ها', $settings['sessions_url'] ); ?>
@@ -259,31 +228,6 @@ final class BA_Studies_Center_Settings_Tab {
 			</table>
 		</form>
 		<?php
-	}
-
-	/**
-	 * فهرست checkbox دسته‌ها.
-	 *
-	 * @param string    $field    نام ورودی.
-	 * @param WP_Term[] $terms    termها.
-	 * @param int[]     $selected انتخاب‌ها.
-	 * @return void
-	 */
-	private static function render_term_checkboxes( $field, array $terms, array $selected ) {
-		echo '<fieldset class="ba-studies-settings__terms">';
-
-		foreach ( $terms as $term ) {
-			printf(
-				'<label style="display:inline-block;margin:0 0 6px 18px"><input type="checkbox" name="%1$s" value="%2$d" %3$s /> %4$s <span class="description">(%5$s)</span></label>',
-				esc_attr( $field ),
-				(int) $term->term_id,
-				checked( in_array( (int) $term->term_id, $selected, true ), true, false ),
-				esc_html( $term->name ),
-				esc_html( BA_Studies_Formatter::number( $term->count ) )
-			);
-		}
-
-		echo '</fieldset>';
 	}
 
 	/**

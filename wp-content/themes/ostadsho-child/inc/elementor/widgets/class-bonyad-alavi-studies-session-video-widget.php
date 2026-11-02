@@ -154,6 +154,11 @@ final class Bonyad_Alavi_Studies_Session_Video_Widget extends Bonyad_Alavi_Studi
 		$badge    = trim( (string) $settings['badge_text'] );
 		$duration = 'yes' === $settings['show_duration'] ? $data['duration'] : '';
 		$label    = $show_badge ? implode( ' · ', array_filter( array( $badge, $duration ) ) ) : '';
+
+		// بدون ویدئو و بدون تصویر شاخص جعبه خالی نمایش داده نمی‌شود (در ویرایشگر برای طراحی می‌ماند).
+		if ( ! $data['video'] && ! $data['poster'] && ! $this->is_editor_context() ) {
+			return;
+		}
 		?>
 		<div class="ba-session-video<?php echo $data['video'] ? '' : ' ba-session-video--poster'; ?>" data-ba-session-video>
 			<?php if ( $data['video'] ) : ?>
