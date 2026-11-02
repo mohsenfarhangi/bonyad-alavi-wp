@@ -279,6 +279,9 @@ $GLOBALS['t_options'][$S::OPTION_NAME] = array('hero_slides' => array(array('ima
 $check('hero-slides-deleted-attachment-skipped', $S::get_hero_slides() === array());
 $GLOBALS['t_options'][$S::OPTION_NAME] = array();
 
+$check('time-leading-zero-dropped', BA_Studies_Formatter::time('08:30') === '8:30' && BA_Studies_Formatter::time('10:30') === '10:30' && BA_Studies_Formatter::time('00:15') === '0:15');
+$check('time-empty-and-odd-values-safe', BA_Studies_Formatter::time('') === '' && BA_Studies_Formatter::time('8:30') === '8:30' && BA_Studies_Formatter::time('abc') === 'abc');
+$check('time-then-persian-digits', BA_Studies_Formatter::fa_digits(BA_Studies_Formatter::time('08:30')) === '۸:۳۰');
 $failed = false;
 foreach ($results as $name => $ok) {
 	echo ($ok ? 'PASS ' : 'FAIL ') . $name . PHP_EOL;

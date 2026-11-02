@@ -788,3 +788,11 @@ Modules: [MODULE-AFE](../modules/alavi-form-engine.md), [MODULE-JIHADI-FORM](../
 - stub harness برای `get_hero_slides` و `Group_Control_Box_Shadow` اصلاح شد: مرحله «Isolated harness render» در CI با کد Hero جدید از شاخه‌های قبلی قرمز می‌شد.
 - تست: contract ۵۷، runtime ۷۰، `tests/studies-center-session-widgets.php` ۳۳ (جدید، با mutation راستی‌آزمایی). **با Elementor ۴٫۳٫۵ واقعی در سندباکس محلی** ثبت کنترل‌ها، ۱۳ خروجی CSS تولیدی و ۶ خروجی DOM با مقادیر غیرپیش‌فرض تأیید شد. روی سایت زنده هنوز نشستی منتشر و قالب Theme Builder import نشده؛ پذیرش زنده باز است.
 
+## STATE-002-044 — Live acceptance of the session inner page + typography fix (2026-11-02)
+
+- روی سایت زنده قالب `studies-session-single.json` با شناسه `29801` (نوع single-post) import و شرط `include/singular/ba_study_session` (REST `elementor/v1/site-editor/templates-conditions/<id>`) ست شد؛ تداخلی با قالب‌های دیگر نبود. با یک نشست آزمایشی (پیش‌نویس، عکس شاخص و ویدئوی موجود سایت، دو PDF بی‌محتوا) صفحه کامل رندر شد: ویدئو و برچسب، لید و گزارش، ۶ ردیف جدول با تاریخ شمسی و ۳ فایل؛ پخش ویدئو (کلیک play) بدون خطای JS کار کرد. نشست و فایل‌های آزمایشی بعد از آزمایش حذف شدند؛ قالب و شرطش مانده‌اند.
+- مغایرت کشف‌شده فقط روی سایت واقعی: کیت سراسری Elementor (`.elementor-kit-157`، اولویت ۰،۱،۱) برای `h1`/`h2`/`a` فونت IRSans و اندازه/وزن تعیین می‌کند (عنوان کارت ۲۸px/۵۰۰، عنوان فایل‌ها ۲۵px/۶۰۰) و وزن پایه سایت ۳۰۰ است؛ این در سندباکس نبود. رفع: عنوان‌ها و دکمه دانلود با دو کلاس (`.ba-session-info .ba-session-info__title` …) و وزن ۴۰۰ صریح برای مقدار/گزارش/مشخصات؛ کنترل‌های Style ویجت همچنان غلبه می‌کنند. با تزریق CSS جدید روی صفحه زنده مقدارها برابر طرح شد.
+- ساعت بدون صفر ابتدایی مثل طرح (`۸:۳۰` به‌جای `۰۸:۳۰`): `BA_Studies_Formatter::time()`.
+- نکته عملیاتی: فیلد «مشخصات» فایل نباید پسوند را بنویسد؛ سیستم خودش `· PDF/MP4` را اضافه می‌کند.
+- این رفع هنوز روی هاست استقرار نیافته (نیاز به merge و استقرار).
+

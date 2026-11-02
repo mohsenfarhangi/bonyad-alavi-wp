@@ -25,6 +25,16 @@ final class BA_Studies_Formatter {
 	}
 
 	/**
+	 * ساعت H:i را بدون صفر ابتدایی ساعت برمی‌گرداند (۰۸:۳۰ → ۸:۳۰) مطابق طرح.
+	 *
+	 * @param string $value ساعت.
+	 * @return string
+	 */
+	public static function time( $value ) {
+		return (string) preg_replace( '/^0(\d:)/', '$1', (string) $value );
+	}
+
+	/**
 	 * عدد را با جداکننده هزارگان «٬» و ارقام فارسی برمی‌گرداند.
 	 *
 	 * @param int $number عدد.
