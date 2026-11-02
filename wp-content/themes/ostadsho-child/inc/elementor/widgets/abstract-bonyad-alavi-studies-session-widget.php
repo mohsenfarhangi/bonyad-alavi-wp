@@ -17,7 +17,7 @@ use Elementor\Widget_Base;
 /**
  * تشخیص نشست جاری و رندر مشترک فهرست فایل‌ها.
  *
- * در ویرایشگر Theme Builder که پست جاری خود template است، آخرین نشست منتشرشده
+ * در ویرایشگر Theme Builder که پست جاری خود template است، آخرین مقاله منتشرشده دارای اطلاعات نشست
  * برای پیش‌نمایش استفاده می‌شود تا template قابل طراحی باشد.
  */
 abstract class Bonyad_Alavi_Studies_Session_Widget_Base extends Widget_Base {
@@ -38,7 +38,7 @@ abstract class Bonyad_Alavi_Studies_Session_Widget_Base extends Widget_Base {
 	protected function get_session_id() {
 		$post_id = (int) get_the_ID();
 
-		if ( $post_id && BA_Studies_Content_Types::SESSION_POST_TYPE === get_post_type( $post_id ) ) {
+		if ( $post_id && in_array( get_post_type( $post_id ), array( BA_Studies_Content_Types::SESSION_HOST_TYPE, BA_Studies_Content_Types::SESSION_POST_TYPE ), true ) ) {
 			return $post_id;
 		}
 
@@ -48,10 +48,11 @@ abstract class Bonyad_Alavi_Studies_Session_Widget_Base extends Widget_Base {
 
 		$latest = get_posts(
 			array(
-				'post_type'      => BA_Studies_Content_Types::SESSION_POST_TYPE,
+				'post_type'      => BA_Studies_Content_Types::SESSION_HOST_TYPE,
 				'post_status'    => 'publish',
 				'posts_per_page' => 1,
 				'fields'         => 'ids',
+				'meta_key'       => BA_Studies_Session_Meta::META_KEY, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key -- فقط پیش‌نمایش ویرایشگر.
 			)
 		);
 

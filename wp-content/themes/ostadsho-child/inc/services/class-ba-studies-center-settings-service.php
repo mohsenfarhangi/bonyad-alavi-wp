@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * مالک schema، مقادیر پیش‌فرض و sanitize تنظیمات مرکز مطالعات است.
  *
  * متن‌ها و ظاهر صفحه در Elementor مدیریت می‌شوند؛ این تنظیمات فقط داده‌محور هستند:
- * تفکیک کتاب/پژوهش در publications، override آمار و لینک آرشیوها.
+ * اسلایدهای Hero، override آمار و لینک آرشیوها. منبع محتوا (دسته‌ها) فقط در ویجت‌های Elementor انتخاب می‌شود.
  */
 final class BA_Studies_Center_Settings_Service {
 
@@ -28,8 +28,6 @@ final class BA_Studies_Center_Settings_Service {
 	 */
 	public static function get_defaults() {
 		return array(
-			'books_cats'     => array(),
-			'research_cats'  => array(),
 			'stats_books'    => '',
 			'stats_sessions' => '',
 			'stats_research' => '',
@@ -64,16 +62,6 @@ final class BA_Studies_Center_Settings_Service {
 	public static function sanitize( $input ) {
 		$input  = is_array( $input ) ? $input : array();
 		$output = self::get_defaults();
-
-		foreach ( array( 'books_cats', 'research_cats' ) as $key ) {
-			$ids = isset( $input[ $key ] ) ? (array) $input[ $key ] : array();
-			$ids = array_values( array_unique( array_filter( array_map( 'absint', $ids ) ) ) );
-
-			$output[ $key ] = $ids;
-		}
-
-		// یک دسته نمی‌تواند هم کتاب باشد هم پژوهش؛ پژوهش اولویت دارد تا محتوا تکرار نشود.
-		$output['books_cats'] = array_values( array_diff( $output['books_cats'], $output['research_cats'] ) );
 
 		foreach ( array( 'stats_books', 'stats_sessions', 'stats_research' ) as $key ) {
 			$raw            = isset( $input[ $key ] ) ? self::normalize_digits( (string) $input[ $key ] ) : '';
@@ -228,7 +216,7 @@ final class BA_Studies_Center_Settings_Service {
 	/**
 	 * لینک آرشیو پیش‌فرض یک نوع خروجی.
 	 *
-	 * ترتیب: لینک ذخیره‌شده تب → آرشیو اولین دسته انتخاب‌شده publications → آرشیو publications.
+	 * ترتیب: لینک ذخیره‌شده تب → آرشیو publications.
 	 *
 	 * @param string $type books|sessions|research.
 	 * @return string
@@ -242,16 +230,6 @@ final class BA_Studies_Center_Settings_Service {
 		}
 
 		if ( in_array( $type, array( 'books', 'research' ), true ) ) {
-			$cats = $settings[ $type . '_cats' ];
-
-			if ( $cats && taxonomy_exists( BA_Studies_Content_Types::PUBLICATION_CAT_TAX ) ) {
-				$link = get_term_link( (int) reset( $cats ), BA_Studies_Content_Types::PUBLICATION_CAT_TAX );
-
-				if ( ! is_wp_error( $link ) ) {
-					return $link;
-				}
-			}
-
 			$archive = get_post_type_archive_link( BA_Studies_Content_Types::PUBLICATION_TYPE );
 
 			return $archive ? $archive : '';

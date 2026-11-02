@@ -12,9 +12,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * تنها مالک ساخت WP_Query و شمارش سه نوع خروجی مرکز مطالعات است.
  *
- * - books:    publications در دسته‌های کتاب، بدون دسته‌های پژوهش.
- * - research: publications در دسته‌های پژوهش (از تب تنظیمات).
- * - sessions: CPT نشست.
+ * - books:    publications در دسته‌های انتخاب‌شده ویجت (خالی = همه انتشارات).
+ * - research: publications در دسته‌های انتخاب‌شده ویجت (خالی = بدون خروجی).
+ * - sessions: نوشته‌ها (مقالات) در دسته‌های انتخاب‌شده ویجت (خالی = بدون خروجی).
  * فیلتر حوزه روی هر سه با Taxonomy مشترک ba_study_area اعمال می‌شود.
  */
 final class BA_Studies_Query_Service {
@@ -103,36 +103,6 @@ final class BA_Studies_Query_Service {
 	}
 
 	/**
-	 * Post Typeهای قابل Query برای کاروسل نشست‌ها بر اساس taxonomyهای انتخاب‌شده.
-	 *
-	 * اگر taxonomy انتخاب‌شده روی CPT نشست ثبت باشد (مثل حوزه)، فقط نشست‌ها می‌آیند.
-	 * اگر روی CPT نشست ثبت نباشد (مثل دسته‌بندی نوشته‌ها)، Post Typeهای مشترک همه
-	 * taxonomyهای انتخاب‌شده استفاده می‌شوند؛ شروط taxonomyها همچنان با AND ترکیب‌اند.
-	 *
-	 * @param array $clauses شروط tax_query ساخته‌شده از termهای انتخاب‌شده.
-	 * @return string[] خالی یعنی هیچ Post Type مشترکی وجود ندارد.
-	 */
-	private static function post_types_for_clauses( array $clauses ) {
-		$common = null;
-
-		foreach ( $clauses as $clause ) {
-			$taxonomy = get_taxonomy( $clause['taxonomy'] );
-			$types    = $taxonomy && ! empty( $taxonomy->object_type ) ? array_values( (array) $taxonomy->object_type ) : array();
-			$common   = null === $common ? $types : array_values( array_intersect( $common, $types ) );
-		}
-
-		if ( null === $common ) {
-			return array( BA_Studies_Content_Types::SESSION_POST_TYPE );
-		}
-
-		if ( in_array( BA_Studies_Content_Types::SESSION_POST_TYPE, $common, true ) ) {
-			return array( BA_Studies_Content_Types::SESSION_POST_TYPE );
-		}
-
-		return $common;
-	}
-
-	/**
 	 * آرگومان‌های WP_Query یک نوع خروجی؛ null یعنی منبع پیکربندی نشده است.
 	 *
 	 * @param string $type books|sessions|research.
@@ -165,54 +135,27 @@ final class BA_Studies_Query_Service {
 		$tax     = array();
 		$selected_categories = self::sanitize_category_ids( $opts['categories'] );
 
+		// منبع هر سه نوع فقط دسته‌های انتخاب‌شده در همان ویجت است (بدون تنظیمات سراسری).
 		if ( 'sessions' === $type ) {
-			$args['post_type'] = BA_Studies_Content_Types::SESSION_POST_TYPE;
-			if ( $selected_categories ) {
-				$clauses = self::selected_term_clauses( $selected_categories );
-				if ( null === $clauses ) {
-					return null;
-				}
-				$tax = array_merge( $tax, $clauses );
-
-				$post_types = self::post_types_for_clauses( $clauses );
-				if ( ! $post_types ) {
-					return null;
-				}
-				$args['post_type'] = 1 === count( $post_types ) ? reset( $post_types ) : $post_types;
+			// نشست‌ها نوشته‌اند؛ بدون دسته انتخابی همه نوشته‌های سایت نشست حساب نمی‌شوند.
+			if ( ! $selected_categories ) {
+				return null;
 			}
+			$args['post_type'] = BA_Studies_Content_Types::SESSION_HOST_TYPE;
 		} else {
-			$settings          = BA_Studies_Center_Settings_Service::get_settings();
 			$args['post_type'] = BA_Studies_Content_Types::PUBLICATION_TYPE;
-			if ( 'research' === $type ) {
-				// دسته‌های مدیریت بر همه گزینه‌های ویجت مقدم‌اند.
-				$research_cats = ! empty( $settings['research_cats'] ) ? $settings['research_cats'] : $selected_categories;
-				if ( ! $research_cats ) {
-					return null;
-				}
-				if ( ! empty( $settings['research_cats'] ) ) {
-					$tax[] = self::cat_clause( $settings['research_cats'], 'IN' );
-				} else {
-					$clauses = self::selected_term_clauses( $selected_categories );
-					if ( null === $clauses ) {
-						return null;
-					}
-					$tax = array_merge( $tax, $clauses );
-				}
-			} else {
-				if ( ! empty( $settings['books_cats'] ) ) {
-					$tax[] = self::cat_clause( $settings['books_cats'], 'IN' );
-				} elseif ( $selected_categories ) {
-					$clauses = self::selected_term_clauses( $selected_categories );
-					if ( null === $clauses ) {
-						return null;
-					}
-					$tax = array_merge( $tax, $clauses );
-				}
-				// پژوهش‌های تنظیم‌شده سراسری به کتاب‌ها وارد نمی‌شوند.
-				if ( ! empty( $settings['research_cats'] ) ) {
-					$tax[] = self::cat_clause( $settings['research_cats'], 'NOT IN' );
-				}
+			// پژوهش‌ها بدون دسته انتخابی خالی‌اند؛ کتاب‌ها بدون دسته همه انتشارات‌اند.
+			if ( 'research' === $type && ! $selected_categories ) {
+				return null;
 			}
+		}
+
+		if ( $selected_categories ) {
+			$clauses = self::selected_term_clauses( $selected_categories );
+			if ( null === $clauses ) {
+				return null;
+			}
+			$tax = array_merge( $tax, $clauses );
 		}
 
 		$area = sanitize_title( (string) $opts['area'] );
@@ -231,23 +174,6 @@ final class BA_Studies_Query_Service {
 		}
 
 		return apply_filters( 'ba_studies_query_args', $args, $type, $opts );
-	}
-
-	/**
-	 * شرط Taxonomy دسته‌های publications.
-	 *
-	 * @param int[]  $ids      شناسه termها.
-	 * @param string $operator IN|NOT IN.
-	 * @return array
-	 */
-	private static function cat_clause( array $ids, $operator ) {
-		return array(
-			'taxonomy'         => BA_Studies_Content_Types::PUBLICATION_CAT_TAX,
-			'field'            => 'term_id',
-			'terms'            => array_map( 'absint', $ids ),
-			'operator'         => $operator,
-			'include_children' => true,
-		);
 	}
 
 	/**
@@ -285,7 +211,7 @@ final class BA_Studies_Query_Service {
 	/**
 	 * تعداد واقعی محتوای منتشرشده یک نوع.
 	 *
-	 * همان build_args کاروسل را با همان دسته‌های انتخابی استفاده می‌کند تا عدد آمار دقیقاً
+	 * همان build_args کاروسل را با همان دسته‌های انتخابی ویجت استفاده می‌کند تا عدد آمار دقیقاً
 	 * برابر تعداد کل نتایجی باشد که کاروسل از آن‌ها می‌خواند (نه فقط حداکثر تعداد نمایش).
 	 *
 	 * @param string $type       نوع.

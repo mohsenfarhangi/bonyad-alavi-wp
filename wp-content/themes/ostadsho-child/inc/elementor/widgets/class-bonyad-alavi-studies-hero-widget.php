@@ -269,7 +269,7 @@ final class Bonyad_Alavi_Studies_Hero_Widget extends Widget_Base {
 				'label_block' => true,
 				'options'     => class_exists( 'Bonyad_Alavi_Studies_Carousel_Widget' ) ? Bonyad_Alavi_Studies_Carousel_Widget::category_options() : array(),
 				'condition'   => array( 'source' => array( 'books', 'sessions', 'research' ) ),
-				'description' => 'همان دسته‌هایی را انتخاب کنید که کاروسل همین بخش استفاده می‌کند تا عدد آمار برابر تعداد نتایج کاروسل شود. خالی = بدون فیلتر دسته. override تب «مرکز مطالعات» اولویت دارد.',
+				'description' => 'همان دسته‌هایی را انتخاب کنید که کاروسل همین بخش استفاده می‌کند تا عدد آمار برابر تعداد نتایج کاروسل شود. پژوهش‌ها و نشست‌ها بدون دسته صفر می‌شوند و کتاب‌ها بدون دسته همه انتشارات را می‌شمارند. override عددی تب «مرکز مطالعات» اولویت دارد.',
 			)
 		);
 		$repeater->add_control(

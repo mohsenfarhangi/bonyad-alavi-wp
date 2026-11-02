@@ -17,7 +17,10 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 final class BA_Studies_Content_Types {
 
+	/** CPT قدیمی نشست؛ فقط ثبت می‌شود و از منوی مدیریت پنهان است (نشست‌ها اکنون نوشته‌اند). */
 	const SESSION_POST_TYPE    = 'ba_study_session';
+	/** نوع محتوای فعلی نشست‌ها: نوشته‌های وردپرس (مقالات). */
+	const SESSION_HOST_TYPE    = 'post';
 	const AREA_TAXONOMY        = 'ba_study_area';
 	const RESEARCH_TYPE_TAX    = 'ba_research_type';
 	const PUBLICATION_TYPE     = 'publications';
@@ -119,10 +122,12 @@ final class BA_Studies_Content_Types {
 					'all_items'          => 'همه نشست‌ها',
 				),
 				'public'          => true,
-				'show_in_rest'    => true,
+				'show_ui'         => false,
+				'show_in_menu'    => false,
+				'show_in_nav_menus' => false,
+				'show_in_admin_bar' => false,
+				'show_in_rest'    => false,
 				'has_archive'     => false,
-				'menu_icon'       => 'dashicons-video-alt3',
-				'menu_position'   => 21,
 				'supports'        => array( 'title', 'editor', 'excerpt', 'thumbnail', 'revisions' ),
 				'rewrite'         => array(
 					'slug'       => 'studies-center/sessions',
@@ -137,14 +142,14 @@ final class BA_Studies_Content_Types {
 	}
 
 	/**
-	 * Taxonomy مشترک «حوزه» برای کتاب، پژوهش و نشست.
+	 * Taxonomy مشترک «حوزه» برای مقالات (نشست‌ها) و انتشارات (کتاب/پژوهش).
 	 *
 	 * @return void
 	 */
 	private static function register_area_taxonomy() {
 		register_taxonomy(
 			self::AREA_TAXONOMY,
-			array( self::SESSION_POST_TYPE, self::PUBLICATION_TYPE ),
+			array( self::SESSION_HOST_TYPE, self::PUBLICATION_TYPE ),
 			array(
 				'labels'            => array(
 					'name'          => 'حوزه‌های مرکز مطالعات',

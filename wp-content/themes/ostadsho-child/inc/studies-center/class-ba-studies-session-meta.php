@@ -29,8 +29,8 @@ final class BA_Studies_Session_Meta {
 	 * @return void
 	 */
 	public static function register_hooks() {
-		add_action( 'add_meta_boxes_' . BA_Studies_Content_Types::SESSION_POST_TYPE, array( __CLASS__, 'register_metabox' ) );
-		add_action( 'save_post_' . BA_Studies_Content_Types::SESSION_POST_TYPE, array( __CLASS__, 'save' ), 10, 2 );
+		add_action( 'add_meta_boxes_' . BA_Studies_Content_Types::SESSION_HOST_TYPE, array( __CLASS__, 'register_metabox' ) );
+		add_action( 'save_post_' . BA_Studies_Content_Types::SESSION_HOST_TYPE, array( __CLASS__, 'save' ), 10, 2 );
 		add_action( 'admin_enqueue_scripts', array( __CLASS__, 'enqueue_assets' ) );
 	}
 
@@ -68,7 +68,7 @@ final class BA_Studies_Session_Meta {
 	}
 
 	/**
-	 * متاباکس را روی صفحه ویرایش نشست ثبت می‌کند.
+	 * متاباکس را روی صفحه ویرایش مقاله (نشست‌ها نوشته‌اند) ثبت می‌کند.
 	 *
 	 * @return void
 	 */
@@ -77,14 +77,14 @@ final class BA_Studies_Session_Meta {
 			'ba-session-details',
 			'اطلاعات نشست، ویدئو و فایل‌ها',
 			array( __CLASS__, 'render' ),
-			BA_Studies_Content_Types::SESSION_POST_TYPE,
+			BA_Studies_Content_Types::SESSION_HOST_TYPE,
 			'normal',
 			'high'
 		);
 	}
 
 	/**
-	 * Assetهای متاباکس فقط روی صفحه ویرایش نشست.
+	 * Assetهای متاباکس فقط روی صفحه ویرایش مقاله.
 	 *
 	 * @param string $hook_suffix صفحه جاری.
 	 * @return void
@@ -96,7 +96,7 @@ final class BA_Studies_Session_Meta {
 
 		$screen = function_exists( 'get_current_screen' ) ? get_current_screen() : null;
 
-		if ( ! $screen || BA_Studies_Content_Types::SESSION_POST_TYPE !== $screen->post_type ) {
+		if ( ! $screen || BA_Studies_Content_Types::SESSION_HOST_TYPE !== $screen->post_type ) {
 			return;
 		}
 
@@ -284,7 +284,14 @@ final class BA_Studies_Session_Meta {
 			? wp_unslash( $_POST[ self::FIELD_NAME ] ) // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- sanitize() پایین.
 			: array();
 
-		update_post_meta( $post_id, self::META_KEY, self::sanitize( $raw ) );
+		$clean = self::sanitize( $raw );
+
+		// نوشته‌ای که نشست نیست (متای خالی و بدون سابقه) متای بی‌مصرف نگیرد.
+		if ( $clean === self::get_defaults() && ! metadata_exists( 'post', $post_id, self::META_KEY ) ) {
+			return;
+		}
+
+		update_post_meta( $post_id, self::META_KEY, $clean );
 	}
 
 	/**
