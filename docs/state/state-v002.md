@@ -796,3 +796,10 @@ Modules: [MODULE-AFE](../modules/alavi-form-engine.md), [MODULE-JIHADI-FORM](../
 - نکته عملیاتی: فیلد «مشخصات» فایل نباید پسوند را بنویسد؛ سیستم خودش `· PDF/MP4` را اضافه می‌کند.
 - این رفع هنوز روی هاست استقرار نیافته (نیاز به merge و استقرار).
 
+## STATE-002-045 — Production deploy of PR #18 (2026-11-02)
+
+- Deploy شده: commit `3d96f45` (PR #18، merge `cb5501f`)؛ PR #17 (`8e8f0ff`) قبلاً Deploy شده بود. فقط **۳ فایل زمان‌اجرا**: `assets/css/bonyad-alavi-studies-session.css`، `inc/studies-center/class-ba-studies-formatter.php` (تابع `time()`)، `inc/studies-center/class-ba-studies-session-meta.php`. تگ `deploy-2026-11-02-pr18`.
+- پیش از Deploy: Git سالم، هاست برای هر ۲۸ فایل زمان‌اجرا مطابق انتظار (۲۵ = main و ۳ = پیش از PR #18)، سینتکس PHP، پشتیبان خام با MANIFEST sha256. روش: آپلود `.tmp` + sha256 + rename اتمی + health check بعد از هر فایل + Rollback خودکار (نیاز نشد). بعد از Deploy هر ۲۸ فایل دوباره دانلود شد و با main برابر بود؛ `.tmp` نماند.
+- تست روی Production (نشست آزمایشی پیش‌نویس): قالب Theme Builder 29801 اعمال شد؛ ساعت `۸:۳۰ تا ۱۰:۳۰`؛ تایپوگرافی محاسبه‌شده برابر طرح (عنوان 19/700، عنوان فایل‌ها 18/700، مقدار/گزارش/مشخصات 400، همه peyda)؛ play کار می‌کند؛ بدون خطای JS و منبع ناموفق؛ دسکتاپ و موبایل با طرح هم‌خوان؛ صفحه اصلی، مطالعات، انتشارات، مشارکت، خبر و REST ۲۰۰ و بدون نشت قالب نشست. `error_log` بدون Fatal و بدون ارجاع به فایل‌های Deploy‌شده؛ ۴۸ هشدار غیرمرگبار از کد تم والد (`ostadsho/elementor/widgets/pweb-widget.php`، `functions.php`) همزمان با کارهای پیشخوان تست ثبت شد که بازتولید نشد.
+- داده آزمایشی روی سایت (فقط برای بررسی مدیر): نشست پیش‌نویس `29809` و دو PDF آزمایشی `29810` و `29811` (حذف با تأیید مدیر).
+
