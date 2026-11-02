@@ -373,6 +373,18 @@ final class BA_Studies_Session_Meta {
 			$event_date = $timestamp ? date_i18n( $date_format, $timestamp ) : '';
 		}
 
+		// مقاله‌ای که هنوز اطلاعات نشست ندارد: تاریخ انتشار جای تاریخ برگزاری می‌نشیند.
+		if ( '' === $event_date ) {
+			$event_date = self::post_date( $post_id, $date_format );
+		}
+
+		// بدون «لید» دستی، خلاصه دستی مقاله جایگزین می‌شود؛ خلاصه خودکار ساخته نمی‌شود تا با متن تکرار نشود.
+		$lead = $meta['lead'];
+
+		if ( '' === trim( (string) $lead ) && has_excerpt( $post_id ) ) {
+			$lead = wp_strip_all_tags( get_the_excerpt( $post_id ) );
+		}
+
 		$areas = get_the_terms( $post_id, BA_Studies_Content_Types::AREA_TAXONOMY );
 		$areas = is_array( $areas ) ? wp_list_pluck( $areas, 'name' ) : array();
 
@@ -393,7 +405,7 @@ final class BA_Studies_Session_Meta {
 			'poster'     => get_the_post_thumbnail_url( $post_id, 'large' ),
 			'video'      => $video,
 			'duration'   => BA_Studies_Formatter::fa_digits( $duration ),
-			'lead'       => $meta['lead'],
+			'lead'       => $lead,
 			'event_type' => $meta['event_type'],
 			'event_date' => BA_Studies_Formatter::fa_digits( $event_date ),
 			'time_start' => BA_Studies_Formatter::fa_digits( BA_Studies_Formatter::time( $meta['time_start'] ) ),
@@ -403,6 +415,28 @@ final class BA_Studies_Session_Meta {
 			'location'   => $meta['location'],
 			'files'      => $files,
 		);
+	}
+
+	/**
+	 * تاریخ انتشار یک مقاله؛ افزونه‌های تاریخ شمسی پست سراسری را می‌خوانند، پس موقتاً همان پست را سراسری می‌گذاریم.
+	 *
+	 * @param int    $post_id     شناسه.
+	 * @param string $date_format فرمت.
+	 * @return string
+	 */
+	private static function post_date( $post_id, $date_format ) {
+		$post = get_post( $post_id );
+
+		if ( ! $post ) {
+			return '';
+		}
+
+		$previous        = isset( $GLOBALS['post'] ) ? $GLOBALS['post'] : null;
+		$GLOBALS['post'] = $post; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+		$date            = get_the_date( $date_format, $post );
+		$GLOBALS['post'] = $previous; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+
+		return (string) $date;
 	}
 
 	/**

@@ -222,15 +222,17 @@ final class Bonyad_Alavi_Studies_Session_Info_Widget extends Bonyad_Alavi_Studie
 			<?php if ( 'yes' === $settings['show_title'] ) : ?>
 				<<?php echo $tag; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- whitelist ?> class="ba-session-info__title"><?php echo esc_html( $data['title'] ); ?></<?php echo $tag; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- whitelist ?>>
 			<?php endif; ?>
+			<?php $rows = array_values( array_filter( $rows, static function ( $row ) { return '' !== trim( $row[1] ); } ) ); ?>
+			<?php if ( $rows ) : ?>
 			<dl class="ba-session-info__table">
 				<?php foreach ( $rows as $row ) : ?>
-					<?php if ( '' === trim( $row[1] ) ) { continue; } ?>
 					<div class="ba-session-info__row">
 						<dt><?php echo esc_html( $row[0] ); ?></dt>
 						<dd><?php echo nl2br( esc_html( $row[1] ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></dd>
 					</div>
 				<?php endforeach; ?>
 			</dl>
+			<?php endif; ?>
 			<?php
 			if ( 'yes' === $settings['show_files'] ) {
 				$files_title = 'yes' === ( $settings['show_files_title'] ?? 'yes' ) ? (string) $settings['files_title'] : '';

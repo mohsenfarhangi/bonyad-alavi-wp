@@ -33,9 +33,15 @@ function get_post_thumbnail_id($post) { return 0; }
 function get_the_terms($post, $tax) { return false; }
 function has_excerpt($post) { return true; }
 function get_the_excerpt($post) { return 'x'; }
-function get_the_title($post) { return 'T' . $post->ID; }
+function get_the_title($post) { return 'T' . (is_object($post) ? $post->ID : $post); }
 function get_permalink($post) { return 'https://example.test/' . $post->ID . '/'; }
 /* مثل افزونه‌های تاریخ شمسی: تاریخ را از پست سراسری می‌خواند و آرگومان $post را نادیده می‌گیرد. */
+function get_post($id) { return (object) array('ID' => (int) $id, 'post_date' => $GLOBALS['t_post_dates'][(int) $id] ?? '1405/08/11'); }
+function get_post_meta($id, $key, $single = false) { return $GLOBALS['t_post_meta'][(int) $id][$key] ?? ''; }
+function wp_get_attachment_url($id) { return ''; }
+function get_the_post_thumbnail_url($id, $size = 'full') { return ''; }
+function wp_list_pluck($list, $field) { return array_map(static function ($i) use ($field) { return $i->$field; }, (array) $list); }
+function date_i18n($format, $ts) { return gmdate($format, $ts); }
 function get_the_date($format, $post = null) { return $GLOBALS['post']->post_date; }
 class WP_Query {
 	public $found_posts = 7;
@@ -164,6 +170,16 @@ $check('session-date-normalized', $meta['event_date'] === '2026-09-07');
 $check('session-time-validated', $meta['time_start'] === '8:30' && $meta['time_end'] === '');
 $check('session-files-filtered', count($meta['files']) === 1 && $meta['files'][0]['file_id'] === 22);
 $check('session-text-sanitized', !str_contains($meta['speakers'], '<script>'));
+
+/* ---------- مقاله بدون اطلاعات نشست (fallback) ---------- */
+$GLOBALS['post'] = null;
+$plain = BA_Studies_Session_Meta::get_view_data(555);
+$check('plain-post-date-fallback', $plain['event_date'] !== '' && str_contains($plain['event_date'], '۱۴۰۵'));
+$check('plain-post-lead-from-manual-excerpt', $plain['lead'] === 'x');
+$check('plain-post-empty-collections', $plain['video'] === '' && $plain['poster'] === '' && $plain['files'] === array() && $plain['speakers'] === '' && $plain['location'] === '' && $plain['event_type'] === '');
+$GLOBALS['t_post_meta'][556]['_ba_session'] = array('event_date' => '2026-09-07', 'lead' => 'لید دستی');
+$full = BA_Studies_Session_Meta::get_view_data(556);
+$check('session-meta-wins-over-fallback', $full['lead'] === 'لید دستی' && !str_contains($full['event_date'], '1405'));
 
 /* ---------- Capabilities ---------- */
 $caps = BA_Studies_Content_Types::get_session_capabilities();
