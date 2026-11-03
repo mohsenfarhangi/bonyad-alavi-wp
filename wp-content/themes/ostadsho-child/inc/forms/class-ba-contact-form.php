@@ -68,6 +68,12 @@ final class BA_Contact_Form {
 						] )
 						->width( 6 ),
 					$province,
+					SelectField::make( 'message_category' )
+						->label( 'دسته‌بندی پیام' )
+						->placeholder( 'انتخاب دسته‌بندی' )
+						->options( [] ) // گزینه‌ها فقط از پنل مدیریت فرم اضافه می‌شوند.
+						->required()
+						->width( 12 ),
 					TextField::make( 'subject' )
 						->label( 'موضوع پیام' )
 						->required()
@@ -102,7 +108,7 @@ final class BA_Contact_Form {
 					'config'           => [
 						'to'      => get_option( 'admin_email' ),
 						'subject' => 'پیام جدید تماس با ما: {{field:subject}}',
-						'body'    => "پیام جدیدی از فرم تماس با ما ثبت شد.\n\nنام: {{field:full_name}}\nشماره همراه: {{field:mobile}}\nایمیل: {{field:email}}\nموضوع: {{field:subject}}\n\nمتن پیام:\n{{field:message}}\n\nکد رهگیری: {{tracking_code}}",
+						'body'    => "پیام جدیدی از فرم تماس با ما ثبت شد.\n\nنام: {{field:full_name}}\nشماره همراه: {{field:mobile}}\nایمیل: {{field:email}}\nدسته‌بندی پیام: {{field:message_category}}\nموضوع: {{field:subject}}\n\nمتن پیام:\n{{field:message}}\n\nکد رهگیری: {{tracking_code}}",
 					],
 				],
 			] );

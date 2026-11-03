@@ -18,6 +18,12 @@
 
 AFE release goal همچنان live acceptance نسخه 1.0.28 و رفع blocker واقعی پیش از production promotion است.
 
+## Contact form — admin-managed message category (2026-11-04)
+
+- فیلد اجباری Select با شناسه `message_category` و عرض ۱۲، بدون گزینه اولیه، پیش از موضوع در فرم `contact-us` اضافه شد. مدیریت گزینه‌ها فقط از Field Override استاندارد AFE است.
+- توکن `{{field:message_category}}` به ایمیل پیش‌فرض مدیر افزوده شد. اگر Action/ترتیب از پنل Override شده باشد، نیازمند بررسی روی سایت است.
+- تست قرارداد اختصاصی فرم و workflow بررسی PHP افزوده شد؛ پذیرش زنده و افزودن گزینه‌ها توسط مدیر لازم است.
+
 ## Recently Completed
 
 ### Studies Center: sessions as posts, no global query settings (2026-11-02)

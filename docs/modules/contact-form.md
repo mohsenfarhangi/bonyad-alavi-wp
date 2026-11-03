@@ -31,6 +31,7 @@ Shortcode:
 | `mobile` | tel | شماره همراه | yes | 6 |
 | `email` | email | ایمیل | no | 6 |
 | `province` | select | استان | yes | 6 |
+| `message_category` | select | دسته‌بندی پیام | yes | 12 |
 | `subject` | text | موضوع پیام | yes | 12 |
 | `message` | textarea | متن پیام | yes | 12 |
 
@@ -54,6 +55,16 @@ Shortcode:
 ```
 
 بنابراین منبع استان همان Geo Data Source عمومی AFE است.
+
+### Message category contract
+
+- فیلد `message_category` درست پیش از `subject` قرار دارد؛ اجباری و تمام‌عرض (`width=12`) است.
+- تعریف فرم عمداً `options([])` دارد: هیچ گزینه اولیه‌ای در PHP تنظیم نشده و placeholder «انتخاب دسته‌بندی» است. **تا زمانی که مدیر حداقل یک گزینه تعیین نکند، فرم قابل تکمیل نیست.**
+- مدیر در **Alavi Form Engine ← فرم‌ها ← تماس با ما ← فیلدها و چیدمان** روی «دسته‌بندی پیام» کلیک می‌کند و در «گزینه‌ها»، هر مورد را در یک خط به‌شکل `value|label` وارد و ذخیره می‌کند؛ مثال: `پرسش|پرسش`.
+- فیلد Select از قابلیت Override موجود افزونه استفاده می‌کند؛ ویرایش، افزودن، حذف و مرتب‌سازی گزینه‌ها در پنل انجام می‌شود.
+- ایمیل پیش‌فرض مدیر توکن `{{field:message_category}}` را پیش از موضوع دارد و مقدار `value` را نمایش می‌دهد. برای خوانایی ایمیل، مقدارهای قابل‌فهم انتخاب شوند.
+- در صورت وجود **Override ذخیره‌شده برای Action ایمیل**، متن PHP به‌جای آن استفاده نمی‌شود؛ مدیر باید متن همان Action را به‌روزرسانی کند یا Override را غیرفعال کند.
+- **Override ذخیره‌شده ترتیب فیلدها** ممکن است باعث شود فیلد جدید در انتهای ترتیب ثبت‌شده قرار گیرد؛ در این صورت مدیر باید آن را پیش از موضوع جابه‌جا کند یا ترتیب را بازنشانی کند.
 
 ## Runtime Settings
 
@@ -81,7 +92,7 @@ Workflow سفارشی تعریف نشده و workflow پیش‌فرض Engine ا�
 - on error: continue
 - recipient: `get_option('admin_email')`
 - subject contains `{{field:subject}}`
-- body includes name/mobile/email/subject/message + `{{tracking_code}}`
+- body includes name/mobile/email/message_category/subject/message + `{{tracking_code}}`
 
 ارسال ایمیل کاربر یا Reply-To پویا به‌صورت پیش‌فرض تعریف نشده است.
 
@@ -115,15 +126,20 @@ Guards:
 - simple form settings
 - shared storage
 - Admin Email Action
+- required message_category select, no initial options and placed before subject
+- admin options override support
+- email includes message_category token
 - field/tracking tokens
 - theme bootstrap registration
+
+CI: `.github/workflows/contact-form-checks.yml` runs PHP lint and contact form regression tests on relevant pull requests.
 
 ## Live Acceptance Checklist
 
 1. فرم با shortcode روی frontend نمایش داده شود.
 2. فیلد استان از Geo Data Source مقدار بگیرد.
 3. mobile mask/validator در frontend و submit نهایی درست باشد.
-4. ایمیل optional و سایر required fields درست عمل کنند.
+4. دسته‌بندی قبل از موضوع باشد، بدون گزینه اولیه ارسال معتبر ممکن نباشد و پس از ثبت Override گزینه‌ها قابل انتخاب شوند؛ ایمیل optional و سایر required fields بررسی شوند.
 5. CAPTCHA و rate limit در محیط واقعی تست شوند.
 6. Submission در Admin با slug `contact-us` دیده شود.
-7. ایمیل مدیر بعد از submit با subject/body resolved دریافت شود.
+7. ایمیل مدیر دسته‌بندی انتخاب‌شده را همراه موضوع و متن پیام دریافت کند (در صورت وجود Action Override، آن تنظیمات جدا بررسی شود).

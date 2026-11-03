@@ -809,3 +809,9 @@ Modules: [MODULE-AFE](../modules/alavi-form-engine.md), [MODULE-JIHADI-FORM](../
 - بررسی فقط‌خواندنی Production: دسته 317 «رویدادها و نشست ها» ۷ مقاله منتشرشده، بدون زیر‌دسته. قالب `29813` «قالب رویداد ها و نشست ها» (single-post، شرط `include/singular/in_category/317`) هم‌اکنون UI قدیمی این مقاله‌ها را می‌سازد (و همان روز ویرایش شده بود)؛ قالب عمومی مقاله `3168` شرط `include/singular/post` دارد. قالب 29801 فقط شرط `ba_study_session` دارد، پس روی هیچ مقاله‌ای اعمال نمی‌شود.
 - تغییر داده سایت (اعمال نشده، منتظر تأیید): شرط 29801 → `include/singular/in_category/317` و برداشتن شرط 29813 (خود قالب باقی می‌ماند)؛ در Hero صفحه 7930 افزودن `categories` به کارت کتاب (334) و پژوهش (333). پشتیبان‌ها: `~/bonyad-deploy-backups/2026-11-02-pr19-pre-change/`.
 
+
+## STATE-002-048 — Contact form admin-managed message category (2026-11-04)
+
+- فیلد اجباری `message_category` از نوع Select، تمام‌عرض و قبل از موضوع قرار گرفت؛ گزینه‌های پیش‌فرض کاملاً خالی‌اند و مدیر از UI فعلی Field Override افزونه AFE به‌شکل `value|label` آن‌ها را تعیین می‌کند.
+- ایمیل پیش‌فرض مدیر `{{field:message_category}}` را قبل از موضوع نشان می‌دهد. اگر Action Override قبلی ذخیره شده باشد، نیاز به تغییر همان Action وجود دارد.
+- اگر ترتیب فیلدها قبلاً Override شده باشد، ممکن است نیاز به جابه‌جایی دستی فیلد تازه‌افزوده در پنل باشد. آزمون regression و workflow اختصاصی اضافه شد؛ پذیرش WordPress زنده باقی است.
