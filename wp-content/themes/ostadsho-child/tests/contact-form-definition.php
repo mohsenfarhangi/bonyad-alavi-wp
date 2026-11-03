@@ -73,7 +73,7 @@ $checks = [
         is_string($afeAdminForms) && is_string($afeSubmissionService)
         && str_contains($afeAdminForms, "['select','radio']")
         && str_contains($afeAdminForms, "field_override[")
-        && str_contains($afeAdminForms, "['options']=$this->parseOptions(")
+        && str_contains($afeAdminForms, "['options']=\$this->parseOptions(")
         && str_contains($afeSubmissionService, "'required','options'"),
     'subject-required' => ($fields['subject']['required'] ?? false) === true,
     'message-required' => ($fields['message']['type'] ?? '') === 'textarea' && ($fields['message']['required'] ?? false) === true,
