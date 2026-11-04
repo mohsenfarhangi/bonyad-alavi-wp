@@ -39,6 +39,7 @@
 - API/extensionهای Form Engine → `MODULE-AFE-EXTENSION`
 - فرم ثبت‌نام گروه‌های مردمی و جهادی → `MODULE-JIHADI-FORM`
 - فرم تماس با ما → `MODULE-CONTACT-FORM`
+- ویجت‌های صفحه ارتباط با ما → `MODULE-CONTACT-PAGE`
 - فرم جذب تسهیلگر → `MODULE-FACILITATOR-FORM`
 - تنظیمات مدیریت قالب → `MODULE-THEME-ADMIN`
 - رسانه/گالری محصول → `MODULE-THEME-MEDIA`

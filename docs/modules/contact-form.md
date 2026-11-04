@@ -96,6 +96,10 @@ Workflow سفارشی تعریف نشده و workflow پیش‌فرض Engine ا�
 
 ارسال ایمیل کاربر یا Reply-To پویا به‌صورت پیش‌فرض تعریف نشده است.
 
+## Page widgets
+
+بخش‌های غیرفرم صفحه «ارتباط با ما» (اطلاعات تماس، جدول داخلی‌ها، مراکز وابسته، نقشه) ویجت دارند: [MODULE-CONTACT-PAGE](contact-page-widgets.md). فرم در آن تغییری نکرده است.
+
 ## Ownership Boundary
 
 Inside theme:

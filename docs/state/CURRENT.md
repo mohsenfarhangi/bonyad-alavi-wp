@@ -1,6 +1,6 @@
 # Current Project State
 
-آخرین بازبینی: **2026-10-31**
+آخرین بازبینی: **2026-11-05**
 
 ## Project Phase
 
@@ -26,8 +26,12 @@ AFE release goal همچنان live acceptance نسخه 1.0.28 و رفع blocker 
 
 ## Recently Completed
 
+### Contact page widgets + four-up studies carousels (2026-11-05)
+- ویجت‌های اطلاعات تماس، جدول داخلی‌ها، کارت مراکز وابسته و نقشه برای صفحه «ارتباط با ما» بدون تغییر ظاهر (۰ پیکسل تفاوت در هارنس)؛ فرم دست‌نخورده. جزئیات: [MODULE-CONTACT-PAGE](../modules/contact-page-widgets.md)، STATE-002-049. شاخه `feat/contact-page-widgets-20261105`. **استقرار، ساخت پیش‌نویس صفحه و پذیرش زنده انجام نشده.**
+- صفحه 7930 (با تأیید و پشتیبان): عنوان باکس معرفی برداشته و کاروسل نشست‌ها ۴تایی شد. پژوهش ۴تایی نشد چون کارت خراب می‌شد؛ رفع CSS در همان شاخه است و بعد از deploy باید `slides_per_view=4` روی پژوهش با تأیید تنظیم شود.
+
 ### Studies Center: sessions as posts, no global query settings (2026-11-02)
-- منوی CPT نشست غیرفعال شد (ثبت حفظ شده)؛ اطلاعات نشست و حوزه روی مقالات است؛ کتاب/پژوهش/نشست و شمارش آمار فقط از دسته‌های انتخاب‌شده در ویجت می‌آیند و تنظیمات `books_cats`/`research_cats` تب مطالعات حذف شد. جزئیات: [MODULE-STUDIES-CENTER](../modules/studies-center.md)، [ADR-008](../decisions/ADR-008-studies-center-data-model.md)، STATE-002-046. شاخه `feat/studies-sessions-on-posts-20261102`؛ fallback اطلاعات ناقص و برنامه تغییر شرط قالب 29801/29813 و آمار Hero در STATE-002-047. **استقرار و پذیرش زنده انجام نشده.**
+- منوی CPT نشست غیرفعال شد (ثبت حفظ شده)؛ اطلاعات نشست و حوزه روی مقالات است؛ کتاب/پژوهش/نشست و شمارش آمار فقط از دسته‌های انتخاب‌شده در ویجت می‌آیند و تنظیمات `books_cats`/`research_cats` تب مطالعات حذف شد. جزئیات: [MODULE-STUDIES-CENTER](../modules/studies-center.md)، [ADR-008](../decisions/ADR-008-studies-center-data-model.md)، STATE-002-046. شاخه `feat/studies-sessions-on-posts-20261102`؛ fallback اطلاعات ناقص و برنامه تغییر شرط قالب 29801/29813 و آمار Hero در STATE-002-047. **PR #19 ادغام و (گزارش مدیر) روی Production مستقر شد؛ قالب 29801 با شرط دسته 317 فعال است. پذیرش زنده کامل ثبت نشده.**
 
 ### Studies Center session inner page (2026-11-02)
 - صفحه داخلی نشست با طرح دسکتاپ/موبایل مقایسه و اصلاح شد (برچسب ویدئو چپ، وزن‌ها، ارتفاع ردیف فایل، عرض ستون‌های قالب ۵۸٫۳/۳۹٫۲) و هر چهار ویجت نشست کنترل‌های محتوا و Style کامل گرفتند؛ جزئیات و تست‌ها: [MODULE-STUDIES-CENTER](../modules/studies-center.md)، STATE-002-042. شاخه `feat/studies-session-page-widgets-20261102` روی سه شاخه merge‌نشده قبلی ساخته شده (merge یک‌جا). **قالب Theme Builder هنوز روی سایت import نشده و نشست واقعی منتشر نیست؛ پذیرش زنده انجام نشده.**
@@ -331,6 +335,7 @@ Open release work برای AFE:
 - [MODULE-HOME-NEWS](../modules/theme-home-news-widget.md)
 - [MODULE-SECTION-HEADING](../modules/theme-section-heading-widget.md)
 - [MODULE-STUDIES-CENTER](../modules/studies-center.md)
+- [MODULE-CONTACT-PAGE](../modules/contact-page-widgets.md)
 
 ## Tests Status
 
@@ -375,14 +380,11 @@ Historical PASSهای AFE/Theme به HEAD جدید تعمیم داده نمی‌
 
 ## Next Agent Handoff
 
-**Current task:** پیامک بازیابی فرم با متن آزاد و پترن/BodyId قابل تنظیم شده است؛ آزمون‌های متمرکز PHP/JS و Providerها PASS شده‌اند. پذیرش زنده ارسال پترن تأییدشده در وردپرس، بررسی Overrideهای فرم جهادی و تأیید رسیدن پیامک همچنان لازم است.
+**Current task:** (۱) PR شاخه `feat/contact-page-widgets-20261105` (ویجت‌های صفحه ارتباط با ما + رفع CSS کارت پژوهش) را کاربر می‌سازد/merge می‌کند؛ بعد deploy با اسکریپت امن (فقط CSS و `inc/elementor/**`)؛ بعد با تأیید `slides_per_view=4` روی کاروسل پژوهش `e994d17` صفحه 7930 (پشتیبان + diff)؛ (۲) صفحه **جدید** پیش‌نویس noindex برای ارتباط با ما با ویجت‌ها؛ فرم‌ها (شورت‌کد `contact-us` و فرم قدیمی پنهان `0b88134e`) دست‌نخورده؛ تست نمایش/ارسال/ایمیل مدیر؛ جایگزینی 28817 فقط با تأیید جدا. صفحه 28817 و فرم‌ها تا آن موقع دست نخورند.
 
+**Open task (هیرو، task جدا):** فلش‌های اسلایدر با `slider_show_arrows` در Elementor خاموش شوند و سپس قانون `.ba-slider__controls` در `style.css` و `<style>` inline در Code Snippet #9 حذف شوند؛ قبل از حذف قانون `.elementor-element-964556b .ba-hero__grid { grid-template-rows … !important }` روی دسکتاپ و موبایل تست شود.
 
-**Open task (هیرو، task جدا):** فلش‌های اسلایدر با `slider_show_arrows` در Elementor خاموش شوند و سپس قانون `.ba-slider__controls` در `style.css` و `<style>` inline در Code Snippet #9 حذف شوند. قانون `.elementor-element-964556b .ba-hero__grid { grid-template-rows … !important }` پیش از حذف روی دسکتاپ و موبایل تست شود. تا آن زمان قوانین موجود بدون تغییر بمانند.
-
-**Tracked since 2026-10-30:** `wp-content/plugins/alavi-pages/` اکنون در whitelist `.gitignore` است (نسخه سرور مرجع است).
-
-**Studies Center (branch `feat/studies-center-page`, PR باز نشده/merge نشده):** پیش از هر چیز روی سایت بررسی شود که Elementor Pro با Theme Builder فعال و مجاز است. اگر نبود، متوقف شو و گزارش بده و قالب PHP جایگزین نساز. سپس طبق «مراحل import» در [MODULE-STUDIES-CENTER](../modules/studies-center.md): import سه JSON، شرط نمایش single نشست، ساخت برگه پیش‌نویس، انتخاب دسته‌های کتاب/پژوهش در تب، دادن Capability، و افزودن منو از پنل. صفحه 7930 بدون تأیید مدیر پروژه بازنویسی نشود.
+**Known:** شاخه‌های docs استقرار (`docs/studies-pr18/pr19/production-deploy-record-20261102`) merge نشده‌اند؛ `tests/home-news-widget-contract.php` از قبل در `default-date-format` شکست می‌خورد؛ پذیرش زنده SMS/AFE 1.0.28 باز است (بخش‌های قبلی همین فایل).
 
 **Start here:** [../INDEX.md](../INDEX.md) → [../modules/INDEX.md](../modules/INDEX.md).
 

@@ -713,6 +713,29 @@ a.ba-studies-stat:focus-visible {
   -webkit-line-clamp: 3;
 }
 
+/* پژوهش در عرض کم (مثلاً چهار کارت در دسکتاپ): فوتر عمودی تا دکمه از کارت بیرون نزند */
+.ba-studies-section--research .ba-studies-carousel__slide {
+  container-type: inline-size;
+}
+
+@container (max-width: 300px) {
+  .ba-studies-card--research .ba-studies-card__footer {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+    min-width: 0;
+  }
+
+  .ba-studies-card--research .ba-studies-card__date,
+  .ba-studies-card--research .ba-studies-card__more {
+    white-space: nowrap;
+  }
+
+  .ba-studies-card--research .ba-studies-card__title {
+    font-size: 14px;
+  }
+}
+
 /* ---------- گرید آرشیو ---------- */
 
 .ba-studies-grid__list {

@@ -14,6 +14,9 @@ on:
       - 'wp-content/themes/ostadsho-child/inc/admin/settings/class-ba-studies-center-settings-tab.php'
       - 'wp-content/themes/ostadsho-child/inc/elementor/elementor-widgets.php'
       - 'wp-content/themes/ostadsho-child/inc/elementor/widgets/*studies*'
+      - 'wp-content/themes/ostadsho-child/inc/elementor/widgets/*contact*'
+      - 'wp-content/themes/ostadsho-child/assets/css/*contact-page*'
+      - 'wp-content/themes/ostadsho-child/tests/contact-page-widgets.php'
       - 'wp-content/themes/ostadsho-child/assets/css/*studies*'
       - 'wp-content/themes/ostadsho-child/assets/js/*studies*'
       - 'wp-content/themes/ostadsho-child/elementor-templates/**'
@@ -48,6 +51,8 @@ jobs:
             inc/services/class-ba-studies-center-settings-service.php \
             inc/admin/settings/class-ba-studies-center-settings-tab.php \
             inc/elementor/widgets/*studies*.php \
+            inc/elementor/widgets/*contact*.php \
+            tests/contact-page-widgets.php \
             tests/studies-center-*.php \
             tests/studies-center-harness/*.php; do
             php -l "$file"
@@ -58,6 +63,8 @@ jobs:
         run: php tests/studies-center-runtime.php
       - name: Session widgets render behavior
         run: php tests/studies-center-session-widgets.php
+      - name: Contact page widgets and four-up research card
+        run: php tests/contact-page-widgets.php
       - name: Shared Elementor bootstrap regressions
         run: |
           php tests/home-hero-widget-contract.php

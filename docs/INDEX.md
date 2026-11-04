@@ -18,6 +18,7 @@
 - AFE عمومی → [modules/INDEX.md](modules/INDEX.md) → `MODULE-AFE`
 - توسعه hook/form/action در AFE → `MODULE-AFE-EXTENSION`
 - فرم تماس با ما → `MODULE-CONTACT-FORM`
+- ویجت‌های صفحه ارتباط با ما (اطلاعات، جدول، کارت، نقشه) → `MODULE-CONTACT-PAGE`
 - فرم جذب تسهیلگر → `MODULE-FACILITATOR-FORM`
 - تنظیمات مدیریت قالب → `MODULE-THEME-ADMIN`
 - media/gallery محصول → `MODULE-THEME-MEDIA`
