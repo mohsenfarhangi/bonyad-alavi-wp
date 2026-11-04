@@ -1647,7 +1647,10 @@
       }
       if (result) {
         const edit = json.data.edit_url ? `<a class="afe-result-link" href="${escapeAttr(json.data.edit_url)}">${json.data.locked ? 'مشاهده اطلاعات ثبت‌شده' : 'لینک ویرایش و ادامه فرم'}</a>` : '';
-        result.innerHTML = `<div class="afe-success"><strong>${escapeHtml(json.data.message)}</strong><span>کد رهگیری: <b dir="ltr">${escapeHtml(json.data.tracking_code)}</b></span>${edit}</div>`;
+        const tracking = form.dataset.afeShowTrackingCode === '0'
+          ? ''
+          : `<span>کد رهگیری: <b dir="ltr">${escapeHtml(json.data.tracking_code)}</b></span>`;
+        result.innerHTML = `<div class="afe-success"><strong>${escapeHtml(json.data.message)}</strong>${tracking}${edit}</div>`;
         result.scrollIntoView({behavior:'smooth', block:'center'});
       }
       return true;

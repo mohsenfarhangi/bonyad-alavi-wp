@@ -226,6 +226,8 @@ HTML
 			] )
 			->settings( [
 				'wizard'                   => false,
+				'show_tracking_code'       => false,
+				'success_message'          => 'درخواست شما با موفقیت ثبت شد. از اینکه مجتمع اردوگاهی امام خمینی (ره) را انتخاب کرده‌اید سپاسگزاریم. به‌زودی با شما تماس گرفته خواهد شد.',
 				'save_draft'               => false,
 				'show_progress'            => false,
 				'editing_enabled'          => false,

@@ -48,6 +48,8 @@ final class Form
                 'wizard' => true,
                 'save_draft' => true,
                 'show_progress' => true,
+                'show_tracking_code' => true,
+                'success_message' => '',
                 'editing_enabled' => true,
                 'editing_modes' => ['wordpress', 'link', 'tracking'],
                 'preview_enabled' => false,
