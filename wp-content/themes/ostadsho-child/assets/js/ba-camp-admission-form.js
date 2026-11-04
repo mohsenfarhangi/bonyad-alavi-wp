@@ -141,9 +141,15 @@
       setDuration(nights);
     };
 
+    const scheduleUpdate = () => {
+      updateDuration();
+      // Run once more after AFE's own input normalizers have handled the event.
+      Promise.resolve().then(updateDuration);
+    };
+
     ['input', 'change', 'blur'].forEach(eventName => {
-      startInput.addEventListener(eventName, updateDuration);
-      endInput.addEventListener(eventName, updateDuration);
+      startInput.addEventListener(eventName, scheduleUpdate);
+      endInput.addEventListener(eventName, scheduleUpdate);
     });
     form.addEventListener('submit', updateDuration, true);
     updateDuration();
