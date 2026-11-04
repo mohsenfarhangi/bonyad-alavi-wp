@@ -54,7 +54,7 @@ final class BA_Camp_Admission_Form {
 			[ 'date' ],
 			'تاریخ پایان باید حداقل یک روز بعد از تاریخ شروع باشد.',
 			static function ( string $value, array $field, array $config, array $data ): bool {
-				$start_field = sanitize_key( (string) ( $config['start_field'] ?? 'from_date' ) );
+				$start_field = (string) ( $config['start_field'] ?? 'from_date' );
 				$duration    = self::durationBetweenJalaliDates(
 					(string) ( $data[ $start_field ] ?? '' ),
 					$value
