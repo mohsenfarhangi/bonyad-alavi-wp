@@ -69,7 +69,15 @@ $persianDigits['to_date'] = '۱۴۰۵/۰۸/۱۸';
 $persianDigits['stay_duration'] = '۳';
 $persianDigitErrors = $validator->validate($form, $persianDigits);
 
+$leadingZeros = $validData;
+$leadingZeros['guest_count'] = '024';
+$leadingZeros['stay_duration'] = '03';
+$leadingZeroErrors = $validator->validate($form, $leadingZeros);
+
 $missingErrors = $validator->validate($form, []);
+
+$themeRoot = dirname(__DIR__);
+$frontendScript = file_get_contents($themeRoot . '/assets/js/ba-camp-admission-form.js');
 
 $checks = [
     'slug-and-title' =>
@@ -119,6 +127,12 @@ $checks = [
     'same-day-stay-rejected' => isset($sameDayErrors['to_date'], $sameDayErrors['stay_duration']),
     'fractional-guest-count-rejected' => isset($invalidGuestCountErrors['guest_count']),
     'persian-digits-accepted' => $persianDigitErrors === [],
+    'leading-zero-numeric-values-accepted' => $leadingZeroErrors === [],
+    'frontend-duration-is-readonly-and-reactive' =>
+        is_string($frontendScript)
+        && str_contains($frontendScript, 'durationInput.readOnly = true')
+        && str_contains($frontendScript, "startInput.addEventListener(eventName, scheduleUpdate)")
+        && str_contains($frontendScript, 'jalaliDayNumber'),
     'missing-required-data-rejected' => count($missingErrors) === 7,
     'no-default-actions' => ($form['actions'] ?? null) === [],
     'simple-shared-form' =>
