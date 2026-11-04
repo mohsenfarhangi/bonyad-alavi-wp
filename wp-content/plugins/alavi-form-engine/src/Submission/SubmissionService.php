@@ -290,7 +290,9 @@ final class SubmissionService
             'is_duplicate'=>$duplicate->isDuplicate() && $duplicate->allowsDuplicate(),
             'duplicate_of_submission_id'=>$duplicate->isDuplicate() && $duplicate->allowsDuplicate() ? (int)$duplicate->duplicateSubmissionId : 0,
             'locked'=>(!$draft && !empty($form['settings']['lock_after_submit'])),
-            'message'=>$draft ? 'پیش‌نویس با موفقیت ذخیره شد.' : 'اطلاعات با موفقیت ثبت شد.',
+            'message'=>$draft
+                ? 'پیش‌نویس با موفقیت ذخیره شد.'
+                : (trim((string)($form['settings']['success_message'] ?? '')) ?: 'اطلاعات با موفقیت ثبت شد.'),
         ];
     }
 
