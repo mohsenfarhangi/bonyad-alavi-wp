@@ -17,7 +17,7 @@ Child theme بنیاد علوی روی parent `ostadsho` integrationهای اخ�
 - Elementor widgets/dynamic tags را load می‌کند؛ از جمله Hero، Quick Links، Live Stats، About/Impact، News صفحه اصلی و Section Heading عمومی با assetهای scoped و lazy registration توسط Elementor.
 - participation gateway/quick-checkout services را load می‌کند.
 - center settings service/tab را load می‌کند.
-- Source Definition فرم‌های پروژه‌ای شامل فرم جهادی و فرم تماس با ما را از `inc/forms/` load و با `afe_register_forms` ثبت می‌کند.
+- Source Definition فرم‌های پروژه‌ای شامل فرم جهادی، فرم تماس با ما، فرم جذب تسهیلگر و فرم پذیرش مجتمع اردوگاهی را از `inc/forms/` load و با `afe_register_forms` ثبت می‌کند؛ فرم اردوگاه اعتبارسنج‌های اختصاصی را نیز از `afe_register_validator_definitions` ثبت می‌کند.
 - settings access/page/AJAX controller را initialize می‌کند.
 
 Subdirectories:
