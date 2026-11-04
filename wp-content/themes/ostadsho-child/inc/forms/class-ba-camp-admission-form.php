@@ -44,7 +44,7 @@ final class BA_Camp_Admission_Form {
 			static function ( string $value ): bool {
 				$value = Validators::latinDigits( trim( $value ) );
 
-				return 1 === preg_match( '/^[1-9][0-9]*$/D', $value );
+				return 1 === preg_match( '/^[0-9]+$/D', $value ) && (int) $value > 0;
 			}
 		) );
 
@@ -78,7 +78,8 @@ final class BA_Camp_Admission_Form {
 
 				return null !== $duration
 					&& $duration > 0
-					&& 1 === preg_match( '/^[1-9][0-9]*$/D', $value )
+					&& 1 === preg_match( '/^[0-9]+$/D', $value )
+					&& (int) $value > 0
 					&& (int) $value === $duration;
 			}
 		) );
