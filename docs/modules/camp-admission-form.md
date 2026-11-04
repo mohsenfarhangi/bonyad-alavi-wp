@@ -51,6 +51,9 @@ The reusable AFE validator callback now receives the complete sanitized submissi
 - Strong style isolation.
 - Custom CAPTCHA and rate limit = 5.
 - No default Actions or email notification.
+- Applicant success state hides the tracking code; the code is still generated and stored for Admin/internal follow-up.
+- The success message is: «درخواست شما با موفقیت ثبت شد. از اینکه مجتمع اردوگاهی امام خمینی (ره) را انتخاب کرده‌اید سپاسگزاریم. به‌زودی با شما تماس گرفته خواهد شد.»
+- Other AFE forms continue to show tracking codes by default; the behavior is controlled by per-form `show_tracking_code` and `success_message` settings.
 - No duplicate policy configured.
 
 ## Presentation
@@ -77,6 +80,7 @@ Run with PHP 8.3+ and Node:
 php wp-content/plugins/alavi-form-engine/tests/cross-field-validator-context.php
 php wp-content/plugins/alavi-form-engine/tests/validator-registry.php
 php wp-content/themes/ostadsho-child/tests/camp-admission-form-definition.php
+node --check wp-content/plugins/alavi-form-engine/assets/js/frontend.js
 node --check wp-content/themes/ostadsho-child/assets/js/ba-camp-admission-form.js
 ```
 
@@ -89,5 +93,6 @@ node --check wp-content/themes/ostadsho-child/assets/js/ba-camp-admission-form.j
 5. Try same-day, reversed and invalid Jalali dates; submission must be blocked with a field-level error.
 6. Submit with an empty/zero/fractional guest count; the server must reject it.
 7. Submit a valid request and verify all seven values, including stay duration, are stored in AFE Admin.
-8. Confirm no email/action runs by default; add the desired Actions from the Admin Action Builder.
-9. Verify the form does not alter the appearance or behavior of other AFE forms.
+8. Confirm the applicant sees the configured thank-you message and no tracking code, while the tracking code remains available in AFE Admin.
+9. Confirm no email/action runs by default; add the desired Actions from the Admin Action Builder.
+10. Verify other AFE forms still show tracking codes by default and are unaffected by this form's settings.
