@@ -9,7 +9,6 @@
   --ba-camp-muted: #718077;
   border: 1px solid var(--ba-camp-border);
   border-radius: 18px;
-  overflow: hidden;
   background: #fff;
   box-shadow: 0 16px 42px rgba(24, 61, 42, .07);
 }
@@ -19,6 +18,7 @@
   padding: 30px 38px 32px;
   background: linear-gradient(115deg, #f7faf7 0%, #edf5ef 100%);
   border-bottom: 1px solid var(--ba-camp-border);
+  border-radius: 17px 17px 0 0;
 }
 
 .afe-form[data-form="imam-khomeini-camp-admission"] .ba-camp-admission__header::before {
