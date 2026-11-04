@@ -49,6 +49,7 @@ Subdirectories:
 - [MODULE-JIHADI-CENTER](jihadi-center.md) — صفحه مرکز
 - [MODULE-JIHADI-FORM](jihadi-group-registration-form.md) — Source Definition و registration فرم ثبت‌نام گروه‌های مردمی و جهادی
 - [MODULE-CONTACT-FORM](contact-form.md) — فرم تک‌مرحله‌ای تماس با ما با فیلد استان Geo و ایمیل اطلاع‌رسانی مدیر
+- [MODULE-CAMP-ADMISSION](camp-admission-form.md) — فرم پذیرش مجتمع اردوگاهی با تاریخ شمسی و محاسبه/اعتبارسنجی سمت سرور مدت اقامت
 - [MODULE-HOME-HERO](theme-home-hero-widget.md) — Hero صفحه اصلی شامل Mission Nav، Slider و Query-driven Ticker
 - [MODULE-HOME-QUICK-LINKS](theme-home-quick-links-widget.md) — دسترسی‌های سریع صفحه اصلی با overflow/More دقیق reference
 - [MODULE-HOME-LIVE-STATS](theme-home-live-stats-widget.md) — گزارش برخط اقدامات با layout و typography دقیق reference
