@@ -12,6 +12,7 @@ spl_autoload_register(static function (string $class) use ($pluginRoot): void {
 
 require_once dirname(__DIR__) . '/inc/forms/class-ba-camp-admission-form.php';
 
+use BonyadAlavi\FormEngine\Form\Form;
 use BonyadAlavi\FormEngine\Form\FormRegistry;
 use BonyadAlavi\FormEngine\Form\Validator;
 use BonyadAlavi\FormEngine\Security\Validators;
