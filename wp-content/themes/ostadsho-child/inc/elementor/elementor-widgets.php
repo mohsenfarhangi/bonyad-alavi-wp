@@ -85,6 +85,11 @@ final class BA_Elementor_Assets {
 		);
 
 		$this->register_style(
+			'bonyad-alavi-contact-page',
+			'assets/css/bonyad-alavi-contact-page.css'
+		);
+
+		$this->register_style(
 			'bonyad-alavi-studies-center',
 			'assets/css/bonyad-alavi-studies-center.css'
 		);
@@ -263,6 +268,11 @@ final class BA_Elementor_Widgets_Registrar {
 		require_once get_stylesheet_directory() . '/inc/elementor/widgets/class-bonyad-alavi-home-about-widget.php';
 		require_once get_stylesheet_directory() . '/inc/elementor/widgets/class-bonyad-alavi-home-news-widget.php';
 		require_once get_stylesheet_directory() . '/inc/elementor/widgets/class-bonyad-alavi-section-heading-widget.php';
+		require_once get_stylesheet_directory() . '/inc/elementor/widgets/abstract-bonyad-alavi-contact-page-widget.php';
+		require_once get_stylesheet_directory() . '/inc/elementor/widgets/class-bonyad-alavi-contact-info-widget.php';
+		require_once get_stylesheet_directory() . '/inc/elementor/widgets/class-bonyad-alavi-contact-table-widget.php';
+		require_once get_stylesheet_directory() . '/inc/elementor/widgets/class-bonyad-alavi-contact-cards-widget.php';
+		require_once get_stylesheet_directory() . '/inc/elementor/widgets/class-bonyad-alavi-contact-map-widget.php';
 		require_once get_stylesheet_directory() . '/inc/elementor/widgets/class-bonyad-alavi-studies-hero-widget.php';
 		require_once get_stylesheet_directory() . '/inc/elementor/widgets/class-bonyad-alavi-studies-area-filter-widget.php';
 		require_once get_stylesheet_directory() . '/inc/elementor/widgets/class-bonyad-alavi-studies-carousel-widget.php';
@@ -282,6 +292,10 @@ final class BA_Elementor_Widgets_Registrar {
 		$widgets_manager->register( new \Bonyad_Alavi_Home_About_Widget() );
 		$widgets_manager->register( new \Bonyad_Alavi_Home_News_Widget() );
 		$widgets_manager->register( new \Bonyad_Alavi_Section_Heading_Widget() );
+		$widgets_manager->register( new \Bonyad_Alavi_Contact_Info_Widget() );
+		$widgets_manager->register( new \Bonyad_Alavi_Contact_Table_Widget() );
+		$widgets_manager->register( new \Bonyad_Alavi_Contact_Cards_Widget() );
+		$widgets_manager->register( new \Bonyad_Alavi_Contact_Map_Widget() );
 		$widgets_manager->register( new \Bonyad_Alavi_Studies_Hero_Widget() );
 		$widgets_manager->register( new \Bonyad_Alavi_Studies_Area_Filter_Widget() );
 		$widgets_manager->register( new \Bonyad_Alavi_Studies_Carousel_Widget() );
