@@ -94,6 +94,14 @@ Hook:
 
 Reusable validator جدید به registry اضافه شود؛ branch hard-coded در Admin page نساز.
 
+`ValidatorDefinition` callback contract:
+- `$value`: sanitized current field value
+- `$field`: current field schema
+- `$config`: this field's validator configuration
+- `$data`: complete sanitized submission data, for cross-field rules
+
+The fourth `$data` argument is now passed by `Validator::validateRegistered()`. Existing callbacks that declare only the original three arguments remain compatible. Use this context for server-authoritative date ranges, matching fields and calculated values; never trust a frontend-only calculation.
+
 Legacy `->rule(...)` برای backward compatibility باقی است.
 
 Custom Regex admin path:
