@@ -61,6 +61,8 @@ Validator Registry core coverage:
 - date/calendar
 - custom regex
 
+Registered `ValidatorDefinition` callbacks receive the complete sanitized form data as a fourth argument (`$data`) in addition to value, field and validator config. This enables secure cross-field validation such as date ranges and calculated values. Existing three-argument callbacks remain compatible; frontend checks remain UX only and PHP validation is authoritative.
+
 Custom Regex:
 - نیازمند `afe_manage_settings`
 - max 500 chars
