@@ -21,8 +21,12 @@ final class ValidatorDefinition
         return $this->fieldTypes === [] || in_array($fieldType, $this->fieldTypes, true);
     }
 
-    public function validate(string $value, array $field, array $config = []): bool
+    /**
+     * Validate one field with access to the complete sanitized submission data.
+     * The fourth callback argument is optional for existing three-argument validators.
+     */
+    public function validate(string $value, array $field, array $config = [], array $data = []): bool
     {
-        return (bool)($this->callback)($value, $field, $config);
+        return (bool)($this->callback)($value, $field, $config, $data);
     }
 }

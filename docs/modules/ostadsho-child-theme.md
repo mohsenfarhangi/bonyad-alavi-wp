@@ -17,7 +17,7 @@ Child theme بنیاد علوی روی parent `ostadsho` integrationهای اخ�
 - Elementor widgets/dynamic tags را load می‌کند؛ از جمله Hero، Quick Links، Live Stats، About/Impact، News صفحه اصلی و Section Heading عمومی با assetهای scoped و lazy registration توسط Elementor.
 - participation gateway/quick-checkout services را load می‌کند.
 - center settings service/tab را load می‌کند.
-- Source Definition فرم‌های پروژه‌ای شامل فرم جهادی و فرم تماس با ما را از `inc/forms/` load و با `afe_register_forms` ثبت می‌کند.
+- Source Definition فرم‌های پروژه‌ای شامل فرم جهادی، فرم تماس با ما، فرم جذب تسهیلگر و فرم پذیرش مجتمع اردوگاهی را از `inc/forms/` load و با `afe_register_forms` ثبت می‌کند؛ فرم اردوگاه اعتبارسنج‌های اختصاصی را نیز از `afe_register_validator_definitions` ثبت می‌کند.
 - settings access/page/AJAX controller را initialize می‌کند.
 
 Subdirectories:
@@ -49,6 +49,7 @@ Subdirectories:
 - [MODULE-JIHADI-CENTER](jihadi-center.md) — صفحه مرکز
 - [MODULE-JIHADI-FORM](jihadi-group-registration-form.md) — Source Definition و registration فرم ثبت‌نام گروه‌های مردمی و جهادی
 - [MODULE-CONTACT-FORM](contact-form.md) — فرم تک‌مرحله‌ای تماس با ما با فیلد استان Geo و ایمیل اطلاع‌رسانی مدیر
+- [MODULE-CAMP-ADMISSION](camp-admission-form.md) — فرم پذیرش مجتمع اردوگاهی با تاریخ شمسی و محاسبه/اعتبارسنجی سمت سرور مدت اقامت
 - [MODULE-HOME-HERO](theme-home-hero-widget.md) — Hero صفحه اصلی شامل Mission Nav، Slider و Query-driven Ticker
 - [MODULE-HOME-QUICK-LINKS](theme-home-quick-links-widget.md) — دسترسی‌های سریع صفحه اصلی با overflow/More دقیق reference
 - [MODULE-HOME-LIVE-STATS](theme-home-live-stats-widget.md) — گزارش برخط اقدامات با layout و typography دقیق reference

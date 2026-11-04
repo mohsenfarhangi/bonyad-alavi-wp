@@ -1,0 +1,45 @@
+name: Camp admission form checks
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'wp-content/plugins/alavi-form-engine/src/Form/Validator.php'
+      - 'wp-content/plugins/alavi-form-engine/src/Validation/ValidatorDefinition.php'
+      - 'wp-content/plugins/alavi-form-engine/tests/cross-field-validator-context.php'
+      - 'wp-content/themes/ostadsho-child/functions.php'
+      - 'wp-content/themes/ostadsho-child/inc/forms/class-ba-camp-admission-form.php'
+      - 'wp-content/themes/ostadsho-child/assets/css/ba-camp-admission-form.css'
+      - 'wp-content/themes/ostadsho-child/assets/js/ba-camp-admission-form.js'
+      - 'wp-content/themes/ostadsho-child/tests/camp-admission-form-definition.php'
+      - '.github/workflows/camp-admission-form-checks.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          coverage: none
+      - name: PHP syntax
+        run: |
+          php -l wp-content/plugins/alavi-form-engine/src/Form/Validator.php
+          php -l wp-content/plugins/alavi-form-engine/src/Validation/ValidatorDefinition.php
+          php -l wp-content/plugins/alavi-form-engine/tests/cross-field-validator-context.php
+          php -l wp-content/themes/ostadsho-child/functions.php
+          php -l wp-content/themes/ostadsho-child/inc/forms/class-ba-camp-admission-form.php
+          php -l wp-content/themes/ostadsho-child/tests/camp-admission-form-definition.php
+      - name: AFE validator regression
+        run: |
+          php wp-content/plugins/alavi-form-engine/tests/cross-field-validator-context.php
+          php wp-content/plugins/alavi-form-engine/tests/validator-registry.php
+      - name: Camp admission form regression
+        run: php wp-content/themes/ostadsho-child/tests/camp-admission-form-definition.php
+      - name: JavaScript syntax
+        run: node --check wp-content/themes/ostadsho-child/assets/js/ba-camp-admission-form.js

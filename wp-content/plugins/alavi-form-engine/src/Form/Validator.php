@@ -112,7 +112,7 @@ final class Validator
         }
 
         if (!isset($errors[$field['name']])) $this->validateCharacterMode($field,$string,$errors);
-        if (!isset($errors[$field['name']])) $this->validateRegistered($field,$string,$errors);
+        if (!isset($errors[$field['name']])) $this->validateRegistered($field,$string,$data,$errors);
 
         if (!empty($field['unique_group'])) {
             $uniqueGroups[$field['unique_group']][] = $value;
@@ -120,7 +120,7 @@ final class Validator
     }
 
 
-    private function validateRegistered(array $field,string $value,array &$errors): void
+    private function validateRegistered(array $field,string $value,array $data,array &$errors): void
     {
         $registry=$this->registry;
         if (!$registry) return;
@@ -130,7 +130,7 @@ final class Validator
             $key=(string)($config['key']??'');
             $definition=$registry->get($key);
             if (!$definition || !$definition->supports((string)($field['type']??''))) continue;
-            if (!$definition->validate($value,$field,$config)) {
+            if (!$definition->validate($value,$field,$config,$data)) {
                 $errors[$field['name']]=(string)($config['message']??$definition->defaultMessage);
                 return;
             }
