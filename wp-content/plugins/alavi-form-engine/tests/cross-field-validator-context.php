@@ -8,9 +8,9 @@ spl_autoload_register(static function (string $class): void {
     if (is_readable($file)) require_once $file;
 });
 
-use BonyadAlavi\\FormEngine\\Form\\Validator;
-use BonyadAlavi\\FormEngine\\Validation\\ValidatorDefinition;
-use BonyadAlavi\\FormEngine\\Validation\\ValidatorRegistry;
+use BonyadAlavi\FormEngine\Form\Validator;
+use BonyadAlavi\FormEngine\Validation\ValidatorDefinition;
+use BonyadAlavi\FormEngine\Validation\ValidatorRegistry;
 
 $registry = new ValidatorRegistry();
 $registry->register(new ValidatorDefinition(
