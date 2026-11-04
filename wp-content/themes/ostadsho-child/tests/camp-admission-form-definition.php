@@ -78,6 +78,11 @@ $missingErrors = $validator->validate($form, []);
 
 $themeRoot = dirname(__DIR__);
 $frontendScript = file_get_contents($themeRoot . '/assets/js/ba-camp-admission-form.js');
+$engineFrontend = file_get_contents($pluginRoot . '/assets/js/frontend.js');
+$rendererSource = file_get_contents($pluginRoot . '/src/Form/Renderer.php');
+$submissionSource = file_get_contents($pluginRoot . '/src/Submission/SubmissionService.php');
+$defaultFormSettings = Form::make('default-settings-test')->toArray()['settings'];
+$expectedSuccessMessage = 'درخواست شما با موفقیت ثبت شد. از اینکه مجتمع اردوگاهی امام خمینی (ره) را انتخاب کرده‌اید سپاسگزاریم. به‌زودی با شما تماس گرفته خواهد شد.';
 
 $checks = [
     'slug-and-title' =>
@@ -134,6 +139,20 @@ $checks = [
         && str_contains($frontendScript, "startInput.addEventListener(eventName, scheduleUpdate)")
         && str_contains($frontendScript, 'jalaliDayNumber'),
     'missing-required-data-rejected' => count($missingErrors) === 7,
+    'tracking-code-hidden-after-submit' =>
+        ($form['settings']['show_tracking_code'] ?? true) === false
+        && is_string($engineFrontend)
+        && str_contains($engineFrontend, "form.dataset.afeShowTrackingCode === '0'")
+        && is_string($rendererSource)
+        && str_contains($rendererSource, 'data-afe-show-tracking-code'),
+    'custom-thank-you-message' =>
+        ($form['settings']['success_message'] ?? '') === $expectedSuccessMessage
+        && is_string($submissionSource)
+        && str_contains($submissionSource, "['settings']['success_message'] ?? ''"),
+    'tracking-code-visible-by-default-for-other-forms' =>
+        ($defaultFormSettings['show_tracking_code'] ?? false) === true,
+    'success-message-default-preserves-existing-forms' =>
+        ($defaultFormSettings['success_message'] ?? null) === '',
     'no-default-actions' => ($form['actions'] ?? null) === [],
     'simple-shared-form' =>
         ($form['settings']['wizard'] ?? true) === false
