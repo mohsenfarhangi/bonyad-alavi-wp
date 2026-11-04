@@ -2,17 +2,17 @@
 
 **Status:** implemented in theme / live acceptance pending  
 **Owner:** Ostadsho child theme  
-**Slug:** \`imam-khomeini-camp-admission\`  
-**Source:** \`wp-content/themes/ostadsho-child/inc/forms/class-ba-camp-admission-form.php\`  
-**Shortcode:** \`[alavi_form id="imam-khomeini-camp-admission"]\`
+**Slug:** `imam-khomeini-camp-admission`  
+**Source:** `wp-content/themes/ostadsho-child/inc/forms/class-ba-camp-admission-form.php`  
+**Shortcode:** `[alavi_form id="imam-khomeini-camp-admission"]`
 
 ## Architecture
 
 The child theme owns the form Source Definition, project-specific validators, scoped CSS and browser-side stay-duration calculation. Alavi Form Engine owns rendering, Jalali datepicker integration, field validation pipeline, submission persistence, Admin and Action Builder.
 
 Registration:
-- \`afe_register_forms\` registers the form.
-- \`afe_register_validator_definitions\` registers the form's positive-integer and cross-field validators.
+- `afe_register_forms` registers the form.
+- `afe_register_validator_definitions` registers the form's positive-integer and cross-field validators.
 - Theme assets are enqueued separately and all selectors are scoped to the form slug.
 
 No default Actions are defined. Admin can add and configure the required Actions through the Alavi Form Engine form settings. No email is sent unless the administrator explicitly adds an email Action.
@@ -23,18 +23,18 @@ All seven fields are required:
 
 | Key | Label | Type | Contract |
 |---|---|---|---|
-| \`organization_name\` | نام سازمان | Text | Required |
-| \`representative_name\` | نام و نام خانوادگی نماینده | Text | Required |
-| \`representative_mobile\` | شماره تماس نماینده | Tel | Required, \`mobile_09\`, \`mobile_ir\` mask |
-| \`guest_count\` | تعداد مهمانان | Number | Positive integer, minimum 1 |
-| \`from_date\` | از تاریخ | Date | Jalali calendar |
-| \`to_date\` | تا تاریخ | Date | Jalali calendar, strictly after \`from_date\` |
-| \`stay_duration\` | مدت اقامت (شب) | Number | Read-only in frontend, automatically calculated and required |
+| `organization_name` | نام سازمان | Text | Required |
+| `representative_name` | نام و نام خانوادگی نماینده | Text | Required |
+| `representative_mobile` | شماره تماس نماینده | Tel | Required, `mobile_09`, `mobile_ir` mask |
+| `guest_count` | تعداد مهمانان | Number | Positive integer, minimum 1 |
+| `from_date` | از تاریخ | Date | Jalali calendar |
+| `to_date` | تا تاریخ | Date | Jalali calendar, strictly after `from_date` |
+| `stay_duration` | مدت اقامت (شب) | Number | Read-only in frontend, automatically calculated and required |
 
 ## Stay Duration Contract
 
 - Duration is the difference between the Jalali start and end dates in **nights**. The start date is not counted as an additional night.
-- The frontend listens to date input/change events, calculates the date difference and fills \`stay_duration\`.
+- The frontend listens to date input/change events, calculates the date difference and fills `stay_duration`.
 - The calculated field is read-only in the browser; it remains part of the submitted AFE data and is saved with the submission.
 - Server-side validators independently validate the end date and compare the submitted duration with the actual Jalali date difference. A tampered or stale duration is rejected.
 - End date must be later than start date. Same-day or reversed ranges are invalid.
@@ -56,29 +56,29 @@ The reusable AFE validator callback now receives the complete sanitized submissi
 ## Presentation
 
 - Minimal formal visual language aligned with the child theme's green/gold identity.
-- Scoped BEM block: \`ba-camp-admission\`.
+- Scoped BEM block: `ba-camp-admission`.
 - Responsive 2-column field layout on desktop and 1-column layout on mobile.
 - The duration field is visually distinguished as a calculated/read-only value.
 - Submit button label: «ثبت درخواست پذیرش».
 
 Assets:
-- \`assets/css/ba-camp-admission-form.css\`
-- \`assets/js/ba-camp-admission-form.js\`
+- `assets/css/ba-camp-admission-form.css`
+- `assets/js/ba-camp-admission-form.js`
 
 ## Regression Tests
 
-- Engine cross-field validator context: \`wp-content/plugins/alavi-form-engine/tests/cross-field-validator-context.php\`
-- Form definition and date/duration validation: \`wp-content/themes/ostadsho-child/tests/camp-admission-form-definition.php\`
-- CI: \`.github/workflows/camp-admission-form-checks.yml\`
+- Engine cross-field validator context: `wp-content/plugins/alavi-form-engine/tests/cross-field-validator-context.php`
+- Form definition and date/duration validation: `wp-content/themes/ostadsho-child/tests/camp-admission-form-definition.php`
+- CI: `.github/workflows/camp-admission-form-checks.yml`
 
 Run with PHP 8.3+ and Node:
 
-\`\`\`sh
+```sh
 php wp-content/plugins/alavi-form-engine/tests/cross-field-validator-context.php
 php wp-content/plugins/alavi-form-engine/tests/validator-registry.php
 php wp-content/themes/ostadsho-child/tests/camp-admission-form-definition.php
 node --check wp-content/themes/ostadsho-child/assets/js/ba-camp-admission-form.js
-\`\`\`
+```
 
 ## Live Acceptance Checklist
 
