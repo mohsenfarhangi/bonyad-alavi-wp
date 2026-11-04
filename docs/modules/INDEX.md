@@ -27,6 +27,8 @@
 
 برای فرم تماس با ما از `MODULE-CONTACT-FORM` شروع کن.
 
+برای فرم پذیرش مجتمع اردوگاهی امام خمینی (ره) از `MODULE-CAMP-ADMISSION` شروع کن و در صورت تغییر اعتبارسنجی بین‌فیلدی Engine، `MODULE-AFE`/`MODULE-AFE-EXTENSION` را هم بخوان.
+
 برای تغییرات `ba-hero__grid`/Hero صفحه اصلی از `MODULE-HOME-HERO` شروع کن.
 
 برای تغییرات `ba-quick-links` صفحه اصلی از `MODULE-HOME-QUICK-LINKS` شروع کن.
