@@ -59,6 +59,21 @@ function my_theme_enqueue_styles()
         true
     );
 
+    // Presentation and calculated stay duration for the camp admission form only.
+    wp_enqueue_style(
+        'ba-camp-admission-form',
+        get_stylesheet_directory_uri() . '/assets/css/ba-camp-admission-form.css',
+        array('child-style'),
+        filemtime( get_stylesheet_directory() . '/assets/css/ba-camp-admission-form.css' )
+    );
+    wp_enqueue_script(
+        'ba-camp-admission-form',
+        get_stylesheet_directory_uri() . '/assets/js/ba-camp-admission-form.js',
+        array(),
+        filemtime( get_stylesheet_directory() . '/assets/js/ba-camp-admission-form.js' ),
+        true
+    );
+
     if ( function_exists( 'is_cart' ) && is_cart() ) {
         wp_enqueue_style(
             'ba-participation-cart',
@@ -175,3 +190,8 @@ add_action( 'afe_register_forms', array( BA_Contact_Form::class, 'register' ) );
 // فرم جذب تسهیلگر؛ تمام مدیریت، اعتبارسنجی و ذخیره‌سازی با Alavi Form Engine است.
 require_once get_stylesheet_directory() . '/inc/forms/class-ba-facilitator-recruitment-form.php';
 add_action( 'afe_register_forms', array( BA_Facilitator_Recruitment_Form::class, 'register' ) );
+
+// فرم پذیرش مجتمع اردوگاهی امام خمینی (ره)؛ محاسبه و اعتبارسنجی مدت اقامت نیز به همین فرم محدود است.
+require_once get_stylesheet_directory() . '/inc/forms/class-ba-camp-admission-form.php';
+add_action( 'afe_register_validator_definitions', array( BA_Camp_Admission_Form::class, 'registerValidators' ) );
+add_action( 'afe_register_forms', array( BA_Camp_Admission_Form::class, 'register' ) );
