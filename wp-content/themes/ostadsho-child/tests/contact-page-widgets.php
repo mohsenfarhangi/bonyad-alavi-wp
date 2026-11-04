@@ -134,6 +134,7 @@ foreach (explode('}', (string) preg_replace('#/\*.*?\*/#s', '', $css)) as $block
 	}
 }
 $check('css-element-selectors-two-class', 0 === $bad);
+$check('css-card-title-has-no-font-size-kit-owns-it', 1 === preg_match('/\\.ba-contact-cards \\.ba-contact-cards__title \\{([^}]*)\\}/', $css, $titleRule) && !str_contains($titleRule[1], 'font-size'));
 $check('css-no-js-widgets', !str_contains($registrar, 'contact-page.js'));
 foreach (array('Info', 'Table', 'Cards', 'Map') as $n) {
 	$src = (string) file_get_contents($theme . '/inc/elementor/widgets/class-bonyad-alavi-contact-' . strtolower($n) . '-widget.php');

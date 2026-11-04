@@ -110,10 +110,10 @@
   padding: 20px;
 }
 
+/* اندازه/وزن عنوان از تایپوگرافی h4 کیت سراسری Elementor می‌آید (همان ظاهر فعلی صفحه روی سایت). */
 .ba-contact-cards .ba-contact-cards__title {
   margin: 0 0 14px;
   color: #055a2c;
-  font-size: 1.05rem;
 }
 
 .ba-contact-cards .ba-contact-cards__title a {

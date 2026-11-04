@@ -824,3 +824,9 @@ Modules: [MODULE-AFE](../modules/alavi-form-engine.md), [MODULE-JIHADI-FORM](../
 - **تست:** `contact-page-widgets.php` ۶۲/۶۲، `studies-center-contract` ۶۰، `runtime` ۷۴، `session-widgets` ۳۸، `contact-form-definition` ۲۰، `section-heading-widget-contract` ۱۳ PASS (PHP 8.5 محلی). مقایسه بصری هارنس مرجع در برابر ویجت‌ها (۱۲۸۰/۳۹۰): ۰ پیکسل تفاوت؛ رندر در Elementor ۴٫۳٫۵ سندباکس؛ harness مطالعات با Swiper واقعی و ۴ ستون برای پژوهش قبل/بعد رفع. GitHub Actions و پذیرش واقعی WordPress/Production انجام نشده.
 - **یافته فقط‌خواندنی:** `class-ba-contact-form.php` روی هاست با `main` (دسته‌بندی پیام) یکسان است؛ `tests/contact-form-definition.php` قدیمی روی هاست مانده (بی‌اثر).
 
+## STATE-002-050 — PR #23 deployed; draft page 29990; research 4-up applied (2026-11-05)
+
+- **استقرار (با تأیید مدیر، اسکریپت امن):** ۸ فایل PR #23 (CSS مطالعات، CSS و ۵ کلاس ویجت ارتباط با ما، registrar) روی هاست؛ همه دوباره دانلود و با `main` (`f31c229`) برابر؛ `.tmp` نیست؛ Fatal در error_log صفر؛ Elementor چهار ویجت را ثبت کرد. اجرای اول با سقف زمانی background کشته شد (۶ از ۸ فایل؛ registrar آخر بود پس ویجت بارگذاری نمی‌شد)؛ حالت `resume` اسکریپت فقط دو فایل باقی‌مانده را مستقر کرد. پشتیبان‌ها: `~/bonyad-deploy-backups/2026-11-05-contact-deploy/`.
+- **صفحه 7930:** `slides_per_view=4` روی کاروسل پژوهش `e994d17` (فقط یک کلید) پس از استقرار CSS رفع؛ دسکتاپ ۴تایی، دکمه/تاریخ داخل کارت؛ perView تبلت/موبایل بدون تغییر.
+- **پیش‌نویس `29990`:** مقایسه با 28817 و درس‌های آن در [MODULE-CONTACT-PAGE](../modules/contact-page-widgets.md). 28817 تغییر نکرد. تست ارسال فرم واقعی انجام نشده (ایمیل مدیر/ثبت دیتابیس؛ نیازمند تأیید).
+
