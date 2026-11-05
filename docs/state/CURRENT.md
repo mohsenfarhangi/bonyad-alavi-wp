@@ -29,6 +29,9 @@ AFE release goal همچنان live acceptance نسخه 1.0.28 و رفع blocker 
 - فرم `imam-khomeini-camp-admission`: انتخاب چندگانه قابل جست‌وجوی ۱۴ فضای اردوگاه در بخش اول، پذیرش اجباری قوانین در انتها و CAPTCHA درست بالای دکمه ثبت. مقدارهای منتخب و رضایت کاربر در داده ثبت ذخیره می‌شوند؛ داده جعلی/خالی سمت سرور رد می‌شود.
 - AFE: نوع Checkbox افزوده شد؛ ترتیب CAPTCHA با `captcha_before_submit` به‌صورت opt-in و فقط برای این فرم تغییر می‌کند. regression مربوطه به‌روزرسانی شد؛ پذیرش زنده (Elementor و ثبت واقعی) باقی است. [MODULE-CAMP-ADMISSION](../modules/camp-admission-form.md)
 
+### Camp admission — regulations checkbox UI refinement (2026-11-05)
+- فیلد `terms_accepted` صرفاً در CSS اختصاصی فرم به Flex افقی با راست‌چین RTL تغییر کرد؛ پس‌زمینه و border حذف شدند و پیغام خطا در ردیف جدا باقی می‌ماند. هیچ تغییری در الزام پذیرش، ارسال فرم یا منطق دیگر انجام نشد. regression قرارداد CSS اضافه شد؛ پذیرش بصری زنده در Elementor هنوز لازم است.
+
 ## Recently Completed
 
 ### Contact page widgets + four-up studies carousels (2026-11-05)

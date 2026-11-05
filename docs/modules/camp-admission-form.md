@@ -69,6 +69,7 @@ The reusable AFE validator callback now receives the complete sanitized submissi
 ## Presentation
 
 - Minimal formal visual language aligned with the child theme's green/gold identity.
+- Regulations consent (`terms_accepted`) uses an unboxed transparent Flex row with the checkbox on the right in RTL and the label next to it; its validation message wraps to the following row. No background or border is applied to the field.
 - Scoped BEM block: `ba-camp-admission`.
 - Responsive 2-column field layout on desktop and 1-column layout on mobile.
 - The duration field is visually distinguished as a calculated/read-only value.
