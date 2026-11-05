@@ -6,7 +6,7 @@
 
 پروژه در توسعه فعال است.
 
-- **Alavi Form Engine:** `1.0.28-dev.7`، DB `1.0.5-dev.2`، stable baseline/tag `1.0.27`; production bump هنوز به live acceptance وابسته است.
+- **Alavi Form Engine:** `1.0.28-dev.8`، DB `1.0.5-dev.3`، stable baseline/tag `1.0.27`; production bump هنوز به live acceptance وابسته است.
 - **Ostadsho child theme:** custom integration layer روی Theme header `2.8`; version docs legacy v0.x به state history مهاجرت کرده‌اند.
 
 ## Current Goal
@@ -33,6 +33,13 @@ AFE release goal همچنان live acceptance نسخه 1.0.28 و رفع blocker 
 - فیلد `terms_accepted` صرفاً در CSS اختصاصی فرم به Flex افقی با راست‌چین RTL تغییر کرد؛ پس‌زمینه و border حذف شدند و پیغام خطا در ردیف جدا باقی می‌ماند. هیچ تغییری در الزام پذیرش، ارسال فرم یا منطق دیگر انجام نشد. regression قرارداد CSS اضافه شد؛ پذیرش بصری زنده در Elementor هنوز لازم است.
 
 ## Recently Completed
+
+### AFE per-form admin-only fields + Jihadi group level (2026-11-05)
+- تب جدید «فیلدهای مدیریتی» برای هر فرم: متن کوتاه، چندخطی، انتخابی با گزینه‌های قابل تنظیم؛ تعریف `settings.admin_fields` با Admin override مستقل و سقف ۳۰ فیلد. مقدارها در جدول اختصاصی `afe_submission_admin_fields` (به‌جای `data_json`) ذخیره می‌شوند؛ فقط مدیریت دارای مجوز همان فرم قابلیت مشاهده/ویرایش و خروجی دارد. پاک‌سازی در purge دائم؛ DB version `1.0.5-dev.3` و plugin dev `1.0.28-dev.8`.
+- فرم جهادی `jihadi-group-registration`: فیلد `group_level` در **جزئیات/ویرایش مدیر** با چهار سطح «نوپا، فعال، پیشرو، الگو»، بدون نمایش در فرم عمومی. ثبت‌های قبلی قابل طبقه‌بندی و مقدار اولیه خالی دارند.
+- Excel تک‌ثبت و لیست، PDF/چاپ مدیریت و profile ستون‌های `admin:<key>` پشتیبانی می‌شوند؛ پروفایل‌های Excel قدیمی ستون جدید را append می‌کنند، خاموش‌بودن صریح ستون حفظ می‌شود. PDFهای تولیدشده برای کاربران/Actionها به‌طور پیش‌فرض فیلد مدیریتی را نشان نمی‌دهند.
+- تست‌های PHP logic/storage/export wiring و CI متمرکز اضافه شده‌اند. استقرار و acceptance واقعی wp-admin و Excel/PDF لازم است. [MODULE-AFE](../modules/alavi-form-engine.md)، [MODULE-JIHADI-FORM](../modules/jihadi-group-registration-form.md).
+
 
 ### Contact page widgets + four-up studies carousels (2026-11-05)
 - ویجت‌های اطلاعات تماس، جدول داخلی‌ها، کارت مراکز وابسته و نقشه برای صفحه «ارتباط با ما» بدون تغییر ظاهر (۰ پیکسل تفاوت در هارنس)؛ فرم دست‌نخورده. جزئیات: [MODULE-CONTACT-PAGE](../modules/contact-page-widgets.md)، STATE-002-049. PR #23 ادغام و مستقر شد؛ پیش‌نویس `29990` ساخته شد؛ **پذیرش نهایی/جایگزینی 28817 انجام نشده.**

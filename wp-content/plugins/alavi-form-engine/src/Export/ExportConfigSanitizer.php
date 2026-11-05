@@ -1,6 +1,7 @@
 <?php
 declare(strict_types=1);
 namespace BonyadAlavi\FormEngine\Export;
+use BonyadAlavi\FormEngine\Admin\AdminFields;
 final class ExportConfigSanitizer
 {
     public function sanitize(array $input,array $form): array
@@ -17,6 +18,6 @@ final class ExportConfigSanitizer
     }
     private function sanitizeHtml(string $html): string{return wp_kses($html,['div'=>['class'=>true,'dir'=>true,'style'=>true],'span'=>['class'=>true,'dir'=>true,'style'=>true],'p'=>['class'=>true,'dir'=>true,'style'=>true],'strong'=>[],'b'=>[],'em'=>[],'i'=>[],'br'=>[],'h1'=>['class'=>true,'style'=>true],'h2'=>['class'=>true,'style'=>true],'h3'=>['class'=>true,'style'=>true],'table'=>['class'=>true,'dir'=>true,'style'=>true],'thead'=>[],'tbody'=>[],'tr'=>['class'=>true],'th'=>['class'=>true,'colspan'=>true,'rowspan'=>true,'style'=>true],'td'=>['class'=>true,'colspan'=>true,'rowspan'=>true,'style'=>true],'a'=>['href'=>true,'target'=>true,'rel'=>true,'class'=>true],'ul'=>[],'ol'=>[],'li'=>[]]);}
     private function sanitizeCss(string $css): string{$css=str_replace(["\0",'<?','?>'],'',$css);$css=preg_replace('/@(?:import|font-face|charset|namespace|supports|document)\b[^;{}]*(?:;|\{.*?\})/is','',$css)??'';$css=preg_replace('/(?:expression|javascript\s*:|behavior\s*:|-moz-binding|url\s*\()/i','',$css)??'';return trim(substr($css,0,20000));}
-    private function fieldMap(array $form): array{$out=[];foreach((array)($form['steps']??[]) as $step)foreach((array)($step['items']??[]) as $field)$this->collect((array)$field,$out,'');return $out;}
+    private function fieldMap(array $form): array{$out=[];foreach((array)($form['steps']??[]) as $step)foreach((array)($step['items']??[]) as $field)$this->collect((array)$field,$out,'');foreach(AdminFields::definitions($form) as $field)$out[AdminFields::exportKey($field['key'])]=$field['label'];return $out;}
     private function collect(array $field,array &$out,string $prefix): void{$name=(string)($field['name']??'');$type=(string)($field['type']??'');if($name===''||$type==='html')return;$path=$prefix===''?$name:$prefix.'.'.$name;if($type==='repeater'){foreach((array)($field['fields']??[]) as $child)$this->collect((array)$child,$out,$path);return;}$out[$path]=(string)($field['label']??$path);}
 }

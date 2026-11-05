@@ -2,6 +2,7 @@
 declare(strict_types=1);
 namespace BonyadAlavi\FormEngine\Export;
 use BonyadAlavi\FormEngine\Admin\FormDataPresenter;
+use BonyadAlavi\FormEngine\Admin\AdminFields;
 use BonyadAlavi\FormEngine\Repository\SubmissionRepository;
 use BonyadAlavi\FormEngine\Localization\LocaleDateService;
 use RuntimeException;
@@ -45,6 +46,21 @@ final class ExcelExporter
         $sheet->setCellValueExplicit('A4','تاریخ ثبت',\PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);$sheet->setCellValueExplicit('B4',$this->dates->formatUtc((string)$submission['created_at'],true),\PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
         $r=6;$data=(array)$submission['data'];foreach($this->presenter->sections($form) as $section){$sheet->mergeCells("A{$r}:B{$r}");$sheet->setCellValueExplicit("A{$r}",(string)($section['step']['title']??''),\PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);$this->styleSection($sheet,"A{$r}:B{$r}",$cfg);$r++;
             foreach($section['fields'] as $field){$name=(string)$field['name'];$sheet->setCellValueExplicit("A{$r}",$this->presenter->fieldLabel($field),\PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);if(($field['type']??'')==='file'){$files=$this->repo->filesForField((int)$submission['id'],$name);$this->setFilesCell($sheet,"B{$r}",$files);}else{$sheet->setCellValueExplicit("B{$r}",$this->presenter->plainField($field,$data[$name]??'',$data),\PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);}$r++;}}
+        $adminDefinitions=AdminFields::definitions($form);
+        if($adminDefinitions!==[]) {
+            $adminValues=$this->repo->adminFields((int)$submission['id']);
+            $sheet->mergeCells("A{$r}:B{$r}");
+            $sheet->setCellValueExplicit("A{$r}",'اطلاعات اختصاصی مدیر',\PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+            $this->styleSection($sheet,"A{$r}:B{$r}",$cfg);
+            $r++;
+            foreach($adminDefinitions as $definition){
+                $field=AdminFields::presentationField($definition);
+                $sheet->setCellValueExplicit("A{$r}",$definition['label'],\PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+                $value=$this->presenter->plainField($field,$adminValues[$definition['key']]??'');
+                $sheet->setCellValueExplicit("B{$r}",$value,\PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+                $r++;
+            }
+        }
         $sheet->getColumnDimension('A')->setWidth(28);$sheet->getColumnDimension('B')->setWidth(60);$sheet->getStyle("A1:B".max(1,$r-1))->getAlignment()->setWrapText(true)->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_TOP);$sheet->getStyle("A1:A".max(1,$r-1))->getFont()->setBold(true);
     }
 
@@ -53,8 +69,52 @@ final class ExcelExporter
         $profile=$this->profile($form);$cfg=(array)$profile['excel'];$sheet->setTitle($title!==''?$title:$this->safeSheetName((string)($cfg['sheet_name']??$form['title']??'ثبت‌ها')));$sheet->setRightToLeft(!empty($cfg['rtl']));$columns=[];foreach((array)($cfg['columns']??[]) as $column)if(!empty($column['enabled']))$columns[]=$column;
         array_unshift($columns,['field'=>'__tracking','label'=>'کد رهگیری','width'=>18],['field'=>'__status','label'=>'وضعیت','width'=>16],['field'=>'__date','label'=>'تاریخ ثبت','width'=>18]);
         foreach($columns as $i=>$column){$cell=$this->cell($i+1,1);$sheet->setCellValueExplicit($cell,(string)$column['label'],\PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);$sheet->getColumnDimension(\PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($i+1))->setWidth((float)($column['width']??22));}
-        $this->styleHeader($sheet,'A1:'.$this->cell(count($columns),1),$cfg);$r=2;foreach($rows as $row){$data=(array)$row['data'];foreach($columns as $i=>$column){$field=(string)$column['field'];$value='';if($field==='__tracking')$value=(string)$row['tracking_code'];elseif($field==='__status'){$status=(string)$row['status'];$value=(string)($form['workflow'][$status]??$status);}elseif($field==='__date')$value=$this->dates->formatUtc((string)$row['created_at'],true);else{$def=$this->fieldByPath($form,$field);if($def){$raw=$this->valueByPath($data,$field);if(($def['type']??'')==='file'&&!str_contains($field,'.')){$files=$this->repo->filesForField((int)$row['id'],$field);$this->setFilesCell($sheet,$this->cell($i+1,$r),$files);continue;}$value=$this->presenter->plainField($def,$raw,$data);}}$sheet->setCellValueExplicit($this->cell($i+1,$r),$value,\PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);}$r++;}
-        if(!empty($cfg['freeze_header']))$sheet->freezePane('A2');if(!empty($cfg['auto_filter'])&&count($columns)>0)$sheet->setAutoFilter('A1:'.$this->cell(count($columns),max(1,$r-1)));$sheet->getStyle('A1:'.$this->cell(max(1,count($columns)),max(1,$r-1)))->getAlignment()->setWrapText(true)->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_TOP);
+        $this->styleHeader($sheet,'A1:'.$this->cell(count($columns),1),$cfg);
+        $adminDefs=[];
+        foreach(AdminFields::definitions($form) as $definition) $adminDefs[AdminFields::exportKey($definition['key'])]=$definition;
+        $hasAdminColumns=false;
+        foreach($columns as $col) if(isset($adminDefs[(string)($col['field']??'')])) $hasAdminColumns=true;
+
+        $adminValueMap=$hasAdminColumns
+            ? $this->repo->adminFieldsForSubmissions(array_column($rows,'id'))
+            : [];
+        $r=2;
+        foreach($rows as $row) {
+            $data=(array)$row['data'];
+            $adminValues=$adminValueMap[(int)$row['id']]??[];
+            foreach($columns as $i=>$column) {
+                $field=(string)$column['field'];
+                $value='';
+                if($field==='__tracking') $value=(string)$row['tracking_code'];
+                elseif($field==='__status') {
+                    $status=(string)$row['status'];
+                    $value=(string)($form['workflow'][$status]??$status);
+                } elseif($field==='__date') $value=$this->dates->formatUtc((string)$row['created_at'],true);
+                elseif(isset($adminDefs[$field])) {
+                    $definition=$adminDefs[$field];
+                    $value=$this->presenter->plainField(
+                        AdminFields::presentationField($definition),
+                        $adminValues[$definition['key']]??''
+                    );
+                } else {
+                    $def=$this->fieldByPath($form,$field);
+                    if($def) {
+                        $raw=$this->valueByPath($data,$field);
+                        if(($def['type']??'')==='file'&&!str_contains($field,'.')) {
+                            $files=$this->repo->filesForField((int)$row['id'],$field);
+                            $this->setFilesCell($sheet,$this->cell($i+1,$r),$files);
+                            continue;
+                        }
+                        $value=$this->presenter->plainField($def,$raw,$data);
+                    }
+                }
+                $sheet->setCellValueExplicit($this->cell($i+1,$r),$value,\PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+            }
+            $r++;
+        }
+        if(!empty($cfg['freeze_header']))$sheet->freezePane('A2');
+        if(!empty($cfg['auto_filter']) && count($columns)>0)$sheet->setAutoFilter('A1:'.$this->cell(count($columns),max(1,$r-1)));
+        $sheet->getStyle('A1:'.$this->cell(max(1,count($columns)),max(1,$r-1)))->getAlignment()->setWrapText(true)->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_TOP);
     }
 
     private function styleHeader(object $sheet,string $range,array $cfg): void{$style=$sheet->getStyle($range);$style->getFont()->setBold(!empty($cfg['header_bold']))->getColor()->setRGB((string)($cfg['header_text']??'0F6B4F'));$style->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setRGB((string)($cfg['header_fill']??'E7F1ED'));}

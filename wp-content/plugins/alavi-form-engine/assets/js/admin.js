@@ -964,6 +964,40 @@
     });
   };
 
+  const initAdminMetaFields = () => {
+    document.querySelectorAll('[data-afe-admin-meta-fields]').forEach(root => {
+      const list = qs(root, '[data-afe-admin-meta-rows]');
+      const template = qs(root, '[data-afe-admin-meta-template]');
+      const add = qs(root, '[data-afe-admin-meta-add]');
+      if (!list || !template || !add) return;
+      let next = list.querySelectorAll('[data-afe-admin-meta-row]').length;
+      const sync = row => {
+        const type = qs(row, '[data-afe-admin-meta-type]');
+        const options = qs(row, '[data-afe-admin-meta-options]');
+        if (type && options) options.hidden = type.value !== 'select';
+      };
+      const bind = row => {
+        qs(row, '[data-afe-admin-meta-type]')?.addEventListener('change', () => sync(row));
+        qs(row, '[data-afe-admin-meta-remove]')?.addEventListener('click', () => row.remove());
+        sync(row);
+      };
+      list.querySelectorAll('[data-afe-admin-meta-row]').forEach(bind);
+      add.addEventListener('click', () => {
+        if (list.querySelectorAll('[data-afe-admin-meta-row]').length >= 30) return;
+        const index = next++;
+        const html = template.innerHTML.replace(/__INDEX__/g, String(index));
+        const holder = document.createElement('div');
+        holder.innerHTML = html.trim();
+        const row = holder.firstElementChild;
+        if (row) {
+          list.appendChild(row);
+          bind(row);
+          qs(row, 'input[name$="[key]"]')?.focus();
+        }
+      });
+    });
+  };
+
   const initAdminDatePickers = () => {
     if (!window.afeAdmin?.isJalali || !window.jalaliDatepicker) return;
     try {
@@ -1007,6 +1041,7 @@
     initBrandMarkSettings();
     initTemplateEditors();
     initFormTabs();
+    initAdminMetaFields();
     initTokenPalettes();
     initActionBuilders();
     initDuplicateSettings();

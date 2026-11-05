@@ -3,6 +3,7 @@ declare(strict_types=1);
 namespace BonyadAlavi\FormEngine\Export;
 
 use BonyadAlavi\FormEngine\Admin\FormDataPresenter;
+use BonyadAlavi\FormEngine\Admin\AdminFields;
 use BonyadAlavi\FormEngine\Localization\LocaleDateService;
 use BonyadAlavi\FormEngine\Repository\SubmissionRepository;
 
@@ -10,12 +11,12 @@ final class PdfTemplateRenderer
 {
     public function __construct(private readonly FormDataPresenter $presenter,private readonly SubmissionRepository $repo,private readonly LocaleDateService $dates){}
 
-    public function render(array $form,array $submission): string
+    public function render(array $form,array $submission,bool $includeAdminFields=false): string
     {
-        $profile=$this->profile($form);$pdf=(array)$profile['pdf'];$tokens=$this->tokens($form,$submission);
-        $header=$this->replace((string)$pdf['header_html'],$tokens,$form,$submission);
-        $body=$this->replace((string)$pdf['body_html'],$tokens,$form,$submission);
-        $footer=$this->replace((string)$pdf['footer_html'],$tokens,$form,$submission);
+        $profile=$this->profile($form);$pdf=(array)$profile['pdf'];$tokens=$this->tokens($form,$submission,$includeAdminFields);
+        $header=$this->replace((string)$pdf['header_html'],$tokens,$form,$submission,$includeAdminFields);
+        $body=$this->replace((string)$pdf['body_html'],$tokens,$form,$submission,$includeAdminFields);
+        $footer=$this->replace((string)$pdf['footer_html'],$tokens,$form,$submission,$includeAdminFields);
         $css=(string)$pdf['css'];
         return '<style>'.$css.'</style><div lang="fa" dir="rtl">'.$header.$body.$footer.'</div>';
     }
@@ -25,7 +26,7 @@ final class PdfTemplateRenderer
         return ExportProfile::resolve($form);
     }
 
-    private function tokens(array $form,array $submission): array
+    private function tokens(array $form,array $submission,bool $includeAdminFields=false): array
     {
         $status=(string)($submission['status']??'');
         return [
@@ -35,24 +36,35 @@ final class PdfTemplateRenderer
             '{{tracking_code}}'=>esc_html((string)($submission['tracking_code']??'')),
             '{{status}}'=>esc_html((string)($form['workflow'][$status]??$status)),
             '{{submitted_at}}'=>esc_html($this->dates->formatUtc((string)($submission['created_at']??''),true)),
-            '{{fields_table}}'=>$this->fieldsTable($form,$submission),
+            '{{fields_table}}'=>$this->fieldsTable($form,$submission,$includeAdminFields),
         ];
     }
 
-    private function replace(string $template,array $tokens,array $form,array $submission): string
+    private function replace(string $template,array $tokens,array $form,array $submission,bool $includeAdminFields=false): string
     {
         $out=strtr($template,$tokens);
         $data=(array)($submission['data']??[]);
         $out=preg_replace_callback('/\{\{field:([a-zA-Z0-9_.-]+)\}\}/',function(array $m)use($form,$data):string{
             $field=$this->fieldByPath($form,$m[1]);if(!$field)return '';$value=$this->valueByPath($data,$m[1]);return $this->escapeValue($this->presenter->plainField($field,$value,$data));
         },$out)??$out;
+        // Admin-only tokens are available solely in authorized admin exports,
+        // never in public form rendering or ordinary field:* substitutions.
+        $adminDefs=[];
+        if($includeAdminFields) foreach(AdminFields::definitions($form) as $definition) $adminDefs[$definition['key']]=$definition;
+        $adminValues=$adminDefs?$this->repo->adminFields((int)($submission['id']??0)):[];
+        $out=preg_replace_callback('/\{\{admin_field:([a-z][a-z0-9_]*)\}\}/',
+            function(array $m)use($adminDefs,$adminValues):string{
+                if(!isset($adminDefs[$m[1]])) return '';
+                $field=AdminFields::presentationField($adminDefs[$m[1]]);
+                return $this->escapeValue($this->presenter->plainField($field,$adminValues[$m[1]]??''));
+            },$out)??$out;
         $out=preg_replace_callback('/\{\{files:([a-zA-Z0-9_.-]+)\}\}/',function(array $m)use($submission):string{
             if(str_contains($m[1],'.'))return '';$files=$this->repo->filesForField((int)($submission['id']??0),$m[1]);return $this->fileLinks($files);
         },$out)??$out;
         return $out;
     }
 
-    private function fieldsTable(array $form,array $submission): string
+    private function fieldsTable(array $form,array $submission,bool $includeAdminFields=false): string
     {
         $data=(array)($submission['data']??[]);$id=(int)($submission['id']??0);$html='<table class="afe-export-table"><tbody>';
         foreach($this->presenter->sections($form) as $section){$title=(string)($section['step']['title']??'');if($title!=='')$html.='<tr class="afe-export-step"><th colspan="2">'.esc_html($title).'</th></tr>';
@@ -60,6 +72,16 @@ final class PdfTemplateRenderer
                 if(($field['type']??'')==='file'){$html.=$this->fileLinks($this->repo->filesForField($id,$name));}
                 else{$html.=$this->presenter->displayField($field,$data[$name]??'',$data);} $html.='</td></tr>';
             }}
+        $adminDefinitions=$includeAdminFields?AdminFields::definitions($form):[];
+        if($adminDefinitions!==[]) {
+            $adminValues=$this->repo->adminFields($id);
+            $html.='<tr class="afe-export-step"><th colspan="2">اطلاعات اختصاصی مدیر</th></tr>';
+            foreach($adminDefinitions as $definition) {
+                $field=AdminFields::presentationField($definition);
+                $html.='<tr><th>'.esc_html($definition['label']).'</th><td>'.
+                    $this->presenter->displayField($field,$adminValues[$definition['key']]??'').'</td></tr>';
+            }
+        }
         return $html.'</tbody></table>';
     }
 

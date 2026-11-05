@@ -63,6 +63,13 @@ Form definition از DSL عمومی AFE شامل `Form`, `Step`, Text/Number/Tex
 - legacy coverage keys از `legacy_row_map` به ساختار repeater جدید map می‌شوند.
 - file fields limits/MIMEها همان Source Definition فعلی حفظ شده‌اند.
 
+## Admin-only group classification (2026-11-05)
+
+- در Source Definition فرم `settings.admin_fields` یک فیلد `select` به نام `group_level` و عنوان «سطح گروه» تعریف شد. چهار گزینه: `novpa` (نوپا)، `faal` (فعال)، `pishro` (پیشرو)، `olgoo` (الگو).
+- فقط در صفحه جزئیات و ویرایش Submission در مدیریت نمایش داده می‌شود؛ فرم عمومی و مسیر REST و ویرایش متقاضی آن را ندارند. مقدار در جدول جداگانه `afe_submission_admin_fields` ذخیره می‌شود و در Excel تک/لیست و PDF/چاپ مدیریتی قابل مشاهده است. برای ثبت‌های قدیمی مقدار خالی باقی می‌ماند تا مدیر اختصاص دهد.
+- در مدیریت فرم‌ها، تب «فیلدهای مدیریتی» امکان تغییر label/options و افزودن فیلدهای دیگر را می‌دهد. Admin Override ممکن است بر تعریف کد تقدم داشته باشد؛ در سایت با تنظیمات موجود بررسی شود. تغییر شناسه ذخیره‌شده بدون برنامه مهاجرت توصیه نمی‌شود.
+- این قابلیت از Engine عمومی استفاده می‌کند و نباید برای فرم جهادی به‌صورت اختصاصی داخل Exporter یا SubmissionsPage hardcode شود.
+
 ## Workflow / Runtime Settings
 
 Workflow:

@@ -77,6 +77,16 @@ final class Migrator
                 KEY field_number (field_key(80),value_num)
             ) {$charset};",
 
+            "CREATE TABLE {$p}afe_submission_admin_fields (
+                submission_id bigint(20) unsigned NOT NULL,
+                field_key varchar(64) NOT NULL,
+                value_text longtext NULL,
+                updated_by bigint(20) unsigned NOT NULL DEFAULT 0,
+                updated_at datetime NOT NULL,
+                PRIMARY KEY  (submission_id,field_key),
+                KEY field_key (field_key)
+            ) {$charset};",
+
             "CREATE TABLE {$p}afe_files (
                 id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
                 submission_id bigint(20) unsigned NOT NULL,
@@ -211,7 +221,7 @@ final class Migrator
     {
         global $wpdb;
         $required = [
-            'afe_forms','afe_submissions','afe_submission_values','afe_files',
+            'afe_forms','afe_submissions','afe_submission_values','afe_submission_admin_fields','afe_files',
             'afe_notes','afe_audit_log','afe_action_log','afe_action_once','afe_submission_fingerprints',
             'afe_geo_provinces','afe_geo_counties','afe_geo_districts',
         ];

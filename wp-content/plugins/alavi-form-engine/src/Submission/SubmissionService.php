@@ -544,6 +544,11 @@ final class SubmissionService
         }
 
         $form['settings'] = array_replace_recursive($form['settings'], $adminSettings);
+        // Lists must replace the code-defined array, not recursively merge
+        // indexes: removing a field in the manager must actually remove it.
+        if (array_key_exists('admin_fields',$adminSettings) && is_array($adminSettings['admin_fields'])) {
+            $form['settings']['admin_fields']=array_values($adminSettings['admin_fields']);
+        }
         if (!empty($adminSettings['workflow']) && is_array($adminSettings['workflow'])) {
             $form['workflow'] = $adminSettings['workflow'];
         }

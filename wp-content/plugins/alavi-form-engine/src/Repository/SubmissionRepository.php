@@ -100,6 +100,65 @@ final class SubmissionRepository
         return $result;
     }
 
+    /**
+     * Admin-only values are held in a separate table. They are deliberately
+     * absent from data_json, the public form edit context and REST payloads.
+     *
+     * @return array<string,string>
+     */
+    public function adminFields(int $submissionId): array
+    {
+        global $wpdb;
+        $table=$wpdb->prefix.'afe_submission_admin_fields';
+        $rows=$wpdb->get_results($wpdb->prepare(
+            "SELECT field_key,value_text FROM {$table} WHERE submission_id=%d", $submissionId
+        ), ARRAY_A);
+        $out=[];
+        foreach ((array)$rows as $row) $out[(string)$row['field_key']]=(string)($row['value_text']??'');
+        return $out;
+    }
+
+    /** @return array<int,array<string,string>> Bulk-load to avoid N+1 Excel export queries. */
+    public function adminFieldsForSubmissions(array $submissionIds): array
+    {
+        global $wpdb;
+        $ids=array_values(array_unique(array_filter(array_map('absint',$submissionIds))));
+        $out=[];
+        foreach(array_chunk($ids,250) as $chunk) {
+            $placeholders=implode(',',array_fill(0,count($chunk),'%d'));
+            $sql=$wpdb->prepare(
+                "SELECT submission_id,field_key,value_text FROM {$wpdb->prefix}afe_submission_admin_fields WHERE submission_id IN ($placeholders)",
+                ...$chunk
+            );
+            foreach((array)$wpdb->get_results($sql,ARRAY_A) as $row) {
+                $id=(int)$row['submission_id'];
+                $out[$id][(string)$row['field_key']]=(string)($row['value_text']??'');
+            }
+        }
+        return $out;
+    }
+
+    /** Save only fields validated against the matching form definition. */
+    public function saveAdminFields(int $submissionId, array $values, int $editorId): bool
+    {
+        global $wpdb;
+        $table=$wpdb->prefix.'afe_submission_admin_fields';
+        foreach ($values as $key=>$value) {
+            $key=(string)$key;
+            if (!preg_match('/^[a-z][a-z0-9_]{0,63}$/D',$key) || !is_string($value)) return false;
+            if ($value==='') {
+                if ($wpdb->delete($table,['submission_id'=>$submissionId,'field_key'=>$key],['%d','%s'])===false) return false;
+                continue;
+            }
+            $result=$wpdb->replace($table,[
+                'submission_id'=>$submissionId, 'field_key'=>$key, 'value_text'=>$value,
+                'updated_by'=>$editorId, 'updated_at'=>current_time('mysql',true),
+            ],['%d','%s','%s','%d','%s']);
+            if ($result===false) return false;
+        }
+        return true;
+    }
+
     public function files(int $submissionId): array
     {
         global $wpdb;
@@ -294,6 +353,7 @@ final class SubmissionRepository
         $wpdb->query('START TRANSACTION');
         try {
             $wpdb->delete($p.'afe_submission_values',['submission_id'=>$id],['%d']);
+            $wpdb->delete($p.'afe_submission_admin_fields',['submission_id'=>$id],['%d']);
             $wpdb->delete($p.'afe_notes',['submission_id'=>$id],['%d']);
             $wpdb->delete($p.'afe_files',['submission_id'=>$id],['%d']);
             $wpdb->delete($p.'afe_audit_log',['submission_id'=>$id],['%d']);

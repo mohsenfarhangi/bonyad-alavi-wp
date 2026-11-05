@@ -3,8 +3,8 @@
 **Status:** active development / pre-acceptance  
 **Path:** `wp-content/plugins/alavi-form-engine/`  
 **Namespace:** `BonyadAlavi\FormEngine`  
-**Development version:** `1.0.28-dev.7`  
-**DB checkpoint:** `1.0.5-dev.2`  
+**Development version:** `1.0.28-dev.8`  
+**DB checkpoint:** `1.0.5-dev.3`  
 **Stable baseline/tag documented:** `1.0.27`  
 **PHP:** `>=8.3`
 
@@ -111,6 +111,16 @@ Style modes:
 - `disabled`
 
 tokens زیر `.afe-shell` scope شده‌اند و strong mode reset محدود/defensive دارد.
+
+## Admin-only fields per form (2026-11-05)
+
+- تب «فیلدهای مدیریتی» در تنظیمات **هر فرم**: مدیر دارای مجوز CONFIGURE می‌تواند تا ۳۰ فیلد از نوع `text`، `textarea` یا `select` تعریف کند. برای Select، گزینه‌ها `value|عنوان`، هر خط یک مورد هستند؛ شناسه یکتا، انگلیسی و ثابت است. پیکربندی در `settings.admin_fields` به‌صورت Source Definition یا admin override ذخیره می‌شود؛ Override لیست را **جایگزین** می‌کند (نه merge اندیسی) تا حذف فیلد امکان‌پذیر باشد.
+- این فیلدها به `steps` یا schema عمومی فرم/REST اضافه نمی‌شوند، در public rendering و public submission دیده نمی‌شوند و هیچ عملیات ذخیره عمومی اجازه تغییر آن‌ها را ندارد.
+- جدول اختصاصی `afe_submission_admin_fields` شامل `submission_id`, `field_key`, `value_text`, `updated_by`, `updated_at` است؛ مهاجرت DB به `1.0.5-dev.3` با `dbDelta` و health check انجام می‌شود. ارسال‌های قبلی با مقدار خالی قابل مشاهده‌اند؛ فقط مدیر دارای `FormAccess::EDIT` و nonce صفحه ثبت می‌تواند آن‌ها را تغییر دهد، با whitelist کلیدها و اعتبارسنجی strict Select. در purge دائم، داده‌های مدیریتی وابسته نیز حذف می‌شوند. تغییرات با نام کلیدها audit می‌شوند (نه مقادیر حساس).
+- در صفحه مشاهده/ویرایش ثبت، بخش مستقل «اطلاعات اختصاصی مدیر» نمایش داده می‌شود. در Excel تک‌ثبت و PDF/چاپ مدیریتی این بخش درج می‌شود و در Excel لیست، ستون‌های `admin:<key>` در Profile هر فرم قابل فعال/غیرفعال‌کردن هستند. پروفایل‌های Excel قدیمی ستون‌های جدید را به‌طور پیش‌فرض دریافت می‌کنند، اما اگر ستون صراحتاً غیرفعال شده باشد، حالت آن حفظ می‌شود. Select مقدار فارسیِ عنوان را چاپ/خروجی می‌دهد.
+- PDF مدیریت با `PdfTemplateRenderer::render($form,$row,true)` فیلدهای مدیریتی را فعال می‌کند؛ رندرهای PDF دیگر (مثلاً Action عمومی) به‌طور پیش‌فرض فیلدهای مدیریتی را افشا نمی‌کنند. توکن اختیاری قالب PDF مدیریتی: `{{admin_field:group_level}}`.
+- مسیرها: `src/Admin/AdminFields.php`, `src/Admin/FormsPage.php`, `src/Admin/SubmissionsPage.php`, `src/Repository/SubmissionRepository.php`, `src/Database/Migrator.php`, `src/Export/*`, `assets/js/admin.js`. QA: `admin-submission-fields.php`, `admin-submission-field-storage.php`, `admin-submission-field-integration.php`.
+- **Jihadi فرم:** در Source Definition فقط برای فرم `jihadi-group-registration` فیلد `group_level` با گزینه‌های `novpa=نوپا`، `faal=فعال`، `pishro=پیشرو` و `olgoo=الگو` اضافه شد. داده قدیمی بدون migration مقداری باقی می‌ماند و مدیر می‌تواند سطح را بعداً تعیین کند. بازبینی Admin Override ذخیره‌شده و آزمون استقرار وردپرس واقعی همچنان لازم است.
 
 ## Submission Lifecycle
 

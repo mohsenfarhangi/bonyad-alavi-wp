@@ -179,6 +179,22 @@ final class SubmissionsPage
                 echo '</td></tr>';
             }
         }
+
+        $adminDefinitions=AdminFields::definitions($form);
+        if ($adminDefinitions !== []) {
+            $adminValues=$this->repo->adminFields($id);
+            echo '<tr class="afe-submission-step-row"><th colspan="2">اطلاعات اختصاصی مدیر</th></tr>';
+            foreach($adminDefinitions as $definition) {
+                $field=AdminFields::presentationField($definition);
+                $key=$definition['key'];
+                $value=$adminValues[$key]??'';
+                echo '<tr class="afe-submission-field-row"><th><strong>'.esc_html($definition['label']).'</strong><small>فیلد مدیریتی</small></th><td>';
+                echo $editing
+                    ? $this->presenter->editField($field,$value,[], 'afe_admin_fields')
+                    : $this->presenter->displayField($field,$value);
+                echo '</td></tr>';
+            }
+        }
         echo '</tbody></table></div>';
         if($editing) echo '<div class="afe-admin-savebar"><button class="button button-primary button-large" type="submit">ذخیره تغییرات</button><a class="button button-large" href="'.esc_url($this->detailUrl($id)).'">انصراف</a></div>';
         echo '</div>';
@@ -315,10 +331,25 @@ final class SubmissionsPage
             wp_safe_redirect(add_query_arg('action_retried','1',$this->detailUrl((int)$row['id']))); exit;
         } elseif($action==='edit_data' && $this->access->can($formSlug,FormAccess::EDIT)) {
             $input=is_array($_POST['afe_admin_data']??null)?(array)$_POST['afe_admin_data']:[];
+            try {
+                $inputAdmin=is_array($_POST['afe_admin_fields']??null)?(array)$_POST['afe_admin_fields']:[];
+                $adminValues=AdminFields::sanitizeValues($form,$inputAdmin);
+            } catch (\InvalidArgumentException $error) {
+                wp_die(esc_html($error->getMessage()),'مقدار فیلد مدیریتی نامعتبر',['back_link'=>true]);
+            }
             $clean=$this->presenter->sanitizeSubmitted($form,$input,(array)$row['data']);
             $updated=$this->service->updateSubmissionDataAdmin((int)$row['id'],$clean);
             if(is_wp_error($updated)) wp_die(esc_html($updated->get_error_message()));
             $changed=$updated;
+            // These values live in a dedicated table: public edits never touch them.
+            if($adminValues!==[]) {
+                if(!$this->repo->saveAdminFields((int)$row['id'],$adminValues,get_current_user_id())) {
+                    wp_die('ذخیره اطلاعات مدیریتی انجام نشد.');
+                }
+                $this->repo->audit((int)$row['id'],$formSlug,'submission.admin_fields_updated',[
+                    'fields'=>array_keys($adminValues),
+                ]);
+            }
         }
         wp_safe_redirect(add_query_arg('updated',$changed?'1':'0',$this->detailUrl((int)$row['id']))); exit;
     }
@@ -410,7 +441,7 @@ final class SubmissionsPage
             }
             if($action==='pdf') {
                 $profile=$this->pdfTemplates->profile($form);
-                $html=$this->pdfTemplates->render($form,$row);
+                $html=$this->pdfTemplates->render($form,$row,true);
                 $bytes=$this->pdfExporter->bytes($html,(array)$profile['pdf']);
                 \BonyadAlavi\FormEngine\Export\BinaryDownload::streamBytes($bytes,'application/pdf','submission-'.$id.'.pdf');
             }
@@ -439,6 +470,16 @@ final class SubmissionsPage
                     continue;
                 }
                 $html.='<tr><th>'.esc_html($this->presenter->fieldLabel($field)).'</th><td>'.$this->presenter->displayField($field,$row['data'][$name]??'',$row['data']).'</td></tr>';
+            }
+        }
+        $adminDefinitions=AdminFields::definitions($form);
+        if($adminDefinitions) {
+            $values=$this->repo->adminFields((int)$row['id']);
+            $html.='<tr class="step"><th colspan="2">اطلاعات اختصاصی مدیر</th></tr>';
+            foreach($adminDefinitions as $definition) {
+                $field=AdminFields::presentationField($definition);
+                $html.='<tr><th>'.esc_html($definition['label']).'</th><td>'.
+                    $this->presenter->displayField($field,$values[$definition['key']]??'').'</td></tr>';
             }
         }
         $html.='</table>';
