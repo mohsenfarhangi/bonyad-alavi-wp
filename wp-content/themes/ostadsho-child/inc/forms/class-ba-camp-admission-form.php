@@ -5,9 +5,11 @@ use BonyadAlavi\FormEngine\Form\Form;
 use BonyadAlavi\FormEngine\Form\FormRegistry;
 use BonyadAlavi\FormEngine\Form\Step;
 use BonyadAlavi\FormEngine\Form\Fields\{
+	CheckboxField,
 	DateField,
 	HtmlBlock,
 	NumberField,
+	SelectField,
 	TelField,
 	TextField
 };
@@ -35,7 +37,49 @@ final class BA_Camp_Admission_Form {
 	 * AFE در callback اعتبارسنج، داده نرمال‌شده تمام فیلدهای فرم را نیز می‌فرستد؛
 	 * بنابراین محاسبه و کنترل تاریخ‌ها فقط به JavaScript مرورگر متکی نیست.
 	 */
+	/** All available venue names; the same user-facing names are stored in submission data. */
+	public static function facilityOptions(): array {
+		return [
+			'سالن همایش شهید بروجردی',
+			'مرکز آموزشی اقامتی شماره 1 شهید ردانی‌پور',
+			'مرکز آموزشی اقامتی شماره 3 شهید بهنام محمدی',
+			'مرکز آموزشی اقامتی شماره 4 فجر',
+			'مرکز آموزشی- اقامتی شماره 7- شهید صیاد شیرازی',
+			'مرکز آموزشی- اقامتی شماره 8- شهید احمدی‌روشن',
+			'مرکز آموزشی- اقامتی شماره 9- شهید سلیمانی',
+			'اقامتگاه شماره 10- شهید کاظمی آشتیانی',
+			'اقامتگاه شماره 11- ولایت',
+			'سالن غذاخوری',
+			'سالن تیراندازی',
+			'سالن سرپوشیده ورزشی',
+			'زمین پینت بال',
+			'استخر',
+		];
+	}
+
 	public static function registerValidators( ValidatorRegistry $registry ): void {
+		// Server-side guard, including selections tampered with outside the dropdown.
+		// Use the field's resolved options so Admin overrides remain supported.
+		$registry->register( new ValidatorDefinition(
+			'ba_camp_facilities_selection',
+			'انتخاب یک یا چند فضای درخواستی معتبر',
+			[ 'select' ],
+			'لطفاً حداقل یک فضای معتبر انتخاب کنید.',
+			static function ( string $value, array $field, array $config, array $data ): bool {
+				$selected = $data[ $field['name'] ] ?? null;
+				if ( ! is_array( $selected ) || ! $selected || count( $selected ) > 50 ) {
+					return false;
+				}
+				$options  = (array) ( $field['options'] ?? [] );
+				$allowed  = array_is_list( $options ) ? array_values( $options ) : array_keys( $options );
+				$allowed  = array_map( 'strval', $allowed );
+				$selected = array_map( 'strval', $selected );
+
+				return count( array_unique( $selected ) ) === count( $selected )
+					&& count( array_diff( $selected, $allowed ) ) === 0;
+			}
+		) );
+
 		$registry->register( new ValidatorDefinition(
 			'ba_camp_positive_integer',
 			'عدد صحیح مثبت برای فرم پذیرش اردوگاه',
@@ -169,6 +213,23 @@ HTML
 						->required()
 						->width( 6 ),
 
+					SelectField::make( 'requested_facilities' )
+						->label( 'فضاها و امکانات مورد درخواست' )
+						->placeholder( 'انتخاب یک یا چند اقامتگاه یا سالن' )
+						->description( 'می‌توانید چند مورد را انتخاب کنید؛ برای انتخاب بیشتر، دوباره روی گزینه‌های فهرست کلیک کنید.' )
+						->options( self::facilityOptions() )
+						->multiple()
+						->custom()
+						->searchable()
+						->meta( 'validators', [
+							[
+								'key'     => 'ba_camp_facilities_selection',
+								'message' => 'لطفاً یک یا چند فضای معتبر از فهرست انتخاب کنید.',
+							],
+						] )
+						->required()
+						->width( 12 ),
+
 					HtmlBlock::make(
 						'<div class="ba-camp-admission__section-heading ba-camp-admission__section-heading--request"><span>۰۲</span><div><strong>مشخصات اقامت</strong><small>تعداد مهمانان و تاریخ ورود و خروج را مشخص کنید</small></div></div>'
 					),
@@ -222,6 +283,10 @@ HTML
 						] )
 						->required()
 						->width( 12 ),
+					CheckboxField::make( 'terms_accepted' )
+						->label( 'قوانین و مقررات پذیرش را مطالعه کرده‌ام و می‌پذیرم' )
+						->required()
+						->width( 12 ),
 				] ),
 			] )
 			->settings( [
@@ -236,6 +301,7 @@ HTML
 				'lock_after_submit'        => false,
 				'show_edit_request_button' => false,
 				'captcha'                  => 'custom',
+				'captcha_before_submit'    => true,
 				'rate_limit'               => 5,
 			] )
 			->styleIsolation( 'strong' )
