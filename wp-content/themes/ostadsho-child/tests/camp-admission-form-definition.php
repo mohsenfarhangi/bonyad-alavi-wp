@@ -40,10 +40,12 @@ $validData = [
     'organization_name' => 'سازمان نمونه',
     'representative_name' => 'علی رضایی',
     'representative_mobile' => '09123456789',
+    'requested_facilities' => ['سالن همایش شهید بروجردی', 'استخر'],
     'guest_count' => '24',
     'from_date' => '1405/08/15',
     'to_date' => '1405/08/18',
     'stay_duration' => '3',
+    'terms_accepted' => '1',
 ];
 $validErrors = $validator->validate($form, $validData);
 
@@ -75,6 +77,26 @@ $leadingZeros['guest_count'] = '024';
 $leadingZeros['stay_duration'] = '03';
 $leadingZeroErrors = $validator->validate($form, $leadingZeros);
 
+$invalidFacilities = $validData;
+$invalidFacilities['requested_facilities'] = ['ساختمان ناموجود'];
+$invalidFacilitiesErrors = $validator->validate($form, $invalidFacilities);
+
+$missingFacilities = $validData;
+$missingFacilities['requested_facilities'] = [];
+$missingFacilitiesErrors = $validator->validate($form, $missingFacilities);
+
+$duplicatedFacilities = $validData;
+$duplicatedFacilities['requested_facilities'] = ['استخر', 'استخر'];
+$duplicatedFacilitiesErrors = $validator->validate($form, $duplicatedFacilities);
+
+$uncheckedTerms = $validData;
+unset($uncheckedTerms['terms_accepted']);
+$uncheckedTermsErrors = $validator->validate($form, $uncheckedTerms);
+
+$forgedTerms = $validData;
+$forgedTerms['terms_accepted'] = '0';
+$forgedTermsErrors = $validator->validate($form, $forgedTerms);
+
 $missingErrors = $validator->validate($form, []);
 
 $themeRoot = dirname(__DIR__);
@@ -89,20 +111,35 @@ $checks = [
     'slug-and-title' =>
         ($form['slug'] ?? '') === 'imam-khomeini-camp-admission'
         && ($form['title'] ?? '') === 'فرم پذیرش مجتمع اردوگاهی امام خمینی (ره)',
-    'exactly-seven-data-fields' => $order === [
+    'exactly-nine-data-fields' => $order === [
         'organization_name',
         'representative_name',
         'representative_mobile',
+        'requested_facilities',
         'guest_count',
         'from_date',
         'to_date',
         'stay_duration',
+        'terms_accepted',
     ],
-    'all-seven-fields-required' =>
-        count(array_filter($fields, static fn(array $field): bool => !empty($field['required']))) === 7,
+    'all-nine-fields-required' =>
+        count(array_filter($fields, static fn(array $field): bool => !empty($field['required']))) === 9,
     'organization-and-representative-fields' =>
         ($fields['organization_name']['type'] ?? '') === 'text'
         && ($fields['representative_name']['type'] ?? '') === 'text',
+    'facilities-multi-select-and-14-options' =>
+        ($fields['requested_facilities']['type'] ?? '') === 'select'
+        && ($fields['requested_facilities']['multiple'] ?? false) === true
+        && ($fields['requested_facilities']['select_mode'] ?? '') === 'custom'
+        && ($fields['requested_facilities']['searchable'] ?? false) === true
+        && count($fields['requested_facilities']['options'] ?? []) === 14
+        && ($fields['requested_facilities']['validators'][0]['key'] ?? '') === 'ba_camp_facilities_selection'
+        && in_array('سالن غذاخوری', $fields['requested_facilities']['options'] ?? [], true)
+        && in_array('استخر', $fields['requested_facilities']['options'] ?? [], true),
+    'terms-is-required-checkbox' =>
+        ($fields['terms_accepted']['type'] ?? '') === 'checkbox'
+        && ($fields['terms_accepted']['required'] ?? false) === true
+        && ($fields['terms_accepted']['default'] ?? '') !== '1',
     'mobile-validator-and-mask' =>
         ($fields['representative_mobile']['type'] ?? '') === 'tel'
         && !empty($fields['representative_mobile']['rules']['mobile_09'])
@@ -127,6 +164,11 @@ $checks = [
     'three-night-date-calculation' => BA_Camp_Admission_Form::durationBetweenJalaliDates('1405/08/15', '1405/08/18') === 3,
     'persian-digit-date-calculation' => BA_Camp_Admission_Form::durationBetweenJalaliDates('۱۴۰۵/۰۸/۱۵', '۱۴۰۵/۰۸/۱۸') === 3,
     'invalid-jalali-date-rejected' => BA_Camp_Admission_Form::durationBetweenJalaliDates('1405/13/01', '1405/13/02') === null,
+    'invalid-facility-rejected' => isset($invalidFacilitiesErrors['requested_facilities']),
+    'missing-facility-rejected' => isset($missingFacilitiesErrors['requested_facilities']),
+    'duplicate-facility-rejected' => isset($duplicatedFacilitiesErrors['requested_facilities']),
+    'unchecked-terms-rejected' => isset($uncheckedTermsErrors['terms_accepted']),
+    'forged-terms-rejected' => isset($forgedTermsErrors['terms_accepted']),
     'valid-data-accepted' => $validErrors === [],
     'tampered-duration-rejected' => isset($invalidDurationErrors['stay_duration']),
     'end-before-start-rejected' => isset($invalidRangeErrors['to_date']),
@@ -139,7 +181,7 @@ $checks = [
         && str_contains($frontendScript, 'durationInput.readOnly = true')
         && str_contains($frontendScript, "startInput.addEventListener(eventName, scheduleUpdate)")
         && str_contains($frontendScript, 'jalaliDayNumber'),
-    'missing-required-data-rejected' => count($missingErrors) === 7,
+    'missing-required-data-rejected' => count($missingErrors) === 9,
     'tracking-code-hidden-after-submit' =>
         ($form['settings']['show_tracking_code'] ?? true) === false
         && is_string($engineFrontend)
@@ -154,6 +196,15 @@ $checks = [
         ($defaultFormSettings['show_tracking_code'] ?? false) === true,
     'success-message-default-preserves-existing-forms' =>
         ($defaultFormSettings['success_message'] ?? null) === '',
+    'captcha-located-before-final-submit' =>
+        ($form['settings']['captcha_before_submit'] ?? false) === true
+        && is_string($rendererSource)
+        && str_contains($rendererSource, '$inlineCaptcha && $index===$dataSteps-1')
+        && str_contains($rendererSource, '$locked || $inlineCaptcha')
+        && str_contains($rendererSource, 'captchaMarkup'),
+    'frontend-checkbox-required-by-check-state' =>
+        is_string($engineFrontend)
+        && str_contains($engineFrontend, "controls[0].type === 'checkbox'"),
     'no-default-actions' => ($form['actions'] ?? null) === [],
     'simple-shared-form' =>
         ($form['settings']['wizard'] ?? true) === false

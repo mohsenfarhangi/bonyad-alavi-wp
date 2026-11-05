@@ -70,6 +70,15 @@ final class Validator
         }
         if ($empty) return;
 
+        // Checkbox is an explicit consent, not an arbitrary nonempty text value.
+        // Only a checked browser checkbox submits the canonical value "1".
+        if (($field['type'] ?? '') === 'checkbox') {
+            if (!is_scalar($value) || (string)$value !== '1') {
+                $errors[$field['name']] = ($field['label'] ?? $field['name']) . ' باید پذیرفته شود.';
+            }
+            return;
+        }
+
         $rules = $field['rules'] ?? [];
         $string = is_scalar($value) ? trim((string)$value) : '';
 

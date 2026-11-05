@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - 'wp-content/plugins/alavi-form-engine/src/Form/Validator.php'
+      - 'wp-content/plugins/alavi-form-engine/src/Form/Fields/CheckboxField.php'
       - 'wp-content/plugins/alavi-form-engine/src/Form/Form.php'
       - 'wp-content/plugins/alavi-form-engine/src/Form/Renderer.php'
       - 'wp-content/plugins/alavi-form-engine/src/Submission/SubmissionService.php'
@@ -34,6 +35,7 @@ jobs:
       - name: PHP syntax
         run: |
           php -l wp-content/plugins/alavi-form-engine/src/Form/Validator.php
+          php -l wp-content/plugins/alavi-form-engine/src/Form/Fields/CheckboxField.php
           php -l wp-content/plugins/alavi-form-engine/src/Form/Form.php
           php -l wp-content/plugins/alavi-form-engine/src/Form/Renderer.php
           php -l wp-content/plugins/alavi-form-engine/src/Submission/SubmissionService.php

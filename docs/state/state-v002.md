@@ -830,3 +830,10 @@ Modules: [MODULE-AFE](../modules/alavi-form-engine.md), [MODULE-JIHADI-FORM](../
 - **صفحه 7930:** `slides_per_view=4` روی کاروسل پژوهش `e994d17` (فقط یک کلید) پس از استقرار CSS رفع؛ دسکتاپ ۴تایی، دکمه/تاریخ داخل کارت؛ perView تبلت/موبایل بدون تغییر.
 - **پیش‌نویس `29990`:** مقایسه با 28817 و درس‌های آن در [MODULE-CONTACT-PAGE](../modules/contact-page-widgets.md). 28817 تغییر نکرد. تست ارسال فرم واقعی انجام نشده (ایمیل مدیر/ثبت دیتابیس؛ نیازمند تأیید).
 
+
+## STATE-002-051 — Camp admission facilities, consent and CAPTCHA before submit (2026-11-05)
+
+- AFE camp form: one required searchable multi-select of 14 venue/hall/sports facilities in the first section (stored as Persian name array) and one required, unchecked regulations-acceptance checkbox at the end.
+- AFE gains reusable checkbox field rendering and server/frontend required validation. Registered validator confirms selected venues belong to the effective, overrideable option set.
+- Per-form `captcha_before_submit` setting places a single CAPTCHA after the agreement and before the final submit button; defaults elsewhere unchanged.
+- Tests/CI and module docs updated; live WordPress/Elementor acceptance pending.

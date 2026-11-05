@@ -19,17 +19,27 @@ No default Actions are defined. Admin can add and configure the required Actions
 
 ## Fields
 
-All seven fields are required:
+All nine fields are required:
 
 | Key | Label | Type | Contract |
 |---|---|---|---|
 | `organization_name` | نام سازمان | Text | Required |
 | `representative_name` | نام و نام خانوادگی نماینده | Text | Required |
 | `representative_mobile` | شماره تماس نماینده | Tel | Required, `mobile_09`, `mobile_ir` mask |
+| `requested_facilities` | فضاها و امکانات مورد درخواست | Multi-select | Required, searchable 14 choices; can choose multiple venue/hall/amenity names; stores selected Persian labels |
 | `guest_count` | تعداد مهمانان | Number | Positive integer, minimum 1 |
 | `from_date` | از تاریخ | Date | Jalali calendar |
 | `to_date` | تا تاریخ | Date | Jalali calendar, strictly after `from_date` |
 | `stay_duration` | مدت اقامت (شب) | Number | Read-only in frontend, automatically calculated and required |
+| `terms_accepted` | پذیرش قوانین و مقررات | Checkbox | Required; no preselected consent; server accepts only `1` |
+
+## Facility choices and consent
+
+The `requested_facilities` field appears at the end of the **first section**, after representative contact information and before accommodation details. The custom AFE multi-select is searchable; it saves an array of selected Persian labels, rather than obscure internal codes. Source choices (14) are defined in `BA_Camp_Admission_Form::facilityOptions()` and may still be overridden using AFE's normal options editor. The server-side `ba_camp_facilities_selection` validator rejects missing, duplicate or unknown selections using the effective options on that form.
+
+Source list: سالن همایش شهید بروجردی؛ مرکز آموزشی اقامتی شماره 1 شهید ردانی‌پور؛ مرکز آموزشی اقامتی شماره 3 شهید بهنام محمدی؛ مرکز آموزشی اقامتی شماره 4 فجر؛ مرکز آموزشی- اقامتی شماره 7- شهید صیاد شیرازی؛ مرکز آموزشی- اقامتی شماره 8- شهید احمدی‌روشن؛ مرکز آموزشی- اقامتی شماره 9- شهید سلیمانی؛ اقامتگاه شماره 10- شهید کاظمی آشتیانی؛ اقامتگاه شماره 11- ولایت؛ سالن غذاخوری؛ سالن تیراندازی؛ سالن سرپوشیده ورزشی؛ زمین پینت بال؛ استخر.
+
+The `terms_accepted` field is a required checkbox, shown after the calculated stay duration. Its label is «قوانین و مقررات پذیرش را مطالعه کرده‌ام و می‌پذیرم». No policies URL was supplied, so no regulations document is linked. It is unchecked by default. The generic AFE checkbox renderer and PHP/frontend validators recognize this field: only a checked checkbox (`1`) passes server validation.
 
 ## Stay Duration Contract
 
@@ -49,7 +59,7 @@ The reusable AFE validator callback now receives the complete sanitized submissi
 - Draft saving, applicant editing and preview disabled.
 - Shared AFE storage.
 - Strong style isolation.
-- Custom CAPTCHA and rate limit = 5.
+- Custom CAPTCHA and rate limit = 5. This form opts in to `captcha_before_submit`: Renderer emits exactly one CAPTCHA after form fields/terms and immediately before final submit. Other forms retain the previous CAPTCHA position.
 - No default Actions or email notification.
 - Applicant success state hides the tracking code; the code is still generated and stored for Admin/internal follow-up.
 - The success message is: «درخواست شما با موفقیت ثبت شد. از اینکه مجتمع اردوگاهی امام خمینی (ره) را انتخاب کرده‌اید سپاسگزاریم. به‌زودی با شما تماس گرفته خواهد شد.»
@@ -92,7 +102,9 @@ node --check wp-content/themes/ostadsho-child/assets/js/ba-camp-admission-form.j
 4. Change either date and confirm duration is recalculated.
 5. Try same-day, reversed and invalid Jalali dates; submission must be blocked with a field-level error.
 6. Submit with an empty/zero/fractional guest count; the server must reject it.
-7. Submit a valid request and verify all seven values, including stay duration, are stored in AFE Admin.
-8. Confirm the applicant sees the configured thank-you message and no tracking code, while the tracking code remains available in AFE Admin.
-9. Confirm no email/action runs by default; add the desired Actions from the Admin Action Builder.
-10. Verify other AFE forms still show tracking codes by default and are unaffected by this form's settings.
+7. Submit a valid request and verify all nine values, including selected multiple facilities, consent and stay duration, are stored in AFE Admin.
+8. Confirm the 14-option multi-select supports selecting two or more facilities and searching; empty/forged/duplicate values are rejected. Without checking the regulations checkbox, the form must not submit.
+9. Confirm CAPTCHA is between the terms checkbox and submit button (once only), and the existing CAPTCHA refresh/validation work.
+10. Confirm the applicant sees8. Confirm the applicant sees the configured thank-you message and no tracking code, while the tracking code remains available in AFE Admin.
+11. Confirm no email/action runs by default; add the desired Actions from the Admin Action Builder.
+12. Verify other AFE forms still show tracking codes by default and retain their default CAPTCHA placement.

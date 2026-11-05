@@ -177,6 +177,49 @@
   text-align: left;
 }
 
+.afe-form[data-form="imam-khomeini-camp-admission"] .afe-field[data-field="requested_facilities"] .afe-custom-select__trigger {
+  min-height: 48px;
+  border-radius: 9px;
+}
+
+.afe-form[data-form="imam-khomeini-camp-admission"] .afe-field[data-field="terms_accepted"] {
+  display: grid;
+  grid-template-columns: 23px minmax(0, 1fr);
+  align-items: center;
+  gap: 7px 11px;
+  margin-top: 5px;
+  padding: 15px 16px;
+  border: 1px solid var(--ba-camp-border);
+  border-radius: 10px;
+  background: #f8fbf8;
+}
+
+.afe-form[data-form="imam-khomeini-camp-admission"] .afe-field[data-field="terms_accepted"] .afe-label {
+  grid-column: 2;
+  grid-row: 1;
+  margin: 0;
+  line-height: 1.9;
+  cursor: pointer;
+}
+
+.afe-form[data-form="imam-khomeini-camp-admission"] .afe-field[data-field="terms_accepted"] .afe-checkbox {
+  grid-column: 1;
+  grid-row: 1;
+  width: 21px;
+  height: 21px;
+  margin: 0;
+  accent-color: var(--ba-camp-green);
+  cursor: pointer;
+}
+
+.afe-form[data-form="imam-khomeini-camp-admission"] .afe-field[data-field="terms_accepted"] .afe-field-error {
+  grid-column: 1 / -1;
+}
+
+.afe-form[data-form="imam-khomeini-camp-admission"] .afe-step > .afe-captcha-wrap {
+  padding: 15px 0 4px;
+}
+
 .afe-form[data-form="imam-khomeini-camp-admission"] .afe-step-actions {
   margin-top: 20px;
   padding-top: 22px;
@@ -217,7 +260,6 @@
     padding: 24px 24px 18px;
   }
 
-  .afe-form[data-form="imam-khomeini-camp-admission"] .afe-captcha-wrap,
   .afe-form[data-form="imam-khomeini-camp-admission"] .afe-form-result {
     padding-left: 24px;
     padding-right: 24px;

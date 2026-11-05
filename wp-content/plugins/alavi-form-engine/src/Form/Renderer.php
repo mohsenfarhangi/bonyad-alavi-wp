@@ -54,6 +54,8 @@ final class Renderer
         // the applicant-facing lock and expose edit controls on the public page.
         $locked = !empty($editing['row']['is_locked']);
         $previewEnabled = !empty($form['settings']['preview_enabled']);
+        // Only opt-in forms place CAPTCHA inside their final data step before the submit button.
+        $inlineCaptcha = !$previewEnabled && !$locked && !empty($form['settings']['captcha_before_submit']);
 
         wp_enqueue_style('afe-frontend');
         if ($this->usesJalaliCalendar($form)) {
@@ -91,6 +93,9 @@ final class Renderer
                 . '<h2>'.esc_html($step['title']).'</h2>'
                 . (!empty($step['description'])?'<p>'.esc_html((string)$step['description']).'</p>':'')
                 . '</div><div class="afe-grid">'.$body.'</div>'
+                . ($inlineCaptcha && $index===$dataSteps-1
+                    ? '<div class="afe-captcha-wrap">'.$this->security->captchaMarkup((string)($form['settings']['captcha']??'custom')).'</div>'
+                    : '')
                 . $this->stepActions($index,$dataSteps,$form,$previewEnabled,$locked)
                 . '</section>';
         }
@@ -166,7 +171,7 @@ final class Renderer
         return $customCssHtml . '<div class="'.esc_attr($shellClass).'" data-afe-isolation="'.esc_attr($this->styleIsolation->modeForForm($form)).'" dir="rtl">'.$editingNotice.$lockPanel.$resumeBox
             . '<form class="afe-form" method="post" enctype="multipart/form-data" novalidate data-form="'.esc_attr($slug).'"'.($locked?' data-afe-readonly="1"':'').' data-afe-lock-after-submit="'.(!empty($form['settings']['lock_after_submit'])?'1':'0').'" data-afe-preview-enabled="'.($previewEnabled?'1':'0').'" data-afe-show-tracking-code="'.(($form['settings']['show_tracking_code']??true)?'1':'0').'" data-afe-lock-warning="'.esc_attr((string)($form['settings']['lock_warning']??'')).'" data-afe-duplicate-tracking="'.($duplicateTracking?'1':'0').'" data-afe-duplicate-otp="'.($duplicateOtp?'1':'0').'" data-afe-duplicate-otp="'.($duplicateOtp?'1':'0').'"'.$duplicateAttrs.'>'
             . $hidden . $duplicateLive . $content
-            . ($locked?'':'<div class="afe-captcha-wrap">'.$this->security->captchaMarkup((string)($form['settings']['captcha']??'custom')).'</div>')
+            . ($locked || $inlineCaptcha ? '' : '<div class="afe-captcha-wrap">'.$this->security->captchaMarkup((string)($form['settings']['captcha']??'custom')).'</div>')
             . '<div class="afe-form-result" aria-live="polite"></div>'
             . '</form></div>';
     }
@@ -299,6 +304,7 @@ final class Renderer
             'textarea' => '<textarea class="afe-control" rows="5"'.$common.'>'.esc_textarea((string)$value).'</textarea>',
             'select' => $this->select($field,$value,$allValues,$name,$id,$required),
             'radio' => $this->radio($field,$value,$name),
+            'checkbox' => '<input class="afe-checkbox" type="checkbox"'.$common.' value="1"'.checked((string)$value,'1',false).'>',
             'file' => $this->fileInput($field, $id),
             'number' => '<input class="afe-control" type="number" inputmode="numeric"'.$common.' value="'.esc_attr((string)$value).'">',
             'date' => $this->dateInput($field,$value,$common),

@@ -24,6 +24,10 @@ AFE release goal همچنان live acceptance نسخه 1.0.28 و رفع blocker 
 - توکن `{{field:message_category}}` به ایمیل پیش‌فرض مدیر افزوده شد. اگر Action/ترتیب از پنل Override شده باشد، نیازمند بررسی روی سایت است.
 - تست قرارداد اختصاصی فرم و workflow بررسی PHP افزوده شد؛ پذیرش زنده و افزودن گزینه‌ها توسط مدیر لازم است.
 
+### Camp admission — facilities, consent, and CAPTCHA order (2026-11-05)
+- فرم `imam-khomeini-camp-admission`: انتخاب چندگانه قابل جست‌وجوی ۱۴ فضای اردوگاه در بخش اول، پذیرش اجباری قوانین در انتها و CAPTCHA درست بالای دکمه ثبت. مقدارهای منتخب و رضایت کاربر در داده ثبت ذخیره می‌شوند؛ داده جعلی/خالی سمت سرور رد می‌شود.
+- AFE: نوع Checkbox افزوده شد؛ ترتیب CAPTCHA با `captcha_before_submit` به‌صورت opt-in و فقط برای این فرم تغییر می‌کند. regression مربوطه به‌روزرسانی شد؛ پذیرش زنده (Elementor و ثبت واقعی) باقی است. [MODULE-CAMP-ADMISSION](../modules/camp-admission-form.md)
+
 ## Recently Completed
 
 ### Contact page widgets + four-up studies carousels (2026-11-05)

@@ -1312,8 +1312,8 @@
       const controls = qsa(wrapper, 'input:not([type="hidden"]),select,textarea')
         .filter(el => !el.disabled && !el.closest('.afe-custom-select'));
       if (!controls.length) return;
-      const radio = controls[0].type === 'radio';
-      const hasValue = radio ? controls.some(el => el.checked) : controls.some(el => {
+      const checkable = controls[0].type === 'radio' || controls[0].type === 'checkbox';
+      const hasValue = checkable ? controls.some(el => el.checked) : controls.some(el => {
         if (el.type === 'file') {
           const upload = el.closest('.afe-upload');
           return (el.files && el.files.length) || selectedExistingCount(upload) > 0;
