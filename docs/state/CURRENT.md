@@ -38,7 +38,7 @@ AFE release goal همچنان live acceptance نسخه 1.0.28 و رفع blocker 
 - تب جدید «فیلدهای مدیریتی» برای هر فرم: متن کوتاه، چندخطی، انتخابی با گزینه‌های قابل تنظیم؛ تعریف `settings.admin_fields` با Admin override مستقل و سقف ۳۰ فیلد. مقدارها در جدول اختصاصی `afe_submission_admin_fields` (به‌جای `data_json`) ذخیره می‌شوند؛ فقط مدیریت دارای مجوز همان فرم قابلیت مشاهده/ویرایش و خروجی دارد. پاک‌سازی در purge دائم؛ DB version `1.0.5-dev.3` و plugin dev `1.0.28-dev.8`.
 - فرم جهادی `jihadi-group-registration`: فیلد `group_level` در **جزئیات/ویرایش مدیر** با چهار سطح «نوپا، فعال، پیشرو، الگو»، بدون نمایش در فرم عمومی. ثبت‌های قبلی قابل طبقه‌بندی و مقدار اولیه خالی دارند.
 - Excel تک‌ثبت و لیست، PDF/چاپ مدیریت و profile ستون‌های `admin:<key>` پشتیبانی می‌شوند؛ پروفایل‌های Excel قدیمی ستون جدید را append می‌کنند، خاموش‌بودن صریح ستون حفظ می‌شود. PDFهای تولیدشده برای کاربران/Actionها به‌طور پیش‌فرض فیلد مدیریتی را نشان نمی‌دهند.
-- تست‌های PHP logic/storage/export wiring و CI متمرکز اضافه شده‌اند. استقرار و acceptance واقعی wp-admin و Excel/PDF لازم است. [MODULE-AFE](../modules/alavi-form-engine.md)، [MODULE-JIHADI-FORM](../modules/jihadi-group-registration-form.md).
+- تست‌های PHP logic/storage/export wiring و CI متمرکز اضافه شده‌اند؛ [GitHub Actions 42043273260](https://github.com/mohsenfarhangi/bonyad-alavi-wp/actions/runs/42043273260) PASS. استقرار و acceptance واقعی wp-admin و Excel/PDF لازم است. [MODULE-AFE](../modules/alavi-form-engine.md)، [MODULE-JIHADI-FORM](../modules/jihadi-group-registration-form.md).
 
 
 ### Contact page widgets + four-up studies carousels (2026-11-05)
@@ -396,6 +396,8 @@ Historical PASSهای AFE/Theme به HEAD جدید تعمیم داده نمی‌
 ## Next Agent Handoff
 
 **Current task:** کد ویجت‌های ارتباط با ما (PR #23) و رفع CSS کارت پژوهش روی هاست مستقر است و کاروسل‌های نشست/پژوهش 7930 چهارتایی‌اند. پیش‌نویس `29990` (draft) ساخته شده؛ مانده: (۱) PR شاخه `fix/contact-widgets-card-title-kit-20261105` (حذف `font-size` عنوان کارت) را کاربر merge کند و فقط `assets/css/bonyad-alavi-contact-page.css` با اسکریپت امن مستقر شود؛ (۲) با تأیید، تست واقعی ارسال فرم روی پیش‌نویس (ثبت در دیتابیس + ایمیل مدیر)؛ (۳) جایگزینی 28817 (انتقال `_elementor_data` یا تعویض آدرس) فقط با تأیید جدا و پشتیبان تازه. صفحه 28817 و فرم‌ها تا آن موقع دست نخورند. جزئیات: STATE-002-050.
+
+**Open task (AFE فیلدهای مدیریتی، PR #28):** تب فیلدهای مدیریتی برای هر فرم، ذخیره ایزوله در جدول جدید، نمایش/ویرایش با مجوز، Excel/PDF/چاپ مدیریتی و سطح گروه جهادی پیاده‌سازی شده‌اند. آزمون متمرکز GitHub Actions run 42043273260 موفق است؛ لازم است بعد از merge و استقرار روی وردپرس، dbDelta نسخه `1.0.5-dev.3`، اعمال Override موجود، ثبت/ویرایش سطح برای Submissionهای قدیمی و خروجی واقعی PDF/Excel بررسی شوند. نسخه توسعه `1.0.28-dev.8`، stable ثابت است.
 
 **Open task (هیرو، task جدا):** فلش‌های اسلایدر با `slider_show_arrows` در Elementor خاموش شوند و سپس قانون `.ba-slider__controls` در `style.css` و `<style>` inline در Code Snippet #9 حذف شوند؛ قبل از حذف قانون `.elementor-element-964556b .ba-hero__grid { grid-template-rows … !important }` روی دسکتاپ و موبایل تست شود.
 
