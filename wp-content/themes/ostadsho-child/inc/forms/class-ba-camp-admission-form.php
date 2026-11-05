@@ -67,7 +67,7 @@ final class BA_Camp_Admission_Form {
 			'لطفاً حداقل یک فضای معتبر انتخاب کنید.',
 			static function ( string $value, array $field, array $config, array $data ): bool {
 				$selected = $data[ $field['name'] ] ?? null;
-				if ( ! is_array( $selected ) || ! $selected || count( $selected ) > 14 ) {
+				if ( ! is_array( $selected ) || ! $selected || count( $selected ) > 50 ) {
 					return false;
 				}
 				$options  = (array) ( $field['options'] ?? [] );
