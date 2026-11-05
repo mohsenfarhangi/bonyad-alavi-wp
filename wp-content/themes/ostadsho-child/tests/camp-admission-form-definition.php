@@ -32,6 +32,18 @@ foreach ($form['steps'] as $step) {
     }
 }
 
+$stepItems = $form['steps'][0]['items'] ?? [];
+$sectionTwoIndex = null;
+$facilitiesIndex = null;
+$guestCountIndex = null;
+foreach ($stepItems as $index => $item) {
+    if (($item['type'] ?? '') === 'html' && str_contains((string)($item['html'] ?? ''), 'مشخصات اقامت')) {
+        $sectionTwoIndex = $index;
+    }
+    if (($item['name'] ?? '') === 'requested_facilities') $facilitiesIndex = $index;
+    if (($item['name'] ?? '') === 'guest_count') $guestCountIndex = $index;
+}
+
 $validatorRegistry = new ValidatorRegistry();
 BA_Camp_Admission_Form::registerValidators($validatorRegistry);
 $validator = new Validator($validatorRegistry);
@@ -122,6 +134,10 @@ $checks = [
         'stay_duration',
         'terms_accepted',
     ],
+    'facilities-belong-to-accommodation-section' =>
+        $sectionTwoIndex !== null && $facilitiesIndex !== null && $guestCountIndex !== null
+        && $sectionTwoIndex + 1 === $facilitiesIndex
+        && $facilitiesIndex + 1 === $guestCountIndex,
     'all-nine-fields-required' =>
         count(array_filter($fields, static fn(array $field): bool => !empty($field['required']))) === 9,
     'organization-and-representative-fields' =>

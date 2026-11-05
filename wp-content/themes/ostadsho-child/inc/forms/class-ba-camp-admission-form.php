@@ -213,6 +213,9 @@ HTML
 						->required()
 						->width( 6 ),
 
+					HtmlBlock::make(
+						'<div class="ba-camp-admission__section-heading ba-camp-admission__section-heading--request"><span>۰۲</span><div><strong>مشخصات اقامت</strong><small>تعداد مهمانان و تاریخ ورود و خروج را مشخص کنید</small></div></div>'
+					),
 					SelectField::make( 'requested_facilities' )
 						->label( 'فضاها و امکانات مورد درخواست' )
 						->placeholder( 'انتخاب یک یا چند اقامتگاه یا سالن' )
@@ -230,9 +233,6 @@ HTML
 						->required()
 						->width( 12 ),
 
-					HtmlBlock::make(
-						'<div class="ba-camp-admission__section-heading ba-camp-admission__section-heading--request"><span>۰۲</span><div><strong>مشخصات اقامت</strong><small>تعداد مهمانان و تاریخ ورود و خروج را مشخص کنید</small></div></div>'
-					),
 					NumberField::make( 'guest_count' )
 						->label( 'تعداد مهمانان' )
 						->placeholder( 'تعداد افراد' )

@@ -35,7 +35,7 @@ All nine fields are required:
 
 ## Facility choices and consent
 
-The `requested_facilities` field appears at the end of the **first section**, after representative contact information and before accommodation details. The custom AFE multi-select is searchable; it saves an array of selected Persian labels, rather than obscure internal codes. Source choices (14) are defined in `BA_Camp_Admission_Form::facilityOptions()` and may still be overridden using AFE's normal options editor. The server-side `ba_camp_facilities_selection` validator rejects missing, duplicate or unknown selections using the effective options on that form.
+The `requested_facilities` field appears at the **beginning of the second section (مشخصات اقامت)**, immediately after its section heading and before `guest_count`. The custom AFE multi-select is searchable; it saves an array of selected Persian labels, rather than obscure internal codes. Source choices (14) are defined in `BA_Camp_Admission_Form::facilityOptions()` and may still be overridden using AFE's normal options editor. The server-side `ba_camp_facilities_selection` validator rejects missing, duplicate or unknown selections using the effective options on that form.
 
 Source list: سالن همایش شهید بروجردی؛ مرکز آموزشی اقامتی شماره 1 شهید ردانی‌پور؛ مرکز آموزشی اقامتی شماره 3 شهید بهنام محمدی؛ مرکز آموزشی اقامتی شماره 4 فجر؛ مرکز آموزشی- اقامتی شماره 7- شهید صیاد شیرازی؛ مرکز آموزشی- اقامتی شماره 8- شهید احمدی‌روشن؛ مرکز آموزشی- اقامتی شماره 9- شهید سلیمانی؛ اقامتگاه شماره 10- شهید کاظمی آشتیانی؛ اقامتگاه شماره 11- ولایت؛ سالن غذاخوری؛ سالن تیراندازی؛ سالن سرپوشیده ورزشی؛ زمین پینت بال؛ استخر.
 
