@@ -837,3 +837,11 @@ Modules: [MODULE-AFE](../modules/alavi-form-engine.md), [MODULE-JIHADI-FORM](../
 - AFE gains reusable checkbox field rendering and server/frontend required validation. Registered validator confirms selected venues belong to the effective, overrideable option set.
 - Per-form `captcha_before_submit` setting places a single CAPTCHA after the agreement and before the final submit button; defaults elsewhere unchanged.
 - Tests/CI and module docs updated; live WordPress/Elementor acceptance pending.
+
+## 2026-11-05 — Per-form admin-only submission fields, Jihadi level select
+
+- Added per-form configurable administrator-only fields (text, textarea, select) in the AFE settings tab. Their values live in a separate `afe_submission_admin_fields` table; applicant input and public submissions/REST cannot set them. DB checkpoint 1.0.5-dev.3, AFE assets 1.0.28-dev.8.
+- Admin submission details and editing respect per-form VIEW/EDIT permissions; manager values are displayed separately from public answers. Values audited, removed with permanent purge.
+- Approved exports: Excel single/detail and list, admin PDF/print include manager data. Existing Excel column profiles append missing admin columns without overriding explicitly disabled ones. Nonadmin PDF flows remain private by default.
+- Jihadi form code defaults include `group_level` (novpa/نوپا, faal/فعال, pishro/پیشرو, olgoo/الگو). No default value; existing submissions remain unclassified until admin changes them.
+- Add unit/storage/wiring regression tests and dedicated CI; live WordPress/DB migration/PhpSpreadsheet/WordPress permission acceptance pending.

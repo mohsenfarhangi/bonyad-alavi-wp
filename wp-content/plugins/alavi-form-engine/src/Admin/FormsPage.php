@@ -148,6 +148,10 @@ final class FormsPage
         $this->renderFieldOrdering($form);
         echo '</section>';
 
+        echo '<section class="afe-form-tab-panel" data-afe-form-tab-panel="admin_fields" hidden>';
+        $this->renderAdminFieldsSettings($form);
+        echo '</section>';
+
         echo '<section class="afe-form-tab-panel" data-afe-form-tab-panel="duplicate" hidden>';
         $this->renderDuplicateSettings($form);
         echo '</section>';
@@ -253,6 +257,7 @@ final class FormsPage
         $tabs=[
             'general'=>'عمومی',
             'fields'=>'فیلدها و چیدمان',
+            'admin_fields'=>'فیلدهای مدیریتی',
             'duplicate'=>'جلوگیری از تکرار',
             'actions'=>'رویدادها و اکشن‌ها',
             'workflow'=>'Workflow',
@@ -266,6 +271,43 @@ final class FormsPage
             echo '<button type="button" class="afe-form-tab'.($key==='general'?' is-active':'').'" role="tab" aria-selected="'.($key==='general'?'true':'false').'" data-afe-form-tab="'.esc_attr($key).'">'.esc_html($label).'</button>';
         }
         echo '</nav>';
+    }
+
+    /**
+     * Admin-only field schema for each form. These definitions are not frontend
+     * form steps, so applicants never see or submit them.
+     */
+    private function renderAdminFieldsSettings(array $form): void
+    {
+        $definitions=AdminFields::definitions($form);
+        echo '<div class="afe-admin-card" data-afe-admin-meta-fields>';
+        echo '<div class="afe-admin-card-title"><div><h2>فیلدهای اختصاصی مدیر</h2><p>این فیلدها فقط در جزئیات و ویرایش ثبت توسط مدیر نمایش داده می‌شوند. مقادیر از داده‌های عمومی کاربر جدا هستند و می‌توان آن‌ها را در PDF و Excel خروجی گرفت.</p></div></div>';
+        echo '<p class="description">شناسه هر فیلد باید انگلیسی، یکتا و ثابت باشد. تغییر شناسه بعد از ثبت مقدار، مقدار قبلی را به شناسه جدید منتقل نمی‌کند. برای گزینه‌های انتخابی هر خط را به‌شکل <code>value|عنوان نمایشی</code> وارد کنید.</p>';
+        echo '<div data-afe-admin-meta-rows>';
+        foreach($definitions as $i=>$definition) {
+            echo $this->adminFieldRow($definition,(string)$i);
+        }
+        echo '</div><button type="button" class="button button-secondary" data-afe-admin-meta-add>+ افزودن فیلد مدیریتی</button>';
+        echo '<template data-afe-admin-meta-template>'.$this->adminFieldRow(['key'=>'','label'=>'','type'=>'text','options'=>[]],'__INDEX__').'</template>';
+        echo '<p class="description">نوع‌های قابل استفاده: متن کوتاه، متن چندخطی و انتخابی. سطح دسترسی مشاهده، ویرایش و خروجی از مجوزهای ثبت‌های همان فرم پیروی می‌کند.</p>';
+        echo '</div>';
+    }
+
+    private function adminFieldRow(array $field,string $index): string
+    {
+        $prefix='admin_fields['.$index.']';
+        $type=(string)($field['type']??'text');
+        $html='<div class="afe-admin-meta-row" data-afe-admin-meta-row><div class="afe-admin-meta-grid">';
+        $html.='<label>شناسه انگلیسی<input name="'.esc_attr($prefix.'[key]').'" value="'.esc_attr((string)($field['key']??'')).'" placeholder="group_level" pattern="[a-z][a-z0-9_]*" maxlength="64"></label>';
+        $html.='<label>عنوان نمایشی<input name="'.esc_attr($prefix.'[label]').'" value="'.esc_attr((string)($field['label']??'')).'" placeholder="سطح گروه"></label>';
+        $html.='<label>نوع فیلد<select name="'.esc_attr($prefix.'[type]').'" data-afe-admin-meta-type>';
+        foreach(['text'=>'متن کوتاه','textarea'=>'متن چندخطی','select'=>'انتخاب از فهرست'] as $key=>$label) {
+            $html.='<option value="'.esc_attr($key).'" '.selected($key,$type,false).'>'.esc_html($label).'</option>';
+        }
+        $html.='</select></label>';
+        $html.='<label class="afe-admin-meta-options" data-afe-admin-meta-options>گزینه‌های انتخابی (هر سطر یک گزینه)<textarea rows="4" dir="ltr" name="'.esc_attr($prefix.'[options]').'" placeholder="new|نوپا">'.esc_textarea(AdminFields::optionLines($field)).'</textarea></label>';
+        $html.='</div><button type="button" class="button-link-delete" data-afe-admin-meta-remove>حذف فیلد</button></div>';
+        return $html;
     }
 
     private function renderDuplicateSettings(array $form): void
@@ -1037,6 +1079,15 @@ final class FormsPage
                 wp_die(esc_html($error->getMessage()),'خطا در تنظیمات پیامک بازیابی',['back_link'=>true]);
             }
         }
+        // Replace the whole per-form admin-only definition list. Removal of a
+        // code-defined field is an intentional manager override.
+        try {
+            $adminFieldsInput=is_array($_POST['admin_fields']??null)?(array)wp_unslash($_POST['admin_fields']):[];
+            $adminDefinitions=AdminFields::sanitizeDefinitions($adminFieldsInput,$codeForm);
+        } catch(\InvalidArgumentException $error) {
+            wp_die(esc_html($error->getMessage()),'فیلد مدیریتی نامعتبر',['back_link'=>true]);
+        }
+        $settings['admin_fields']=$adminDefinitions;
         $settings['duplicate']=[
             'enabled'=>!empty($_POST['duplicate_enabled']) && $duplicateFields!==[],
             'fields'=>$duplicateFields,
@@ -1062,8 +1113,12 @@ final class FormsPage
         if ($previewOverride!=='') $settings['preview_template']=$previewOverride;
 
         $resetExportProfile=!empty($_POST['reset_export_profile']);
-        $submittedExport=(new ExportConfigSanitizer())->sanitize((array)($_POST['export_profile']??[]),$codeForm);
-        $codeExport=ExportProfile::resolve($codeForm);
+        // The user may add a new admin field in this very same save. Make its
+        // export column immediately eligible for the current export profile.
+        $exportForm=$codeForm;
+        $exportForm['settings']['admin_fields']=$adminDefinitions;
+        $submittedExport=(new ExportConfigSanitizer())->sanitize((array)($_POST['export_profile']??[]),$exportForm);
+        $codeExport=ExportProfile::resolve($exportForm);
         if(!$resetExportProfile && $submittedExport!==$codeExport) $settings['exports']=$submittedExport;
 
         $styleIsolation=sanitize_key((string)($_POST['style_isolation']??'inherit'));

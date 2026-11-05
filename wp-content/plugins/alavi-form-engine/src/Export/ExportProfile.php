@@ -1,13 +1,18 @@
 <?php
 declare(strict_types=1);
 namespace BonyadAlavi\FormEngine\Export;
+use BonyadAlavi\FormEngine\Admin\AdminFields;
 final class ExportProfile
 {
-    public const PDF_TOKENS=['{{form_title}}','{{form_slug}}','{{submission_id}}','{{tracking_code}}','{{status}}','{{submitted_at}}','{{fields_table}}','{{field:*}}','{{files:*}}'];
+    public const PDF_TOKENS=['{{form_title}}','{{form_slug}}','{{submission_id}}','{{tracking_code}}','{{status}}','{{submitted_at}}','{{fields_table}}','{{field:*}}','{{admin_field:*}}','{{files:*}}'];
     public static function defaults(array $form): array
     {
         $columns=[];
         foreach((array)($form['steps']??[]) as $step) foreach((array)($step['items']??[]) as $field) self::collectColumn((array)$field,$columns,'');
+        foreach(AdminFields::definitions($form) as $field) {
+            $columns[]=['field'=>AdminFields::exportKey($field['key']),
+                'label'=>$field['label'],'enabled'=>true,'width'=>$field['type']==='textarea'?40:22];
+        }
         return ['pdf'=>['page_size'=>'A4','orientation'=>'portrait','header_html'=>'<div class="afe-export-header"><strong>{{form_title}}</strong><span>کد رهگیری: {{tracking_code}}</span></div>','body_html'=>'<div class="afe-export-meta">وضعیت: {{status}} · تاریخ ثبت: {{submitted_at}}</div>{{fields_table}}','footer_html'=>'<div class="afe-export-footer">Alavi Form Engine · {{tracking_code}}</div>','css'=>self::defaultPdfCss()],'excel'=>['sheet_name'=>'ثبت‌ها','rtl'=>true,'freeze_header'=>true,'auto_filter'=>true,'header_bold'=>true,'header_fill'=>'E7F1ED','header_text'=>'0F6B4F','columns'=>$columns]];
     }
     public static function resolve(array $form,array $override=[]): array
@@ -17,6 +22,19 @@ final class ExportProfile
         $resolved=array_replace_recursive($base,$code,$override);
         if(isset($code['excel']['columns'])&&is_array($code['excel']['columns'])) $resolved['excel']['columns']=array_values($code['excel']['columns']);
         if(isset($override['excel']['columns'])&&is_array($override['excel']['columns'])) $resolved['excel']['columns']=array_values($override['excel']['columns']);
+        // Saved Excel profiles predate newly defined admin-only fields. Append
+        // their columns without changing the order or enabled flags of existing
+        // columns; explicit per-column disable remains authoritative.
+        $present=[];
+        foreach((array)($resolved['excel']['columns']??[]) as $col) $present[(string)($col['field']??'')]=true;
+        foreach(AdminFields::definitions($form) as $field) {
+            $key=AdminFields::exportKey($field['key']);
+            if(isset($present[$key])) continue;
+            $resolved['excel']['columns'][]=[
+                'field'=>$key,'label'=>$field['label'],'enabled'=>true,
+                'width'=>$field['type']==='textarea'?40:22,
+            ];
+        }
         return $resolved;
     }
 

@@ -404,6 +404,21 @@ final class BA_Jihadi_Group_Registration_Form {
 			           'captcha'                  => 'custom',
 			           'rate_limit'               => 20,
 			           'storage'                  => 'shared',
+                       // Visible/editable only to managers on submission details
+                       // and available for authorized PDF/Excel exports.
+                       'admin_fields' => [
+                           [
+                               'key' => 'group_level',
+                               'label' => 'سطح گروه',
+                               'type' => 'select',
+                               'options' => [
+                                   'novpa' => 'نوپا',
+                                   'faal' => 'فعال',
+                                   'pishro' => 'پیشرو',
+                                   'olgoo' => 'الگو',
+                               ],
+                           ],
+                       ],
 			           'duplicate'                => [
 				           'enabled'      => true,
 				           'fields'       => [ 'registration_code', 'group_mobile' ],

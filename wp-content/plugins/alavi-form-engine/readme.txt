@@ -24,6 +24,8 @@ Project-specific forms are registered through the afe_register_forms hook. The B
 
 == Changelog ==
 
+* 1.0.28-dev.8: per-form admin-only submission fields (text/textarea/select), dedicated DB table, editable submission detail, admin PDF/print and Excel exports, safe legacy column-profile additions; Jihadi group_level select (novpa/faal/pishro/olgoo). New DB checkpoint 1.0.5-dev.3, stable baseline unchanged.
+
 * 1.0.28-dev.7: configurable per-form recovery OTP message body with {{code}} placeholder, optional {{minutes}}, approved Pattern/BodyId and ordered arguments; validation and backwards-compatible free mode; no DB/stable change.
 
 * 1.0.28-dev.6: six-tab global settings with sticky save and preserved active tab; optional bounded admin-only SMS send diagnostics for test/Action/OTP, sanitized Farapayamak numeric status codes and history clear/refresh. Existing SMS test rate limit unchanged, DB/stable unchanged.

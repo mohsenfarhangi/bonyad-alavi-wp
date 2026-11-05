@@ -144,3 +144,12 @@
 .afe-settings-test-diagnostics { padding:12px 14px;margin:12px 0 0;background:#13271e;color:#d8eddf;border-radius:8px;direction:ltr;text-align:left;font-size:12px;white-space:pre-wrap;word-break:break-word; }
 .afe-settings-test-diagnostics[hidden] { display:none!important; }
 @media(max-width:782px) { .afe-settings-tabs {margin-top:12px;} .afe-settings-save {bottom:0;margin-left:-8px;margin-right:-8px;border-radius:12px 12px 0 0;padding:10px 12px;} .afe-settings-save span {font-size:12px;} .afe-settings-save .button {flex:1 1 auto;} }
+
+/* Per-form, manager-only submission fields */
+.afe-admin-meta-row { border:1px solid #d7e2dc;background:#fbfdfa;border-radius:12px;margin:12px 0;padding:16px; }
+.afe-admin-meta-grid { display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px 16px; }
+.afe-admin-meta-grid label {display:flex;flex-direction:column;gap:6px;font-weight:600;}
+.afe-admin-meta-grid input,.afe-admin-meta-grid select,.afe-admin-meta-grid textarea { width:100%;max-width:100%; }
+.afe-admin-meta-row [data-afe-admin-meta-remove] { margin-top:12px; }
+.afe-admin-meta-options[hidden] { display:none!important; }
+@media(max-width:780px){.afe-admin-meta-grid{grid-template-columns:minmax(0,1fr);}}
