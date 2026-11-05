@@ -4,7 +4,7 @@ namespace BonyadAlavi\FormEngine\Export;
 use BonyadAlavi\FormEngine\Admin\AdminFields;
 final class ExportProfile
 {
-    public const PDF_TOKENS=['{{form_title}}','{{form_slug}}','{{submission_id}}','{{tracking_code}}','{{status}}','{{submitted_at}}','{{fields_table}}','{{field:*}}','{{files:*}}'];
+    public const PDF_TOKENS=['{{form_title}}','{{form_slug}}','{{submission_id}}','{{tracking_code}}','{{status}}','{{submitted_at}}','{{fields_table}}','{{field:*}}','{{admin_field:*}}','{{files:*}}'];
     public static function defaults(array $form): array
     {
         $columns=[];
