@@ -112,6 +112,12 @@ $forgedTermsErrors = $validator->validate($form, $forgedTerms);
 $missingErrors = $validator->validate($form, []);
 
 $themeRoot = dirname(__DIR__);
+$campCss = file_get_contents($themeRoot . '/assets/css/ba-camp-admission-form.css');
+$termsSelector = '.afe-form[data-form="imam-khomeini-camp-admission"] .afe-field[data-field="terms_accepted"]';
+$termsStart = is_string($campCss) ? strpos($campCss, $termsSelector . ' {') : false;
+$termsEnd = $termsStart !== false ? strpos($campCss, '}', $termsStart) : false;
+$termsRule = $termsStart !== false && $termsEnd !== false ? substr($campCss, $termsStart, $termsEnd - $termsStart) : '';
+
 $frontendScript = file_get_contents($themeRoot . '/assets/js/ba-camp-admission-form.js');
 $engineFrontend = file_get_contents($pluginRoot . '/assets/js/frontend.js');
 $rendererSource = file_get_contents($pluginRoot . '/src/Form/Renderer.php');
@@ -152,6 +158,16 @@ $checks = [
         && ($fields['requested_facilities']['validators'][0]['key'] ?? '') === 'ba_camp_facilities_selection'
         && in_array('سالن غذاخوری', $fields['requested_facilities']['options'] ?? [], true)
         && in_array('استخر', $fields['requested_facilities']['options'] ?? [], true),
+    'terms-clean-flex-layout' =>
+        str_contains($termsRule, 'display: flex;')
+        && str_contains($termsRule, 'flex-direction: row;')
+        && str_contains($termsRule, 'flex-wrap: wrap;')
+        && str_contains($termsRule, 'border: none;')
+        && str_contains($termsRule, 'background: transparent;')
+        && !str_contains($termsRule, 'grid-template-columns')
+        && is_string($campCss)
+        && str_contains($campCss, $termsSelector . ' .afe-checkbox {')
+        && str_contains($campCss, 'order: -1;'),
     'terms-is-required-checkbox' =>
         ($fields['terms_accepted']['type'] ?? '') === 'checkbox'
         && ($fields['terms_accepted']['required'] ?? false) === true
