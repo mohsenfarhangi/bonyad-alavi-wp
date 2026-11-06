@@ -167,7 +167,7 @@ final class SubmissionsPage
         }
         echo '<div class="afe-admin-card"><div class="afe-admin-card-title"><div><h2>'.($editing?'ویرایش اطلاعات':'اطلاعات ثبت‌شده').'</h2><p>'.($editing?'مقادیر را مستقیماً ویرایش و ذخیره کنید.':'اطلاعات بر اساس ساختار اصلی فرم نمایش داده می‌شود.').'</p></div></div>';
         echo '<div class="afe-table-scroll"><table class="widefat afe-submission-data-table"><tbody>';
-        foreach($this->presenter->sections($form) as $section) {
+        foreach($this->presenter->sections($form,false) as $section) {
             $stepTitle=(string)($section['step']['title']??'');
             echo '<tr class="afe-submission-step-row"><th colspan="2">'.esc_html($stepTitle).'</th></tr>';
             foreach($section['fields'] as $field) {
@@ -238,6 +238,8 @@ final class SubmissionsPage
             echo '</select>'; submit_button('تغییر وضعیت','primary','submit',false); echo '</form></div>';
         }
 
+        $this->renderAdminFieldsSidebar($form,$row,$trashed);
+
         if($this->access->can($formSlug,FormAccess::MANAGE)) {
             echo '<div class="afe-admin-card"><h2>یادداشت داخلی</h2>';
             if(!$trashed && current_user_can(Capabilities::ADD_NOTES)) {
@@ -252,6 +254,43 @@ final class SubmissionsPage
         }
         if($this->access->can($formSlug,FormAccess::MANAGE)) $this->renderActionLogs($id);
         echo '</aside></div></div>';
+    }
+
+    /**
+     * These fields live exclusively in the detail sidebar. They are separately
+     * editable even when the main submission detail is read-only or locked.
+     * The same presenter still includes them in PDF, print and XLSX exports.
+     */
+    private function renderAdminFieldsSidebar(array $form,array $row,bool $trashed): void
+    {
+        $fields=AdminSubmissionFields::fieldMap($form);
+        if(!$fields) return;
+        $slug=(string)$row['form_slug'];
+        $canEdit=!$trashed && current_user_can(Capabilities::EDIT_SUBMISSIONS)
+            && $this->access->can($slug,FormAccess::EDIT);
+        $data=(array)($row['data']??[]);
+        echo '<div class="afe-admin-card afe-submission-admin-fields"><h2>اطلاعات اختصاصی مدیریت</h2>';
+        if($canEdit) {
+            echo '<form method="post" class="afe-sidebar-admin-fields-form">';
+            wp_nonce_field('afe_submission_edit_'.(int)$row['id'],'afe_submission_nonce');
+            echo '<input type="hidden" name="afe_detail_action" value="admin_fields">';
+        }
+        foreach($fields as $field) {
+            $name=(string)$field['name'];
+            $value=$data[$name]??'';
+            echo '<div class="afe-sidebar-admin-field">';
+            if($canEdit) {
+                echo '<label class="afe-sidebar-admin-label"><strong>'.esc_html($this->presenter->fieldLabel($field)).'</strong>';
+                echo $this->presenter->editField($field,$value,$data,'afe_submission_meta');
+                echo '</label>';
+            } else {
+                echo '<div class="afe-sidebar-admin-label"><strong>'.esc_html($this->presenter->fieldLabel($field)).'</strong></div>';
+                echo '<div class="afe-sidebar-admin-value">'.$this->presenter->displayField($field,$value,$data).'</div>';
+            }
+            echo '</div>';
+        }
+        if($canEdit) submit_button('ذخیره اطلاعات مدیریتی','secondary','submit',false);
+        echo $canEdit?'</form></div>':'</div>';
     }
 
     private function handleDetailPost(array $row,array $form): void
@@ -313,6 +352,12 @@ final class SubmissionsPage
                 wp_die(esc_html($message));
             }
             wp_safe_redirect(add_query_arg('action_retried','1',$this->detailUrl((int)$row['id']))); exit;
+        } elseif($action==='admin_fields' && $this->access->can($formSlug,FormAccess::EDIT) && current_user_can(Capabilities::EDIT_SUBMISSIONS)) {
+            $input=isset($_POST['afe_submission_meta']) && is_array($_POST['afe_submission_meta'])
+                ? (array)wp_unslash($_POST['afe_submission_meta']) : [];
+            $updated=$this->service->updateAdminSubmissionFields((int)$row['id'],$input);
+            if(is_wp_error($updated)) wp_die(esc_html($updated->get_error_message()));
+            $changed=$updated;
         } elseif($action==='edit_data' && $this->access->can($formSlug,FormAccess::EDIT)) {
             $input=is_array($_POST['afe_admin_data']??null)?(array)$_POST['afe_admin_data']:[];
             $clean=$this->presenter->sanitizeSubmitted($form,$input,(array)$row['data']);

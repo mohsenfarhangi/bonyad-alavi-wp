@@ -3,7 +3,7 @@
 **Status:** active development / pre-acceptance  
 **Path:** `wp-content/plugins/alavi-form-engine/`  
 **Namespace:** `BonyadAlavi\FormEngine`  
-**Development version:** `1.0.28-dev.8`  
+**Development version:** `1.0.28-dev.9`  
 **DB checkpoint:** `1.0.5-dev.2`  
 **Stable baseline/tag documented:** `1.0.27`  
 **PHP:** `>=8.3`
@@ -111,6 +111,13 @@ Style modes:
 - `disabled`
 
 tokens زیر `.afe-shell` scope شده‌اند و strong mode reset محدود/defensive دارد.
+
+## Sidebar editing for admin-only submission fields (2026-11-06)
+
+- کارت «اطلاعات اختصاصی مدیریت» در **سایدبار صفحه جزئیات Submission** قرار گرفت، کنار کارت‌های وضعیت و یادداشت داخلی. در حالت مشاهده (بدون `?edit=1`) نیز کاربر دارای `afe_edit_submissions` و دسترسی `FormAccess::EDIT` به همان فرم می‌تواند فیلدها را مستقیماً تغییر داده و با فرم و nonce مستقل ذخیره کند؛ در حالت بدون مجوز، فیلدها فقط خواندنی هستند. ثبت زباله‌دان‌شده اجازه ویرایش ندارد؛ قفل‌بودن متقاضی، ویرایش مدیریتی مجاز را محدود نمی‌کند.
+- فیلدهای admin-only در **جدول اصلی اطلاعات ارسالی** و فرم «ویرایش اطلاعات» دیگر تکرار نمی‌شوند. `FormDataPresenter::sections($form,false)` مخصوص صفحه اصلی است؛ default `sections($form)` همچنان شامل این داده‌ها برای Excel تک/لیست، PDF و چاپ می‌شود.
+- مسیر POST مستقل `afe_detail_action=admin_fields` از nonce موجود صفحه، فرم‌اسکوپ و Capability کنترل می‌شود. سرویس `SubmissionService::updateAdminSubmissionFields()` فیلدهای ارسال‌شده را با whitelist `AdminSubmissionFields::fieldMap` بررسی می‌کند، گزینه Select جعلی/نامعلوم و ثبت حذف‌شده را رد می‌کند، فقط داده‌های مدیریتی را در JSON همان Submission به‌روزرسانی کرده و audit/event `submission.updated` را ثبت می‌کند. ساختار Duplicate و داده‌های متقاضی تغییر نمی‌کنند.
+- تست‌های جدید `tests/admin-fields-sidebar.php` و اصلاح تست Presenter/Workflow مرتبط. نسخه توسعه `1.0.28-dev.9` برای کش CSS، DB/stable ثابت. پذیرش زنده صفحه سایدبار و ذخیره روی سایت همچنان نیازمند بررسی است.
 
 ## Admin-only submission fields (2026-11-06)
 

@@ -59,11 +59,12 @@ $duplicate=AdminSubmissionFields::sanitizeDefinitions([
 $checks=[
     'valid-choices-preserved'=>($admin['__afe_admin_group_level']['options']??null)===[
         'new'=>'نوپا','active'=>'فعال','leading'=>'پیشرو','model'=>'الگو'],
-    'separate-section-in-admin-presenter'=>count($sections)===2
+    'separate-section-in-export-presenter'=>count($sections)===2
         && ($sections[1]['step']['title']??'')==='اطلاعات اختصاصی مدیریت'
         && ($sections[1]['fields'][0]['name']??'')==='__afe_admin_group_level',
-    'presenter-admin-edit-persists-valid-choice'=>($presenterClean['__afe_admin_group_level']??null)==='model',
-    'presenter-admin-edit-rejects-forged-choice'=>($presenterInvalid['__afe_admin_group_level']??null)==='',
+    'main-editor-cannot-overwrite-admin-value'=>($presenterClean['__afe_admin_group_level']??null)==='active',
+    'main-editor-ignores-forged-admin-choice'=>($presenterInvalid['__afe_admin_group_level']??null)==='active',
+    'public-detail-can-exclude-admin-section'=>count($presenter->sections($form,false))===1,
     'presenter-displays-persian-choice-label'=>$presenterLabel==='فعال',
     'presenter-edit-renders-native-select'=>str_contains($presenterEdit,'<select') && str_contains($presenterEdit,'selected'),
     'admin-edit-accepts-valid-choice'=>($valid['__afe_admin_group_level']??null)==='leading',

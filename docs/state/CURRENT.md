@@ -1,12 +1,12 @@
 # Current Project State
 
-آخرین بازبینی: **2026-11-05**
+آخرین بازبینی: **2026-11-06**
 
 ## Project Phase
 
 پروژه در توسعه فعال است.
 
-- **Alavi Form Engine:** `1.0.28-dev.8`، DB `1.0.5-dev.2`، stable baseline/tag `1.0.27`; production bump هنوز به live acceptance وابسته است.
+- **Alavi Form Engine:** `1.0.28-dev.9`، DB `1.0.5-dev.2`، stable baseline/tag `1.0.27`; production bump هنوز به live acceptance وابسته است.
 - **Ostadsho child theme:** custom integration layer روی Theme header `2.8`; version docs legacy v0.x به state history مهاجرت کرده‌اند.
 
 ## Current Goal
@@ -33,6 +33,13 @@ AFE release goal همچنان live acceptance نسخه 1.0.28 و رفع blocker 
 - فیلد `terms_accepted` صرفاً در CSS اختصاصی فرم به Flex افقی با راست‌چین RTL تغییر کرد؛ پس‌زمینه و border حذف شدند و پیغام خطا در ردیف جدا باقی می‌ماند. هیچ تغییری در الزام پذیرش، ارسال فرم یا منطق دیگر انجام نشد. regression قرارداد CSS اضافه شد؛ پذیرش بصری زنده در Elementor هنوز لازم است.
 
 ## Recently Completed
+
+### Admin-only submission fields: sidebar + inline editing (2026-11-06)
+- «اطلاعات اختصاصی مدیریت» از جدول اصلی به کارت سایدبار جزئیات Submission منتقل شد. در حالت مشاهده، مدیر دارای `afe_edit_submissions` و `FormAccess::EDIT` می‌تواند با فرم و nonce مستقل ذخیره کند؛ بدون مجوز/زباله‌دان read-only است. سطح گروه جهادی در همین کارت Select می‌شود.
+- Service مسیر امن `admin_fields` با allowlist برای نام/مقدار، حفظ سایر داده‌ها، audit و انتشار `submission.updated` دارد؛ قفل‌بودن فرم متقاضی مانع ویرایش مدیر مجاز نیست.
+- Excel، PDF، چاپ و Tokenهای خروجی بدون تغییر حفظ شدند؛ Presenter در جدول اصلی جزئیات/ویرایش کامل، فیلدهای مدیریتی را کنار می‌گذارد تا تکرار نشوند.
+- آزمون contract `admin-fields-sidebar.php` و آزمون‌های قبلی و **GitHub Actions [run 42223056259](https://github.com/mohsenfarhangi/bonyad-alavi-wp/actions/runs/42223056259) PASS** (PHP lint، امنیت و فرم مدیریتی، Export regression و JS syntax). نسخه dev `1.0.28-dev.9`، DB/stable ثابت. نیازمند آزمایش live سایدبار، ذخیره و خروجی‌ها است.
+
 
 ### Admin-only submission fields per form (2026-11-06)
 - فرم‌ساز AFE دارای تب مستقل «فیلدهای اختصاصی مدیریت» برای تعریف per-form فیلد text/textarea/number/select است؛ ویرایش/مشاهده فقط در صفحه جزئیات Submission مدیر صورت می‌گیرد و نمایش عمومی ندارد.

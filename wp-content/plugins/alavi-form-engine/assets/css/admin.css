@@ -153,3 +153,15 @@
 .afe-admin-field-definition [data-afe-admin-field-options][hidden]{display:none!important}
 .afe-admin-field-definition [data-afe-admin-fields-remove]{color:#a32020;cursor:pointer}
 [data-afe-admin-submission-fields] [data-afe-admin-fields-add]{margin-top:12px}
+
+.afe-submission-admin-fields .afe-sidebar-admin-label{display:block}
+
+/* Submission detail: compact and independently editable administrator metadata. */
+.afe-submission-admin-fields .afe-sidebar-admin-fields-form{display:flex;flex-direction:column;gap:12px}
+.afe-submission-admin-fields .afe-sidebar-admin-field{margin:0 0 12px;min-width:0}
+.afe-submission-admin-fields .afe-sidebar-admin-label{display:block;margin-bottom:7px;font-size:13px;color:#344a40}
+.afe-submission-admin-fields .afe-admin-control{display:block;width:100%;max-width:100%;min-width:0;box-sizing:border-box;margin-top:6px}
+.afe-submission-admin-fields textarea.afe-admin-control{min-height:88px;resize:vertical}
+.afe-submission-admin-fields select.afe-admin-control{min-height:38px}
+.afe-submission-admin-fields .afe-sidebar-admin-value{padding:10px 12px;background:#f7faf8;border:1px solid #e1e9e5;border-radius:8px;color:#273a30;overflow-wrap:anywhere}
+.afe-submission-admin-fields .button{margin-top:3px}
