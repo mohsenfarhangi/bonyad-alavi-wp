@@ -153,3 +153,5 @@
 .afe-admin-field-definition [data-afe-admin-field-options][hidden]{display:none!important}
 .afe-admin-field-definition [data-afe-admin-fields-remove]{color:#a32020;cursor:pointer}
 [data-afe-admin-submission-fields] [data-afe-admin-fields-add]{margin-top:12px}
+
+.afe-submission-admin-fields .afe-sidebar-admin-label{display:block}

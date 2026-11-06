@@ -934,6 +934,64 @@ final class SubmissionService
         return '';
     }
 
+    /**
+     * Independently saves the admin-only sidebar fields. This deliberately
+     * does not pass through regular form edit, validation, fingerprints or
+     * applicant lock checks: only trusted administrators may update them.
+     */
+    public function updateAdminSubmissionFields(int $submissionId,array $input): bool|WP_Error
+    {
+        if(!current_user_can('afe_edit_submissions')) {
+            return new WP_Error('forbidden','اجازه ویرایش فیلدهای مدیریتی را ندارید.');
+        }
+        $row=$this->submissions->find($submissionId);
+        if(!$row || !empty($row['trashed_at'])) {
+            return new WP_Error('not_found','ثبت فعال پیدا نشد.');
+        }
+        $slug=(string)($row['form_slug']??'');
+        if(!$this->registry->has($slug) || !$this->formAccess->can($slug,FormAccess::EDIT)) {
+            return new WP_Error('forbidden','اجازه ویرایش این فرم را ندارید.');
+        }
+        $form=$this->resolvedForm($slug);
+        $fields=AdminSubmissionFields::fieldMap($form);
+        if(!$fields) return new WP_Error('invalid_fields','فیلد مدیریتی برای این فرم تعریف نشده است.');
+        foreach($input as $name=>$value) {
+            if(!is_string($name) || !array_key_exists($name,$fields)) {
+                return new WP_Error('invalid_field','فیلد مدیریتی ناشناخته است.');
+            }
+        }
+        foreach($fields as $name=>$field) {
+            if(!array_key_exists($name,$input)) {
+                return new WP_Error('missing_field','اطلاعات فیلد مدیریتی ناقص است.');
+            }
+            $value=$input[$name];
+            if(!is_scalar($value)) return new WP_Error('invalid_value','مقدار فیلد مدیریتی نامعتبر است.');
+            if(($field['type']??'')==='select' && (string)$value!==''
+                && !array_key_exists((string)$value,(array)$field['options'])) {
+                return new WP_Error('invalid_option','گزینه انتخاب‌شده معتبر نیست.');
+            }
+        }
+        $existing=(array)($row['data']??[]);
+        $updated=AdminSubmissionFields::sanitizeInput($form,$input,$existing);
+        if($updated===$existing) return false;
+        if(!$this->submissions->update($submissionId,[
+            'data_json'=>wp_json_encode($updated,JSON_UNESCAPED_UNICODE),
+            'updated_at'=>current_time('mysql',true),
+        ])) {
+            return new WP_Error('database','ذخیره فیلدهای مدیریتی انجام نشد.');
+        }
+        $this->submissions->replaceValues($submissionId,$updated);
+        $changed=[];
+        foreach($fields as $key=>$field) {
+            if(($existing[$key]??'')!==($updated[$key]??'')) $changed[]=$key;
+        }
+        $this->submissions->audit($submissionId,$slug,'submission.admin_fields_updated',[
+            'fields'=>$changed,'source'=>'admin_sidebar',
+        ]);
+        $this->emitSubmissionEvent('submission.updated',$submissionId);
+        return true;
+    }
+
     public function updateSubmissionDataAdmin(int $submissionId, array $data): bool|WP_Error
     {
         $row = $this->submissions->find($submissionId);

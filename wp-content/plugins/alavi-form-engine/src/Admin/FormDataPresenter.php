@@ -20,7 +20,7 @@ final class FormDataPresenter
     public function __construct(private readonly DataSourceManager $sources, private readonly LocaleDateService $dates) {}
 
     /** @return array<int,array{step:array,fields:array}> */
-    public function sections(array $form): array
+    public function sections(array $form,bool $includeAdmin=true): array
     {
         $sections=[];
         foreach ((array)($form['steps'] ?? []) as $step) {
@@ -32,7 +32,7 @@ final class FormDataPresenter
             if ($fields) $sections[]=['step'=>$step,'fields'=>$fields];
         }
         $adminFields=AdminSubmissionFields::fieldMap($form);
-        if ($adminFields) $sections[]=['step'=>['title'=>'اطلاعات اختصاصی مدیریت'],'fields'=>array_values($adminFields)];
+        if ($includeAdmin && $adminFields) $sections[]=['step'=>['title'=>'اطلاعات اختصاصی مدیریت'],'fields'=>array_values($adminFields)];
         return $sections;
     }
 
@@ -124,7 +124,7 @@ final class FormDataPresenter
     public function sanitizeSubmitted(array $form,array $input,array $existing=[]): array
     {
         $clean=$existing;
-        foreach ($this->sections($form) as $section) {
+        foreach ($this->sections($form,false) as $section) {
             foreach ($section['fields'] as $field) {
                 $name=(string)($field['name'] ?? '');
                 if ($name==='' || ($field['type']??'')==='file') continue;
@@ -147,7 +147,9 @@ final class FormDataPresenter
                 $clean[$name]=$this->sanitizeScalar($field,$input[$name]??'');
             }
         }
-        return AdminSubmissionFields::sanitizeInput($form,$input,$clean);
+        // Admin-owned metadata is never modified by the main form editor.
+        // The sidebar has its own permission-checked save action.
+        return $clean;
     }
 
     /** @return array<string,array> */

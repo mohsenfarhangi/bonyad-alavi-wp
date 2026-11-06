@@ -19,7 +19,7 @@ $checks=[
     'admin-config-save'=>str_contains($forms,"'admin_fields'") && str_contains($forms,'AdminSubmissionFields::sanitizeDefinitions'),
     'frontend-does-not-render-admin-fields'=>str_contains($presenter,'AdminSubmissionFields::fieldMap($form)')
         && !str_contains($read('src/Form/Renderer.php'),'AdminSubmissionFields::fieldMap'),
-    'admin-edit-validation-and-display'=>str_contains($presenter,'AdminSubmissionFields::sanitizeInput')
+    'admin-edit-validation-and-display'=>str_contains($presenter,'AdminSubmissionFields::fieldMap') && str_contains($presenter,'sections($form,false)')
         && str_contains($presenter,"'title'=>'اطلاعات اختصاصی مدیریت'"),
     'public-resubmit-preserves-admin-data'=>str_contains($service,'AdminSubmissionFields::preserve')
         && str_contains($service,'array_key_exists') && str_contains($service,'admin_fields'),
@@ -36,8 +36,8 @@ $checks=[
         && str_contains($theme,"'active' => 'فعال'")
         && str_contains($theme,"'leading' => 'پیشرو'")
         && str_contains($theme,"'model' => 'الگو'"),
-    'development-asset-version'=>str_contains($entry,'Version: 1.0.28-dev.8')
-        && str_contains($entry,"define('AFE_VERSION', '1.0.28-dev.8')"),
+    'development-asset-version'=>str_contains($entry,'Version: 1.0.28-dev.9')
+        && str_contains($entry,"define('AFE_VERSION', '1.0.28-dev.9')"),
 ];
 foreach($checks as $name=>$ok) {
     echo ($ok?'PASS ':'FAIL ').$name.PHP_EOL;

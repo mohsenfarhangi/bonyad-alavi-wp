@@ -2,7 +2,7 @@ name: AFE per-form admin-only submission fields
 
 on:
   push:
-    branches: [feat/afe-admin-submission-fields]
+    branches: [feat/afe-admin-fields-sidebar]
   pull_request:
     branches: [main]
     paths:
@@ -12,6 +12,7 @@ on:
       - 'wp-content/plugins/alavi-form-engine/assets/js/admin.js'
       - 'wp-content/plugins/alavi-form-engine/assets/css/admin.css'
       - 'wp-content/plugins/alavi-form-engine/tests/admin-submission-fields*'
+      - 'wp-content/plugins/alavi-form-engine/tests/admin-fields-sidebar.php'
       - 'wp-content/themes/ostadsho-child/inc/forms/class-ba-jihadi-group-registration-form.php'
       - '.github/workflows/afe-admin-submission-fields.yml'
   workflow_dispatch:
@@ -33,6 +34,7 @@ jobs:
           for file in \
             wp-content/plugins/alavi-form-engine/src/Admin/AdminSubmissionFields.php \
             wp-content/plugins/alavi-form-engine/src/Admin/FormDataPresenter.php \
+            wp-content/plugins/alavi-form-engine/src/Admin/SubmissionsPage.php \
             wp-content/plugins/alavi-form-engine/src/Admin/FormsPage.php \
             wp-content/plugins/alavi-form-engine/src/Submission/SubmissionService.php \
             wp-content/plugins/alavi-form-engine/src/Export/ExportProfile.php \
@@ -41,11 +43,13 @@ jobs:
             wp-content/plugins/alavi-form-engine/src/Export/ExportConfigSanitizer.php \
             wp-content/themes/ostadsho-child/inc/forms/class-ba-jihadi-group-registration-form.php \
             wp-content/plugins/alavi-form-engine/tests/admin-submission-fields.php \
-            wp-content/plugins/alavi-form-engine/tests/admin-submission-fields-integration.php; do php -l "$file"; done
+            wp-content/plugins/alavi-form-engine/tests/admin-submission-fields-integration.php \
+            wp-content/plugins/alavi-form-engine/tests/admin-fields-sidebar.php; do php -l "$file"; done
       - name: Admin-only field security, display and export regression
         run: |
           php wp-content/plugins/alavi-form-engine/tests/admin-submission-fields.php
           php wp-content/plugins/alavi-form-engine/tests/admin-submission-fields-integration.php
+          php wp-content/plugins/alavi-form-engine/tests/admin-fields-sidebar.php
           php wp-content/themes/ostadsho-child/tests/jihadi-form-definition.php
       - name: Existing submissions and export configuration regression
         run: |

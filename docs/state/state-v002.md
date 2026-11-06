@@ -844,3 +844,10 @@ Modules: [MODULE-AFE](../modules/alavi-form-engine.md), [MODULE-JIHADI-FORM](../
 - Shared Presenter supplies display/edit, PDF, print and Excel single outputs; ExportProfile and ExcelExporter supply list-export columns and PdfTemplateRenderer supports field tokens. Applicant re-submission preserves stored admin-owned values.
 - Jihadi registration Source Definition adds `group_level` select with `new=نوپا`, `active=فعال`, `leading=پیشرو`, `model=الگو`.
 - Automated unit/contract tests and CI added. AFE development assets bump to 1.0.28-dev.8; stable and DB unchanged. Live admin/export acceptance pending.
+
+## 2026-11-06 — Move admin-only submission fields to detail sidebar
+
+- Move admin-only fields from the main detail/edit table into an independently editable sidebar card, including read-only detail mode (same UX model as status and internal notes).
+- Add dedicated `admin_fields` POST action guarded by submission nonce, `afe_edit_submissions`, per-form EDIT access, active submission check and per-field option whitelist. Save only admin-owned JSON keys, retain applicant fields, audit and emit `submission.updated`. Locked applicant submissions may still be classified by an authorized administrator.
+- Keep exporter presenters unchanged and use `sections($form,false)` only for main admin table and main edit sanitization; ensure main edit never resets admin fields.
+- Add regression checks and bump AFE dev assets to 1.0.28-dev.9; DB/stable unchanged. WordPress live acceptance pending.

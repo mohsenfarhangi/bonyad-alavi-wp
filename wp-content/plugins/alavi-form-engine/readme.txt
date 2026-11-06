@@ -24,6 +24,8 @@ Project-specific forms are registered through the afe_register_forms hook. The B
 
 == Changelog ==
 
+* 1.0.28-dev.9: move admin-only submission fields into the detail sidebar with independently authorized inline save in read-only view; preserve Excel/PDF/print and locked applicant submission isolation. DB/stable unchanged.
+
 * 1.0.28-dev.8: per-form admin-only text/textarea/number/select submission fields, detail/edit admin UI and list/single Excel + PDF/print export, safe value preservation on applicant resubmission; Jihadi group level classification. DB/stable unchanged.
 
 * 1.0.28-dev.7: configurable per-form recovery OTP message body with {{code}} placeholder, optional {{minutes}}, approved Pattern/BodyId and ordered arguments; validation and backwards-compatible free mode; no DB/stable change.
