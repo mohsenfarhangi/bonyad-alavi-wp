@@ -1,6 +1,7 @@
 <?php
 declare(strict_types=1);
 namespace BonyadAlavi\FormEngine\Export;
+use BonyadAlavi\FormEngine\Admin\AdminSubmissionFields;
 use BonyadAlavi\FormEngine\Admin\FormDataPresenter;
 use BonyadAlavi\FormEngine\Repository\SubmissionRepository;
 use BonyadAlavi\FormEngine\Localization\LocaleDateService;
@@ -60,7 +61,7 @@ final class ExcelExporter
     private function styleHeader(object $sheet,string $range,array $cfg): void{$style=$sheet->getStyle($range);$style->getFont()->setBold(!empty($cfg['header_bold']))->getColor()->setRGB((string)($cfg['header_text']??'0F6B4F'));$style->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setRGB((string)($cfg['header_fill']??'E7F1ED'));}
     private function styleSection(object $sheet,string $range,array $cfg): void{$this->styleHeader($sheet,$range,$cfg);}
     private function setFilesCell(object $sheet,string $cell,array $files): void{$names=[];$url='';foreach($files as $file){$names[]=(string)($file['original_name']??'فایل');if($url===''){if(!empty($file['attachment_id'])){$u=wp_get_attachment_url((int)$file['attachment_id']);if(is_string($u))$url=$u;}if($url===''&&!empty($file['url']))$url=(string)$file['url'];}}$sheet->setCellValueExplicit($cell,$names?implode("\n",$names):'—',\PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);if($url!==''&&wp_http_validate_url($url))$sheet->getCell($cell)->getHyperlink()->setUrl($url);}
-    private function fieldByPath(array $form,string $path): ?array{$segments=explode('.',$path);foreach((array)$form['steps'] as $step)foreach((array)$step['items'] as $field){$x=$this->findField((array)$field,$segments);if($x)return$x;}return null;}
+    private function fieldByPath(array $form,string $path): ?array{$admin=AdminSubmissionFields::fieldMap($form);if(isset($admin[$path]))return $admin[$path];$segments=explode('.',$path);foreach((array)$form['steps'] as $step)foreach((array)$step['items'] as $field){$x=$this->findField((array)$field,$segments);if($x)return$x;}return null;}
     private function findField(array $field,array $segments): ?array{if(($field['name']??'')!==($segments[0]??''))return null;if(count($segments)===1)return$field;if(($field['type']??'')!=='repeater')return null;$rest=array_slice($segments,1);foreach((array)($field['fields']??[]) as $child){$x=$this->findField((array)$child,$rest);if($x)return$x;}return null;}
     private function valueByPath(mixed $value,string $path): mixed{return $this->walk($value,explode('.',$path));}
     private function walk(mixed $value,array $segments): mixed{if($segments===[])return$value;if(!is_array($value))return null;$seg=(string)$segments[0];$rest=array_slice($segments,1);if(array_key_exists($seg,$value))return$this->walk($value[$seg],$rest);if(array_is_list($value)){$out=[];foreach($value as $row){$x=$this->walk($row,$segments);if($x!==null)$out[]=$x;}return$out;}return null;}

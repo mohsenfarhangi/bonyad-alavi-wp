@@ -6,7 +6,7 @@
 
 پروژه در توسعه فعال است.
 
-- **Alavi Form Engine:** `1.0.28-dev.7`، DB `1.0.5-dev.2`، stable baseline/tag `1.0.27`; production bump هنوز به live acceptance وابسته است.
+- **Alavi Form Engine:** `1.0.28-dev.8`، DB `1.0.5-dev.2`، stable baseline/tag `1.0.27`; production bump هنوز به live acceptance وابسته است.
 - **Ostadsho child theme:** custom integration layer روی Theme header `2.8`; version docs legacy v0.x به state history مهاجرت کرده‌اند.
 
 ## Current Goal
@@ -33,6 +33,13 @@ AFE release goal همچنان live acceptance نسخه 1.0.28 و رفع blocker 
 - فیلد `terms_accepted` صرفاً در CSS اختصاصی فرم به Flex افقی با راست‌چین RTL تغییر کرد؛ پس‌زمینه و border حذف شدند و پیغام خطا در ردیف جدا باقی می‌ماند. هیچ تغییری در الزام پذیرش، ارسال فرم یا منطق دیگر انجام نشد. regression قرارداد CSS اضافه شد؛ پذیرش بصری زنده در Elementor هنوز لازم است.
 
 ## Recently Completed
+
+### Admin-only submission fields per form (2026-11-06)
+- فرم‌ساز AFE دارای تب مستقل «فیلدهای اختصاصی مدیریت» برای تعریف per-form فیلد text/textarea/number/select است؛ ویرایش/مشاهده فقط در صفحه جزئیات Submission مدیر صورت می‌گیرد و نمایش عمومی ندارد.
+- مقادیر زیر نام امن `__afe_admin_<key>` در data_json همان ثبت قرار می‌گیرند، با whitelist server-side گزینه‌های select، حفظ مقدار هنگام submit/draft متقاضی، و بدون DB migration. Presenter و ExportProfile به صورت مشترک نمایش در PDF/چاپ و Excel لیست/تکی را تضمین می‌کنند؛ ستون‌ها برای پروفایل‌های خروجی قدیمی هم اضافه می‌شوند.
+- فرم جهادی دارای فیلد `group_level` با گزینه‌های نوپا، فعال، پیشرو، الگو شد؛ مقدار ثبت‌های گذشته تا ویرایش مدیر خالی است. تنظیمات ذخیره‌شده قدیمی فرم ممکن است بر Source Definition مقدم باشند.
+- تست‌های dedicated در `admin-submission-fields.php` و workflow مربوطه؛ نسخه توسعه `1.0.28-dev.8`، stable و DB ثابت. پذیرش زنده WordPress/Excel/PDF هنوز باز است.
+
 
 ### Contact page widgets + four-up studies carousels (2026-11-05)
 - ویجت‌های اطلاعات تماس، جدول داخلی‌ها، کارت مراکز وابسته و نقشه برای صفحه «ارتباط با ما» بدون تغییر ظاهر (۰ پیکسل تفاوت در هارنس)؛ فرم دست‌نخورده. جزئیات: [MODULE-CONTACT-PAGE](../modules/contact-page-widgets.md)، STATE-002-049. PR #23 ادغام و مستقر شد؛ پیش‌نویس `29990` ساخته شد؛ **پذیرش نهایی/جایگزینی 28817 انجام نشده.**

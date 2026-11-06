@@ -21,6 +21,7 @@ use BonyadAlavi\FormEngine\Validation\ValidatorRegistry;
 use BonyadAlavi\FormEngine\InputMask\InputMaskPattern;
 use BonyadAlavi\FormEngine\InputMask\InputMaskRegistry;
 use BonyadAlavi\FormEngine\Export\ExportProfile;
+use BonyadAlavi\FormEngine\Admin\AdminSubmissionFields;
 use BonyadAlavi\FormEngine\Export\ExportConfigSanitizer;
 use BonyadAlavi\FormEngine\Export\ExportPackageStatus;
 
@@ -148,6 +149,10 @@ final class FormsPage
         $this->renderFieldOrdering($form);
         echo '</section>';
 
+        echo '<section class="afe-form-tab-panel" data-afe-form-tab-panel="admin_fields" hidden>';
+        $this->renderAdminSubmissionFields($form);
+        echo '</section>';
+
         echo '<section class="afe-form-tab-panel" data-afe-form-tab-panel="duplicate" hidden>';
         $this->renderDuplicateSettings($form);
         echo '</section>';
@@ -196,9 +201,9 @@ final class FormsPage
         echo '</div>';
 
         // Output templates: PDF is HTML/CSS + tokens; Excel stays structural.
-        $codeExport=ExportProfile::resolve($codeForm);
+        $codeExport=ExportProfile::resolve($form);
         $storedExport=(array)($storedSettings['exports']??[]);
-        $resolvedExport=ExportProfile::resolve($codeForm,$storedExport);
+        $resolvedExport=ExportProfile::resolve($form,$storedExport);
         $pdfStatus=ExportPackageStatus::pdfReady()?'آماده':'پکیج در vendor این نصب در دسترس نیست';
         $excelStatus=ExportPackageStatus::excelReady()?'آماده':'پکیج در vendor این نصب در دسترس نیست';
         $pdfMissing=ExportPackageStatus::pdfMissingExtensions();
@@ -208,7 +213,7 @@ final class FormsPage
         if($pdfMissing!==[]) echo '<div class="afe-warning">Extensionهای PHP لازم برای PDF: <code>'.esc_html(implode(', ',$pdfMissing)).'</code></div>';
         echo '<div class="afe-admin-grid"><label>اندازه صفحه<select name="export_profile[pdf][page_size]"><option value="A4" '.selected((string)$resolvedExport['pdf']['page_size'],'A4',false).'>A4</option><option value="A5" '.selected((string)$resolvedExport['pdf']['page_size'],'A5',false).'>A5</option><option value="LETTER" '.selected((string)$resolvedExport['pdf']['page_size'],'LETTER',false).'>Letter</option></select></label><label>جهت صفحه<select name="export_profile[pdf][orientation]"><option value="portrait" '.selected((string)$resolvedExport['pdf']['orientation'],'portrait',false).'>عمودی</option><option value="landscape" '.selected((string)$resolvedExport['pdf']['orientation'],'landscape',false).'>افقی</option></select></label></div>';
         $exportTokens=ExportProfile::PDF_TOKENS;
-        foreach($this->exportFieldTokens($codeForm) as $one)$exportTokens[]=$one;
+        foreach($this->exportFieldTokens($form) as $one)$exportTokens[]=$one;
         $this->renderTemplateEditor('export_profile[pdf][header_html]','Header PDF','بالای سند PDF. می‌توانید از Tokenهای فرم استفاده کنید.',(string)$codeExport['pdf']['header_html'],(string)($storedExport['pdf']['header_html']??''),$exportTokens,5,true);
         $this->renderTemplateEditor('export_profile[pdf][body_html]','Body PDF','بدنه سند. Token {{fields_table}} جدول استاندارد و فارسی همه فیلدهای فرم را تولید می‌کند.',(string)$codeExport['pdf']['body_html'],(string)($storedExport['pdf']['body_html']??''),$exportTokens,9);
         $this->renderTemplateEditor('export_profile[pdf][footer_html]','Footer PDF','پایین سند PDF.',(string)$codeExport['pdf']['footer_html'],(string)($storedExport['pdf']['footer_html']??''),$exportTokens,4,true);
@@ -253,6 +258,7 @@ final class FormsPage
         $tabs=[
             'general'=>'عمومی',
             'fields'=>'فیلدها و چیدمان',
+            'admin_fields'=>'فیلدهای اختصاصی مدیریت',
             'duplicate'=>'جلوگیری از تکرار',
             'actions'=>'رویدادها و اکشن‌ها',
             'workflow'=>'Workflow',
@@ -266,6 +272,39 @@ final class FormsPage
             echo '<button type="button" class="afe-form-tab'.($key==='general'?' is-active':'').'" role="tab" aria-selected="'.($key==='general'?'true':'false').'" data-afe-form-tab="'.esc_attr($key).'">'.esc_html($label).'</button>';
         }
         echo '</nav>';
+    }
+
+    private function renderAdminSubmissionFields(array $form): void
+    {
+        $definitions=AdminSubmissionFields::definitions($form);
+        echo '<div class="afe-admin-card" data-afe-admin-submission-fields><div class="afe-admin-card-title"><div><h2>فیلدهای اختصاصی اطلاعات ارسالی</h2><p>این فیلدها فقط در صفحه جزئیات و ویرایش مدیر و خروجی‌های فرم نمایش داده می‌شوند؛ در فرم عمومی و پیش‌نمایش متقاضی قرار نمی‌گیرند.</p></div></div>';
+        echo '<div data-afe-admin-fields-rows>';
+        foreach($definitions as $index=>$field) $this->renderAdminSubmissionFieldRow($field,(int)$index);
+        echo '</div><button type="button" class="button" data-afe-admin-fields-add>+ افزودن فیلد مدیریتی</button>';
+        echo '<p class="description">نام فنی را پس از ایجاد تغییر ندهید تا داده‌های قبلی باقی بمانند. برای Select، گزینه‌ها را با فرمت «مقدار|عنوان» هر کدام در یک سطر وارد کنید. حذف تعریف، داده ذخیره‌شده قبلی را پاک نمی‌کند اما دیگر نمایش داده نمی‌شود.</p>';
+        echo '<template data-afe-admin-fields-template>';
+        $this->renderAdminSubmissionFieldRow(['name'=>'','label'=>'','type'=>'select','options'=>[]],99999);
+        echo '</template></div>';
+    }
+
+    private function renderAdminSubmissionFieldRow(array $field,int $index): void
+    {
+        $prefix='admin_submission_fields['.$index.']';
+        $name=(string)($field['name']??'');
+        $label=(string)($field['label']??'');
+        $type=(string)($field['type']??'text');
+        $options=(array)($field['options']??[]);
+        $optionsText=implode("\n",array_map(static fn($k,$v)=>(string)$k.'|'.(string)$v,array_keys($options),array_values($options)));
+        echo '<div class="afe-admin-field-definition" data-afe-admin-fields-row><div class="afe-admin-grid">';
+        echo '<label>شناسه فنی<input type="text" name="'.esc_attr($prefix.'[name]').'" value="'.esc_attr($name).'" placeholder="group_level" pattern="[a-z][a-z0-9_]*" maxlength="49" dir="ltr"></label>';
+        echo '<label>عنوان فیلد<input type="text" name="'.esc_attr($prefix.'[label]').'" value="'.esc_attr($label).'" placeholder="سطح گروه"></label>';
+        echo '<label>نوع فیلد<select name="'.esc_attr($prefix.'[type]').'" data-afe-admin-field-type>';
+        foreach(['text'=>'متن کوتاه','textarea'=>'متن بلند','number'=>'عدد','select'=>'انتخاب از لیست'] as $key=>$text) {
+            echo '<option value="'.esc_attr($key).'" '.selected($type,$key,false).'>'.esc_html($text).'</option>';
+        }
+        echo '</select></label>';
+        echo '<label class="afe-span-2" data-afe-admin-field-options>گزینه‌های فیلد انتخابی<textarea name="'.esc_attr($prefix.'[options]').'" rows="4" placeholder="new|نوپا&#10;active|فعال">'.esc_textarea($optionsText).'</textarea></label>';
+        echo '</div><button type="button" class="button-link-delete" data-afe-admin-fields-remove>حذف فیلد</button></div>';
     }
 
     private function renderDuplicateSettings(array $form): void
@@ -1037,6 +1076,13 @@ final class FormsPage
                 wp_die(esc_html($error->getMessage()),'خطا در تنظیمات پیامک بازیابی',['back_link'=>true]);
             }
         }
+        $adminFieldsSubmitted=(array)wp_unslash($_POST['admin_submission_fields']??[]);
+        // Reject reserved-name collisions and duplicate names, rather than
+        // silently mapping two different fields to the same saved value.
+        $adminFields=AdminSubmissionFields::sanitizeDefinitions($adminFieldsSubmitted);
+        $submittedValid=array_filter($adminFieldsSubmitted,static fn($one)=>is_array($one)&&trim((string)($one['name']??''))!==''&&trim((string)($one['label']??''))!=='');
+        if(count($adminFields)!==count($submittedValid)) wp_die('تعریف فیلدهای اختصاصی مدیریت نامعتبر یا تکراری است.','خطای تنظیمات',['response'=>400,'back_link'=>true]);
+        $settings['admin_fields']=$adminFields;
         $settings['duplicate']=[
             'enabled'=>!empty($_POST['duplicate_enabled']) && $duplicateFields!==[],
             'fields'=>$duplicateFields,
@@ -1062,8 +1108,10 @@ final class FormsPage
         if ($previewOverride!=='') $settings['preview_template']=$previewOverride;
 
         $resetExportProfile=!empty($_POST['reset_export_profile']);
-        $submittedExport=(new ExportConfigSanitizer())->sanitize((array)($_POST['export_profile']??[]),$codeForm);
-        $codeExport=ExportProfile::resolve($codeForm);
+        $exportForm=$codeForm;
+        $exportForm['settings']['admin_fields']=$adminFields;
+        $submittedExport=(new ExportConfigSanitizer())->sanitize((array)($_POST['export_profile']??[]),$exportForm);
+        $codeExport=ExportProfile::resolve($exportForm);
         if(!$resetExportProfile && $submittedExport!==$codeExport) $settings['exports']=$submittedExport;
 
         $styleIsolation=sanitize_key((string)($_POST['style_isolation']??'inherit'));
@@ -1124,6 +1172,7 @@ final class FormsPage
             if(($field['type']??'')==='file' && !str_contains((string)$path,'.')) $tokens[]='{{files:'.$path.'}}';
             else $tokens[]='{{field:'.$path.'}}';
         }
+        foreach(AdminSubmissionFields::fieldMap($form) as $field) $tokens[]='{{field:'.$field['name'].'}}';
         return $tokens;
     }
 
