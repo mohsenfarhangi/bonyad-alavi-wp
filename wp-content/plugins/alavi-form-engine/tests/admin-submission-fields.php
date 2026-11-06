@@ -4,6 +4,10 @@ declare(strict_types=1);
 function sanitize_key($value): string {return preg_replace('/[^a-z0-9_\-]/','',strtolower((string)$value));}
 function sanitize_text_field($value): string {return trim(strip_tags((string)$value));}
 function sanitize_textarea_field($value): string {return trim(strip_tags((string)$value));}
+function wp_unslash($v) {return $v;}
+function esc_attr($v): string {return htmlspecialchars((string)$v,ENT_QUOTES|ENT_SUBSTITUTE,'UTF-8');}
+function esc_html($v): string {return htmlspecialchars((string)$v,ENT_QUOTES|ENT_SUBSTITUTE,'UTF-8');}
+
 
 spl_autoload_register(static function(string $class): void {
     $prefix='BonyadAlavi\\FormEngine\\';
@@ -32,6 +36,11 @@ $presenter=(new ReflectionClass(FormDataPresenter::class))->newInstanceWithoutCo
 $sections=$presenter->sections($form);
 $existing=['name'=>'گروه نمونه','__afe_admin_group_level'=>'active','__afe_admin_legacy'=>'old'];
 $valid=AdminSubmissionFields::sanitizeInput($form,['__afe_admin_group_level'=>'leading'],$existing);
+$presenterClean=$presenter->sanitizeSubmitted($form,['name'=>'گروه الف','__afe_admin_group_level'=>'model'],$existing);
+$presenterInvalid=$presenter->sanitizeSubmitted($form,['name'=>'گروه الف','__afe_admin_group_level'=>'forged'],$existing);
+$presenterLabel=$presenter->plainField($admin['__afe_admin_group_level'],'active',$existing);
+$presenterEdit=$presenter->editField($admin['__afe_admin_group_level'],'active',$existing);
+
 $invalid=AdminSubmissionFields::sanitizeInput($form,['__afe_admin_group_level'=>'<script>x</script>'],$existing);
 $spoof=AdminSubmissionFields::sanitizeInput($form,['__afe_admin_other'=>'HACK'],[]);
 $public=AdminSubmissionFields::preserve($existing,['name'=>'نام جدید','__afe_admin_group_level'=>'malicious']);
@@ -53,6 +62,10 @@ $checks=[
     'separate-section-in-admin-presenter'=>count($sections)===2
         && ($sections[1]['step']['title']??'')==='اطلاعات اختصاصی مدیریت'
         && ($sections[1]['fields'][0]['name']??'')==='__afe_admin_group_level',
+    'presenter-admin-edit-persists-valid-choice'=>($presenterClean['__afe_admin_group_level']??null)==='model',
+    'presenter-admin-edit-rejects-forged-choice'=>($presenterInvalid['__afe_admin_group_level']??null)==='',
+    'presenter-displays-persian-choice-label'=>$presenterLabel==='فعال',
+    'presenter-edit-renders-native-select'=>str_contains($presenterEdit,'<select') && str_contains($presenterEdit,'selected'),
     'admin-edit-accepts-valid-choice'=>($valid['__afe_admin_group_level']??null)==='leading',
     'admin-edit-rejects-forged-value'=>($invalid['__afe_admin_group_level']??null)==='',
     'admin-edit-rejects-unknown-field'=>!isset($spoof['__afe_admin_other']),
