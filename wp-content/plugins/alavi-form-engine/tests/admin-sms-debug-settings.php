@@ -45,8 +45,8 @@ $checks=[
     'ui-escape-and-ajax-preconditions'=>str_contains($settings,'esc_html($cell)')
         && str_contains($js,'td.textContent')
         && str_contains($js,'settings.debugNonce'),
-    'asset-version'=>str_contains($version,'Version: 1.0.28-dev.6')
-        && str_contains($version,"define('AFE_VERSION', '1.0.28-dev.6')"),
+    'asset-version'=>(bool)preg_match('/Version:\\s+([^\\s]+)/',$version,$matches)
+        && str_contains($version,"define('AFE_VERSION', '".$matches[1]."')"),
 ];
 foreach($checks as $name=>$ok) {
     echo ($ok?'PASS ':'FAIL ').$name.PHP_EOL;
