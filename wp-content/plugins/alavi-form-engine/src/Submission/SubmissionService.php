@@ -2,6 +2,7 @@
 declare(strict_types=1);
 
 namespace BonyadAlavi\FormEngine\Submission;
+use BonyadAlavi\FormEngine\Admin\AdminSubmissionFields;
 
 use BonyadAlavi\FormEngine\Actions\ActionContext;
 use BonyadAlavi\FormEngine\Actions\ActionManager;
@@ -142,6 +143,7 @@ final class SubmissionService
 
         $data = $this->sanitizeBySchema($form, (array)wp_unslash($_POST['afe_data'] ?? []));
         $existing = $this->resolveExisting($form);
+        if ($existing) $data=AdminSubmissionFields::preserve((array)($existing['data']??[]),$data);
         if ($existing && !$this->canEdit($form, $existing)) return new WP_Error('forbidden','این ثبت قفل است یا اجازه ویرایش آن را ندارید.');
 
         $errors = $this->validator->validate($form, $data, $draft);
@@ -544,6 +546,9 @@ final class SubmissionService
         }
 
         $form['settings'] = array_replace_recursive($form['settings'], $adminSettings);
+        if (array_key_exists('admin_fields',$adminSettings) && is_array($adminSettings['admin_fields'])) {
+            $form['settings']['admin_fields']=$adminSettings['admin_fields'];
+        }
         if (!empty($adminSettings['workflow']) && is_array($adminSettings['workflow'])) {
             $form['workflow'] = $adminSettings['workflow'];
         }

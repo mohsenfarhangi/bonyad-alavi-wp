@@ -404,7 +404,20 @@ final class BA_Jihadi_Group_Registration_Form {
 			           'captcha'                  => 'custom',
 			           'rate_limit'               => 20,
 			           'storage'                  => 'shared',
-			           'duplicate'                => [
+			           'admin_fields' => [
+		               [
+		                   'name' => 'group_level',
+		                   'label' => 'سطح گروه',
+		                   'type' => 'select',
+		                   'options' => [
+		                       'new' => 'نوپا',
+		                       'active' => 'فعال',
+		                       'leading' => 'پیشرو',
+		                       'model' => 'الگو',
+		                   ],
+		               ],
+		           ],
+		           'duplicate'                => [
 				           'enabled'      => true,
 				           'fields'       => [ 'registration_code', 'group_mobile' ],
 				           'behavior'     => 'block',

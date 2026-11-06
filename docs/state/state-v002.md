@@ -837,3 +837,10 @@ Modules: [MODULE-AFE](../modules/alavi-form-engine.md), [MODULE-JIHADI-FORM](../
 - AFE gains reusable checkbox field rendering and server/frontend required validation. Registered validator confirms selected venues belong to the effective, overrideable option set.
 - Per-form `captcha_before_submit` setting places a single CAPTCHA after the agreement and before the final submit button; defaults elsewhere unchanged.
 - Tests/CI and module docs updated; live WordPress/Elementor acceptance pending.
+
+## 2026-11-06 — Per-form admin-only submission fields
+
+- Added configurable admin-only field definitions under `settings.admin_fields` with text, textarea, number and select, editable from a separate per-form admin tab. Saved submission values use the reserved `__afe_admin_<key>` namespace in existing JSON storage; no public schema or database migration.
+- Shared Presenter supplies display/edit, PDF, print and Excel single outputs; ExportProfile and ExcelExporter supply list-export columns and PdfTemplateRenderer supports field tokens. Applicant re-submission preserves stored admin-owned values.
+- Jihadi registration Source Definition adds `group_level` select with `new=نوپا`, `active=فعال`, `leading=پیشرو`, `model=الگو`.
+- Automated unit/contract tests and CI added. AFE development assets bump to 1.0.28-dev.8; stable and DB unchanged. Live admin/export acceptance pending.

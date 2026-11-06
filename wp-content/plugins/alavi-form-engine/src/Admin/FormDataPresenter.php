@@ -31,6 +31,8 @@ final class FormDataPresenter
             }
             if ($fields) $sections[]=['step'=>$step,'fields'=>$fields];
         }
+        $adminFields=AdminSubmissionFields::fieldMap($form);
+        if ($adminFields) $sections[]=['step'=>['title'=>'اطلاعات اختصاصی مدیریت'],'fields'=>array_values($adminFields)];
         return $sections;
     }
 
@@ -145,7 +147,7 @@ final class FormDataPresenter
                 $clean[$name]=$this->sanitizeScalar($field,$input[$name]??'');
             }
         }
-        return $clean;
+        return AdminSubmissionFields::sanitizeInput($form,$input,$clean);
     }
 
     /** @return array<string,array> */

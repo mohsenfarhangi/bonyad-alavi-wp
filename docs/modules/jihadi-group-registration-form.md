@@ -1,3 +1,11 @@
+## Admin-only group classification (2026-11-06)
+
+- فیلد مدیریتی `group_level` با عنوان «سطح گروه» از نوع Select در Source Definition فرم جهادی قرار گرفت، **بدون نمایش در فرم عمومی متقاضی**.
+- گزینه‌ها: `new` = نوپا، `active` = فعال، `leading` = پیشرو، `model` = الگو. این فیلد در صفحه مشاهده/ویرایش مدیر قابل نمایش و تغییر است و از Presenter در چاپ/PDF/Excel تکی و لیست خروجی می‌گیرد.
+- ذخیره زیر `__afe_admin_group_level` در JSON همان ثبت انجام می‌شود، و ویرایش مجدد متقاضی آن را حفظ می‌کند. ثبت‌های قدیمی در ابتدا مقدار خالی دارند و مدیر می‌تواند آنها را سطح‌بندی کند.
+- اگر `admin_fields` فرم از قبل در Overrides ذخیره شده باشد، لیست تعریف‌شده در کد ممکن است توسط Override جایگزین شود؛ تب «فیلدهای اختصاصی مدیریت» را پس از ارتقا بررسی کنید.
+- نسخه توسعه AFE `1.0.28-dev.8`؛ هیچ DB migration جدیدی لازم نیست. پذیرش WordPress و export واقعی هنوز باز است.
+
 # MODULE-JIHADI-FORM — Jihadi Group Registration Form
 
 **Status:** active project form  

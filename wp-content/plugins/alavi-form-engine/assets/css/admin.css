@@ -144,3 +144,12 @@
 .afe-settings-test-diagnostics { padding:12px 14px;margin:12px 0 0;background:#13271e;color:#d8eddf;border-radius:8px;direction:ltr;text-align:left;font-size:12px;white-space:pre-wrap;word-break:break-word; }
 .afe-settings-test-diagnostics[hidden] { display:none!important; }
 @media(max-width:782px) { .afe-settings-tabs {margin-top:12px;} .afe-settings-save {bottom:0;margin-left:-8px;margin-right:-8px;border-radius:12px 12px 0 0;padding:10px 12px;} .afe-settings-save span {font-size:12px;} .afe-settings-save .button {flex:1 1 auto;} }
+
+/* Admin-only submission field definitions (per-form management). */
+.afe-admin-field-definition{padding:17px 18px;margin:12px 0;border:1px solid #dce5e0;border-radius:12px;background:#fafcfb}
+.afe-admin-field-definition .afe-admin-grid{margin-bottom:10px}
+.afe-admin-field-definition label{min-width:0}
+.afe-admin-field-definition input,.afe-admin-field-definition textarea,.afe-admin-field-definition select{max-width:100%;box-sizing:border-box}
+.afe-admin-field-definition [data-afe-admin-field-options][hidden]{display:none!important}
+.afe-admin-field-definition [data-afe-admin-fields-remove]{color:#a32020;cursor:pointer}
+[data-afe-admin-submission-fields] [data-afe-admin-fields-add]{margin-top:12px}

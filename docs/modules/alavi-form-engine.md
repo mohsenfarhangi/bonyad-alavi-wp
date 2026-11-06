@@ -3,7 +3,7 @@
 **Status:** active development / pre-acceptance  
 **Path:** `wp-content/plugins/alavi-form-engine/`  
 **Namespace:** `BonyadAlavi\FormEngine`  
-**Development version:** `1.0.28-dev.7`  
+**Development version:** `1.0.28-dev.8`  
 **DB checkpoint:** `1.0.5-dev.2`  
 **Stable baseline/tag documented:** `1.0.27`  
 **PHP:** `>=8.3`
@@ -111,6 +111,16 @@ Style modes:
 - `disabled`
 
 tokens زیر `.afe-shell` scope شده‌اند و strong mode reset محدود/defensive دارد.
+
+## Admin-only submission fields (2026-11-06)
+
+- **عمومی برای هر فرم:** در تب جدید «فیلدهای اختصاصی مدیریت» در تنظیمات همان فرم، فیلدهای مستقل از فرم عمومی تعریف می‌شوند. نوع‌های مجاز: text، textarea، number، select. برای Select گزینه‌ها با فرمت `value|label` و هرکدام در یک خط تعریف می‌شوند. محدودیت ۳۰ فیلد و ۵۰ گزینه به ازای Select؛ نام فنی باید انگلیسی و یکتا باشد.
+- منبع تعریف: `settings.admin_fields` از PHP Form Definition یا Override ذخیره‌شده همان فرم. ذخیره مدیریتی می‌تواند فهرست را جایگزین کند؛ حذف فیلد داده پیشین را حذف نمی‌کند ولی آن را از جزئیات/خروجی پنهان می‌کند. نام فیلد بعد از ایجاد نباید تغییر کند.
+- داده‌ها با کلید رزروشده `__afe_admin_<name>` در `data_json` همان Submission ذخیره می‌شوند؛ **نه** در schema عمومی فرم. frontend، preview و submit عمومی این کلیدها را نمی‌سازند و ویرایش متقاضی مقادیر ذخیره‌شده را حفظ می‌کند. فقط در صفحه جزئیات/ویرایش مدیر با مجوز `FormAccess::EDIT` قابل تغییر هستند. مقدار Select در سمت سرور فقط از گزینه‌های مجاز پذیرفته می‌شود. با فرایند `submission.updated` موجود ذخیره و audit می‌شود؛ Migration DB جدید لازم نیست.
+- `FormDataPresenter::sections()` بخش «اطلاعات اختصاصی مدیریت» را به جدول جزئیات و ویرایش، PDF، چاپ و Excel تک‌رکوردی اضافه می‌کند. `ExportProfile` و `ExcelExporter` فیلدها را در Excel لیست هم به صورت ستون پیش‌فرض فعال می‌کنند؛ برای تنظیمات خروجی ذخیره‌شده قدیمی، ستون مدیریتی جدید انتهای ستون‌ها اضافه می‌شود. در قالب PDF، Token `{{field:__afe_admin_<name>}}` قابل استفاده است و `{{fields_table}}` این بخش را شامل می‌شود.
+- فرم `jihadi-group-registration` در Source Definition دارای فیلد Select `group_level` با عنوان «سطح گروه» و گزینه‌های **نوپا، فعال، پیشرو، الگو** است؛ مقادیر ذخیره `new,active,leading,model` هستند. Override مدیریتی قدیمی ممکن است نیاز به بازبینی داشته باشد.
+- فایل‌های اصلی: `src/Admin/AdminSubmissionFields.php`، `src/Admin/FormDataPresenter.php`، `src/Admin/FormsPage.php`، `src/Submission/SubmissionService.php`، `src/Export/{ExportProfile,ExcelExporter,ExportConfigSanitizer,PdfTemplateRenderer}.php` و `assets/js/admin.js`. تست‌های `tests/admin-submission-fields.php` و Workflow اختصاصی.
+- **تست پذیرش زنده:** صفحه جزئیات و ویرایش یک ثبت قدیمی جهادی، تعیین سطح، ذخیره، بازخوانی و بررسی Excel لیست/تکی، PDF و چاپ؛ همچنین بازگشت متقاضی به Draft بدون حذف سطح تعیین‌شده. تا انجام تست در سایت، پذیرش محیط زنده قطعی نیست.
 
 ## Submission Lifecycle
 

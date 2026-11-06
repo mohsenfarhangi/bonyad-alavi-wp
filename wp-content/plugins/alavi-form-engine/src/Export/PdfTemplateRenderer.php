@@ -1,6 +1,7 @@
 <?php
 declare(strict_types=1);
 namespace BonyadAlavi\FormEngine\Export;
+use BonyadAlavi\FormEngine\Admin\AdminSubmissionFields;
 
 use BonyadAlavi\FormEngine\Admin\FormDataPresenter;
 use BonyadAlavi\FormEngine\Localization\LocaleDateService;
@@ -70,7 +71,7 @@ final class PdfTemplateRenderer
 
     private function fieldByPath(array $form,string $path): ?array
     {
-        $segments=explode('.',$path);foreach((array)($form['steps']??[]) as $step)foreach((array)($step['items']??[]) as $field){$found=$this->findField((array)$field,$segments);if($found)return $found;}return null;
+        $admin=AdminSubmissionFields::fieldMap($form);if(isset($admin[$path]))return $admin[$path];$segments=explode('.',$path);foreach((array)($form['steps']??[]) as $step)foreach((array)($step['items']??[]) as $field){$found=$this->findField((array)$field,$segments);if($found)return $found;}return null;
     }
     private function findField(array $field,array $segments): ?array
     {

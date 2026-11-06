@@ -964,6 +964,40 @@
     });
   };
 
+  const initAdminSubmissionFields = () => {
+    document.querySelectorAll('[data-afe-admin-submission-fields]').forEach(root => {
+      const rows = qs(root, '[data-afe-admin-fields-rows]');
+      const template = qs(root, '[data-afe-admin-fields-template]');
+      const add = qs(root, '[data-afe-admin-fields-add]');
+      if (!rows || !template || !add) return;
+      let nextIndex = rows.children.length;
+      const sync = row => {
+        const type = qs(row, '[data-afe-admin-field-type]');
+        const options = qs(row, '[data-afe-admin-field-options]');
+        if (type && options) options.hidden = type.value !== 'select';
+      };
+      rows.querySelectorAll('[data-afe-admin-fields-row]').forEach(sync);
+      rows.addEventListener('change', event => {
+        const row = event.target.closest('[data-afe-admin-fields-row]');
+        if (row) sync(row);
+      });
+      rows.addEventListener('click', event => {
+        const remove = event.target.closest('[data-afe-admin-fields-remove]');
+        if (remove) remove.closest('[data-afe-admin-fields-row]')?.remove();
+      });
+      add.addEventListener('click', () => {
+        if (rows.children.length >= 30) return;
+        const holder=document.createElement('div');
+        holder.innerHTML=template.innerHTML.replace(/admin_submission_fields\[99999\]/g,'admin_submission_fields['+(nextIndex++)+']');
+        const row=holder.querySelector('[data-afe-admin-fields-row]');
+        if (!row) return;
+        rows.appendChild(row);
+        sync(row);
+        row.querySelector('input[name$="[name]"]')?.focus();
+      });
+    });
+  };
+
   const initAdminDatePickers = () => {
     if (!window.afeAdmin?.isJalali || !window.jalaliDatepicker) return;
     try {
@@ -1010,6 +1044,7 @@
     initTokenPalettes();
     initActionBuilders();
     initDuplicateSettings();
+    initAdminSubmissionFields();
     initOtpSmsSettings();
     initFieldOrdering();
     initFieldOverrideSidebar();
