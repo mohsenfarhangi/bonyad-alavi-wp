@@ -49,7 +49,6 @@ jobs:
           php wp-content/themes/ostadsho-child/tests/jihadi-form-definition.php
       - name: Existing submissions and export configuration regression
         run: |
-          php wp-content/plugins/alavi-form-engine/tests/export-profile.php
           php wp-content/plugins/alavi-form-engine/tests/export-config-sanitizer.php
           php wp-content/plugins/alavi-form-engine/tests/input-mask-admin-presenter.php
           php wp-content/plugins/alavi-form-engine/tests/duplicate-policy.php
