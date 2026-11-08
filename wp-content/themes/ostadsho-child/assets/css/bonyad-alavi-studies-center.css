@@ -477,9 +477,13 @@ a.ba-studies-stat:focus-visible {
   flex-basis: calc((100% - 48px) / 3);
 }
 
-.ba-studies-carousel__slide {
-  height: auto;
+.ba-studies-carousel .swiper-wrapper {
+  align-items: stretch;
+}
+
+.ba-studies-carousel .ba-studies-carousel__slide {
   display: flex;
+  height: auto;
 }
 
 .ba-studies-section.is-loading .ba-studies-carousel {
@@ -582,7 +586,7 @@ a.ba-studies-stat:focus-visible {
   padding: 12px 6px 2px;
 }
 
-.ba-studies-card__title {
+.ba-studies-card .ba-studies-card__title {
   margin: 0;
   color: var(--ba-green);
   font-family: inherit;
@@ -653,6 +657,15 @@ a.ba-studies-stat:focus-visible {
 /* نشست: تصویر افقی + play */
 .ba-studies-card--sessions .ba-studies-card__media {
   aspect-ratio: 6 / 5;
+}
+
+.ba-studies-card--sessions .ba-studies-card__title {
+  display: -webkit-box;
+  overflow: hidden;
+  font-size: 14px;
+  line-height: 1.7;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
 }
 
 .ba-studies-card__play {
