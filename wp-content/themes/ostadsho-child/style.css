@@ -78,10 +78,13 @@ PishtazWeb Theme, (C) 2024 pishtaz-web.com
     letter-spacing: normal;
 }
 
-/* Fix: language switcher header - add "Languages" label on left side */
+/* Fix: language switcher header - "Languages" on the left, "انتخاب زبان" together on the right.
+   The gap inside the Persian label is U+2005 (not a justification opportunity), so only the
+   single space between the two labels stretches; nowrap keeps the label on one line. */
 [data-id="893abb7"] .megamenu-header-default .ep-megamenu-panel::before {
-    content: "Languages \00A0\00A0\00A0\00A0\00A0\00A0\00A0\00A0\00A0\00A0 انتخاب زبان" !important;
+    content: "Languages انتخاب\2005زبان" !important;
     direction: ltr !important;
+    white-space: nowrap !important;
     text-align: justify !important;
     text-align-last: justify !important;
 }
