@@ -196,7 +196,10 @@ final class BA_Quick_Support_Payment_Service
 
             $originalPaymentMethodExists = array_key_exists('payment_method', $_POST);
             $originalPaymentMethod = $_POST['payment_method'] ?? null;
+            $originalRequestPaymentMethodExists = array_key_exists('payment_method', $_REQUEST);
+            $originalRequestPaymentMethod = $_REQUEST['payment_method'] ?? null;
             $_POST['payment_method'] = $gateway->id;
+            $_REQUEST['payment_method'] = $gateway->id;
 
             $session = function_exists('WC') ? WC()->session : null;
             $hadAwaitingOrder = $session && isset($session->order_awaiting_payment);
@@ -250,6 +253,11 @@ final class BA_Quick_Support_Payment_Service
                     $_POST['payment_method'] = $originalPaymentMethod;
                 } else {
                     unset($_POST['payment_method']);
+                }
+                if ($originalRequestPaymentMethodExists) {
+                    $_REQUEST['payment_method'] = $originalRequestPaymentMethod;
+                } else {
+                    unset($_REQUEST['payment_method']);
                 }
             }
 
