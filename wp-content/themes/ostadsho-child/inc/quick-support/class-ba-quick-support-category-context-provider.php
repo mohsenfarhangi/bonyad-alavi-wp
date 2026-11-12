@@ -5,10 +5,10 @@
  * @package OstadshoChild
  */
 
-defined('ABSPATH') || exit;
-
 use BonyadAlavi\FormEngine\Context\FormContextProviderInterface;
 use WP_Error;
+
+defined('ABSPATH') || exit;
 
 final class BA_Quick_Support_Category_Context_Provider implements FormContextProviderInterface
 {
