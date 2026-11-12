@@ -9,6 +9,11 @@ function get_option(string $name, mixed $default = null): mixed {
     return $default;
 }
 
+final class BA_Participation_Payment_Gateway_Service
+{
+    public function __construct() {}
+}
+
 $pluginRoot = dirname(__DIR__, 3) . '/plugins/alavi-form-engine';
 spl_autoload_register(static function(string $class) use ($pluginRoot): void {
     $prefix = 'BonyadAlavi\\FormEngine\\';
@@ -17,7 +22,10 @@ spl_autoload_register(static function(string $class) use ($pluginRoot): void {
     if (is_readable($file)) require_once $file;
 });
 
+require_once dirname(__DIR__) . '/inc/quick-support/class-ba-quick-support-category.php';
+require_once dirname(__DIR__) . '/inc/quick-support/class-ba-quick-support-category-context-provider.php';
 require_once dirname(__DIR__) . '/inc/woocommerce/class-ba-quick-support-payment-service.php';
+require_once dirname(__DIR__) . '/inc/woocommerce/class-ba-quick-support-payment-action.php';
 require_once dirname(__DIR__) . '/inc/forms/class-ba-quick-support-form.php';
 
 use BonyadAlavi\FormEngine\Form\FormRegistry;
@@ -42,6 +50,11 @@ $fields = quick_support_fields($form);
 $validatorRegistry = new ValidatorRegistry();
 BA_Quick_Support_Form::registerValidators($validatorRegistry);
 $validator = new Validator($validatorRegistry);
+
+$actionRegistry = new ActionRegistry();
+BA_Quick_Support_Form::registerActionDefinition($actionRegistry);
+$contextRegistry = new FormContextRegistry();
+BA_Quick_Support_Form::registerContextProvider($contextRegistry);
 
 $validData = [
     'mobile'=>'09123456789',
@@ -96,6 +109,10 @@ $checks = [
         && ($fields['county']['validators'][0]['key'] ?? '') === 'ba_qs_county_in_province',
     'amount-context-validator' => ($fields['amount']['validators'][0]['key'] ?? '') === 'ba_qs_amount_limits',
     'payment-action-registered-in-form' => ($form['actions'][0]['type'] ?? '') === 'ba_quick_support_payment',
+    'payment-action-handler-registered' => $actionRegistry->has('ba_quick_support_payment')
+        && $actionRegistry->handler('ba_quick_support_payment') instanceof BA_Quick_Support_Payment_Action,
+    'payment-action-retry-supported' => $actionRegistry->get('ba_quick_support_payment')?->supportsRetry === true,
+    'category-context-provider-registered' => $contextRegistry->get('ba_quick_support_category') instanceof BA_Quick_Support_Category_Context_Provider,
     'gateway-select-disabled-by-default' => !isset($fields['payment_gateway']),
     'gateway-select-configurable' => isset($gatewayFields['payment_gateway'])
         && !empty($gatewayFields['payment_gateway']['required'])
