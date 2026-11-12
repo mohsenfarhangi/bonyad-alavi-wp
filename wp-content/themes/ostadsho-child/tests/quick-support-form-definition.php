@@ -9,6 +9,10 @@ function get_option(string $name, mixed $default = null): mixed {
     return $default;
 }
 
+function sanitize_key(string $key): string {
+    return strtolower((string)preg_replace('/[^a-z0-9_\\-]/i', '', $key));
+}
+
 final class BA_Participation_Payment_Gateway_Service
 {
     public function __construct() {}
