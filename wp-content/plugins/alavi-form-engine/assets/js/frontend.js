@@ -1636,6 +1636,19 @@
         window.location.assign(new URL(json.data.redirect_url, window.location.href).toString());
         return true;
       }
+      // AFE Actions run after the submission is persisted. Never show a success
+      // message when a required downstream action (such as payment initiation) failed.
+      const actionErrors = json.data.action_errors && typeof json.data.action_errors === 'object'
+        ? Object.values(json.data.action_errors).map(value => String(value || '')).filter(Boolean)
+        : [];
+      if (actionErrors.length) {
+        if (result) {
+          const messages = actionErrors.map(message => `<li>${escapeHtml(message)}</li>`).join('');
+          result.innerHTML = `<div class="afe-notice afe-notice-error"><strong>اطلاعات فرم ذخیره شد، اما مرحله بعدی کامل نشد.</strong><ul>${messages}</ul></div>`;
+          result.scrollIntoView({behavior:'smooth', block:'center'});
+        }
+        return true;
+      }
       // A lock-after-submit response must immediately enter the persisted locked view.
       // Leaving the live preview DOM mounted would incorrectly keep the "back/edit" button
       // visible and the edit-request panel would not exist until a manual refresh.
