@@ -157,18 +157,24 @@ final class BA_Quick_Support_Payment_Service
             if ($gatewayId === '') {
                 return new WP_Error('ba_qs_gateway_required', 'لطفاً درگاه پرداخت را انتخاب کنید.');
             }
-            if (!isset($allowedGateways[$gatewayId])) {
-                return new WP_Error('ba_qs_gateway_forbidden', 'درگاه انتخاب‌شده برای این دسته مجاز نیست.');
-            }
         } else {
             $gatewayId = $this->sanitizeGatewayId($settings['payment_gateway'] ?? '');
-            if ($gatewayId === '' || !isset($allowedGateways[$gatewayId])) {
-                return new WP_Error('ba_qs_default_gateway_invalid', 'درگاه پیش‌فرض مشارکت فعال یا در فهرست مجاز این دسته نیست.');
+            if ($gatewayId === '') {
+                return new WP_Error('ba_qs_default_gateway_invalid', 'درگاه پیش‌فرض مشارکت تنظیم نشده است.');
             }
         }
 
         $gateway = $this->gatewayService->get_gateway_by_id($gatewayId);
         if (is_wp_error($gateway)) return $gateway;
+        $gatewayId = $this->sanitizeGatewayId($gateway->id);
+        if (!isset($allowedGateways[$gatewayId])) {
+            return new WP_Error(
+                $selectionEnabled ? 'ba_qs_gateway_forbidden' : 'ba_qs_default_gateway_invalid',
+                $selectionEnabled
+                    ? 'درگاه انتخاب‌شده برای این دسته مجاز نیست.'
+                    : 'درگاه پیش‌فرض مشارکت فعال یا در فهرست مجاز این دسته نیست.'
+            );
+        }
         if (method_exists($gateway, 'has_fields') && $gateway->has_fields()) {
             return new WP_Error('ba_qs_gateway_fields', 'درگاه انتخاب‌شده به فیلد پرداخت داخل صفحه نیاز دارد و برای پرداخت مستقیم مناسب نیست.');
         }
