@@ -883,5 +883,5 @@ Modules: [MODULE-AFE](../modules/alavi-form-engine.md), [MODULE-JIHADI-FORM](../
 - Theme: CPT `ba_quick_support`، چهار دسته اولیه، تنظیمات active/min/max/suggested/icon/gateway allowlist، Administrator-only category management و Elementor CPT support.
 - Theme/AFE: فرم مشترک `quick-support-payment`، اعتبارسنجی موبایل/کد ملی/email، county وابسته به province و اعتبارسنجی مبلغ قبل از ذخیره Submission.
 - WooCommerce: Action پرداخت، محصول فنی مخفی/مجازی، سفارش مستقل per Submission، Gateway selection/allowlist، استفاده از Gateway isolation موجود، جلوگیری از خرید مستقیم محصول فنی و idempotent retry recovery.
-- CI متمرکز در [run 43309991432](https://github.com/mohsenfarhangi/bonyad-alavi-wp/actions/runs/43309991432) پاس شد. Live gateway/callback، cart/session persistence، HPOS و Elementor site configuration هنوز نیازمند staging acceptance هستند.
+- CI متمرکز در [run 43309991432](https://github.com/mohsenfarhangi/bonyad-alavi-wp/actions/runs/43311051009) پاس شد. Live gateway/callback، cart/session persistence، HPOS و Elementor site configuration هنوز نیازمند staging acceptance هستند.
 - Phase 2 (dashboard/reporting/exports) هنوز شروع نشده است.
