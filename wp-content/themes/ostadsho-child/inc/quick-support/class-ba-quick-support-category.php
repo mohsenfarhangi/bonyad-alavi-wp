@@ -20,6 +20,7 @@ final class BA_Quick_Support_Category
 
     public static function boot(): void
     {
+        add_action('init', [self::class, 'ensure_admin_capability'], 1);
         add_action('init', [self::class, 'register_post_type'], 5);
         add_action('init', [self::class, 'seed_default_categories'], 20);
         add_action('init', [self::class, 'maybe_flush_rewrite_rules'], 999);
@@ -60,9 +61,32 @@ final class BA_Quick_Support_Category
             'menu_icon' => 'dashicons-heart',
             'supports' => ['title', 'editor', 'excerpt', 'thumbnail', 'page-attributes'],
             'capability_type' => 'post',
+            'capabilities' => [
+                'edit_post' => 'manage_ba_quick_support_categories',
+                'delete_post' => 'manage_ba_quick_support_categories',
+                'edit_posts' => 'manage_ba_quick_support_categories',
+                'edit_others_posts' => 'manage_ba_quick_support_categories',
+                'publish_posts' => 'manage_ba_quick_support_categories',
+                'read_private_posts' => 'manage_ba_quick_support_categories',
+                'delete_posts' => 'manage_ba_quick_support_categories',
+                'delete_private_posts' => 'manage_ba_quick_support_categories',
+                'delete_published_posts' => 'manage_ba_quick_support_categories',
+                'delete_others_posts' => 'manage_ba_quick_support_categories',
+                'edit_private_posts' => 'manage_ba_quick_support_categories',
+                'edit_published_posts' => 'manage_ba_quick_support_categories',
+                'create_posts' => 'manage_ba_quick_support_categories',
+            ],
             'map_meta_cap' => true,
         ]);
 
+    }
+
+    public static function ensure_admin_capability(): void
+    {
+        $administrator = get_role('administrator');
+        if ($administrator && !$administrator->has_cap('manage_ba_quick_support_categories')) {
+            $administrator->add_cap('manage_ba_quick_support_categories');
+        }
     }
 
     public static function maybe_flush_rewrite_rules(): void
