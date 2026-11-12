@@ -117,7 +117,9 @@ tokens زیر `.afe-shell` scope شده‌اند و strong mode reset محدود
 - کارت «اطلاعات اختصاصی مدیریت» در **سایدبار صفحه جزئیات Submission** قرار گرفت، کنار کارت‌های وضعیت و یادداشت داخلی. در حالت مشاهده (بدون `?edit=1`) نیز کاربر دارای `afe_edit_submissions` و دسترسی `FormAccess::EDIT` به همان فرم می‌تواند فیلدها را مستقیماً تغییر داده و با فرم و nonce مستقل ذخیره کند؛ در حالت بدون مجوز، فیلدها فقط خواندنی هستند. ثبت زباله‌دان‌شده اجازه ویرایش ندارد؛ قفل‌بودن متقاضی، ویرایش مدیریتی مجاز را محدود نمی‌کند.
 - فیلدهای admin-only در **جدول اصلی اطلاعات ارسالی** و فرم «ویرایش اطلاعات» دیگر تکرار نمی‌شوند. `FormDataPresenter::sections($form,false)` مخصوص صفحه اصلی است؛ default `sections($form)` همچنان شامل این داده‌ها برای Excel تک/لیست، PDF و چاپ می‌شود.
 - مسیر POST مستقل `afe_detail_action=admin_fields` از nonce موجود صفحه، فرم‌اسکوپ و Capability کنترل می‌شود. سرویس `SubmissionService::updateAdminSubmissionFields()` فیلدهای ارسال‌شده را با whitelist `AdminSubmissionFields::fieldMap` بررسی می‌کند، گزینه Select جعلی/نامعلوم و ثبت حذف‌شده را رد می‌کند، فقط داده‌های مدیریتی را در JSON همان Submission به‌روزرسانی کرده و audit/event `submission.updated` را ثبت می‌کند. ساختار Duplicate و داده‌های متقاضی تغییر نمی‌کنند.
-- تست‌های جدید `tests/admin-fields-sidebar.php` و اصلاح تست Presenter/Workflow مرتبط. نسخه توسعه `1.0.28-dev.9` برای کش CSS، DB/stable ثابت. پذیرش زنده صفحه سایدبار و ذخیره روی سایت همچنان نیازمند بررسی است.
+- تست‌های جدید `tests/admin-fields-sidebar.php` و اصلاح تست Presenter/Workflow مرتبط. **GitHub Actions [run 42223520337](https://github.com/mohsenfarhangi/bonyad-alavi-wp/actions/runs/42223520337) PASS**؛ نسخه توسعه `1.0.28-dev.9`، DB `1.0.5-dev.2` و stable baseline `1.0.27` تغییر نکردند.
+- **پذیرش زنده تأییدشده در 2026-11-12:** مدیر پروژه نمایش سایدبار، ذخیره مستقل در حالت مشاهده، ماندگاری مقدار، رفتار ثبت قفل‌شده، محدودیت دسترسی، عدم تکرار در جدول اصلی و خروجی Excel تکی/لیستی، PDF و چاپ را بررسی و تأیید کرده است.
+- PR #29 قابلیت پایه را با ذخیره در `data_json` ادغام کرد؛ PR #30 ویرایش سایدبار را افزود. PR #28 با معماری جدول مستقل DB در 2026-11-12 به‌عنوان نسخه superseded و بدون Merge بسته شد.
 
 ## Admin-only submission fields (2026-11-06)
 
@@ -127,7 +129,7 @@ tokens زیر `.afe-shell` scope شده‌اند و strong mode reset محدود
 - `FormDataPresenter::sections()` بخش «اطلاعات اختصاصی مدیریت» را به جدول جزئیات و ویرایش، PDF، چاپ و Excel تک‌رکوردی اضافه می‌کند. `ExportProfile` و `ExcelExporter` فیلدها را در Excel لیست هم به صورت ستون پیش‌فرض فعال می‌کنند؛ برای تنظیمات خروجی ذخیره‌شده قدیمی، ستون مدیریتی جدید انتهای ستون‌ها اضافه می‌شود. در قالب PDF، Token `{{field:__afe_admin_<name>}}` قابل استفاده است و `{{fields_table}}` این بخش را شامل می‌شود.
 - فرم `jihadi-group-registration` در Source Definition دارای فیلد Select `group_level` با عنوان «سطح گروه» و گزینه‌های **نوپا، فعال، پیشرو، الگو** است؛ مقادیر ذخیره `new,active,leading,model` هستند. Override مدیریتی قدیمی ممکن است نیاز به بازبینی داشته باشد.
 - فایل‌های اصلی: `src/Admin/AdminSubmissionFields.php`، `src/Admin/FormDataPresenter.php`، `src/Admin/FormsPage.php`، `src/Submission/SubmissionService.php`، `src/Export/{ExportProfile,ExcelExporter,ExportConfigSanitizer,PdfTemplateRenderer}.php` و `assets/js/admin.js`. تست‌های `tests/admin-submission-fields.php` و Workflow اختصاصی.
-- **تست پذیرش زنده:** صفحه جزئیات و ویرایش یک ثبت قدیمی جهادی، تعیین سطح، ذخیره، بازخوانی و بررسی Excel لیست/تکی، PDF و چاپ؛ همچنین بازگشت متقاضی به Draft بدون حذف سطح تعیین‌شده. تا انجام تست در سایت، پذیرش محیط زنده قطعی نیست.
+- **پذیرش زنده:** در 2026-11-12 مدیر پروژه تأیید کرد که یک ثبت واقعی بررسی شده و تعیین/ذخیره/بازخوانی سطح گروه، رفتار مجوز و قفل، و نمایش در Excel تکی/لیستی، PDF و چاپ با موفقیت آزمایش شده‌اند. این تأیید مربوط به قابلیت فیلدهای مدیریتی است و به‌تنهایی به معنی آماده‌بودن کل AFE برای انتشار Stable نیست.
 
 ## Submission Lifecycle
 
