@@ -15,13 +15,14 @@ final class BA_Quick_Support_Category
     public const META_MINIMUM = '_ba_qs_minimum_amount';
     public const META_MAXIMUM = '_ba_qs_maximum_amount';
     public const META_SUGGESTED = '_ba_qs_suggested_amounts';
-    public const META_ICON = '_ba_qs_icon';
+    public const META_ICON = 'ba_qs_icon';
     public const META_GATEWAYS = '_ba_qs_gateway_allowlist';
 
     public static function boot(): void
     {
         add_action('init', [self::class, 'register_post_type'], 5);
         add_action('init', [self::class, 'seed_default_categories'], 20);
+        add_action('init', [self::class, 'maybe_flush_rewrite_rules'], 999);
         add_action('pre_get_posts', [self::class, 'filter_public_queries']);
         add_action('add_meta_boxes_' . self::POST_TYPE, [self::class, 'register_meta_box']);
         add_action('save_post_' . self::POST_TYPE, [self::class, 'save_meta'], 10, 2);
@@ -61,10 +62,15 @@ final class BA_Quick_Support_Category
             'map_meta_cap' => true,
         ]);
 
-        if (get_option('ba_quick_support_rewrite_version') !== '1') {
-            flush_rewrite_rules(false);
-            update_option('ba_quick_support_rewrite_version', '1', false);
-        }
+    }
+
+    public static function maybe_flush_rewrite_rules(): void
+    {
+        if (get_option('ba_quick_support_rewrite_version') === '1') return;
+
+        // Run after other plugins and post types have registered their rewrites.
+        flush_rewrite_rules(false);
+        update_option('ba_quick_support_rewrite_version', '1', false);
     }
 
     public static function seed_default_categories(): void
@@ -253,6 +259,11 @@ final class BA_Quick_Support_Category
         $minimum = self::normalizeAmount(get_post_meta($post->ID, self::META_MINIMUM, true));
         $maximum = self::normalizeAmount(get_post_meta($post->ID, self::META_MAXIMUM, true));
         $suggested = array_values(array_filter(array_map([self::class, 'normalizeAmount'], (array)get_post_meta($post->ID, self::META_SUGGESTED, true)), static fn($amount): bool => (float)$amount > 0));
+        $suggested = array_values(array_filter($suggested, static function($amount) use ($minimum, $maximum): bool {
+            $numeric = (float)$amount;
+            return ((float)$minimum <= 0 || $numeric >= (float)$minimum)
+                && ((float)$maximum <= 0 || $numeric <= (float)$maximum);
+        }));
         $decimals = function_exists('wc_get_price_decimals') ? max(0, (int)wc_get_price_decimals()) : 0;
         $step = $decimals > 0 ? '0.' . str_repeat('0', max(0, $decimals - 1)) . '1' : '1';
         $attributes = ['step' => $step, 'min' => (float)$minimum > 0 ? $minimum : $step];
