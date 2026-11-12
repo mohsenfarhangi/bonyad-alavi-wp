@@ -26,7 +26,7 @@ Implemented in the current feature branch:
 - Existing participation Gateway service extended with exact gateway resolution and optional internal isolated-cart item data.
 - Suggested amount/limit UI and customer gateway-selection setting.
 
-**Focused CI:** [run 43309991432](https://github.com/mohsenfarhangi/bonyad-alavi-wp/actions/runs/43309991432) passed PHP syntax, AFE Context/validator tests, Quick Support category/form/payment-rule tests, existing theme form regressions and JavaScript syntax on the PR branch.
+**Focused CI:** [run 43309991432](https://github.com/mohsenfarhangi/bonyad-alavi-wp/actions/runs/43311051009) passed PHP syntax, AFE Context/validator tests, Quick Support category/form/payment-rule tests, existing theme form regressions and JavaScript syntax on the PR branch.
 
 **Not yet accepted:** live hosted/redirect gateway initiation and callback, real Cart/Session/Persistent Cart preservation on staging, HPOS order creation, and Elementor Single/Popup/Loop Grid configuration on the target site. No production deployment has occurred.
 
