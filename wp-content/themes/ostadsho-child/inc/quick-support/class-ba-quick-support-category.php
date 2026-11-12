@@ -23,6 +23,7 @@ final class BA_Quick_Support_Category
         add_action('init', [self::class, 'register_post_type'], 5);
         add_action('init', [self::class, 'seed_default_categories'], 20);
         add_action('init', [self::class, 'maybe_flush_rewrite_rules'], 999);
+        add_action('admin_init', [self::class, 'ensure_elementor_support'], 20);
         add_action('pre_get_posts', [self::class, 'filter_public_queries']);
         add_action('add_meta_boxes_' . self::POST_TYPE, [self::class, 'register_meta_box']);
         add_action('save_post_' . self::POST_TYPE, [self::class, 'save_meta'], 10, 2);
@@ -75,6 +76,8 @@ final class BA_Quick_Support_Category
 
     public static function seed_default_categories(): void
     {
+        if (get_option('ba_quick_support_seed_version') === '1') return;
+
         $defaults = [
             [
                 'economic-empowerment',
@@ -117,6 +120,20 @@ final class BA_Quick_Support_Category
             update_post_meta((int)$postId, self::META_MAXIMUM, '0');
             update_post_meta((int)$postId, self::META_SUGGESTED, []);
             update_post_meta((int)$postId, self::META_GATEWAYS, []);
+        }
+
+        update_option('ba_quick_support_seed_version', '1', false);
+    }
+
+    public static function ensure_elementor_support(): void
+    {
+        if (!class_exists('Elementor\\Plugin')) return;
+
+        $supported = get_option('elementor_cpt_support', ['post', 'page']);
+        $supported = is_array($supported) ? $supported : ['post', 'page'];
+        if (!in_array(self::POST_TYPE, $supported, true)) {
+            $supported[] = self::POST_TYPE;
+            update_option('elementor_cpt_support', array_values(array_unique($supported)));
         }
     }
 
