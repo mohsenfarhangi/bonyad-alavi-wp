@@ -384,6 +384,19 @@ final class BA_Quick_Support_Payment_Service
             return new WP_Error('ba_qs_product_class_missing', 'نوع محصول فنی WooCommerce در دسترس نیست.');
         }
 
+        $lockKey = 'ba_qs_technical_product_lock';
+        $lockAcquired = add_option($lockKey, (string)time(), '', false);
+        if (!$lockAcquired) {
+            $createdAt = (int)get_option($lockKey, 0);
+            if ($createdAt > 0 && (time() - $createdAt) > 120) {
+                delete_option($lockKey);
+                $lockAcquired = add_option($lockKey, (string)time(), '', false);
+            }
+        }
+        if (!$lockAcquired) {
+            return new WP_Error('ba_qs_product_creation_in_progress', 'زیرساخت پرداخت در حال آماده‌سازی است؛ چند لحظه دیگر دوباره تلاش کنید.');
+        }
+
         try {
             $product = new WC_Product_Simple();
             $product->set_name('حمایت سریع بنیاد علوی');
@@ -406,6 +419,8 @@ final class BA_Quick_Support_Payment_Service
         } catch (Throwable $exception) {
             if (function_exists('wc_get_logger')) wc_get_logger()->error($exception->getMessage(), ['source'=>'ba-quick-support']);
             return new WP_Error('ba_qs_product_create_failed', 'آماده‌سازی زیرساخت پرداخت سریع انجام نشد؛ لطفاً با پشتیبانی تماس بگیرید.');
+        } finally {
+            delete_option($lockKey);
         }
     }
 
