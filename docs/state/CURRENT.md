@@ -25,7 +25,7 @@ AFE release goal همچنان live acceptance نسخه 1.0.28 و رفع blocker 
 - CPT `ba_quick_support`، چهار دسته اولیه، فیلدهای تنظیمات دسته، Elementor support و دسترسی مدیریت Administrator-only اضافه شده‌اند.
 - فرم مشترک `quick-support-payment` با فیلدهای اجباری موبایل/نام/نام خانوادگی/مبلغ و فیلدهای اختیاری استان/شهرستان/کد ملی/ایمیل ثبت شده است.
 - Action پرداخت سریع و سفارش مستقل WooCommerce، محصول فنی مخفی، Gateway allowlist/selection، idempotency و retry recovery اضافه شده‌اند.
-- Focused CI در [run 43309991432](https://github.com/mohsenfarhangi/bonyad-alavi-wp/actions/runs/43309991432) پاس شده است.
+- Focused CI در [run 43309991432](https://github.com/mohsenfarhangi/bonyad-alavi-wp/actions/runs/43311051009) پاس شده است.
 - **پذیرش زنده باقی است:** Hosted/Redirect Gateway واقعی، callback/return، حفظ Cart/Session/Persistent Cart، HPOS و تنظیم Elementor Single/Popup/Loop Grid روی سایت.
 - Phase 2 شامل داشبورد مالی، فیلترها و خروجی Excel/CSV هنوز شروع نشده است.
 - مرجع: [ADR-009](../decisions/ADR-009-quick-support-payments.md)، [MODULE-QUICK-SUPPORT](../modules/quick-support-payments.md).
