@@ -407,3 +407,15 @@ Live acceptance قبل از production bump:
 - GitHub Actions [run 39222851678](https://github.com/mohsenfarhangi/bonyad-alavi-wp/actions/runs/39222851678): CSS contract and PHP lint PASS; Chromium PASS at 360/780/782/1024 for no RTL overflow, 1px hidden native select, user selection and mocked form payload. **This is not a live WordPress submission test.**
 - Per-form Additional CSS overrides are stored in WordPress (not tracked in this repository); remove temporary site CSS from the admin editor and purge any site/CDN caches separately.
 - Full `tools/qa.sh` still reports baseline failures in `tests/export-profile.php` and `tests/export-package-integration.php` due to stale references to the removed plugin-level Jihadi form; unrelated to the stylesheet fix. CI preserves this failure evidence but does not block the focused CSS job.
+
+
+## Approved future extension — Generic Form Context (not implemented)
+
+برای پرداخت سریع مشارکت، توسعه عمومی و غیرپروژه‌ای Form Context در AFE تصویب شده است؛ این قابلیت در HEAD فعلی وجود ندارد.
+
+- Elementor «فرم علوی» باید Context Provider را انتخاب کند و Context را از Current Page، مقدار ثابت یا Query Parameter دریافت کند.
+- قرارداد provider registration پیشنهادی: `afe_register_form_context_providers`.
+- Provider سمت integration مقدار را در render resolve می‌کند و token امضاشده/محدود به فرم را برای Submit می‌سازد؛ اعتبارسنجی نهایی در سمت سرور انجام می‌شود.
+- AFE Context معتبر را جدا از فیلدهای متقاضی و به‌صورت immutable در اختیار ActionContext قرار می‌دهد.
+- Engine نباید category، WooCommerce یا Quick Support را hard-code کند. Provider و منطق business در Child Theme می‌ماند.
+- جزئیات target contract: [MODULE-QUICK-SUPPORT](quick-support-payments.md) و [ADR-009](../decisions/ADR-009-quick-support-payments.md).
