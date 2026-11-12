@@ -166,6 +166,38 @@ require_once get_stylesheet_directory() . '/inc/woocommerce/class-ba-participati
 require_once get_stylesheet_directory() . '/inc/woocommerce/class-ba-woocommerce-participation.php';
 
 // پرداخت سریع دسته‌ای و Context Provider عمومی AFE.
+
+add_action( 'wp_enqueue_scripts', function () {
+	if ( ! is_singular( 'ba_quick_support' ) ) {
+		return;
+	}
+
+	$theme_dir = get_stylesheet_directory();
+	$theme_uri = get_stylesheet_directory_uri();
+	$style_path = '/assets/css/ba-quick-support-form.css';
+	$script_path = '/assets/js/ba-quick-support-form.js';
+	$style_file = $theme_dir . $style_path;
+	$script_file = $theme_dir . $script_path;
+
+	if ( is_readable( $style_file ) ) {
+		wp_enqueue_style(
+			'ba-quick-support-form',
+			$theme_uri . $style_path,
+			array(),
+			(string) filemtime( $style_file )
+		);
+	}
+
+	if ( is_readable( $script_file ) ) {
+		wp_enqueue_script(
+			'ba-quick-support-form',
+			$theme_uri . $script_path,
+			array(),
+			(string) filemtime( $script_file ),
+			true
+		);
+	}
+}, 20 );
 require_once get_stylesheet_directory() . '/inc/quick-support/class-ba-quick-support-category.php';
 require_once get_stylesheet_directory() . '/inc/quick-support/class-ba-quick-support-category-context-provider.php';
 require_once get_stylesheet_directory() . '/inc/woocommerce/class-ba-quick-support-payment-service.php';
