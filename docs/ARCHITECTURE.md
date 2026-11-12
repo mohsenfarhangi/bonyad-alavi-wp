@@ -103,18 +103,19 @@ Cart واقعی user نباید در order مشارکت وارد یا توسط g
 
 مرجع: [MODULE-PARTICIPATION](modules/participation-payments.md) و [ADR-002](decisions/ADR-002-participation-quick-checkout.md).
 
-### Approved target extension — Quick Support (implementation pending)
+### Quick Support — Phase 1 implementation in PR #34 (not deployed)
 
-طرح پرداخت سریع دسته‌ای در [ADR-009](decisions/ADR-009-quick-support-payments.md) تصویب شده است؛ این بخش هنوز implementation جاری محسوب نمی‌شود.
+فاز اول طرح [ADR-009](decisions/ADR-009-quick-support-payments.md) در [PR #34](https://github.com/mohsenfarhangi/bonyad-alavi-wp/pull/34) پیاده‌سازی شده و منتظر review/merge و پذیرش staging است.
 
-- Post Type دسته‌ها: `ba_quick_support`؛ صفحات مستقل Elementor و Popup/Loop Grid.
-- فرم مشترک AFE: `quick-support-payment` با Generic Form Context Provider.
-- Context Provider دسته و Action پرداخت در Child Theme قرار می‌گیرند؛ AFE فقط قرارداد عمومی Context را فراهم می‌کند.
-- سفارش مستقل با WooCommerce CRUD، یک backing product فنی Hidden/Virtual و Gateway isolation موجود ساخته می‌شود؛ Cart/Checkout عادی استفاده نمی‌شود.
-- سرویس project-centric فعلی `BA_Participation_Quick_Checkout_Service` بدون تغییر برای category amount validation استفاده نمی‌شود؛ Gateway isolation مشترک قابل استفاده مجدد است.
-- WooCommerce Orders منبع مالی داشبورد Quick Support خواهند بود؛ جدول تراکنش موازی در نسخه اول ساخته نمی‌شود.
+- Post Type دسته‌ها: `ba_quick_support`؛ چهار دسته اولیه و صفحات مستقل Elementor، Popup و Loop Grid.
+- فرم مشترک AFE: `quick-support-payment` با Context Provider عمومی و token امضاشده/server-verified.
+- Context Provider دسته، فرم، Action پرداخت و Payment/Order service در Child Theme قرار دارند؛ AFE فقط قرارداد عمومی Context را فراهم می‌کند.
+- سفارش مستقل با WooCommerce CRUD، backing product فنی Hidden/Virtual و Gateway isolation موجود ساخته می‌شود؛ Cart/Checkout عادی استفاده نمی‌شود.
+- سرویس project-centric فعلی `BA_Participation_Quick_Checkout_Service` برای category amount validation reuse نمی‌شود.
+- WooCommerce Orders منبع مالی گزارش‌های Phase 2 خواهند بود؛ جدول تراکنش موازی در نسخه اول ساخته نمی‌شود.
+- CI متمرکز Phase 1 پاس شده؛ Gateway واقعی، callback، حفظ Cart/Session و HPOS نیازمند staging acceptance هستند.
 
-مرجع طراحی و قرارداد کامل: [MODULE-QUICK-SUPPORT](modules/quick-support-payments.md).
+مرجع پیاده‌سازی: [MODULE-QUICK-SUPPORT](modules/quick-support-payments.md). داشبورد و گزارش‌ها هنوز پیاده‌سازی نشده‌اند.
 
 ## 6. Jihadi Center
 
