@@ -106,8 +106,8 @@ $checks = [
         && ($current['category_title'] ?? '') === 'آموزش، مهارت و پرورش'
         && ($current['category_excerpt'] ?? '') === 'توسعه آموزش و مهارت',
     'amount-bounds-in-context' => is_array($current)
-        && ($current['field_attributes']['amount']['min'] ?? '') === '1000'
-        && ($current['field_attributes']['amount']['max'] ?? '') === '10000',
+        && ($current['field_attributes']['amount']['data-afe-amount-min'] ?? '') === '1000'
+        && ($current['field_attributes']['amount']['data-afe-amount-max'] ?? '') === '10000',
     'suggestions-filtered-to-allowed-range' => is_array($current)
         && ($current['suggested_amounts'] ?? []) === ['1000','5000'],
     'icon-available-for-elementor-custom-field' => is_array($current)
