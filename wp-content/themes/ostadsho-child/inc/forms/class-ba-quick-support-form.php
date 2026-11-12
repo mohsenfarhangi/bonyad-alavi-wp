@@ -51,7 +51,7 @@ final class BA_Quick_Support_Form
             'تطبیق شهرستان با استان',
             ['select'],
             'شهرستان انتخاب‌شده متعلق به استان انتخاب‌شده نیست.',
-            static function(string $value, array $field, array $config, array $data): bool {
+            static function(string $value, array $field, array $config, array $data, array $context = []): bool {
                 $countyId = absint($value);
                 if ($countyId <= 0) return true;
 
@@ -69,6 +69,25 @@ final class BA_Quick_Support_Form
                 ));
 
                 return (int)$matched === $countyId;
+            }
+        ));
+
+        $validators->register(new ValidatorDefinition(
+            'ba_qs_amount_limits',
+            'محدوده مبلغ دسته پرداخت سریع',
+            ['number'],
+            'مبلغ واردشده خارج از محدوده مجاز این دسته است یا دسته معتبر به فرم متصل نیست.',
+            static function(string $value, array $field, array $config, array $data, array $context = []): bool {
+                if (empty($context['category_id'])) return false;
+
+                $amount = (float)BA_Quick_Support_Payment_Service::normalizeAmount($value);
+                $minimum = (float)($context['minimum_amount'] ?? 0);
+                $maximum = (float)($context['maximum_amount'] ?? 0);
+
+                if ($amount <= 0) return false;
+                if ($minimum > 0 && $amount < $minimum) return false;
+                if ($maximum > 0 && $amount > $maximum) return false;
+                return true;
             }
         ));
     }
@@ -169,6 +188,10 @@ final class BA_Quick_Support_Form
                     'data-afe-ltr'=>'1',
                 ])
                 ->description('مبلغ را به واحد پول فعال در فروشگاه وارد کنید.')
+                ->meta('validators', [[
+                    'key'=>'ba_qs_amount_limits',
+                    'message'=>'مبلغ واردشده خارج از محدوده مجاز این دسته است.',
+                ]])
                 ->required()
                 ->width(12),
         ];
