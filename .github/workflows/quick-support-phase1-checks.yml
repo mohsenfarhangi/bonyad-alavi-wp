@@ -23,6 +23,7 @@ on:
       - 'wp-content/themes/ostadsho-child/inc/woocommerce/class-ba-participation-payment-gateway-service.php'
       - 'wp-content/themes/ostadsho-child/inc/admin/settings/tab-participation.php'
       - 'wp-content/themes/ostadsho-child/tests/quick-support-form-definition.php'
+      - 'wp-content/themes/ostadsho-child/tests/quick-support-category-context.php'
       - 'wp-content/themes/ostadsho-child/assets/js/ba-quick-support-form.js'
       - 'wp-content/themes/ostadsho-child/assets/css/ba-quick-support-form.css'
       - 'wp-content/themes/ostadsho-child/functions.php'
@@ -63,6 +64,7 @@ jobs:
           php -l wp-content/plugins/alavi-form-engine/tests/action-context-form-context.php
           php -l wp-content/plugins/alavi-form-engine/tests/form-context-validator.php
           php -l wp-content/themes/ostadsho-child/tests/quick-support-form-definition.php
+          php -l wp-content/themes/ostadsho-child/tests/quick-support-category-context.php
       - name: AFE context and validator tests
         run: |
           php wp-content/plugins/alavi-form-engine/tests/form-context-manager.php
@@ -74,6 +76,7 @@ jobs:
       - name: Theme form regression
         run: |
           php wp-content/themes/ostadsho-child/tests/quick-support-form-definition.php
+          php wp-content/themes/ostadsho-child/tests/quick-support-category-context.php
           php wp-content/themes/ostadsho-child/tests/facilitator-form-definition.php
           php wp-content/themes/ostadsho-child/tests/jihadi-form-definition.php
           php wp-content/themes/ostadsho-child/tests/camp-admission-form-definition.php
