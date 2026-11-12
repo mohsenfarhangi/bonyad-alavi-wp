@@ -472,6 +472,13 @@ final class Renderer
         }
 
         $multiple=!empty($field['multiple']);
+        if (!empty($field['hide_when_single_option']) && !$multiple && count($options) === 1) {
+            $optionValue = (string)array_key_first($options);
+            $optionLabel = (string)reset($options);
+            return '<input type="hidden" name="'.esc_attr($name).'" value="'.esc_attr($optionValue).'">'
+                . '<div class="afe-select-single-option" aria-live="polite">'.esc_html($optionLabel).'</div>';
+        }
+
         $mode=in_array(($field['select_mode']??'custom'),['custom','native'],true)
             ? (string)($field['select_mode']??'custom')
             : 'custom';
