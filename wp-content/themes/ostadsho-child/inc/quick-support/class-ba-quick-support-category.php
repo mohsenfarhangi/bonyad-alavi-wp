@@ -59,7 +59,7 @@ final class BA_Quick_Support_Category
             ],
             'menu_position' => 26,
             'menu_icon' => 'dashicons-heart',
-            'supports' => ['title', 'editor', 'excerpt', 'thumbnail', 'page-attributes'],
+            'supports' => ['title', 'editor', 'excerpt', 'thumbnail', 'page-attributes', 'custom-fields'],
             'capability_type' => 'post',
             'capabilities' => [
                 'edit_post' => 'manage_ba_quick_support_categories',
