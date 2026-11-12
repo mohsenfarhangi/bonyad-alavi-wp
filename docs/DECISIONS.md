@@ -6,6 +6,7 @@
 |---|---|---|
 | [ADR-001](decisions/ADR-001-code-defined-forms.md) | AFE form schema | PHP definition منبع پایه است و Admin فقط override مجاز اعمال می‌کند. |
 | [ADR-002](decisions/ADR-002-participation-quick-checkout.md) | Participation payment | Quick Checkout order/cart از Cart واقعی user جدا می‌ماند. |
+| [ADR-009](decisions/ADR-009-quick-support-payments.md) | Quick Support | فرم مشترک AFE با Context معتبر دسته، سفارش مستقیم و ایزوله WooCommerce و گزارش مبتنی بر Order. |
 | [ADR-003](decisions/ADR-003-shared-theme-settings-persistence.md) | Theme settings | ثبت/ذخیره تب‌های تنظیمات از registry و shared AJAX controller عبور می‌کند و fallback کلاسیک حفظ می‌شود. |
 | [ADR-004](decisions/ADR-004-jihadi-center-source-precedence.md) | Jihadi center | Dashboard/Elementor فقط از resolver مرکزی با precedence تعریف‌شده merge می‌شوند. |
 | [ADR-005](decisions/ADR-005-shared-admin-repeater.md) | Admin Repeater | UI Repeater مشترک است؛ sanitize/persist متعلق به feature است. |
