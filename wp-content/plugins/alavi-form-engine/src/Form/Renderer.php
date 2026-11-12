@@ -171,10 +171,10 @@ final class Renderer
         $duplicateTracking = !empty($form['settings']['editing_enabled'])
             && in_array('tracking', (array)($form['settings']['editing_modes'] ?? []), true);
 
-        return $customCssHtml . '<div class="'.esc_attr($shellClass).'" data-afe-isolation="'.esc_attr($this->styleIsolation->modeForForm($form)).'" dir="rtl">'.$editingNotice.$lockPanel.$resumeBox
         $contextJson = $formContext !== [] ? wp_json_encode($formContext, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) : '';
         $contextAttribute = is_string($contextJson) && $contextJson !== '' ? ' data-afe-context="'.esc_attr($contextJson).'"' : '';
 
+        return $customCssHtml . '<div class="'.esc_attr($shellClass).'" data-afe-isolation="'.esc_attr($this->styleIsolation->modeForForm($form)).'" dir="rtl">'.$editingNotice.$lockPanel.$resumeBox
             . '<form class="afe-form" method="post" enctype="multipart/form-data" novalidate data-form="'.esc_attr($slug).'"'.$contextAttribute.($locked?' data-afe-readonly="1"':'').' data-afe-lock-after-submit="'.(!empty($form['settings']['lock_after_submit'])?'1':'0').'" data-afe-preview-enabled="'.($previewEnabled?'1':'0').'" data-afe-show-tracking-code="'.(($form['settings']['show_tracking_code']??true)?'1':'0').'" data-afe-lock-warning="'.esc_attr((string)($form['settings']['lock_warning']??'')).'" data-afe-duplicate-tracking="'.($duplicateTracking?'1':'0').'" data-afe-duplicate-otp="'.($duplicateOtp?'1':'0').'" data-afe-duplicate-otp="'.($duplicateOtp?'1':'0').'"'.$duplicateAttrs.'>'
             . $hidden . $duplicateLive . $content
             . ($locked || $inlineCaptcha ? '' : '<div class="afe-captcha-wrap">'.$this->security->captchaMarkup((string)($form['settings']['captcha']??'custom')).'</div>')
