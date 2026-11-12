@@ -84,6 +84,7 @@ final class BA_Quick_Support_Form
                 $minimum = (float)($context['minimum_amount'] ?? 0);
                 $maximum = (float)($context['maximum_amount'] ?? 0);
 
+                if ($minimum > 0 && $maximum > 0 && $maximum < $minimum) return false;
                 if ($amount <= 0) return false;
                 if ($minimum > 0 && $amount < $minimum) return false;
                 if ($maximum > 0 && $amount > $maximum) return false;
