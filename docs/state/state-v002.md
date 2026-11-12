@@ -851,3 +851,12 @@ Modules: [MODULE-AFE](../modules/alavi-form-engine.md), [MODULE-JIHADI-FORM](../
 - Add dedicated `admin_fields` POST action guarded by submission nonce, `afe_edit_submissions`, per-form EDIT access, active submission check and per-field option whitelist. Save only admin-owned JSON keys, retain applicant fields, audit and emit `submission.updated`. Locked applicant submissions may still be classified by an authorized administrator.
 - Keep exporter presenters unchanged and use `sections($form,false)` only for main admin table and main edit sanitization; ensure main edit never resets admin fields.
 - Add regression checks and bump AFE dev assets to 1.0.28-dev.9; DB/stable unchanged. WordPress live acceptance pending.
+
+
+## 2026-11-12 — Close superseded PR #28 and confirm live acceptance of admin-only fields
+
+- PR #28 (`feat/afe-admin-only-fields`) با سه Commit و رویکرد ذخیره در جدول مستقل `afe_submission_admin_fields` باز مانده بود. بررسی diff و مقایسه branch با `main` نشان داد این branch به‌صورت مستقیم Merge نشده و از نظر معماری با پیاده‌سازی پذیرفته‌شده فعلی متفاوت است.
+- PR #29 در Commit `a6b4fb97094f7a8fcc0839578f81633534179eff` قابلیت فیلدهای مدیریتی per-form را با کلیدهای رزروشده `__afe_admin_<key>` در `data_json` همان Submission، بدون جدول/Migration جدید، ادغام کرد. PR #30 در Commit `9e143515badefb1e0903157ca71ba16d8840da44` ویرایش مستقل فیلدها را به سایدبار جزئیات اضافه کرد. بنابراین نیاز عملکردی PR #28 در PRهای #29 و #30 پوشش داده شده است، اما معماری جدول جداگانه آن وارد `main` نشده است.
+- پس از ثبت توضیح در گفتگو، PR #28 در 2026-11-12 با وضعیت **closed / not merged** بسته شد؛ دلیل: superseded by PR #29 and #30. [PR #28](https://github.com/mohsenfarhangi/bonyad-alavi-wp/pull/28)، [PR #29](https://github.com/mohsenfarhangi/bonyad-alavi-wp/pull/29)، [PR #30](https://github.com/mohsenfarhangi/bonyad-alavi-wp/pull/30).
+- مدیر پروژه پذیرش زنده قابلیت را تأیید کرد: نمایش کارت سایدبار، ویرایش/ذخیره مستقل در حالت مشاهده، ماندگاری پس از بازخوانی، رفتار ثبت قفل‌شده، read-only برای کاربر فاقد مجوز، عدم تکرار در جدول اصلی و خروجی‌های Excel تکی/لیستی، PDF و چاپ.
+- نسخه AFE روی `1.0.28-dev.9` و DB checkpoint روی `1.0.5-dev.2` باقی است؛ stable baseline `1.0.27`. این پذیرش فقط قابلیت فیلدهای مدیریتی را پوشش می‌دهد و blockerهای عمومی release/production promotion همچنان طبق CURRENT مستقل‌اند.
