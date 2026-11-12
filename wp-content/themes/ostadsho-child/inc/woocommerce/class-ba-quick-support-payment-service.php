@@ -208,7 +208,9 @@ final class BA_Quick_Support_Payment_Service
                         }
 
                         if (function_exists('WC') && WC()->session) {
-                            WC()->session->set('chosen_payment_method', $gateway->id);
+                            // WooCommerce uses this key to associate the gateway return
+                            // with the pending order. Do not overwrite the customer's
+                            // previously selected checkout gateway.
                             WC()->session->set('order_awaiting_payment', $order->get_id());
                             if (is_callable([WC()->session, 'save_data'])) WC()->session->save_data();
                         }
