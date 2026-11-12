@@ -125,6 +125,9 @@ final class BA_Quick_Support_Payment_Service
 
         $minimum = (float)BA_Quick_Support_Category::normalizeAmount(get_post_meta($categoryId, BA_Quick_Support_Category::META_MINIMUM, true));
         $maximum = (float)BA_Quick_Support_Category::normalizeAmount(get_post_meta($categoryId, BA_Quick_Support_Category::META_MAXIMUM, true));
+        if ($minimum > 0 && $maximum > 0 && $maximum < $minimum) {
+            return new WP_Error('ba_qs_amount_configuration', 'محدوده حداقل و حداکثر مبلغ این دسته به‌درستی تنظیم نشده است.');
+        }
         if ($minimum > 0 && $numericAmount < $minimum) {
             return new WP_Error('ba_qs_amount_minimum', sprintf('حداقل مبلغ حمایت %s است.', wp_strip_all_tags(wc_price($minimum))));
         }
