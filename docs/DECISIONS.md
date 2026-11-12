@@ -12,5 +12,6 @@
 | [ADR-006](decisions/ADR-006-afe-export-dependency-isolation.md) | AFE export | PDF/XLSX package-managed هستند و Excel dependencies در برابر Composer collision ایزوله می‌شوند. |
 | [ADR-007](decisions/ADR-007-project-form-ownership.md) | Project form ownership | Engine عمومی فرم پروژه‌ای built-in ندارد؛ Source Definition فرم جهادی در child theme ثبت می‌شود. |
 | [ADR-008](decisions/ADR-008-studies-center-data-model.md) | Studies center | کتاب/پژوهش در publications با تفکیک دسته از تنظیمات؛ CPT نشست در child؛ Taxonomy حوزه مشترک؛ یک Capability برای تب و نشست‌ها. |
+| [ADR-009](decisions/ADR-009-quick-support-payments.md) | Quick Support | فرم مشترک AFE با Context معتبر دسته، سفارش مستقیم و ایزوله WooCommerce و گزارش مبتنی بر Order. |
 
 ADR جدید فقط برای تصمیم معماری/contract ماندگار ایجاد شود؛ تغییر ظاهری جزئی وارد ADR نشود.

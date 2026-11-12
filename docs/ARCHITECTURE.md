@@ -103,6 +103,19 @@ Cart واقعی user نباید در order مشارکت وارد یا توسط g
 
 مرجع: [MODULE-PARTICIPATION](modules/participation-payments.md) و [ADR-002](decisions/ADR-002-participation-quick-checkout.md).
 
+### Approved target extension — Quick Support (implementation pending)
+
+طرح پرداخت سریع دسته‌ای در [ADR-009](decisions/ADR-009-quick-support-payments.md) تصویب شده است؛ این بخش هنوز implementation جاری محسوب نمی‌شود.
+
+- Post Type دسته‌ها: `ba_quick_support`؛ صفحات مستقل Elementor و Popup/Loop Grid.
+- فرم مشترک AFE: `quick-support-payment` با Generic Form Context Provider.
+- Context Provider دسته و Action پرداخت در Child Theme قرار می‌گیرند؛ AFE فقط قرارداد عمومی Context را فراهم می‌کند.
+- سفارش مستقل با WooCommerce CRUD، یک backing product فنی Hidden/Virtual و Gateway isolation موجود ساخته می‌شود؛ Cart/Checkout عادی استفاده نمی‌شود.
+- سرویس project-centric فعلی `BA_Participation_Quick_Checkout_Service` بدون تغییر برای category amount validation استفاده نمی‌شود؛ Gateway isolation مشترک قابل استفاده مجدد است.
+- WooCommerce Orders منبع مالی داشبورد Quick Support خواهند بود؛ جدول تراکنش موازی در نسخه اول ساخته نمی‌شود.
+
+مرجع طراحی و قرارداد کامل: [MODULE-QUICK-SUPPORT](modules/quick-support-payments.md).
+
 ## 6. Jihadi Center
 
 Dashboard و Elementor هر دو content/query inputs دارند، اما `BA_Center_Settings_Service::get_effective_settings()` تنها resolver معتبر است و queryها از `BA_Content_Query_Service` می‌گذرند.

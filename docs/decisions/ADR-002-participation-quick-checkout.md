@@ -27,6 +27,10 @@
 - gatewayهای دارای payment fields داخلی target contract فعلی نیستند؛ Hosted/Redirect مسیر اصلی است.
 - تغییر sanitizer یا country/state initialization ممکن است compatibility gateway/WooCommerce را بشکند.
 
+## Related Decisions
+
+- [ADR-009 — Quick Support category payments](ADR-009-quick-support-payments.md) extends the isolated order/Gateway contract to category-based donations. It reuses the lower-level Gateway isolation service but does not reuse the project-specific amount validator unchanged.
+
 ## Related Modules
 
 - [MODULE-PARTICIPATION](../modules/participation-payments.md)

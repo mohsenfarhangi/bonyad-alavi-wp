@@ -860,3 +860,16 @@ Modules: [MODULE-AFE](../modules/alavi-form-engine.md), [MODULE-JIHADI-FORM](../
 - پس از ثبت توضیح در گفتگو، PR #28 در 2026-11-12 با وضعیت **closed / not merged** بسته شد؛ دلیل: superseded by PR #29 and #30. [PR #28](https://github.com/mohsenfarhangi/bonyad-alavi-wp/pull/28)، [PR #29](https://github.com/mohsenfarhangi/bonyad-alavi-wp/pull/29)، [PR #30](https://github.com/mohsenfarhangi/bonyad-alavi-wp/pull/30).
 - مدیر پروژه پذیرش زنده قابلیت را تأیید کرد: نمایش کارت سایدبار، ویرایش/ذخیره مستقل در حالت مشاهده، ماندگاری پس از بازخوانی، رفتار ثبت قفل‌شده، read-only برای کاربر فاقد مجوز، عدم تکرار در جدول اصلی و خروجی‌های Excel تکی/لیستی، PDF و چاپ.
 - نسخه AFE روی `1.0.28-dev.9` و DB checkpoint روی `1.0.5-dev.2` باقی است؛ stable baseline `1.0.27`. این پذیرش فقط قابلیت فیلدهای مدیریتی را پوشش می‌دهد و blockerهای عمومی release/production promotion همچنان طبق CURRENT مستقل‌اند.
+
+
+## 2026-11-12 — Quick Support payment architecture accepted
+
+- مدیر پروژه طرح فنی پرداخت سریع مشارکت مردمی را تصویب کرد؛ این ثبت صرفاً تصمیم معماری است و در تاریخ ثبت هیچ کد اجرایی برای Quick Support تغییر نکرد.
+- رویکرد Hybrid: AFE مالک فرم مشترک و Generic Form Context contract؛ Child Theme مالک Post Type دسته‌ها، Context Provider، Action پرداخت و داشبورد؛ WooCommerce مرجع سفارش، Gateway و Refund.
+- Post Type با کلید معتبر `ba_quick_support`، چهار دسته اولیه اقتصادی/آموزش/بهداشت/زیرساخت و URLهای `/participation/quick-support/{slug}/` تعیین شد. Popup و Loop Grid و صفحات دسته با Elementor طراحی می‌شوند.
+- فرم واحد `quick-support-payment`: موبایل، نام، نام خانوادگی و مبلغ اجباری؛ استان، شهرستان `county` وابسته به `province`، کد ملی و ایمیل اختیاری. واحد مبلغ از تنظیمات WooCommerce می‌آید.
+- Context در ویجت AFE از Current Page، Fixed Category یا Query Parameter (پیش‌فرض `support_category`) resolve می‌شود؛ token امضاشده در سمت سرور verify و به ActionContext به‌صورت immutable داده می‌شود.
+- پرداخت مستقیم و بدون Cart/Checkout عادی؛ Gateway isolation موجود reuse می‌شود، اما validator پروژه‌ای `validate_project_amount()` برای Quick Support استفاده نمی‌شود. یک محصول فنی مشترک Simple/Virtual/Hidden backing order item و isolated cart است و خرید مستقیم آن باید مسدود باشد.
+- انتخاب درگاه توسط پرداخت‌کننده قابل فعال/غیرفعال و به‌صورت پیش‌فرض خاموش است؛ allowlist عمومی و per-category، عدم silent fallback و پشتیبانی نسخه اول از Hosted/Redirect Gatewayها تصویب شد.
+- WooCommerce Orderها منبع مالی گزارش هستند؛ گزارش خالص پس از Refund با CRUD و HPOS، بدون جدول مالی موازی در نسخه اول.
+- جزئیات کامل در [ADR-009](../decisions/ADR-009-quick-support-payments.md) و [MODULE-QUICK-SUPPORT](../modules/quick-support-payments.md) ثبت شده است.

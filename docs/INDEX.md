@@ -22,7 +22,8 @@
 - فرم جذب تسهیلگر → `MODULE-FACILITATOR-FORM`
 - تنظیمات مدیریت قالب → `MODULE-THEME-ADMIN`
 - media/gallery محصول → `MODULE-THEME-MEDIA`
-- پرداخت مشارکت → `MODULE-PARTICIPATION`
+- پرداخت مشارکت فعلی → `MODULE-PARTICIPATION`
+- پرداخت سریع دسته‌ای → [MODULE-QUICK-SUPPORT](modules/quick-support-payments.md) و [ADR-009](decisions/ADR-009-quick-support-payments.md)
 - مرکز جهادی → `MODULE-JIHADI-CENTER`
 - Hero صفحه اصلی → `MODULE-HOME-HERO`
 - دسترسی‌های سریع صفحه اصلی → `MODULE-HOME-QUICK-LINKS`

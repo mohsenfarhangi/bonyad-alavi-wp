@@ -18,6 +18,15 @@
 
 AFE release goal همچنان live acceptance نسخه 1.0.28 و رفع blocker واقعی پیش از production promotion است.
 
+## Accepted architecture — Quick Support (2026-11-12)
+
+- طرح فنی «پرداخت سریع مشارکت مردمی» با Hybrid architecture تصویب شد؛ وضعیت فعلی **design accepted / implementation pending** است و هنوز کد یا نسخه‌ای برای آن تغییر نکرده است.
+- یک فرم AFE با slug `quick-support-payment` برای چهار دسته اقتصادی، آموزش، بهداشت و زیرساخت استفاده می‌شود؛ صفحات دسته و Popup با Elementor، دسته‌ها با CPT `ba_quick_support` و Loop Grid مدیریت می‌شوند.
+- فیلدهای اجباری: موبایل، نام، نام خانوادگی و مبلغ. استان، شهرستان (`county` وابسته به `province`)، کد ملی و ایمیل اختیاری‌اند. انتخاب درگاه توسط کاربر optional و از تنظیمات قابل فعال/غیرفعال است.
+- Context source در ویجت AFE: Current Page، Fixed Category یا Query Parameter با پیش‌فرض `support_category`؛ Context امضاشده و server-verified است.
+- پرداخت مستقیم با سفارش مستقل WooCommerce و Gateway isolation انجام می‌شود؛ Cart/Checkout عادی استفاده نمی‌شود. گزارش مالی از Orderهای WooCommerce و با HPOS CRUD خوانده می‌شود.
+- تصمیم‌ها و جزئیات: [ADR-009](../decisions/ADR-009-quick-support-payments.md)، [MODULE-QUICK-SUPPORT](../modules/quick-support-payments.md). این قابلیت هنوز پیاده‌سازی یا live-tested نشده است.
+
 ## Contact form — admin-managed message category (2026-11-04)
 
 - فیلد اجباری Select با شناسه `message_category` و عرض ۱۲، بدون گزینه اولیه، پیش از موضوع در فرم `contact-us` اضافه شد. مدیریت گزینه‌ها فقط از Field Override استاندارد AFE است.
@@ -406,6 +415,8 @@ Historical PASSهای AFE/Theme به HEAD جدید تعمیم داده نمی‌
 
 **آخرین کار تکمیل‌شده:** PR #28 مربوط به فیلدهای اختصاصی مدیریت بررسی و در 2026-11-12 به‌عنوان پیاده‌سازی superseded بسته شد؛ قابلیت از طریق PR #29 و #30 در `main` وجود دارد و پذیرش زنده آن طبق تأیید مدیر پروژه انجام شده است. برای این قابلیت کار باز دیگری باقی نمانده است. جزئیات در [MODULE-AFE](../modules/alavi-form-engine.md)، [MODULE-JIHADI-FORM](../modules/jihadi-group-registration-form.md) و انتهای [state-v002.md](state-v002.md) ثبت شده‌اند.
 
+**آخرین تصمیم معماری پذیرفته‌شده (2026-11-12):** طرح پرداخت سریع دسته‌ای ثبت شده، اما هنوز پیاده‌سازی نشده است. برای شروع آن ابتدا [MODULE-QUICK-SUPPORT](../modules/quick-support-payments.md) و [ADR-009](../decisions/ADR-009-quick-support-payments.md) را بخوان؛ سپس قراردادهای [MODULE-PARTICIPATION](../modules/participation-payments.md)، [MODULE-AFE](../modules/alavi-form-engine.md) و [MODULE-AFE-EXTENSION](../modules/alavi-form-engine-extension-api.md) را بررسی کن. هیچ‌یک از فرم، CPT، Context Provider، Action، محصول فنی یا داشبورد Quick Support را موجود فرض نکن.
+
 **شروع task بعدی:** از بخش `Current Goal` در ابتدای همین فایل، task موردنظر را انتخاب کن. پذیرش زنده فرم جذب تسهیلگر و پذیرش بصری ویجت‌های Elementor هنوز در آن بخش باز هستند.
 
 **Open task (هیرو، task جدا):** فلش‌های اسلایدر با `slider_show_arrows` در Elementor خاموش شوند و سپس قانون `.ba-slider__controls` در `style.css` و `<style>` inline در Code Snippet #9 حذف شوند؛ قبل از حذف قانون `.elementor-element-964556b .ba-hero__grid { grid-template-rows … !important }` روی دسکتاپ و موبایل تست شود.
@@ -416,6 +427,6 @@ Historical PASSهای AFE/Theme به HEAD جدید تعمیم داده نمی‌
 
 **Do not reconsider without new evidence:** AFE source-definition override model، ownership فرم پروژه‌ای در theme، participation cart isolation، theme shared settings persistence، Jihadi source precedence، shared admin Repeater، export autoload isolation.
 
-**Do not assume:** current HEAD QA PASS، پذیرش کلی همه مسیرهای Export در سطح release، vendor availability یا production readiness. پذیرش زنده فیلدهای مدیریتی فقط برای همان قابلیت و طبق گزارش مدیر پروژه تأیید شده است.
+**Do not assume:** current HEAD QA PASS، پذیرش کلی همه مسیرهای Export در سطح release، vendor availability یا production readiness؛ همچنین طرح Quick Support هنوز implementation یا live acceptance ندارد. پذیرش زنده فیلدهای مدیریتی فقط برای همان قابلیت و طبق گزارش مدیر پروژه تأیید شده است.
 
 **History lookup:** [INDEX.md](INDEX.md) → `state-v002.md` برای legacy milestones.
