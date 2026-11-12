@@ -409,13 +409,17 @@ Live acceptance قبل از production bump:
 - Full `tools/qa.sh` still reports baseline failures in `tests/export-profile.php` and `tests/export-package-integration.php` due to stale references to the removed plugin-level Jihadi form; unrelated to the stylesheet fix. CI preserves this failure evidence but does not block the focused CSS job.
 
 
-## Approved future extension — Generic Form Context (not implemented)
+## Generic Form Context — implemented in PR #34, deployment pending
 
-برای پرداخت سریع مشارکت، توسعه عمومی و غیرپروژه‌ای Form Context در AFE تصویب شده است؛ این قابلیت در HEAD فعلی وجود ندارد.
+قرارداد عمومی Form Context در AFE پیاده‌سازی شده است؛ کد در [PR #34](https://github.com/mohsenfarhangi/bonyad-alavi-wp/pull/34) قرار دارد و هنوز به main merge یا روی سایت deploy نشده است.
 
-- Elementor «فرم علوی» باید Context Provider را انتخاب کند و Context را از Current Page، مقدار ثابت یا Query Parameter دریافت کند.
-- قرارداد provider registration پیشنهادی: `afe_register_form_context_providers`.
-- Provider سمت integration مقدار را در render resolve می‌کند و token امضاشده/محدود به فرم را برای Submit می‌سازد؛ اعتبارسنجی نهایی در سمت سرور انجام می‌شود.
-- AFE Context معتبر را جدا از فیلدهای متقاضی و به‌صورت immutable در اختیار ActionContext قرار می‌دهد.
-- Engine نباید category، WooCommerce یا Quick Support را hard-code کند. Provider و منطق business در Child Theme می‌ماند.
-- جزئیات target contract: [MODULE-QUICK-SUPPORT](quick-support-payments.md) و [ADR-009](../decisions/ADR-009-quick-support-payments.md).
+- قرارداد provider: `FormContextProviderInterface`، `FormContextRegistry` و hook برابر `afe_register_form_context_providers`.
+- `FormContextManager` از Current Page، Fixed Value و Query Parameter پشتیبانی می‌کند؛ provider نوع شناسه Slug/ID را تعیین می‌کند.
+- توکن HMAC امضاشده، محدود به form slug و دارای انقضای ۱۲ ساعته صادر می‌شود؛ اندازه token محدود است و provider در زمان Submit دوباره Context را resolve/validate می‌کند.
+- Context به‌صورت داده‌ای جدا از applicant fields و `data_json` به `ActionContext` immutable منتقل می‌شود.
+- `Validator::validate()` یک آرگومان Context اختیاری می‌پذیرد؛ `ValidatorDefinition` نیز Context را به callbackهای سفارشی می‌دهد. این تغییر برای فرم‌های قدیمی backward-compatible است.
+- Context در render به DataSourceهای سفارشی و field attributes دسترسی دارد؛ Elementor Form Widget کنترل‌های provider/source/identifier را ارائه می‌کند.
+- `SelectField::hideWhenSingleOption()` برای dynamic selectهای تک‌گزینه‌ای اضافه شده است.
+- خطاهای Action پس از ثبت Submission در frontend به‌عنوان خطای مرحله بعدی نمایش داده می‌شوند و success کاذب نشان داده نمی‌شود.
+
+هسته AFE نباید Quick Support، Category یا WooCommerce را hard-code کند؛ provider و business logic همچنان در Child Theme می‌مانند. جزئیات integration در [MODULE-QUICK-SUPPORT](quick-support-payments.md) و [ADR-009](../decisions/ADR-009-quick-support-payments.md) است.
