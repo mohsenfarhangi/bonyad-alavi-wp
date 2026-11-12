@@ -4,6 +4,8 @@ declare(strict_types=1);
 use BonyadAlavi\FormEngine\Actions\ActionContext;
 use BonyadAlavi\FormEngine\Actions\ActionInterface;
 
+defined('ABSPATH') || exit;
+
 final class BA_Quick_Support_Payment_Action implements ActionInterface
 {
     public function __construct(private readonly BA_Quick_Support_Payment_Service $payments) {}
