@@ -13,6 +13,7 @@ use BonyadAlavi\FormEngine\Duplicate\DuplicateDecision;
 use BonyadAlavi\FormEngine\Duplicate\DuplicatePolicy;
 use BonyadAlavi\FormEngine\Duplicate\DuplicateRepository;
 use BonyadAlavi\FormEngine\Core\FormAccess;
+use BonyadAlavi\FormEngine\Context\FormContextManager;
 use BonyadAlavi\FormEngine\Events\EventDispatcher;
 use BonyadAlavi\FormEngine\Events\SubmissionCreated;
 use BonyadAlavi\FormEngine\Events\SubmissionUpdated;
@@ -44,7 +45,8 @@ final class SubmissionService
         private readonly DuplicateRepository $duplicateRepository,
         private readonly ActionExecutionRepository $actionExecutions,
         private readonly InputMaskRegistry $inputMasks,
-        private readonly ?SmsDraftRecovery $smsRecovery = null
+        private readonly ?SmsDraftRecovery $smsRecovery = null,
+        private readonly ?FormContextManager $formContexts = null
     ) {}
 
     /**
@@ -140,6 +142,21 @@ final class SubmissionService
 
         $security = $this->security->verifyRequest($slug, (int)($form['settings']['rate_limit'] ?? 10));
         if (is_wp_error($security)) return $security;
+
+        $formContext = [];
+        $rawContextToken = wp_unslash($_POST['_afe_context_token'] ?? '');
+        if (is_array($rawContextToken)) {
+            return new WP_Error('afe_context_token', 'توکن Context فرم معتبر نیست.');
+        }
+        $contextToken = sanitize_text_field((string)$rawContextToken);
+        if ($contextToken !== '') {
+            if (!$this->formContexts) {
+                return new WP_Error('afe_context_unavailable', 'زیرساخت Context فرم در دسترس نیست.');
+            }
+            $verifiedContext = $this->formContexts->verify($slug, $contextToken);
+            if (is_wp_error($verifiedContext)) return $verifiedContext;
+            $formContext = $verifiedContext;
+        }
 
         $data = $this->sanitizeBySchema($form, (array)wp_unslash($_POST['afe_data'] ?? []));
         $existing = $this->resolveExisting($form);
@@ -244,10 +261,10 @@ final class SubmissionService
         // new Action Engine execution uses the canonical registry event keys.
         if ($wasExisting) {
             $this->events->dispatch(new SubmissionUpdated($id,$slug,$data,$status));
-            $this->rememberRedirect($actionRedirect, $this->emitActionEvent('submission.updated', $form, $id, $data, $row, $actionErrors));
+            $this->rememberRedirect($actionRedirect, $this->emitActionEvent('submission.updated', $form, $id, $data, $row, $actionErrors, $formContext));
         } else {
             $this->events->dispatch(new SubmissionCreated($id,$slug,$data));
-            $this->rememberRedirect($actionRedirect, $this->emitActionEvent('submission.created', $form, $id, $data, $row, $actionErrors));
+            $this->rememberRedirect($actionRedirect, $this->emitActionEvent('submission.created', $form, $id, $data, $row, $actionErrors, $formContext));
         }
 
         $this->rememberRedirect($actionRedirect, $this->emitActionEvent(
@@ -256,11 +273,12 @@ final class SubmissionService
             $id,
             $data,
             $row,
-            $actionErrors
+            $actionErrors,
+            $formContext
         ));
 
         if (!$draft && !empty($row['is_locked']) && !$wasLocked) {
-            $this->rememberRedirect($actionRedirect, $this->emitActionEvent('submission.locked', $form, $id, $data, $row, $actionErrors));
+            $this->rememberRedirect($actionRedirect, $this->emitActionEvent('submission.locked', $form, $id, $data, $row, $actionErrors, $formContext));
         }
 
         $base = wp_get_referer() ?: home_url('/');
@@ -725,7 +743,7 @@ final class SubmissionService
         return $errors;
     }
 
-    private function emitActionEvent(string $eventKey, array $form, int $submissionId, array $data, array $row, array &$errors): string
+    private function emitActionEvent(string $eventKey, array $form, int $submissionId, array $data, array $row, array &$errors, array $context = []): string
     {
         $runtime = new ActionRuntime();
         $queue = [$eventKey];
@@ -759,7 +777,8 @@ final class SubmissionService
                     (string)($form['title'] ?? ''),
                     $this->fieldKeys($form),
                     $form,
-                    $runtime
+                    $runtime,
+                    $context
                 )
             );
             foreach ($result->errors as $actionKey => $message) {
