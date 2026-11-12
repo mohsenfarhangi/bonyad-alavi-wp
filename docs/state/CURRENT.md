@@ -1,6 +1,6 @@
 # Current Project State
 
-آخرین بازبینی: **2026-11-06**
+آخرین بازبینی: **2026-11-12**
 
 ## Project Phase
 
@@ -38,14 +38,16 @@ AFE release goal همچنان live acceptance نسخه 1.0.28 و رفع blocker 
 - «اطلاعات اختصاصی مدیریت» از جدول اصلی به کارت سایدبار جزئیات Submission منتقل شد. در حالت مشاهده، مدیر دارای `afe_edit_submissions` و `FormAccess::EDIT` می‌تواند با فرم و nonce مستقل ذخیره کند؛ بدون مجوز/زباله‌دان read-only است. سطح گروه جهادی در همین کارت Select می‌شود.
 - Service مسیر امن `admin_fields` با allowlist برای نام/مقدار، حفظ سایر داده‌ها، audit و انتشار `submission.updated` دارد؛ قفل‌بودن فرم متقاضی مانع ویرایش مدیر مجاز نیست.
 - Excel، PDF، چاپ و Tokenهای خروجی بدون تغییر حفظ شدند؛ Presenter در جدول اصلی جزئیات/ویرایش کامل، فیلدهای مدیریتی را کنار می‌گذارد تا تکرار نشوند.
-- آزمون contract `admin-fields-sidebar.php` و آزمون‌های قبلی و **GitHub Actions [run 42223056259](https://github.com/mohsenfarhangi/bonyad-alavi-wp/actions/runs/42223056259) PASS** (PHP lint، امنیت و فرم مدیریتی، Export regression و JS syntax). نسخه dev `1.0.28-dev.9`، DB/stable ثابت. نیازمند آزمایش live سایدبار، ذخیره و خروجی‌ها است.
+- آزمون contract `admin-fields-sidebar.php` و آزمون‌های قبلی و **GitHub Actions [run 42223056259](https://github.com/mohsenfarhangi/bonyad-alavi-wp/actions/runs/42223056259) PASS** (PHP lint، امنیت و فرم مدیریتی، Export regression و JS syntax). نسخه dev `1.0.28-dev.9`، DB `1.0.5-dev.2` و stable baseline `1.0.27` ثابت ماند.
+- **پذیرش زنده در 2026-11-12 توسط مدیر پروژه تأیید شد:** نمایش کارت در سایدبار، ویرایش و ذخیره مستقل در حالت مشاهده، ماندگاری پس از بازخوانی، ویرایش ثبت قفل‌شده توسط مدیر مجاز، فقط‌خواندنی بودن برای کاربر فاقد مجوز، حذف تکرار از جدول اصلی و خروجی‌های Excel تکی/لیستی، PDF و چاپ بررسی و تأیید شدند.
+- PR #29 زیرساخت فیلدهای اختصاصی را با ذخیره در `data_json` و بدون DB migration پیاده کرد؛ PR #30 ویرایش مستقل سایدبار را افزود. PR #28 که از جدول جداگانه استفاده می‌کرد، در 2026-11-12 بدون Merge و به‌عنوان superseded بسته شد.
 
 
 ### Admin-only submission fields per form (2026-11-06)
 - فرم‌ساز AFE دارای تب مستقل «فیلدهای اختصاصی مدیریت» برای تعریف per-form فیلد text/textarea/number/select است؛ ویرایش/مشاهده فقط در صفحه جزئیات Submission مدیر صورت می‌گیرد و نمایش عمومی ندارد.
 - مقادیر زیر نام امن `__afe_admin_<key>` در data_json همان ثبت قرار می‌گیرند، با whitelist server-side گزینه‌های select، حفظ مقدار هنگام submit/draft متقاضی، و بدون DB migration. Presenter و ExportProfile به صورت مشترک نمایش در PDF/چاپ و Excel لیست/تکی را تضمین می‌کنند؛ ستون‌ها برای پروفایل‌های خروجی قدیمی هم اضافه می‌شوند.
 - فرم جهادی دارای فیلد `group_level` با گزینه‌های نوپا، فعال، پیشرو، الگو شد؛ مقدار ثبت‌های گذشته تا ویرایش مدیر خالی است. تنظیمات ذخیره‌شده قدیمی فرم ممکن است بر Source Definition مقدم باشند.
-- تست‌های dedicated در `admin-submission-fields.php` و workflow مربوطه؛ نسخه توسعه `1.0.28-dev.8`، stable و DB ثابت. پذیرش زنده WordPress/Excel/PDF هنوز باز است.
+- این پیاده‌سازی در **PR #29** ادغام شد (Commit `a6b4fb97094f7a8fcc0839578f81633534179eff`) و سپس در **PR #30** با ویرایش مستقل سایدبار تکمیل شد (Commit `9e143515badefb1e0903157ca71ba16d8840da44`). PR #28 نسخه جایگزین با جدول DB مستقل بود و پس از تأیید پوشش قابلیت در #29/#30، در 2026-11-12 بدون Merge بسته شد. پذیرش زنده این قابلیت نیز در همین تاریخ توسط مدیر پروژه تأیید شد.
 
 
 ### Contact page widgets + four-up studies carousels (2026-11-05)
@@ -402,16 +404,18 @@ Historical PASSهای AFE/Theme به HEAD جدید تعمیم داده نمی‌
 
 ## Next Agent Handoff
 
-**Current task:** کد ویجت‌های ارتباط با ما (PR #23) و رفع CSS کارت پژوهش روی هاست مستقر است و کاروسل‌های نشست/پژوهش 7930 چهارتایی‌اند. پیش‌نویس `29990` (draft) ساخته شده؛ مانده: (۱) PR شاخه `fix/contact-widgets-card-title-kit-20261105` (حذف `font-size` عنوان کارت) را کاربر merge کند و فقط `assets/css/bonyad-alavi-contact-page.css` با اسکریپت امن مستقر شود؛ (۲) با تأیید، تست واقعی ارسال فرم روی پیش‌نویس (ثبت در دیتابیس + ایمیل مدیر)؛ (۳) جایگزینی 28817 (انتقال `_elementor_data` یا تعویض آدرس) فقط با تأیید جدا و پشتیبان تازه. صفحه 28817 و فرم‌ها تا آن موقع دست نخورند. جزئیات: STATE-002-050.
+**آخرین کار تکمیل‌شده:** PR #28 مربوط به فیلدهای اختصاصی مدیریت بررسی و در 2026-11-12 به‌عنوان پیاده‌سازی superseded بسته شد؛ قابلیت از طریق PR #29 و #30 در `main` وجود دارد و پذیرش زنده آن طبق تأیید مدیر پروژه انجام شده است. برای این قابلیت کار باز دیگری باقی نمانده است. جزئیات در [MODULE-AFE](../modules/alavi-form-engine.md)، [MODULE-JIHADI-FORM](../modules/jihadi-group-registration-form.md) و انتهای [state-v002.md](state-v002.md) ثبت شده‌اند.
+
+**شروع task بعدی:** از بخش `Current Goal` در ابتدای همین فایل، task موردنظر را انتخاب کن. پذیرش زنده فرم جذب تسهیلگر و پذیرش بصری ویجت‌های Elementor هنوز در آن بخش باز هستند.
 
 **Open task (هیرو، task جدا):** فلش‌های اسلایدر با `slider_show_arrows` در Elementor خاموش شوند و سپس قانون `.ba-slider__controls` در `style.css` و `<style>` inline در Code Snippet #9 حذف شوند؛ قبل از حذف قانون `.elementor-element-964556b .ba-hero__grid { grid-template-rows … !important }` روی دسکتاپ و موبایل تست شود.
 
-**Known:** شاخه‌های docs استقرار (`docs/studies-pr18/pr19/production-deploy-record-20261102`) merge نشده‌اند؛ `tests/home-news-widget-contract.php` از قبل در `default-date-format` شکست می‌خورد؛ پذیرش زنده SMS/AFE 1.0.28 باز است (بخش‌های قبلی همین فایل).
+**Known:** شاخه‌های docs استقرار (`docs/studies-pr18/pr19/production-deploy-record-20261102`) merge نشده‌اند؛ `tests/home-news-widget-contract.php` از قبل در `default-date-format` شکست می‌خورد؛ پذیرش زنده SMS و سایر blockerهای release مربوط به AFE 1.0.28 همچنان جداگانه باز هستند. پذیرش قابلیت فیلدهای مدیریتی در این موارد باز محسوب نمی‌شود.
 
 **Start here:** [../INDEX.md](../INDEX.md) → [../modules/INDEX.md](../modules/INDEX.md).
 
 **Do not reconsider without new evidence:** AFE source-definition override model، ownership فرم پروژه‌ای در theme، participation cart isolation، theme shared settings persistence، Jihadi source precedence، shared admin Repeater، export autoload isolation.
 
-**Do not assume:** current HEAD QA PASS، live export acceptance، vendor availability یا production readiness.
+**Do not assume:** current HEAD QA PASS، پذیرش کلی همه مسیرهای Export در سطح release، vendor availability یا production readiness. پذیرش زنده فیلدهای مدیریتی فقط برای همان قابلیت و طبق گزارش مدیر پروژه تأیید شده است.
 
 **History lookup:** [INDEX.md](INDEX.md) → `state-v002.md` برای legacy milestones.
