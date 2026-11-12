@@ -6,7 +6,6 @@
  */
 
 use BonyadAlavi\FormEngine\Context\FormContextProviderInterface;
-use WP_Error;
 
 defined('ABSPATH') || exit;
 
