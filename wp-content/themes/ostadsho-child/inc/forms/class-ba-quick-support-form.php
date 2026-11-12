@@ -8,7 +8,6 @@ use BonyadAlavi\FormEngine\Form\Form;
 use BonyadAlavi\FormEngine\Form\FormRegistry;
 use BonyadAlavi\FormEngine\Form\Step;
 use BonyadAlavi\FormEngine\Form\Fields\EmailField;
-use BonyadAlavi\FormEngine\Form\Fields\NumberField;
 use BonyadAlavi\FormEngine\Form\Fields\SelectField;
 use BonyadAlavi\FormEngine\Form\Fields\TelField;
 use BonyadAlavi\FormEngine\Form\Fields\TextField;
@@ -75,7 +74,7 @@ final class BA_Quick_Support_Form
         $validators->register(new ValidatorDefinition(
             'ba_qs_amount_limits',
             'محدوده مبلغ دسته پرداخت سریع',
-            ['number'],
+            ['text'],
             'مبلغ واردشده خارج از محدوده مجاز این دسته است یا دسته معتبر به فرم متصل نیست.',
             static function(string $value, array $field, array $config, array $data, array $context = []): bool {
                 if (empty($context['category_id'])) return false;
@@ -178,14 +177,15 @@ final class BA_Quick_Support_Form
                 ->attributes(['autocomplete'=>'email'])
                 ->width(6),
 
-            NumberField::make('amount')
+            TextField::make('amount')
                 ->label('مبلغ حمایت')
                 ->placeholder('مبلغ را وارد کنید')
                 ->attributes([
-                    'min'=>'1',
-                    'step'=>'1',
+                    'maxlength'=>20,
                     'inputmode'=>'decimal',
                     'autocomplete'=>'off',
+                    'data-afe-character-mode'=>'digits',
+                    'data-afe-allowed-extra'=>'.٬٫,',
                     'data-afe-ltr'=>'1',
                 ])
                 ->description('مبلغ را به واحد پول فعال در فروشگاه وارد کنید.')
