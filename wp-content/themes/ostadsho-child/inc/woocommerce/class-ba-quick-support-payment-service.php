@@ -277,6 +277,9 @@ final class BA_Quick_Support_Payment_Service
             $order->set_billing_phone(sanitize_text_field((string)($data['mobile'] ?? '')));
             $email = sanitize_email((string)($data['email'] ?? ''));
             $order->set_billing_email($email);
+            $storeCountry = (string)get_option('woocommerce_default_country', '');
+            $storeCountry = strtoupper((string)strtok($storeCountry, ':'));
+            if ($storeCountry !== '') $order->set_billing_country($storeCountry);
             $order->set_payment_method($gateway);
             $order->set_currency(get_woocommerce_currency());
             $order->set_prices_include_tax(false);
