@@ -15,6 +15,7 @@ on:
       - 'wp-content/plugins/alavi-form-engine/src/Elementor/FormWidget.php'
       - 'wp-content/plugins/alavi-form-engine/src/Submission/SubmissionService.php'
       - 'wp-content/plugins/alavi-form-engine/src/Validation/ValidatorDefinition.php'
+      - 'wp-content/plugins/alavi-form-engine/assets/js/frontend.js'
       - 'wp-content/plugins/alavi-form-engine/tests/form-context-*.php'
       - 'wp-content/plugins/alavi-form-engine/tests/action-context-form-context.php'
       - 'wp-content/themes/ostadsho-child/inc/quick-support/**'
@@ -84,4 +85,6 @@ jobs:
           php wp-content/themes/ostadsho-child/tests/jihadi-form-definition.php
           php wp-content/themes/ostadsho-child/tests/camp-admission-form-definition.php
       - name: JavaScript syntax
-        run: node --check wp-content/themes/ostadsho-child/assets/js/ba-quick-support-form.js
+        run: |
+          node --check wp-content/plugins/alavi-form-engine/assets/js/frontend.js
+          node --check wp-content/themes/ostadsho-child/assets/js/ba-quick-support-form.js
