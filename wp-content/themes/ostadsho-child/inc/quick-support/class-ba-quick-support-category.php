@@ -306,9 +306,10 @@ final class BA_Quick_Support_Category
                 && ((float)$maximum <= 0 || $numeric <= (float)$maximum);
         }));
         $decimals = function_exists('wc_get_price_decimals') ? max(0, (int)wc_get_price_decimals()) : 0;
-        $step = $decimals > 0 ? '0.' . str_repeat('0', max(0, $decimals - 1)) . '1' : '1';
-        $attributes = ['step' => $step, 'min' => (float)$minimum > 0 ? $minimum : $step];
-        if ((float)$maximum > 0) $attributes['max'] = $maximum;
+        $attributes = [
+            'data-afe-amount-min' => (float)$minimum > 0 ? $minimum : '',
+            'data-afe-amount-max' => (float)$maximum > 0 ? $maximum : '',
+        ];
 
         return [
             'category_id' => (int)$post->ID,
