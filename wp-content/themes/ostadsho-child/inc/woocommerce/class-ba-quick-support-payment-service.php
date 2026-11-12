@@ -116,6 +116,13 @@ final class BA_Quick_Support_Payment_Service
         if (!BA_Quick_Support_Category::is_active($category)) {
             return new WP_Error('ba_qs_category_unavailable', 'دسته انتخاب‌شده دیگر برای دریافت حمایت فعال نیست یا Context آن موجود نیست.');
         }
+        if ($existingBeforeLock instanceof WC_Order && $existingBeforeLock->is_paid()) {
+            return new WP_Error('ba_qs_already_paid', 'برای این ثبت، پرداخت تأییدشده وجود دارد.');
+        }
+
+        // Always work with freshly resolved category data. This also restores
+        // the same trusted context for administrator retries without a browser token.
+        $context = BA_Quick_Support_Category::context($category);
 
         $amount = self::normalizeAmount($data['amount'] ?? '');
         $numericAmount = (float)$amount;
