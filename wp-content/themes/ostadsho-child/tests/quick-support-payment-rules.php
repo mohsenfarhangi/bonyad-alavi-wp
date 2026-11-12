@@ -74,6 +74,8 @@ $checks = [
     'customer-selection-setting-enabled' => $selectionEnabled,
     'customer-selection-setting-disabled' => $selectionDisabled,
     'persian-thousands-normalized' => $persianAmount === '50000',
+    'negative-amount-rejected' => BA_Quick_Support_Payment_Service::normalizeAmount('-500') === '0',
+    'scientific-notation-rejected' => BA_Quick_Support_Payment_Service::normalizeAmount('1e3') === '0',
     'currency-decimal-precision-preserved' => $decimalAmount === '123.45',
     'technical-product-direct-add-blocked-even-with-client-marker' => $blockedDirect === false,
     'technical-product-allowed-only-inside-server-isolated-context' => $allowedIsolated === true,
