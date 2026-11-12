@@ -39,6 +39,16 @@ final class SelectField extends AbstractField
         return $this;
     }
 
+    /**
+     * Replace the select with a trusted hidden value and a static label when
+     * the resolved source contains exactly one option.
+     */
+    public function hideWhenSingleOption(bool $hide = true): static
+    {
+        $this->config['hide_when_single_option'] = $hide;
+        return $this;
+    }
+
     public function toArray(): array
     {
         return array_replace(parent::toArray(), [
