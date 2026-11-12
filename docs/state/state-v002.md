@@ -873,3 +873,15 @@ Modules: [MODULE-AFE](../modules/alavi-form-engine.md), [MODULE-JIHADI-FORM](../
 - انتخاب درگاه توسط پرداخت‌کننده قابل فعال/غیرفعال و به‌صورت پیش‌فرض خاموش است؛ allowlist عمومی و per-category، عدم silent fallback و پشتیبانی نسخه اول از Hosted/Redirect Gatewayها تصویب شد.
 - WooCommerce Orderها منبع مالی گزارش هستند؛ گزارش خالص پس از Refund با CRUD و HPOS، بدون جدول مالی موازی در نسخه اول.
 - جزئیات کامل در [ADR-009](../decisions/ADR-009-quick-support-payments.md) و [MODULE-QUICK-SUPPORT](../modules/quick-support-payments.md) ثبت شده است.
+
+
+## 2026-11-13 — Quick Support Phase 1 implementation started
+
+- فاز اول معماری مصوب ADR-009 در PR #34 پیاده‌سازی شد؛ این milestone به معنی merge یا production deployment نیست.
+- AFE: Generic Form Context Provider interface/registry/manager، Elementor controls، signed 12-hour form-bound token، server-side provider revalidation، Context جدا از applicant data در ActionContext و context-aware validation.
+- AFE: Context به dynamic data source و field attributes منتقل می‌شود؛ single-option dynamic Select و نمایش خطاهای downstream Action اضافه شد.
+- Theme: CPT `ba_quick_support`، چهار دسته اولیه، تنظیمات active/min/max/suggested/icon/gateway allowlist، Administrator-only category management و Elementor CPT support.
+- Theme/AFE: فرم مشترک `quick-support-payment`، اعتبارسنجی موبایل/کد ملی/email، county وابسته به province و اعتبارسنجی مبلغ قبل از ذخیره Submission.
+- WooCommerce: Action پرداخت، محصول فنی مخفی/مجازی، سفارش مستقل per Submission، Gateway selection/allowlist، استفاده از Gateway isolation موجود، جلوگیری از خرید مستقیم محصول فنی و idempotent retry recovery.
+- CI متمرکز در [run 43309991432](https://github.com/mohsenfarhangi/bonyad-alavi-wp/actions/runs/43309991432) پاس شد. Live gateway/callback، cart/session persistence، HPOS و Elementor site configuration هنوز نیازمند staging acceptance هستند.
+- Phase 2 (dashboard/reporting/exports) هنوز شروع نشده است.
