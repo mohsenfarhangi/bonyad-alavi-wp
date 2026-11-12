@@ -210,7 +210,10 @@ final class BA_Quick_Support_Payment_Service
                         try {
                             $result = $gateway->process_payment($order->get_id());
                         } catch (Throwable $exception) {
-                            return new WP_Error('ba_qs_gateway_exception', $exception->getMessage());
+                            if (function_exists('wc_get_logger')) {
+                                wc_get_logger()->error($exception->getMessage(), ['source'=>'ba-quick-support','order_id'=>$order->get_id()]);
+                            }
+                            return new WP_Error('ba_qs_gateway_exception', 'ارتباط با درگاه پرداخت با خطا مواجه شد؛ لطفاً دوباره تلاش کنید.');
                         }
 
                         if (!is_array($result) || ($result['result'] ?? '') !== 'success' || empty($result['redirect'])) {
@@ -247,7 +250,10 @@ final class BA_Quick_Support_Payment_Service
                     'customer_id' => get_current_user_id(),
                     'created_via' => 'ba_quick_support',
                 ]);
-                if (is_wp_error($order)) return $order;
+                if (is_wp_error($order)) {
+                    if (function_exists('wc_get_logger')) wc_get_logger()->error($order->get_error_message(), ['source'=>'ba-quick-support','submission_id'=>$submissionId]);
+                    return new WP_Error('ba_qs_order_create_failed', 'ایجاد سفارش پرداخت سریع انجام نشد؛ لطفاً با پشتیبانی تماس بگیرید.');
+                }
             } else {
                 $order->set_status('pending');
             }
@@ -304,7 +310,8 @@ final class BA_Quick_Support_Payment_Service
 
             return $order;
         } catch (Throwable $exception) {
-            return new WP_Error('ba_qs_order_create_failed', $exception->getMessage());
+            if (function_exists('wc_get_logger')) wc_get_logger()->error($exception->getMessage(), ['source'=>'ba-quick-support','submission_id'=>$submissionId]);
+            return new WP_Error('ba_qs_order_create_failed', 'ایجاد سفارش پرداخت سریع انجام نشد؛ لطفاً با پشتیبانی تماس بگیرید.');
         }
     }
 
@@ -355,7 +362,8 @@ final class BA_Quick_Support_Payment_Service
             update_option('ba_quick_support_product_id', $productId, false);
             return $product;
         } catch (Throwable $exception) {
-            return new WP_Error('ba_qs_product_create_failed', $exception->getMessage());
+            if (function_exists('wc_get_logger')) wc_get_logger()->error($exception->getMessage(), ['source'=>'ba-quick-support']);
+            return new WP_Error('ba_qs_product_create_failed', 'آماده‌سازی زیرساخت پرداخت سریع انجام نشد؛ لطفاً با پشتیبانی تماس بگیرید.');
         }
     }
 
