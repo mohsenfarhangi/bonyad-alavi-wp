@@ -15,7 +15,8 @@ final readonly class ActionContext
         public string $formTitle = '',
         public array $fieldKeys = [],
         public array $form = [],
-        public ?ActionRuntime $runtime = null
+        public ?ActionRuntime $runtime = null,
+        public array $context = []
     ) {}
 
     public function withRuntime(ActionRuntime $runtime): self
@@ -29,7 +30,8 @@ final readonly class ActionContext
             $this->formTitle,
             $this->fieldKeys,
             $this->form,
-            $runtime
+            $runtime,
+            $this->context
         );
     }
 }
