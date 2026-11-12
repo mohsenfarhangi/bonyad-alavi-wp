@@ -2,7 +2,7 @@
 
 **Status:** Accepted  
 **Date recorded:** 2026-11-12  
-**Implementation status:** Pending; this ADR records the approved design, not deployed code.
+**Implementation status:** Phase 1 implementation is under review in [PR #34](https://github.com/mohsenfarhangi/bonyad-alavi-wp/pull/34); not merged or deployed. Phase 2 reporting remains pending.
 
 ## Context
 
