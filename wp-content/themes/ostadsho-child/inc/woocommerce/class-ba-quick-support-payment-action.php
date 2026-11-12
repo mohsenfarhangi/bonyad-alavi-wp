@@ -14,10 +14,6 @@ final class BA_Quick_Support_Payment_Action implements ActionInterface
     {
         if ($context->event !== 'submission.submitted') return;
 
-        if (empty($context->context['category_id'])) {
-            throw new RuntimeException('دسته پرداخت سریع به فرم متصل نیست یا Context آن معتبر نیست.');
-        }
-
         $result = $this->payments->process($context->context, $context->data, $context->submissionId);
         if (is_wp_error($result)) {
             throw new RuntimeException($result->get_error_message());
