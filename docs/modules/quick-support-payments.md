@@ -12,7 +12,7 @@
 
 ## Phase 1 Implementation Record — PR #34
 
-<badge>Code review / staging acceptance pending</badge>
+**Implementation status:** code review / staging acceptance pending.
 
 Implemented in the current feature branch:
 
