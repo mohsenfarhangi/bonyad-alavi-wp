@@ -238,7 +238,15 @@ final class BA_Quick_Support_Payment_Service
                 }
             }
 
-            if (is_wp_error($payment)) return $payment;
+            if (is_wp_error($payment)) {
+                if ($payment->get_error_code() === 'bap_isolated_cart_exception') {
+                    if (function_exists('wc_get_logger')) {
+                        wc_get_logger()->error($payment->get_error_message(), ['source'=>'ba-quick-support','order_id'=>$order->get_id()]);
+                    }
+                    return new WP_Error('ba_qs_gateway_exception', 'آماده‌سازی ارتباط با درگاه پرداخت با خطا مواجه شد؛ لطفاً دوباره تلاش کنید.');
+                }
+                return $payment;
+            }
             $redirect = is_array($payment) ? esc_url_raw((string)($payment['redirect'] ?? '')) : '';
             if ($redirect === '') {
                 return new WP_Error('ba_qs_gateway_redirect_missing', 'آدرس انتقال به درگاه پرداخت دریافت نشد.');
