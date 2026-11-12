@@ -79,6 +79,9 @@ final class FormContextManager
         }
 
         $encoded = rtrim(strtr(base64_encode($json), '+/', '-_'), '=');
+        if (strlen($encoded) + 65 > 8192) {
+            return new WP_Error('afe_context_size', 'داده Context برای انتقال امن بیش از حد بزرگ است.');
+        }
         $secret = $this->secret();
         if ($secret === '') return new WP_Error('afe_context_secret', 'کلید امنیتی WordPress برای Context در دسترس نیست.');
 
