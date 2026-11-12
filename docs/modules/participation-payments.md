@@ -116,3 +116,18 @@ Prepare و Process هر دو از:
 ## Historical Evolution
 
 v0.6.0 تا v0.6.5 به‌ترتیب inline checkout، sanitizer independence، case-sensitive ID، mixed-patch compatibility، billing-only layout و country/state fix را اضافه کردند. جزئیات historical در [state-v002](../state/state-v002.md) است.
+
+
+## Quick Support category payments — accepted design, not implemented
+
+پرداخت سریع دسته‌ای به‌عنوان یک integration جدید روی زیرساخت مشارکت تصویب شده است؛ این بخش در حال حاضر پیاده‌سازی نشده است.
+
+- AFE فرم مشترک `quick-support-payment` و Generic Form Context را فراهم می‌کند؛ Child Theme دسته‌ها، Context Provider، Action و گزارش را مدیریت می‌کند.
+- Gateway service موجود `BA_Participation_Payment_Gateway_Service` برای Gateway lookup و isolated cart قابل استفاده مجدد است.
+- Quick Checkout service فعلی project-centric است و `validate_project_amount()` به محصول پروژه و goal/minimum amount آن وابسته است؛ این validator برای دسته‌بندی Quick Support مستقیماً استفاده نشود.
+- سرویس Quick Support اعتبارسنجی مبلغ را براساس category min/max انجام می‌دهد و با WooCommerce CRUD سفارش مستقل می‌سازد.
+- یک محصول فنی مشترک Simple/Virtual/Hidden برای line item و Cart موقت Gateway استفاده می‌شود؛ خرید مستقیم آن خارج از مسیر داخلی ممنوع است.
+- کاربر مستقیماً به Hosted/Redirect Gateway می‌رود؛ Cart و Checkout عادی استفاده نمی‌شوند.
+- WooCommerce Orders منبع مالی گزارش‌ها و Refund هستند؛ نسخه اول جدول مالی موازی ندارد.
+
+طرح کامل: [MODULE-QUICK-SUPPORT](quick-support-payments.md)، تصمیم: [ADR-009](../decisions/ADR-009-quick-support-payments.md).
