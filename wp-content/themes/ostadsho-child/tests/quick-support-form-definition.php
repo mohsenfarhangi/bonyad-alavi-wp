@@ -31,6 +31,8 @@ require_once dirname(__DIR__) . '/inc/forms/class-ba-quick-support-form.php';
 use BonyadAlavi\FormEngine\Form\FormRegistry;
 use BonyadAlavi\FormEngine\Form\Validator;
 use BonyadAlavi\FormEngine\Validation\ValidatorRegistry;
+use BonyadAlavi\FormEngine\Actions\ActionRegistry;
+use BonyadAlavi\FormEngine\Context\FormContextRegistry;
 
 function quick_support_fields(array $form): array {
     $fields = [];
