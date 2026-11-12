@@ -27,6 +27,8 @@
 
 برای task فرم جهادی از `MODULE-JIHADI-FORM` شروع کن و در صورت تغییر Engine سپس `MODULE-AFE`/`MODULE-AFE-EXTENSION` را بخوان.
 
+برای پرداخت سریع دسته‌ای از `MODULE-QUICK-SUPPORT` شروع کن و در صورت تغییر قرارداد عمومی فرم، `MODULE-AFE`/`MODULE-AFE-EXTENSION` و برای Gateway isolation، `MODULE-PARTICIPATION` را نیز بخوان.
+
 برای فرم تماس با ما از `MODULE-CONTACT-FORM` شروع کن.
 
 برای فرم پذیرش مجتمع اردوگاهی امام خمینی (ره) از `MODULE-CAMP-ADMISSION` شروع کن و در صورت تغییر اعتبارسنجی بین‌فیلدی Engine، `MODULE-AFE`/`MODULE-AFE-EXTENSION` را هم بخوان.
