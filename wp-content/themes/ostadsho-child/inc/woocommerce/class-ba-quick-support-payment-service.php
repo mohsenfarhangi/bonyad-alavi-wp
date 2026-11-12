@@ -106,9 +106,15 @@ final class BA_Quick_Support_Payment_Service
         }
 
         $categoryId = absint($context['category_id'] ?? 0);
+        $existingBeforeLock = $this->findOrderForSubmission($submissionId);
+        if ($categoryId <= 0 && $existingBeforeLock instanceof WC_Order) {
+            // Admin retries do not have the original browser token. The first
+            // server-created order is the trusted recovery source for category ID.
+            $categoryId = absint($existingBeforeLock->get_meta(self::ORDER_CATEGORY_ID, true));
+        }
         $category = $categoryId ? get_post($categoryId) : null;
         if (!BA_Quick_Support_Category::is_active($category)) {
-            return new WP_Error('ba_qs_category_unavailable', 'دسته انتخاب‌شده دیگر برای دریافت حمایت فعال نیست.');
+            return new WP_Error('ba_qs_category_unavailable', 'دسته انتخاب‌شده دیگر برای دریافت حمایت فعال نیست یا Context آن موجود نیست.');
         }
 
         $amount = self::normalizeAmount($data['amount'] ?? '');
