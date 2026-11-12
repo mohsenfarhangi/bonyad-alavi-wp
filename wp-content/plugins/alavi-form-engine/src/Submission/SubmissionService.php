@@ -163,7 +163,7 @@ final class SubmissionService
         if ($existing) $data=AdminSubmissionFields::preserve((array)($existing['data']??[]),$data);
         if ($existing && !$this->canEdit($form, $existing)) return new WP_Error('forbidden','این ثبت قفل است یا اجازه ویرایش آن را ندارید.');
 
-        $errors = $this->validator->validate($form, $data, $draft);
+        $errors = $this->validator->validate($form, $data, $draft, $formContext);
         $fileErrors = $this->files->validate($form, $existing ? (int)$existing['id'] : 0, $draft);
         $errors = array_merge($errors, $fileErrors);
         if ($errors) return new WP_Error('validation', 'لطفاً خطاهای فرم را اصلاح کنید.', $errors);
