@@ -60,6 +60,23 @@
             }
         }
 
+        var minimum = Number(context.minimum_amount || 0);
+        var maximum = Number(context.maximum_amount || 0);
+        if (minimum > 0 || maximum > 0) {
+            var limits = document.createElement('div');
+            limits.className = 'ba-qs-amount-limits';
+            var parts = [];
+            if (minimum > 0) {
+                parts.push('حداقل ' + formatAmount(minimum, context.currency_decimals));
+            }
+            if (maximum > 0) {
+                parts.push('حداکثر ' + formatAmount(maximum, context.currency_decimals));
+            }
+            limits.textContent = parts.join('  ·  ')
+                + (context.currency_symbol ? ' ' + context.currency_symbol : '');
+            field.appendChild(limits);
+        }
+
         form.dataset.baQsEnhanced = '1';
     }
 
