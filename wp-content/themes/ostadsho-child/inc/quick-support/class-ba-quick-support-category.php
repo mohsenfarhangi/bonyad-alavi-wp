@@ -125,6 +125,7 @@ final class BA_Quick_Support_Category
             ],
         ];
 
+        $seedComplete = true;
         foreach ($defaults as [$slug, $title, $excerpt]) {
             if (get_page_by_path($slug, OBJECT, self::POST_TYPE)) continue;
 
@@ -137,7 +138,10 @@ final class BA_Quick_Support_Category
                 'menu_order' => 0,
             ], true);
 
-            if (is_wp_error($postId) || !$postId) continue;
+            if (is_wp_error($postId) || !$postId) {
+                $seedComplete = false;
+                continue;
+            }
 
             update_post_meta((int)$postId, self::META_ACTIVE, '1');
             update_post_meta((int)$postId, self::META_MINIMUM, '0');
@@ -146,7 +150,7 @@ final class BA_Quick_Support_Category
             update_post_meta((int)$postId, self::META_GATEWAYS, []);
         }
 
-        update_option('ba_quick_support_seed_version', '1', false);
+        if ($seedComplete) update_option('ba_quick_support_seed_version', '1', false);
     }
 
     public static function ensure_elementor_support(): void
