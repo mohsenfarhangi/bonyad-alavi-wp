@@ -198,6 +198,19 @@ final class BA_Quick_Support_Payment_Service
             $originalPaymentMethod = $_POST['payment_method'] ?? null;
             $_POST['payment_method'] = $gateway->id;
 
+            $session = function_exists('WC') ? WC()->session : null;
+            $hadAwaitingOrder = $session && isset($session->order_awaiting_payment);
+            $previousAwaitingOrder = $session ? $session->get('order_awaiting_payment', null) : null;
+            $restoreAwaitingOrder = static function() use ($session, $hadAwaitingOrder, $previousAwaitingOrder): void {
+                if (!$session) return;
+                if ($hadAwaitingOrder) {
+                    $session->set('order_awaiting_payment', $previousAwaitingOrder);
+                } else {
+                    unset($session->order_awaiting_payment);
+                }
+                if (is_callable([$session, 'save_data'])) $session->save_data();
+            };
+
             try {
                 $payment = $this->gatewayService->with_isolated_cart(
                     $product,
@@ -241,6 +254,7 @@ final class BA_Quick_Support_Payment_Service
             }
 
             if (is_wp_error($payment)) {
+                $restoreAwaitingOrder();
                 if ($payment->get_error_code() === 'bap_isolated_cart_exception') {
                     if (function_exists('wc_get_logger')) {
                         wc_get_logger()->error($payment->get_error_message(), ['source'=>'ba-quick-support','order_id'=>$order->get_id()]);
@@ -251,6 +265,7 @@ final class BA_Quick_Support_Payment_Service
             }
             $redirect = is_array($payment) ? esc_url_raw((string)($payment['redirect'] ?? '')) : '';
             if ($redirect === '') {
+                $restoreAwaitingOrder();
                 return new WP_Error('ba_qs_gateway_redirect_missing', 'آدرس انتقال به درگاه پرداخت دریافت نشد.');
             }
 
