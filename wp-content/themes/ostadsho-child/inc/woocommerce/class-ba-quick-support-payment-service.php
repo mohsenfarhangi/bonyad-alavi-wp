@@ -18,6 +18,8 @@ final class BA_Quick_Support_Payment_Service
     public const ORDER_SUBMISSION_ID = '_ba_afe_submission_id';
     public const ORDER_AMOUNT = '_ba_quick_support_amount';
     public const ORDER_GATEWAY_ID = '_ba_quick_support_gateway_id';
+    public const ORDER_RETURN_URL = '_ba_quick_support_return_url';
+    public const ORDER_RETURN_TOKEN = '_ba_quick_support_return_token';
     public const CART_INTERNAL_MARKER = '_ba_qs_internal';
 
     private BA_Participation_Payment_Gateway_Service $gatewayService;
@@ -195,7 +197,8 @@ final class BA_Quick_Support_Payment_Service
                 return new WP_Error('ba_qs_order_context_mismatch', 'سفارش قبلی این ثبت به دسته دیگری متصل است.');
             }
 
-            $order = $this->createOrUpdateOrder($order, $product, $category, $categoryId, $submissionId, $amount, $gateway, $gatewayId, $data);
+            $returnUrl = $this->resolveReturnUrl($categoryId, $order);
+            $order = $this->createOrUpdateOrder($order, $product, $category, $categoryId, $submissionId, $amount, $gateway, $gatewayId, $data, $returnUrl);
             if (is_wp_error($order)) return $order;
 
             $originalPaymentMethodExists = array_key_exists('payment_method', $_POST);
@@ -285,7 +288,7 @@ final class BA_Quick_Support_Payment_Service
         });
     }
 
-    private function createOrUpdateOrder($order, WC_Product $product, WP_Post $category, int $categoryId, int $submissionId, string $amount, WC_Payment_Gateway $gateway, string $gatewayId, array $data): WC_Order|WP_Error
+    private function createOrUpdateOrder($order, WC_Product $product, WP_Post $category, int $categoryId, int $submissionId, string $amount, WC_Payment_Gateway $gateway, string $gatewayId, array $data, string $returnUrl): WC_Order|WP_Error
     {
         try {
             if (!$order instanceof WC_Order) {
@@ -351,6 +354,8 @@ final class BA_Quick_Support_Payment_Service
             $order->update_meta_data(self::ORDER_SUBMISSION_ID, $submissionId);
             $order->update_meta_data(self::ORDER_AMOUNT, $amount);
             $order->update_meta_data(self::ORDER_GATEWAY_ID, $gatewayId);
+            $order->update_meta_data(self::ORDER_RETURN_URL, $returnUrl);
+            $order->update_meta_data(self::ORDER_RETURN_TOKEN, wp_generate_password(48, false, false));
             $order->calculate_totals(false);
             $order->save();
 
@@ -359,6 +364,51 @@ final class BA_Quick_Support_Payment_Service
             if (function_exists('wc_get_logger')) wc_get_logger()->error($exception->getMessage(), ['source'=>'ba-quick-support','submission_id'=>$submissionId]);
             return new WP_Error('ba_qs_order_create_failed', 'ایجاد سفارش پرداخت سریع انجام نشد؛ لطفاً با پشتیبانی تماس بگیرید.');
         }
+    }
+
+    /**
+     * Resolve the page that hosted the form. Only same-site front-end URLs are
+     * accepted; a previous order URL and then the category permalink are safe
+     * fallbacks when the AJAX Referer is unavailable.
+     */
+    private function resolveReturnUrl(int $categoryId, ?WC_Order $order = null): string
+    {
+        $referer = function_exists('wp_get_raw_referer') ? (string)wp_get_raw_referer() : '';
+        if ($referer === '' && !empty($_SERVER['HTTP_REFERER'])) {
+            $referer = esc_url_raw(wp_unslash((string)$_SERVER['HTTP_REFERER']));
+        }
+
+        $url = $this->validateReturnUrl($referer);
+        if ($url === '' && $order instanceof WC_Order) {
+            $url = $this->validateReturnUrl((string)$order->get_meta(self::ORDER_RETURN_URL, true));
+        }
+        if ($url === '' && $categoryId > 0) {
+            $url = $this->validateReturnUrl((string)get_permalink($categoryId));
+        }
+        if ($url === '') $url = home_url('/');
+
+        return remove_query_arg(
+            ['ba_qs_payment_result', 'ba_qs_order_id', 'ba_qs_token'],
+            $url
+        );
+    }
+
+    private function validateReturnUrl(string $url): string
+    {
+        $url = trim($url);
+        if ($url === '') return '';
+
+        $url = wp_validate_redirect($url, '');
+        if (!is_string($url) || $url === '') return '';
+
+        $host = strtolower((string)wp_parse_url($url, PHP_URL_HOST));
+        $siteHost = strtolower((string)wp_parse_url(home_url('/'), PHP_URL_HOST));
+        if ($host === '' || $siteHost === '' || $host !== $siteHost) return '';
+
+        $path = (string)wp_parse_url($url, PHP_URL_PATH);
+        if (str_contains($path, '/wp-admin/') || str_contains($path, '/wp-login.php')) return '';
+
+        return esc_url_raw($url);
     }
 
     private function technicalProduct(): WC_Product|WP_Error
