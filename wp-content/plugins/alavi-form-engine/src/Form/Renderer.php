@@ -45,6 +45,12 @@ final class Renderer
 
         $form = $this->service->resolvedForm($slug);
         $row = $this->forms->row($slug);
+
+        // Allow a form-specific integration to replace the normal form output,
+        // for example with a trusted payment result on the gateway return visit.
+        $renderOverride = apply_filters('afe_form_render_override', null, $slug, $form, $formContext);
+        if (is_string($renderOverride) && trim($renderOverride) !== '') return $renderOverride;
+
         $editing = $this->resolveEditing($form);
         $values = $editing['row']['data'] ?? [];
         $renderValues = $values;
@@ -90,11 +96,15 @@ final class Renderer
             }
             $body = implode('', $items);
             $body = $this->applyTokens($this->templates->resolveStep($step), $byName, $body);
+            $stepHeading = '';
+            if (empty($form['settings']['hide_step_heading'])) {
+                $stepHeading = '<div class="afe-step-heading"><span class="afe-step-kicker">مرحله '.esc_html((string)($index+1)).' از '.esc_html((string)$total).'</span>'
+                    . '<h2>'.esc_html($step['title']).'</h2>'
+                    . (!empty($step['description'])?'<p>'.esc_html((string)$step['description']).'</p>':'')
+                    . '</div>';
+            }
             $stepHtml[] = '<section class="afe-step'.($index===0?' is-active':'').'" data-step="'.esc_attr((string)$index).'">'
-                . '<div class="afe-step-heading"><span class="afe-step-kicker">مرحله '.esc_html((string)($index+1)).' از '.esc_html((string)$total).'</span>'
-                . '<h2>'.esc_html($step['title']).'</h2>'
-                . (!empty($step['description'])?'<p>'.esc_html((string)$step['description']).'</p>':'')
-                . '</div><div class="afe-grid">'.$body.'</div>'
+                . $stepHeading . '<div class="afe-grid">'.$body.'</div>'
                 . ($inlineCaptcha && $index===$dataSteps-1
                     ? '<div class="afe-captcha-wrap">'.$this->security->captchaMarkup((string)($form['settings']['captcha']??'custom')).'</div>'
                     : '')
