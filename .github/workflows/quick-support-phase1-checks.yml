@@ -11,6 +11,7 @@ on:
       - 'wp-content/plugins/alavi-form-engine/src/Context/**'
       - 'wp-content/plugins/alavi-form-engine/src/Actions/ActionContext.php'
       - 'wp-content/plugins/alavi-form-engine/src/Form/Validator.php'
+      - 'wp-content/plugins/alavi-form-engine/src/Form/Form.php'
       - 'wp-content/plugins/alavi-form-engine/src/Form/Renderer.php'
       - 'wp-content/plugins/alavi-form-engine/src/Form/Fields/SelectField.php'
       - 'wp-content/plugins/alavi-form-engine/src/Elementor/FormWidget.php'
@@ -52,6 +53,7 @@ jobs:
           find wp-content/plugins/alavi-form-engine/src/Context -type f -name '*.php' -print0 | xargs -0 -n1 php -l
           php -l wp-content/plugins/alavi-form-engine/src/Actions/ActionContext.php
           php -l wp-content/plugins/alavi-form-engine/src/Form/Validator.php
+          php -l wp-content/plugins/alavi-form-engine/src/Form/Form.php
           php -l wp-content/plugins/alavi-form-engine/src/Form/Renderer.php
           php -l wp-content/plugins/alavi-form-engine/src/Form/Fields/SelectField.php
           php -l wp-content/plugins/alavi-form-engine/src/Elementor/FormWidget.php
