@@ -6,7 +6,7 @@
 
 پروژه در توسعه فعال است.
 
-- **Alavi Form Engine:** `1.0.28-dev.10`، DB `1.0.5-dev.2`، stable baseline/tag `1.0.27`; production bump هنوز به live acceptance وابسته است.
+- **Alavi Form Engine:** `1.0.28-dev.11`، DB `1.0.5-dev.2`، stable baseline/tag `1.0.27`; production bump هنوز به live acceptance وابسته است.
 - **Ostadsho child theme:** custom integration layer روی Theme header `2.8`; version docs legacy v0.x به state history مهاجرت کرده‌اند.
 
 ## Current Goal
@@ -38,7 +38,7 @@ AFE release goal همچنان live acceptance نسخه 1.0.28 و رفع blocker 
 - `captcha_before_submit=true` کپچا را بعد از فیلدهای فرم و قبل از دکمه ارسال قرار می‌دهد.
 - تغییر generic در AFE فقط یک opt-in جدید برای نمایش عنوان Step اضافه می‌کند؛ هیچ فرم دیگری به‌صورت پیش‌فرض تغییر نمی‌کند.
 - پیاده‌سازی در [PR #39](https://github.com/mohsenfarhangi/bonyad-alavi-wp/pull/39) قرار دارد. Quick Support CI [run 43403744041](https://github.com/mohsenfarhangi/bonyad-alavi-wp/actions/runs/43403744041) و AFE regression CI [run 43403744021](https://github.com/mohsenfarhangi/bonyad-alavi-wp/actions/runs/43403744021) هر دو PASS شدند؛ Merge و پذیرش زنده فرم باقی است.
-- AFE development version: `1.0.28-dev.10`; DB version بدون تغییر است.
+- AFE development version: `1.0.28-dev.11`; DB version بدون تغییر است.
 
 ### Quick Support payment return — in progress (2026-11-13)
 
