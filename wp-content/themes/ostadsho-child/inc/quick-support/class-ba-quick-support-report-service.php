@@ -52,7 +52,7 @@ final class BA_Quick_Support_Report_Service
             'min_amount' => $minimum,
             'max_amount' => $maximum,
             'order_id' => absint($raw['order_id'] ?? 0),
-            'search' => mb_substr(sanitize_text_field((string)($raw['search'] ?? '')), 0, 100),
+            'search' => function_exists('mb_substr') ? mb_substr(sanitize_text_field((string)($raw['search'] ?? '')), 0, 100) : substr(sanitize_text_field((string)($raw['search'] ?? '')), 0, 100),
             'period' => $period,
         ];
     }
@@ -218,9 +218,10 @@ final class BA_Quick_Support_Report_Service
 
         $summary['average_net'] = $summary['paid_count'] > 0 ? $summary['net'] / $summary['paid_count'] : 0.0;
 
-        foreach (['category', 'gateway', 'period'] as $key) {
+        foreach (['category', 'gateway'] as $key) {
             uasort($summary[$key], static fn(array $a, array $b): int => $b['net'] <=> $a['net']);
         }
+        krsort($summary['period']);
 
         return $summary;
     }
