@@ -949,3 +949,13 @@ Modules: [MODULE-AFE](../modules/alavi-form-engine.md), [MODULE-JIHADI-FORM](../
 - Quick Support CI [run 43403744041](https://github.com/mohsenfarhangi/bonyad-alavi-wp/actions/runs/43403744041) passed PHP syntax, AFE Context/validator tests, all theme form regression tests and JavaScript syntax.
 - AFE duplicate-draft and Jihadi form regression CI [run 43403744021](https://github.com/mohsenfarhangi/bonyad-alavi-wp/actions/runs/43403744021) also passed.
 - PR is open and mergeable. Merge, deployment of both the AFE plugin and child theme, and live form verification remain pending.
+
+
+## 2026-11-13 — Quick Support same-page payment return and editable result templates
+
+- Extended the existing [PR #39](https://github.com/mohsenfarhangi/bonyad-alavi-wp/pull/39) branch \`feat/quick-support-dedicated-form-template-20261113\`; no duplicate PR is created.
+- The WooCommerce Quick Support order stores the validated same-site source page URL and a random return token. The gateway return/received and cancellation URL filters apply only to Quick Support orders.
+- Added the generic AFE \`afe_form_render_override\` hook. The theme handler verifies the order marker and compares the return token with \`hash_equals()\` before replacing the form at its original render location.
+- Result state comes from the WooCommerce order (paid, failed, cancelled, pending or unknown), not from the return query flag. Invalid tokens and non-Quick-Support orders keep the normal form output.
+- The AFE Templates tab has five editable status-specific HTML templates and optional CSS, with order/amount/category/transaction/status/date/message/retry tokens.
+- Regression test \`tests/quick-support-payment-return.php\` covers same-page success/cancel URLs, template rendering, status mapping, invalid tokens and CSS sanitization. Latest CI is pending at this snapshot; live Hosted/Redirect gateway acceptance remains required.
