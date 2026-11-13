@@ -202,8 +202,11 @@ require_once get_stylesheet_directory() . '/inc/quick-support/class-ba-quick-sup
 require_once get_stylesheet_directory() . '/inc/quick-support/class-ba-quick-support-category-context-provider.php';
 require_once get_stylesheet_directory() . '/inc/woocommerce/class-ba-quick-support-payment-service.php';
 require_once get_stylesheet_directory() . '/inc/woocommerce/class-ba-quick-support-payment-action.php';
+require_once get_stylesheet_directory() . '/inc/quick-support/class-ba-quick-support-report-service.php';
+require_once get_stylesheet_directory() . '/inc/quick-support/class-ba-quick-support-reports.php';
 BA_Quick_Support_Category::boot();
 BA_Quick_Support_Payment_Service::boot();
+BA_Quick_Support_Reports::boot();
 
 // سرویس و تب تنظیمات مرکز حرکت‌های مردمی و جهادی.
 require_once get_stylesheet_directory() . '/inc/services/class-ba-center-settings-service.php';
