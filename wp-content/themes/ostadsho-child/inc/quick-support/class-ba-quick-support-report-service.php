@@ -93,7 +93,7 @@ final class BA_Quick_Support_Report_Service
                 'key' => BA_Quick_Support_Payment_Service::ORDER_AMOUNT,
                 'value' => (string)$filters['min_amount'],
                 'compare' => '>=',
-                'type' => 'DECIMAL(20,4)',
+                'type' => 'DECIMAL',
             ];
         }
 
@@ -102,7 +102,7 @@ final class BA_Quick_Support_Report_Service
                 'key' => BA_Quick_Support_Payment_Service::ORDER_AMOUNT,
                 'value' => (string)$filters['max_amount'],
                 'compare' => '<=',
-                'type' => 'DECIMAL(20,4)',
+                'type' => 'DECIMAL',
             ];
         }
 
