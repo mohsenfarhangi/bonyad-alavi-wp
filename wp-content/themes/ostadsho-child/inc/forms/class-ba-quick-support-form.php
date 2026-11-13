@@ -220,9 +220,11 @@ final class BA_Quick_Support_Form
                 'editing_modes'=>[],
                 'preview_enabled'=>false,
                 'captcha'=>'custom',
+                'captcha_before_submit'=>true,
                 'rate_limit'=>5,
                 'success_message'=>'اطلاعات ثبت شد؛ در حال انتقال به درگاه پرداخت هستیم.',
             ])
+            ->template('<div class="ba-quick-support-payment">{{steps}}</div>')
             ->steps([
                 Step::make('payment', 'اطلاعات پرداخت')
                     ->fields($fields),
