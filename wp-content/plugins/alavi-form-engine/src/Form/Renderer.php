@@ -44,6 +44,8 @@ final class Renderer
         }
 
         $form = $this->service->resolvedForm($slug);
+        $renderOverride = apply_filters('afe_form_render_override', null, $slug, $form, $contextToken, $formContext);
+        if (is_string($renderOverride) && $renderOverride !== '') return $renderOverride;
         $row = $this->forms->row($slug);
         $editing = $this->resolveEditing($form);
         $values = $editing['row']['data'] ?? [];

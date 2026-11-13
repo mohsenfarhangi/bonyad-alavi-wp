@@ -201,6 +201,8 @@ add_action( 'wp_enqueue_scripts', function () {
 require_once get_stylesheet_directory() . '/inc/quick-support/class-ba-quick-support-category.php';
 require_once get_stylesheet_directory() . '/inc/quick-support/class-ba-quick-support-category-context-provider.php';
 require_once get_stylesheet_directory() . '/inc/woocommerce/class-ba-quick-support-payment-service.php';
+require_once get_stylesheet_directory() . '/inc/woocommerce/class-ba-quick-support-payment-return.php';
+BA_Quick_Support_Payment_Return::boot();
 require_once get_stylesheet_directory() . '/inc/woocommerce/class-ba-quick-support-payment-action.php';
 require_once get_stylesheet_directory() . '/inc/quick-support/class-ba-quick-support-report-service.php';
 require_once get_stylesheet_directory() . '/inc/quick-support/class-ba-quick-support-reports.php';

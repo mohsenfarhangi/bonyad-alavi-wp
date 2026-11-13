@@ -32,6 +32,15 @@ Implemented in the current feature branch:
 
 **Phase 2 implementation — PR #37 (merged):** adds the dedicated report submenu, financial aggregation, filters, paginated order list and CSV/XLSX exports. Report queries are restricted by both `created_via = ba_quick_support` and `_ba_quick_support = 1`, excluding product-based participation orders (`bap_quick_checkout`) from the dashboard, list and exports. Final focused CI [run 43395846166](https://github.com/mohsenfarhangi/bonyad-alavi-wp/actions/runs/43395846166) passed. Strict product-participation exclusion is additionally covered by [PR #38](https://github.com/mohsenfarhangi/bonyad-alavi-wp/pull/38), CI [run 43398110222](https://github.com/mohsenfarhangi/bonyad-alavi-wp/actions/runs/43398110222) passed. Deploy and live acceptance are pending.
 
+## Dedicated payment form presentation and return (feature branch)
+
+- The `quick-support-payment` source definition uses a minimal form template (no internal AFE header), hides the built-in `afe-step-heading` for this form only, and enables `captcha_before_submit` so CAPTCHA is rendered immediately before the submit action.
+- The payment order stores the same-site page URL from the AFE AJAX request Referer in `_ba_qs_return_url`. WooCommerce's `woocommerce_get_return_url` filter sends Quick Support orders back to that page with an order ID/key; the AFE render override replaces the form with the matching result message in the same location.
+- Result state is derived only from the WooCommerce order after the gateway callback (`success`, `failed`, `cancelled`, or `pending`); query parameters never establish payment success. Order ID, order key, `created_via`, and the Quick Support marker are checked before rendering.
+- AFE's template tab gains four per-status HTML editors and a dedicated result CSS editor for this form only. Tokens: `{{order_number}}`, `{{amount}}`, `{{category_title}}`, `{{customer_name}}`, `{{gateway_title}}`.
+- The return renderer uses a generic `afe_form_render_override` extension filter; other AFE forms are unchanged.
+- This feature is under review in a PR; CI and live gateway acceptance are pending.
+
 ## Category Administration Capabilities
 
 Implemented and merged in PR #36. Administrator category-list access was subsequently confirmed on the live site.

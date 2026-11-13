@@ -12,6 +12,7 @@ on:
       - 'wp-content/plugins/alavi-form-engine/src/Actions/ActionContext.php'
       - 'wp-content/plugins/alavi-form-engine/src/Form/Validator.php'
       - 'wp-content/plugins/alavi-form-engine/src/Form/Renderer.php'
+      - 'wp-content/plugins/alavi-form-engine/src/Admin/FormsPage.php'
       - 'wp-content/plugins/alavi-form-engine/src/Form/Fields/SelectField.php'
       - 'wp-content/plugins/alavi-form-engine/src/Elementor/FormWidget.php'
       - 'wp-content/plugins/alavi-form-engine/src/Submission/SubmissionService.php'
@@ -53,6 +54,7 @@ jobs:
           php -l wp-content/plugins/alavi-form-engine/src/Actions/ActionContext.php
           php -l wp-content/plugins/alavi-form-engine/src/Form/Validator.php
           php -l wp-content/plugins/alavi-form-engine/src/Form/Renderer.php
+          php -l wp-content/plugins/alavi-form-engine/src/Admin/FormsPage.php
           php -l wp-content/plugins/alavi-form-engine/src/Form/Fields/SelectField.php
           php -l wp-content/plugins/alavi-form-engine/src/Elementor/FormWidget.php
           php -l wp-content/plugins/alavi-form-engine/src/Submission/SubmissionService.php
@@ -64,6 +66,7 @@ jobs:
           php -l wp-content/themes/ostadsho-child/inc/quick-support/class-ba-quick-support-reports.php
           php -l wp-content/themes/ostadsho-child/inc/forms/class-ba-quick-support-form.php
           php -l wp-content/themes/ostadsho-child/inc/woocommerce/class-ba-quick-support-payment-service.php
+          php -l wp-content/themes/ostadsho-child/inc/woocommerce/class-ba-quick-support-payment-return.php
           php -l wp-content/themes/ostadsho-child/inc/woocommerce/class-ba-quick-support-payment-action.php
           php -l wp-content/themes/ostadsho-child/inc/woocommerce/class-ba-participation-payment-gateway-service.php
           php -l wp-content/themes/ostadsho-child/inc/admin/settings/tab-participation.php
