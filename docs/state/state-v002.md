@@ -959,3 +959,9 @@ Modules: [MODULE-AFE](../modules/alavi-form-engine.md), [MODULE-JIHADI-FORM](../
 - Result state comes from the WooCommerce order (paid, failed, cancelled, pending or unknown), not from the return query flag. Invalid tokens and non-Quick-Support orders keep the normal form output.
 - The AFE Templates tab has five editable status-specific HTML templates and optional CSS, with order/amount/category/transaction/status/date/message/retry tokens.
 - Regression test \`tests/quick-support-payment-return.php\` covers same-page success/cancel URLs, template rendering, status mapping, invalid tokens and CSS sanitization. Latest CI is pending at this snapshot; live Hosted/Redirect gateway acceptance remains required.
+
+
+## 2026-11-13 — AFE dev version 1.0.28-dev.11
+
+- The AFE Renderer now exposes the generic `afe_form_render_override` hook, and the Admin Templates tab supports integration-provided status-specific HTML templates and CSS settings.
+- Quick Support's same-page payment return consumes this extension point; the DB schema version remains `1.0.5-dev.2`.
