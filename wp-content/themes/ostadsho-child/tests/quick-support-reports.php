@@ -169,6 +169,7 @@ $checks = [
     'period-is-whitelisted' => $filters['period'] === 'month',
     'order-query-always-requires-quick-support-marker' => isset($query['meta_query'][0]['key']) && $query['meta_query'][0]['key'] === $marker,
     'order-query-filters-category-and-gateway' => count($query['meta_query']) === 6,
+    'amount-filters-use-numeric-decimal-comparison' => ($query['meta_query'][3]['type'] ?? '') === 'DECIMAL' && ($query['meta_query'][4]['type'] ?? '') === 'DECIMAL',
     'order-query-supports-hpos-compatible-date-range' => $query['date_created'] === '2026-11-01...2026-11-20',
     'order-query-paginates' => $query['page'] === 2 && $query['limit'] === 50 && $query['paginate'] === true,
     'summary-gross-includes-only-confirmed-quick-support-orders' => $summary['gross'] === 1500.0,
