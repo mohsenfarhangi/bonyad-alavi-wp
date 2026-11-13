@@ -1,6 +1,6 @@
 # MODULE-QUICK-SUPPORT — Quick Support Payments
 
-**Status:** Phase 1 and granular category permissions merged in [PR #34](https://github.com/mohsenfarhangi/bonyad-alavi-wp/pull/34), [PR #35](https://github.com/mohsenfarhangi/bonyad-alavi-wp/pull/35) and [PR #36](https://github.com/mohsenfarhangi/bonyad-alavi-wp/pull/36); Phase 2 reports implemented in [PR #37](https://github.com/mohsenfarhangi/bonyad-alavi-wp/pull/37), review pending  
+**Status:** Phase 1, granular category permissions and Phase 2 reports are merged in [PR #34](https://github.com/mohsenfarhangi/bonyad-alavi-wp/pull/34), [PR #35](https://github.com/mohsenfarhangi/bonyad-alavi-wp/pull/35), [PR #36](https://github.com/mohsenfarhangi/bonyad-alavi-wp/pull/36) and [PR #37](https://github.com/mohsenfarhangi/bonyad-alavi-wp/pull/37). Main merge commit: `09cf9f1765d2b8f3fc73545426b5c07016a32340`.  
 **Decision:** [ADR-009](../decisions/ADR-009-quick-support-payments.md)  
 **Parent modules:** [MODULE-PARTICIPATION](participation-payments.md), [MODULE-AFE](alavi-form-engine.md), [MODULE-AFE-EXTENSION](alavi-form-engine-extension-api.md)
 
@@ -12,7 +12,7 @@
 
 ## Phase 1 Implementation Record — PR #34
 
-**Implementation status:** PRs #34, #35 and #36 merged. Generic Context, category CPT, shared form and direct WooCommerce payment code are in main. Administrator access was confirmed on the live WordPress site; payment/gateway staging acceptance remains pending.
+**Implementation status:** PRs #34, #35, #36 and #37 are merged. Generic Context, category CPT, shared form, direct WooCommerce payment and financial reporting dashboard are in main. Administrator access was confirmed on the live WordPress site; live report and payment-flow acceptance remain pending.
 
 Implemented in the current feature branch:
 
@@ -30,7 +30,7 @@ Implemented in the current feature branch:
 
 **Live acceptance still pending:** Hosted/Redirect gateway initiation and callback/return, preservation of the real Cart/Session/Persistent Cart, HPOS order creation, and confirmation of the Elementor Single/Popup/Loop Grid layouts on the target site. The project owner reported that the updated theme files were uploaded and confirmed Administrator access; this does not count as payment-flow acceptance.
 
-**Phase 2 implementation — PR #37:** adds the dedicated report submenu, financial aggregation, filters, paginated order list and CSV/XLSX exports. Final focused CI [run 43395846166](https://github.com/mohsenfarhangi/bonyad-alavi-wp/actions/runs/43395846166) passed; merge and live acceptance are pending.
+**Phase 2 implementation — PR #37 (merged):** adds the dedicated report submenu, financial aggregation, filters, paginated order list and CSV/XLSX exports. Final focused CI [run 43395846166](https://github.com/mohsenfarhangi/bonyad-alavi-wp/actions/runs/43395846166) passed. Deploy and live acceptance are pending.
 
 ## Category Administration Capabilities
 
@@ -321,7 +321,7 @@ WooCommerce Order منبع قطعی مبلغ، ارز، Gateway، وضعیت پ�
 - [x] لینک Order ↔ Submission و صفحه‌بندی سفارش‌ها
 - [x] محاسبه خالص پس از Refund جزئی/کامل با WooCommerce CRUD و سازگار با HPOS
 
-پیاده‌سازی در [PR #37](https://github.com/mohsenfarhangi/bonyad-alavi-wp/pull/37) است؛ تا زمان Merge و پذیرش زنده، آن را روی سایت فعال فرض نکن.
+پیاده‌سازی در [PR #37](https://github.com/mohsenfarhangi/bonyad-alavi-wp/pull/37) به `main` ادغام شده است؛ تا زمان Deploy و پذیرش زنده، آن را روی سایت فعال فرض نکن.
 
 ## Acceptance Tests
 
