@@ -30,7 +30,7 @@ Implemented in the current feature branch:
 
 **Live acceptance still pending:** Hosted/Redirect gateway initiation and callback/return, preservation of the real Cart/Session/Persistent Cart, HPOS order creation, and confirmation of the Elementor Single/Popup/Loop Grid layouts on the target site. The project owner reported that the updated theme files were uploaded and confirmed Administrator access; this does not count as payment-flow acceptance.
 
-**Phase 2 implementation — PR #37 (merged):** adds the dedicated report submenu, financial aggregation, filters, paginated order list and CSV/XLSX exports. Final focused CI [run 43395846166](https://github.com/mohsenfarhangi/bonyad-alavi-wp/actions/runs/43395846166) passed. Deploy and live acceptance are pending.
+**Phase 2 implementation — PR #37 (merged):** adds the dedicated report submenu, financial aggregation, filters, paginated order list and CSV/XLSX exports. Report queries are restricted by both `created_via = ba_quick_support` and `_ba_quick_support = 1`, excluding product-based participation orders (`bap_quick_checkout`) from the dashboard, list and exports. Final focused CI [run 43395846166](https://github.com/mohsenfarhangi/bonyad-alavi-wp/actions/runs/43395846166) passed. Deploy and live acceptance are pending.
 
 ## Category Administration Capabilities
 
@@ -224,6 +224,8 @@ Action پس از ثبت موفق Submission اجرا می‌شود و با Conte
 | Meta Key | Meaning |
 |---|---|
 | `_ba_quick_support` | marker سفارش Quick Support |
+
+علاوه بر metadata بالا، فیلد استاندارد WooCommerce یعنی `created_via` برای سفارش‌های این ماژول باید `ba_quick_support` باشد. این مقدار با `bap_quick_checkout` در سفارش‌های پرداخت محصول‌محور مشارکت متفاوت است و به‌عنوان شرط دوم جداسازی گزارش استفاده می‌شود.
 | `_ba_quick_support_category_id` | شناسه داخلی دسته |
 | `_ba_quick_support_category_slug` | Slug دسته |
 | `_ba_quick_support_category_title` | snapshot عنوان دسته |
@@ -276,7 +278,8 @@ WooCommerce Order منبع قطعی مبلغ، ارز، Gateway، وضعیت پ�
 
 ### Financial Rules
 
-- فقط Orderهای دارای marker `_ba_quick_support` وارد گزارش شوند.
+- فقط Orderهایی وارد گزارش شوند که هم `created_via = ba_quick_support` و هم marker `_ba_quick_support = 1` را داشته باشند.
+- سفارش‌های پرداخت مشارکت محصول‌محور از مسیر مستقل `created_via = bap_quick_checkout` ساخته می‌شوند و نباید در آمار، جدول سفارش‌ها یا خروجی‌های Quick Support نمایش داده شوند.
 - پرداخت‌های تأییدشده با تاریخ پرداخت معتبر در محاسبه تعداد تراکنش موفق لحاظ شوند؛ وضعیت‌های pending/failed/cancelled پرداخت موفق نیستند.
 - مبلغ خالص از مبلغ Order منهای Refundهای ثبت‌شده محاسبه شود؛ Refund جزئی باید اثر خود را در گزارش بگذارد.
 - مبلغ صفر خالص پس از Refund نباید به‌عنوان دریافتی خالص نمایش داده شود.
