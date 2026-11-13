@@ -37,6 +37,8 @@
             var parts = raw.replace(/,/g, '').split('.');
             var integer = parts.shift().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
             var formatted = integer + (parts.length ? '.' + parts.join('.') : '');
+            // Never let the form engine's maxlength enforcement truncate digits on blur.
+            if (input.maxLength > 0 && formatted.length > input.maxLength) return;
             input.value = formatted;
             if (start != null) {
                 var pos = 0, seen = 0;

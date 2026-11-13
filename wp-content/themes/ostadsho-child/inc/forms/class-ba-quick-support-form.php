@@ -181,7 +181,7 @@ final class BA_Quick_Support_Form
                 ->label('مبلغ حمایت' . (function_exists('get_woocommerce_currency_symbol') ? ' (' . html_entity_decode(wp_strip_all_tags((string)get_woocommerce_currency_symbol()), ENT_QUOTES | ENT_HTML5, 'UTF-8') . ')' : ''))
                 ->placeholder('مبلغ را وارد کنید')
                 ->attributes([
-                    'maxlength'=>20,
+                    'maxlength'=>26,
                     'inputmode'=>'decimal',
                     'autocomplete'=>'off',
                     'data-afe-character-mode'=>'digits',

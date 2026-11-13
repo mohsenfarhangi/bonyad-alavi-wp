@@ -42,7 +42,8 @@ final class BA_Quick_Support_Payment_Return
     public static function filterSepFailureRedirect($location, $status)
     {
         if (!is_string($location) || !function_exists('wc_get_checkout_url') || $location !== wc_get_checkout_url()) return $location;
-        $api = $_GET['wc-api'] ?? (function_exists('get_query_var') ? get_query_var('wc-api') : '');
+        // WC invokes callbacks during parse_request, before the global WP_Query exists.
+        $api = $_GET['wc-api'] ?? ($GLOBALS['wp']->query_vars['wc-api'] ?? '');
         $id = $_GET['wc_order'] ?? '';
         $token = $_GET['ba_qs_callback_token'] ?? '';
         if (!is_string($api) || strcasecmp($api, 'WC_Sep_Payment_Gateway') !== 0 || !is_scalar($id) || !is_string($token) || $token === '' || !function_exists('wc_get_order')) return $location;

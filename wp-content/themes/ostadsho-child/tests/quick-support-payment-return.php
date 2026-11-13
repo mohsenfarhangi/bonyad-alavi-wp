@@ -127,6 +127,11 @@ $callbackUrl = BA_Quick_Support_Payment_Return::filterSepCallbackUrl('https://bo
 parse_str((string)parse_url($callbackUrl, PHP_URL_QUERY), $callbackQuery);
 $_GET = ['wc-api'=>'WC_Sep_Payment_Gateway', 'wc_order'=>'321', 'ba_qs_callback_token'=>'return-secret'];
 $sepRedirect = BA_Quick_Support_Payment_Return::filterSepFailureRedirect(wc_get_checkout_url(), 302);
+unset($_GET['wc-api']);
+$GLOBALS['wp'] = (object)['query_vars'=>['wc-api'=>'wc_sep_payment_gateway']];
+$prettySepRedirect = BA_Quick_Support_Payment_Return::filterSepFailureRedirect(wc_get_checkout_url(), 302);
+unset($GLOBALS['wp']);
+$_GET['wc-api'] = 'WC_Sep_Payment_Gateway';
 $_GET['ba_qs_callback_token'] = 'wrong';
 $badSepRedirect = BA_Quick_Support_Payment_Return::filterSepFailureRedirect(wc_get_checkout_url(), 302);
 $_GET['ba_qs_callback_token'] = 'return-secret';
@@ -215,6 +220,7 @@ $legacyHtml = BA_Quick_Support_Payment_Return::renderResult(
 $checks = [
     'sep-callback-carries-token' => ($callbackQuery['ba_qs_callback_token'] ?? '') === 'return-secret',
     'sep-failure-returns-to-form' => str_starts_with($sepRedirect, $baseUrl),
+    'sep-pretty-permalink-returns-to-form' => str_starts_with($prettySepRedirect, $baseUrl),
     'sep-invalid-token-keeps-checkout' => $badSepRedirect === wc_get_checkout_url(),
     'other-gateway-keeps-checkout' => $otherSepRedirect === wc_get_checkout_url(),
     'five-editable-status-templates' => count($definitions) === 5
