@@ -921,3 +921,12 @@ Modules: [MODULE-AFE](../modules/alavi-form-engine.md), [MODULE-JIHADI-FORM](../
 - Focused CI passed [run 43395846166](https://github.com/mohsenfarhangi/bonyad-alavi-wp/actions/runs/43395846166); PR checks also passed for Quick Support, Studies Center, Facilitator and Camp Admission.
 - Next: deploy child theme to staging/site and verify financial totals against real Quick Support orders (including partial/full refunds), Persian CSV/XLSX output, capability boundaries and order/submission links.
 - Phase 1 live gateway acceptance (Hosted/Redirect, callback/return, Cart/Session/Persistent Cart, HPOS and Elementor templates) remains a separate pending checklist.
+
+
+## 2026-11-13 — Isolate Quick Support reports from product-based participation
+
+- Requirement: Quick Support reporting must not include the legacy product/project-based Participation payment orders.
+- The legacy Participation checkout creates orders with `created_via = bap_quick_checkout`; Quick Support creates orders with `created_via = ba_quick_support` and marker `_ba_quick_support = 1`.
+- The report service now requires both the dedicated WooCommerce `created_via` value and the Quick Support order marker. This shared query is used by the dashboard summary, paginated order list, CSV and XLSX iteration.
+- Regression fixtures include product-based participation orders, including a defensive case with a copied Quick Support marker, to prove the creation-source filter excludes them.
+- Implementation and focused regression test are in [PR #38](https://github.com/mohsenfarhangi/bonyad-alavi-wp/pull/38); focused CI [run 43398110222](https://github.com/mohsenfarhangi/bonyad-alavi-wp/actions/runs/43398110222) passed. Merge and deployment are pending.

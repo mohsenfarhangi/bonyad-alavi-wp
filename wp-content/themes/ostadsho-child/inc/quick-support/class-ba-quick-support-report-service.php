@@ -58,8 +58,8 @@ final class BA_Quick_Support_Report_Service
     }
 
     /**
-     * Build a WooCommerce CRUD query. All filtering uses order CRUD/meta_query,
-     * keeping the report compatible with both legacy storage and HPOS.
+     * Build a WooCommerce order query. Source filtering uses created_via and
+     * metadata filtering uses meta_query through wc_get_orders() for HPOS support.
      */
     public function build_query(array $filters, int $page = 1, int $limit = self::PAGE_SIZE): array
     {
@@ -108,6 +108,9 @@ final class BA_Quick_Support_Report_Service
 
         $allStatuses = function_exists('wc_get_order_statuses') ? array_keys(wc_get_order_statuses()) : [];
         $query = [
+            // Keep this dashboard strictly scoped to category-based Quick Support orders.
+            // Product/project participation uses the separate 'bap_quick_checkout' flow.
+            'created_via' => BA_Quick_Support_Payment_Service::ORDER_CREATED_VIA,
             'status' => !empty($filters['status']) ? [$filters['status']] : $allStatuses,
             'limit' => max(1, min(500, $limit)),
             'page' => max(1, $page),
