@@ -209,7 +209,9 @@ HTML,
             }
         }
 
-        $returnUrl = self::safeReturnUrl((string)$order->get_meta(BA_Quick_Support_Payment_Service::ORDER_RETURN_URL, true));
+        $storedReturnUrl = (string)$order->get_meta(BA_Quick_Support_Payment_Service::ORDER_RETURN_URL, true);
+        if ($storedReturnUrl === '') $storedReturnUrl = (string)$order->get_meta('_ba_qs_return_url', true);
+        $returnUrl = self::safeReturnUrl($storedReturnUrl);
         if ($returnUrl === '') return $original;
 
         if (function_exists('nocache_headers')) nocache_headers();
