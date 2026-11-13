@@ -24,7 +24,7 @@ final class BA_Quick_Support_Payment_Return
     public static function cancelUrl(string $url, $order, string $redirect = ''): string
     {
         if (!$order instanceof WC_Order || !self::isQuickSupportOrder($order)) return $url;
-        return add_query_arg('redirect', rawurlencode(self::resultUrl($order, 'cancelled')), $url);
+        return add_query_arg('redirect', self::resultUrl($order, 'cancelled'), $url);
     }
 
     public static function renderResult($override, string $slug, array $form, string $contextToken = '', array $formContext = [])
@@ -50,7 +50,8 @@ final class BA_Quick_Support_Payment_Return
             '{{customer_name}}' => esc_html($customer),
             '{{gateway_title}}' => esc_html($order->get_payment_method_title()),
         ]);
-        $css = (string)($form['settings']['quick_support_result_css'] ?? '');
+        $css = trim((string)($form['settings']['quick_support_result_css'] ?? ''));
+        if ($css === '') $css = self::defaultCss();
         $style = $css !== '' ? '<style>'.wp_strip_all_tags($css).'</style>' : '';
         return $style.'<div class="ba-quick-support-payment ba-quick-support-payment--result" dir="rtl">'.$html.'</div>';
     }
@@ -80,6 +81,11 @@ final class BA_Quick_Support_Payment_Return
         if ($order->has_status(['cancelled'])) return 'cancelled';
         if ($order->has_status(['failed','refunded'])) return 'failed';
         return 'pending';
+    }
+
+    private static function defaultCss(): string
+    {
+        return '.ba-qs-payment-result{max-width:680px;margin:0 auto;padding:32px;border:1px solid #e5e7eb;border-radius:16px;text-align:center;background:#fff;color:#344054}.ba-qs-payment-result h2{margin:0 0 12px;font-size:22px}.ba-qs-payment-result p{line-height:2;color:#667085}.ba-qs-payment-result dl{margin:24px 0 0;text-align:right}.ba-qs-payment-result dl div{display:flex;justify-content:space-between;gap:16px;padding:10px 0;border-top:1px solid #eaecf0}.ba-qs-payment-result dt{color:#667085}.ba-qs-payment-result dd{margin:0;font-weight:700}.ba-qs-payment-result.is-success{border-color:#a6f4c5}.ba-qs-payment-result.is-failed,.ba-qs-payment-result.is-cancelled{border-color:#fecdca}.ba-qs-payment-result.is-pending{border-color:#fedf89}';
     }
 
     private static function defaultTemplates(): array
