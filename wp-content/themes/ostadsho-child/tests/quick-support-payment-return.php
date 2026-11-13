@@ -122,6 +122,19 @@ $cancelUrl = BA_Quick_Support_Payment_Return::filterCancelUrl(
 );
 parse_str((string)parse_url($cancelUrl, PHP_URL_QUERY), $cancelQuery);
 
+$externalOrder = new BA_QS_Test_Order([
+    BA_Quick_Support_Payment_Service::ORDER_MARKER => 1,
+    BA_Quick_Support_Payment_Service::ORDER_RETURN_URL => 'https://attacker.example/return/',
+    BA_Quick_Support_Payment_Service::ORDER_RETURN_TOKEN => 'other-secret',
+]);
+$externalReturnUrl = BA_Quick_Support_Payment_Return::filterReturnUrl('https://bonyadalavi.ir/thank-you/', $externalOrder);
+$unrelatedOrder = new BA_QS_Test_Order([
+    BA_Quick_Support_Payment_Service::ORDER_MARKER => 0,
+    BA_Quick_Support_Payment_Service::ORDER_RETURN_URL => $baseUrl,
+    BA_Quick_Support_Payment_Service::ORDER_RETURN_TOKEN => 'return-secret',
+]);
+$unrelatedReturnUrl = BA_Quick_Support_Payment_Return::filterReturnUrl('https://bonyadalavi.ir/thank-you/', $unrelatedOrder);
+
 $_GET = [
     'ba_qs_payment_result' => '1',
     'ba_qs_order_id' => '321',
@@ -143,6 +156,9 @@ $pendingHtml = BA_Quick_Support_Payment_Return::renderResult(null, 'quick-suppor
 
 $_GET['ba_qs_token'] = 'invalid-token';
 $invalidToken = BA_Quick_Support_Payment_Return::renderResult('normal-form', 'quick-support-payment', ['settings'=>[]]);
+$_GET['ba_qs_token'] = 'return-secret';
+$_GET['ba_qs_payment_result'] = ['1'];
+$arrayFlag = BA_Quick_Support_Payment_Return::renderResult('normal-form', 'quick-support-payment', ['settings'=>[]]);
 
 $checks = [
     'five-editable-status-templates' => count($definitions) === 5
@@ -162,6 +178,10 @@ $checks = [
     'invalid-return-token-does-not-replace-form' => $invalidToken === 'normal-form',
     'unsafe-css-import-is-not-emitted' => !str_contains($GLOBALS['ba_qs_inline_css'], '@import')
         && !str_contains($GLOBALS['ba_qs_inline_css'], 'url('),
+    'unsafe-external-return-url-is-rejected' => $externalReturnUrl === 'https://bonyadalavi.ir/thank-you/',
+    'unrelated-order-return-url-is-unchanged' => $unrelatedReturnUrl === 'https://bonyadalavi.ir/thank-you/',
+    'checkout-payment-url-filter-is-registered' => !empty($GLOBALS['ba_qs_filters']['woocommerce_get_checkout_payment_url']),
+    'array-query-flag-does-not-replace-form' => $arrayFlag === 'normal-form',
     'unrelated-form-template-hook-is-empty' => BA_Quick_Support_Payment_Return::templateDefinitions([], 'contact-us') === [],
 ];
 
