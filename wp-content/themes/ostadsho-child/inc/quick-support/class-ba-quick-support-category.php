@@ -60,46 +60,58 @@ final class BA_Quick_Support_Category
             'menu_position' => 26,
             'menu_icon' => 'dashicons-heart',
             'supports' => ['title', 'editor', 'excerpt', 'thumbnail', 'page-attributes', 'custom-fields'],
-            'capability_type' => 'post',
+            'capability_type' => ['ba_quick_support_category', 'ba_quick_support_categories'],
             'capabilities' => [
-                'edit_post' => 'manage_ba_quick_support_categories',
-                'delete_post' => 'manage_ba_quick_support_categories',
-                'edit_posts' => 'manage_ba_quick_support_categories',
-                'edit_others_posts' => 'manage_ba_quick_support_categories',
-                'publish_posts' => 'manage_ba_quick_support_categories',
-                'read_private_posts' => 'manage_ba_quick_support_categories',
-                'delete_posts' => 'manage_ba_quick_support_categories',
-                'delete_private_posts' => 'manage_ba_quick_support_categories',
-                'delete_published_posts' => 'manage_ba_quick_support_categories',
-                'delete_others_posts' => 'manage_ba_quick_support_categories',
-                'edit_private_posts' => 'manage_ba_quick_support_categories',
-                'edit_published_posts' => 'manage_ba_quick_support_categories',
-                'create_posts' => 'manage_ba_quick_support_categories',
+                // The CPT list screen uses edit_posts; map it to the independent view permission.
+                'edit_posts' => 'view_ba_quick_support_categories',
+                'edit_post' => 'edit_ba_quick_support_category',
+                'read_post' => 'read_ba_quick_support_category',
+                'delete_post' => 'delete_ba_quick_support_category',
+                'create_posts' => 'create_ba_quick_support_categories',
+                'publish_posts' => 'publish_ba_quick_support_categories',
+                'edit_others_posts' => 'edit_others_ba_quick_support_categories',
+                'edit_private_posts' => 'edit_private_ba_quick_support_categories',
+                'edit_published_posts' => 'edit_published_ba_quick_support_categories',
+                'read_private_posts' => 'read_private_ba_quick_support_categories',
+                'delete_posts' => 'delete_ba_quick_support_categories',
+                'delete_others_posts' => 'delete_others_ba_quick_support_categories',
+                'delete_private_posts' => 'delete_private_ba_quick_support_categories',
+                'delete_published_posts' => 'delete_published_ba_quick_support_categories',
             ],
             'map_meta_cap' => true,
         ]);
 
     }
 
+    /**
+     * Seed granular capabilities for the built-in Administrator once.
+     * Other roles are configured explicitly through PublishPress Capabilities.
+     */
     public static function ensure_admin_capability(): void
     {
-        if (!function_exists('wp_roles') || !function_exists('get_role')) return;
+        if (get_option('ba_quick_support_caps_version') === '2') return;
+        if (!function_exists('get_role')) return;
 
-        $registeredRoles = wp_roles();
-        if (!$registeredRoles || !isset($registeredRoles->roles) || !is_array($registeredRoles->roles)) return;
+        $administrator = get_role('administrator');
+        if (!$administrator) return;
 
-        foreach (array_keys($registeredRoles->roles) as $roleSlug) {
-            $role = get_role((string)$roleSlug);
-            if (!$role) continue;
-
-            // Support custom "site manager" roles while keeping access limited
-            // to the built-in Administrator and roles already trusted to manage options.
-            if ($roleSlug !== 'administrator' && !$role->has_cap('manage_options')) continue;
-
-            if (!$role->has_cap('manage_ba_quick_support_categories')) {
-                $role->add_cap('manage_ba_quick_support_categories');
-            }
+        foreach (self::capability_names() as $capability) {
+            $administrator->add_cap($capability);
         }
+
+        update_option('ba_quick_support_caps_version', '2', false);
+    }
+
+    /** @return array<string,string> */
+    public static function capability_names(): array
+    {
+        return [
+            'view' => 'view_ba_quick_support_categories',
+            'create' => 'create_ba_quick_support_categories',
+            'edit' => 'edit_ba_quick_support_category',
+            'publish' => 'publish_ba_quick_support_categories',
+            'delete' => 'delete_ba_quick_support_category',
+        ];
     }
 
     public static function maybe_flush_rewrite_rules(): void

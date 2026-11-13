@@ -43,6 +43,9 @@ $GLOBALS['ba_qs_role_registry'] = new BA_QS_Test_Roles([
 ]);
 function wp_roles(): BA_QS_Test_Roles { return $GLOBALS['ba_qs_role_registry']; }
 function get_role(string $slug): ?BA_QS_Test_Role { return $GLOBALS['ba_qs_roles'][$slug] ?? null; }
+function get_option(string $key, mixed $default = false): mixed { return $GLOBALS['ba_qs_options'][$key] ?? $default; }
+function update_option(string $key, mixed $value, mixed $autoload = null): bool { $GLOBALS['ba_qs_options'][$key] = $value; return true; }
+$GLOBALS['ba_qs_options'] = [];
 
 $GLOBALS['ba_qs_posts'] = [
     41 => new WP_Post(41, 'ba_quick_support', 'publish', 'education-skills', 'آموزش، مهارت و پرورش', 'توسعه آموزش و مهارت'),
@@ -120,11 +123,17 @@ $queryId = $provider->resolve([
 ], 'quick-support-payment');
 
 BA_Quick_Support_Category::ensure_admin_capability();
+$capabilities = BA_Quick_Support_Category::capability_names();
 
 $checks = [
-    'administrator-role-receives-category-capability' => get_role('administrator')?->has_cap('manage_ba_quick_support_categories') === true,
-    'custom-manage-options-role-receives-category-capability' => get_role('custom_site_manager')?->has_cap('manage_ba_quick_support_categories') === true,
-    'non-admin-role-does-not-receive-category-capability' => get_role('editor')?->has_cap('manage_ba_quick_support_categories') === false,
+    'administrator-receives-view-capability' => get_role('administrator')?->has_cap($capabilities['view']) === true,
+    'administrator-receives-create-capability' => get_role('administrator')?->has_cap($capabilities['create']) === true,
+    'administrator-receives-edit-capability' => get_role('administrator')?->has_cap($capabilities['edit']) === true,
+    'administrator-receives-publish-capability' => get_role('administrator')?->has_cap($capabilities['publish']) === true,
+    'administrator-receives-delete-capability' => get_role('administrator')?->has_cap($capabilities['delete']) === true,
+    'custom-manage-options-role-is-not-automatically-granted' => get_role('custom_site_manager')?->has_cap($capabilities['view']) === false,
+    'editor-is-not-automatically-granted' => get_role('editor')?->has_cap($capabilities['view']) === false,
+    'capability-migration-runs-once' => get_option('ba_quick_support_caps_version') === '2',
     'current-page-source-resolves-category' => is_array($current) && ($current['category_id'] ?? 0) === 41,
     'fixed-source-resolves-category' => is_array($fixed) && ($fixed['category_slug'] ?? '') === 'education-skills',
     'query-slug-source-resolves-category' => is_array($querySlug) && ($querySlug['category_id'] ?? 0) === 41,
