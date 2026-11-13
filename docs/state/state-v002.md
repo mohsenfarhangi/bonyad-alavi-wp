@@ -953,12 +953,14 @@ Modules: [MODULE-AFE](../modules/alavi-form-engine.md), [MODULE-JIHADI-FORM](../
 
 ## 2026-11-13 — Quick Support same-page payment return and editable result templates
 
-- Extended the existing [PR #39](https://github.com/mohsenfarhangi/bonyad-alavi-wp/pull/39) branch \`feat/quick-support-dedicated-form-template-20261113\`; no duplicate PR is created.
+- Extended the existing [PR #39](https://github.com/mohsenfarhangi/bonyad-alavi-wp/pull/39) branch `feat/quick-support-dedicated-form-template-20261113`; no duplicate PR is created.
 - The WooCommerce Quick Support order stores the validated same-site source page URL and a random return token. The gateway return/received and cancellation URL filters apply only to Quick Support orders.
-- Added the generic AFE \`afe_form_render_override\` hook. The theme handler verifies the order marker and compares the return token with \`hash_equals()\` before replacing the form at its original render location.
+- Added the generic AFE `afe_form_render_override` hook. The theme handler verifies the order marker and compares the return token with `hash_equals()` before replacing the form at its original render location.
 - Result state comes from the WooCommerce order (paid, failed, cancelled, pending or unknown), not from the return query flag. Invalid tokens and non-Quick-Support orders keep the normal form output.
 - The AFE Templates tab has five editable status-specific HTML templates and optional CSS, with order/amount/category/transaction/status/date/message/retry tokens.
-- Regression test \`tests/quick-support-payment-return.php\` covers same-page success/cancel URLs, template rendering, status mapping, invalid tokens and CSS sanitization. Latest CI is pending at this snapshot; live Hosted/Redirect gateway acceptance remains required.
+- Regression test `tests/quick-support-payment-return.php` covers same-page success/cancel URLs, template rendering, status mapping, invalid/external tokens/URLs, array query inputs and CSS sanitization.
+- Quick Support focused CI [run 43406730380](https://github.com/mohsenfarhangi/bonyad-alavi-wp/actions/runs/43406730380) passed PHP syntax and all dedicated return tests. The separate AFE frontend CSS workflow [run 43406730348](https://github.com/mohsenfarhangi/bonyad-alavi-wp/actions/runs/43406730348) remains red because its export-profile regression fixtures fail and Playwright 1.58.2 does not support Chromium installation on the Ubuntu 26.04 runner; browser tests were skipped.
+- PR #39 remains open; merge/deploy and live Hosted/Redirect success/failure/cancel callback acceptance remain required.
 
 
 ## 2026-11-13 — AFE dev version 1.0.28-dev.11
