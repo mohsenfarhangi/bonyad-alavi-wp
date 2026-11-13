@@ -961,7 +961,7 @@ Modules: [MODULE-AFE](../modules/alavi-form-engine.md), [MODULE-JIHADI-FORM](../
 - Regression test `tests/quick-support-payment-return.php` covers same-page success/cancel URLs, template rendering, status mapping, invalid/external tokens/URLs, array query inputs and CSS sanitization.
 - Quick Support focused CI [run 43407814224](https://github.com/mohsenfarhangi/bonyad-alavi-wp/actions/runs/43407814224) passed PHP syntax and all dedicated return tests, including success, failed, cancelled, pending and unknown.
 - AFE frontend CSS/browser workflow [run 43407334326](https://github.com/mohsenfarhangi/bonyad-alavi-wp/actions/runs/43407334326) passed after pinning Ubuntu 24.04; Playwright checks passed at 360, 780, 782 and 1024px. Its non-blocking AFE regression-suite step still prints three export-profile/Jihadi fixture failures and is configured continue-on-error.
-- PR #39 remains open; merge/deploy and live Hosted/Redirect success/failure/cancel callback acceptance remain required.
+- At this pre-merge checkpoint PR #39 was still open. This snapshot is superseded by STATE-002-053 below.
 
 
 ## 2026-11-13 — AFE dev version 1.0.28-dev.11
@@ -975,6 +975,15 @@ Modules: [MODULE-AFE](../modules/alavi-form-engine.md), [MODULE-JIHADI-FORM](../
 - AFE provides the generic `afe_form_render_override` seam with its existing five-argument context contract; the Admin Templates tab stores five status-specific HTML templates and optional scoped CSS for Quick Support only.
 - Return URLs are same-site and carry a random per-order token. Rendering requires matching `created_via`, the Quick Support order marker and constant-time token comparison. Legacy order-key returns from the first main-branch draft remain supported.
 - AFE remains `1.0.28-dev.11`; DB schema remains `1.0.5-dev.2`. No production version bump is implied.
-- Focused Quick Support CI [run 43407814224](https://github.com/mohsenfarhangi/bonyad-alavi-wp/actions/runs/43407814224) passed. AFE frontend CSS/browser CI [run 43407334326](https://github.com/mohsenfarhangi/bonyad-alavi-wp/actions/runs/43407334326) passed Playwright at 360/780/782/1024px; its non-blocking AFE regression-suite step still reports three export-profile/Jihadi fixture failures.
+- At this pre-merge checkpoint, focused Quick Support CI [run 43407814224](https://github.com/mohsenfarhangi/bonyad-alavi-wp/actions/runs/43407814224) passed. The latest post-fix and pre-merge validations are recorded in STATE-002-053.
 - Deployment, real Hosted/Redirect gateway callbacks, success/failure/cancel/retry, Cart/Session/Persistent Cart, HPOS and Elementor Popup/Loop Grid/Single acceptance remain open.
 
+## STATE-002-053 — PR #39 squash-merged and latest CI state recorded (2026-11-13)
+
+- PR #39 was successfully squash-merged into `main` at 2026-11-13 11:02:55 UTC. Merge commit and `main` HEAD at this snapshot: `27ae5780fe245a6d71cd5af279284f328bcf5992`. PR is closed/merged; no deployment to the live WordPress site was performed in this task.
+- The merge includes the dedicated headerless `quick-support-payment` form, per-form hidden Step heading, CAPTCHA-before-submit placement, same-page WooCommerce return, five editable status templates and optional CSS.
+- Security/compatibility reconciliations retained AFE's five-argument `afe_form_render_override` contract, require both `created_via = ba_quick_support` and `_ba_quick_support = 1`, validate the random per-order token with constant-time comparison, and retain the legacy order-key return path and old saved return URL/template settings.
+- Latest Quick Support workflow [run 43413527210](https://github.com/mohsenfarhangi/bonyad-alavi-wp/actions/runs/43413527210) completed successfully.
+- Latest AFE frontend CSS/browser workflow [run 43413527323](https://github.com/mohsenfarhangi/bonyad-alavi-wp/actions/runs/43413527323) completed successfully at workflow level. CSS/version checks passed; Playwright passed at 360, 780, 782 and 1024px, including RTL select behavior and mocked form submission.
+- Important QA caveat: the workflow's `tools/qa.sh` sub-step reported three baseline Export/Jihadi fixture failures (`jihadi-output-profile`, `export-package-integration.php`, and `export-profile.php`). The step is explicitly `continue-on-error`, so the workflow and browser job completed successfully; the full AFE regression suite must not be described as fully passing until those fixtures are repaired.
+- Still pending: deploy the AFE plugin and child theme to staging/production as appropriate; verify real Hosted/Redirect gateway callbacks for success/failure/cancel/retry, same-page return and editable templates; test Cart/Session/Persistent Cart, HPOS, and Elementor Popup/Loop Grid/Single; complete the live form acceptance. AFE remains `1.0.28-dev.11`, DB remains `1.0.5-dev.2`; no release/version bump was made.
