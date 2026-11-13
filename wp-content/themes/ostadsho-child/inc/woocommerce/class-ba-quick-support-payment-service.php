@@ -11,6 +11,7 @@ final class BA_Quick_Support_Payment_Service
 {
     public const PRODUCT_MARKER = '_ba_quick_support_technical_product';
     public const ORDER_MARKER = '_ba_quick_support';
+    public const ORDER_CREATED_VIA = 'ba_quick_support';
     public const ORDER_CATEGORY_ID = '_ba_quick_support_category_id';
     public const ORDER_CATEGORY_SLUG = '_ba_quick_support_category_slug';
     public const ORDER_CATEGORY_TITLE = '_ba_quick_support_category_title';
@@ -290,7 +291,7 @@ final class BA_Quick_Support_Payment_Service
             if (!$order instanceof WC_Order) {
                 $order = wc_create_order([
                     'customer_id' => get_current_user_id(),
-                    'created_via' => 'ba_quick_support',
+                    'created_via' => self::ORDER_CREATED_VIA,
                 ]);
                 if (is_wp_error($order)) {
                     if (function_exists('wc_get_logger')) wc_get_logger()->error($order->get_error_message(), ['source'=>'ba-quick-support','submission_id'=>$submissionId]);
