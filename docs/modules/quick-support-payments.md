@@ -1,6 +1,6 @@
 # MODULE-QUICK-SUPPORT — Quick Support Payments
 
-**Status:** Phase 1, granular category permissions and Phase 2 reports are merged in [PR #34](https://github.com/mohsenfarhangi/bonyad-alavi-wp/pull/34), [PR #35](https://github.com/mohsenfarhangi/bonyad-alavi-wp/pull/35), [PR #36](https://github.com/mohsenfarhangi/bonyad-alavi-wp/pull/36) and [PR #37](https://github.com/mohsenfarhangi/bonyad-alavi-wp/pull/37). Main merge commit: `09cf9f1765d2b8f3fc73545426b5c07016a32340`.  
+**Status:** Quick Support Phase 1, granular category permissions, Phase 2 reports and strict report-source isolation are merged in [PRs #34–#38](https://github.com/mohsenfarhangi/bonyad-alavi-wp/pulls?q=is%3Apr+is%3Amerged+quick+support). Main merge commit after PR #38: `12145e323ba75aa45299e3d547e9803edfb36a04`. Dedicated form presentation and same-page payment return are implemented in [PR #39](https://github.com/mohsenfarhangi/bonyad-alavi-wp/pull/39); CI/review and live gateway acceptance remain pending.  
 **Decision:** [ADR-009](../decisions/ADR-009-quick-support-payments.md)  
 **Parent modules:** [MODULE-PARTICIPATION](participation-payments.md), [MODULE-AFE](alavi-form-engine.md), [MODULE-AFE-EXTENSION](alavi-form-engine-extension-api.md)
 
@@ -12,9 +12,9 @@
 
 ## Phase 1 Implementation Record — PR #34
 
-**Implementation status:** PRs #34, #35, #36 and #37 are merged. Generic Context, category CPT, shared form, direct WooCommerce payment and financial reporting dashboard are in main. Report-source isolation hardening is in [PR #38](https://github.com/mohsenfarhangi/bonyad-alavi-wp/pull/38) with CI passing; merge/deploy and live report/payment-flow acceptance remain pending.
+**Implementation status:** PRs #34–#38 are merged. Generic Context, category CPT, shared form, direct WooCommerce payment, financial reporting and strict report-source isolation are in main.
 
-Implemented in the current feature branch:
+Phase 1 implementation includes:
 
 - AFE generic Context Provider interface, registry and manager; signed form-bound token with 12-hour expiry and server-side provider revalidation.
 - Elementor Form Widget controls for Current Page, Fixed Category and Query Parameter (Slug/ID).
@@ -30,7 +30,19 @@ Implemented in the current feature branch:
 
 **Live acceptance still pending:** Hosted/Redirect gateway initiation and callback/return, preservation of the real Cart/Session/Persistent Cart, HPOS order creation, and confirmation of the Elementor Single/Popup/Loop Grid layouts on the target site. The project owner reported that the updated theme files were uploaded and confirmed Administrator access; this does not count as payment-flow acceptance.
 
-**Phase 2 implementation — PR #37 (merged):** adds the dedicated report submenu, financial aggregation, filters, paginated order list and CSV/XLSX exports. Report queries are restricted by both `created_via = ba_quick_support` and `_ba_quick_support = 1`, excluding product-based participation orders (`bap_quick_checkout`) from the dashboard, list and exports. Final focused CI [run 43395846166](https://github.com/mohsenfarhangi/bonyad-alavi-wp/actions/runs/43395846166) passed. Strict product-participation exclusion is additionally covered by [PR #38](https://github.com/mohsenfarhangi/bonyad-alavi-wp/pull/38), CI [run 43398110222](https://github.com/mohsenfarhangi/bonyad-alavi-wp/actions/runs/43398110222) passed. Deploy and live acceptance are pending.
+**Phase 2 implementation — PR #37 (merged):** adds the dedicated report submenu, financial aggregation, filters, paginated order list and CSV/XLSX exports. Report queries are restricted by both `created_via = ba_quick_support` and `_ba_quick_support = 1`, excluding product-based participation orders (`bap_quick_checkout`) from the dashboard, list and exports. Final focused CI [run 43395846166](https://github.com/mohsenfarhangi/bonyad-alavi-wp/actions/runs/43395846166) passed. **Strict product-participation exclusion — PR #38 (merged):** all report surfaces require both the creation source and Quick Support marker; focused CI [run 43398110222](https://github.com/mohsenfarhangi/bonyad-alavi-wp/actions/runs/43398110222) passed.
+
+## Phase 3 — Dedicated Payment Form and Same-page Return (PR #39)
+
+- The shared `quick-support-payment` form uses a code-defined form template containing only `{{steps}}`; its internal form header is omitted.
+- `hide_step_heading` removes `.afe-step-heading` for this form. `captcha_before_submit` places CAPTCHA after the final field and immediately before the submit actions.
+- The WooCommerce order stores the same-site page URL that hosted the form and a cryptographically random return token. The URL is resolved from the AJAX Referer, with the Quick Support category permalink as fallback.
+- WooCommerce success/return and cancel URLs are filtered for Quick Support orders only. Cancelled orders are first updated by WooCommerce, then redirected to the signed result URL on the original page.
+- AFE's generic `afe_form_render_override` hook lets the theme replace the form output at render time. A valid return token identifies the Quick Support order; the actual result is selected from the WooCommerce order status, never from the query flag alone.
+- The AFE «قالب‌ها» tab exposes five independent HTML templates (success, failed, cancelled, pending, unknown), their supported tokens and optional CSS. Invalid tokens leave the normal form unchanged.
+- Failure/cancellation templates can link back to the clean source page for a retry. Pending/unknown templates explicitly avoid claiming success or asking the donor to pay again before the status is clear.
+
+PR #39 implementation and regression checks are pending CI/review. No live gateway acceptance is claimed until a real Hosted/Redirect transaction is tested on the target site.
 
 ## Category Administration Capabilities
 
@@ -346,6 +358,13 @@ WooCommerce Order منبع قطعی مبلغ، ارز، Gateway، وضعیت پ�
 - محاسبه Refund جزئی/کامل و گزارش خالص
 - سازگاری HPOS
 - عدم Regression در پرداخت مشارکت فعلی
+- فرم پرداخت سریع بدون هدر داخلی و بدون `.afe-step-heading` رندر شود
+- کپچا دقیقاً بعد از آخرین فیلد و قبل از دکمه ارسال قرار گیرد
+- بازگشت موفق و لغوشده از درگاه به همان صفحه‌ای که فرم در آن قرار داشته است
+- پاسخ ناموفق، لغوشده، pending و unknown براساس وضعیت واقعی WooCommerce نمایش داده شود
+- پنج قالب نتیجه پرداخت و CSS تکمیلی فقط از تنظیمات فرم پرداخت سریع قابل ویرایش باشند
+- توکن بازگشت نامعتبر یا سفارش غیر Quick Support نباید خروجی فرم را جایگزین کند
+- درگاه و سفارش‌های عادی WooCommerce/مشارکت از فیلترهای بازگشت Quick Support متأثر نشوند
 
 ## Non-goals for Version 1
 
