@@ -902,3 +902,12 @@ Modules: [MODULE-AFE](../modules/alavi-form-engine.md), [MODULE-JIHADI-FORM](../
 - PR #36 پنج capability مستقل view/create/edit/publish/delete اضافه می‌کند. primitive `edit_posts` برای دسترسی به فهرست به capability مشاهده نگاشت می‌شود و عملیات سطح نوشته مستقل می‌مانند.
 - Administrator همه پنج مجوز را از طریق migration نسخه‌دار یک‌باره دریافت می‌کند. سایر نقش‌ها خودکار مجوز نمی‌گیرند و هر مجوز در PublishPress Capabilities تنظیم می‌شود.
 - تست regression برای migration و عدم اعطای خودکار به نقش سفارشی و Editor اضافه شد. پذیرش نهایی به CI، merge، deploy و تست زنده نیاز دارد.
+
+
+## 2026-11-13 — Quick Support Phase 1 acceptance and Phase 2 reports
+
+- PR #34, #35 and #36 are merged into `main`. Current main merge commit after PR #36: `9bc9ed6427d845af3595f79499d18197ed756eda`.
+- مدیر پروژه تأیید کرد دسترسی مدیر کل به منوی پرداخت سریع برطرف شده است. REST API برای CPT در context=edit نیز موفق است. پنج capability دسته‌بندی فقط به Administrator به‌صورت خودکار داده می‌شوند؛ سایر نقش‌ها را مدیر سایت در PublishPress تنظیم می‌کند.
+- پذیرش زنده پرداخت هنوز باز است: Hosted/Redirect، callback/return، حفظ Cart/Session/Persistent Cart، HPOS و Elementor templates.
+- Phase 2 dashboard/reporting در branch `feat/quick-support-reports-phase2-20261113` و PR #37 توسعه یافته است: KPIها، breakdown دسته/درگاه/روز/ماه، فیلترهای POST، سفارش‌های صفحه‌بندی‌شده، لینک Order و AFE Submission، CSV/XLSX export و capabilityهای جداگانه view/export. فقط Administrator به‌صورت پیش‌فرض مجوزهای گزارش را می‌گیرد.
+- CI نهایی branch در [run 43395846166](https://github.com/mohsenfarhangi/bonyad-alavi-wp/actions/runs/43395846166) PASS شد. PR #37 منتظر review/merge و سپس staging/live report acceptance است.

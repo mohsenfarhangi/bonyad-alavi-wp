@@ -1,6 +1,6 @@
 # MODULE-QUICK-SUPPORT — Quick Support Payments
 
-**Status:** Phase 1 merged in [PR #34](https://github.com/mohsenfarhangi/bonyad-alavi-wp/pull/34); granular category capabilities are implemented in [PR #36](https://github.com/mohsenfarhangi/bonyad-alavi-wp/pull/36); staging acceptance pending  
+**Status:** Phase 1 and granular category permissions merged in [PR #34](https://github.com/mohsenfarhangi/bonyad-alavi-wp/pull/34), [PR #35](https://github.com/mohsenfarhangi/bonyad-alavi-wp/pull/35) and [PR #36](https://github.com/mohsenfarhangi/bonyad-alavi-wp/pull/36); Phase 2 reports implemented in [PR #37](https://github.com/mohsenfarhangi/bonyad-alavi-wp/pull/37), review pending  
 **Decision:** [ADR-009](../decisions/ADR-009-quick-support-payments.md)  
 **Parent modules:** [MODULE-PARTICIPATION](participation-payments.md), [MODULE-AFE](alavi-form-engine.md), [MODULE-AFE-EXTENSION](alavi-form-engine-extension-api.md)
 
@@ -8,11 +8,11 @@
 
 پرداخت سریع مشارکت مردمی برای حمایت از یکی از دسته‌بندی‌های موضوعی بنیاد علوی، بدون انتخاب پروژه یا محصول توسط پرداخت‌کننده. یک فرم مشترک اطلاعات پرداخت‌کننده را می‌گیرد و پرداخت را مستقیماً از طریق درگاه WooCommerce انجام می‌دهد.
 
-این سند مرجع طراحی و پیاده‌سازی است. فاز اول در PR #34 به main ادغام شده است؛ بااین‌حال پذیرش staging و تأیید دسترسی نقش‌های مدیریتی هنوز باز است.
+این سند مرجع طراحی و پیاده‌سازی است. فاز اول و اصلاح مجوزهای دسته‌بندی به main ادغام شده‌اند. دسترسی مدیر کل روی سایت تأیید شده است؛ پذیرش عملیاتی درگاه و مسیر بازگشت پرداخت همچنان باید در محیط آزمایشی انجام شود.
 
 ## Phase 1 Implementation Record — PR #34
 
-**Implementation status:** Phase 1 merged; role-capability correction in PR #35; staging acceptance pending.
+**Implementation status:** PRs #34, #35 and #36 merged. Generic Context, category CPT, shared form and direct WooCommerce payment code are in main. Administrator access was confirmed on the live WordPress site; payment/gateway staging acceptance remains pending.
 
 Implemented in the current feature branch:
 
@@ -20,7 +20,7 @@ Implemented in the current feature branch:
 - Elementor Form Widget controls for Current Page, Fixed Category and Query Parameter (Slug/ID).
 - Context is carried separately from applicant data through ActionContext and is available to context-aware validators and dynamic data sources.
 - Generic single-option dynamic Select rendering and visible downstream Action errors.
-- `ba_quick_support` CPT, four seeded categories, category meta settings, category management for Administrator and trusted roles with `manage_options`, and Elementor CPT support.
+- `ba_quick_support` CPT, four seeded categories, category meta settings, Elementor CPT support and five independent category capabilities. Only the built-in Administrator receives them automatically; other roles are configured manually in PublishPress Capabilities.
 - Shared AFE form `quick-support-payment`, required/optional field rules, province/county dependency and server-side amount-range validation.
 - Dedicated payment Action and WooCommerce order service, shared technical product, per-submission lock/idempotency, retry recovery and gateway allowlists.
 - Existing participation Gateway service extended with exact gateway resolution and optional internal isolated-cart item data.
@@ -28,13 +28,13 @@ Implemented in the current feature branch:
 
 **Focused CI:** [run 43309991432](https://github.com/mohsenfarhangi/bonyad-alavi-wp/actions/runs/43311051009) passed PHP syntax, AFE Context/validator tests, Quick Support category/form/payment-rule tests, existing theme form regressions and JavaScript syntax on the PR branch.
 
-**Not yet accepted:** live hosted/redirect gateway initiation and callback, real Cart/Session/Persistent Cart preservation on staging, HPOS order creation, and Elementor Single/Popup/Loop Grid configuration on the target site. No production deployment has occurred.
+**Live acceptance still pending:** Hosted/Redirect gateway initiation and callback/return, preservation of the real Cart/Session/Persistent Cart, HPOS order creation, and confirmation of the Elementor Single/Popup/Loop Grid layouts on the target site. The project owner reported that the updated theme files were uploaded and confirmed Administrator access; this does not count as payment-flow acceptance.
 
-**Phase 2 remains out of scope:** Quick Support dashboard, financial aggregation, filters and Excel/CSV exports.
+**Phase 2 implementation — PR #37:** adds the dedicated report submenu, financial aggregation, filters, paginated order list and CSV/XLSX exports. Final focused CI [run 43395846166](https://github.com/mohsenfarhangi/bonyad-alavi-wp/actions/runs/43395846166) passed; merge and live acceptance are pending.
 
 ## Category Administration Capabilities
 
-Implemented in PR #36; merge and live acceptance pending.
+Implemented and merged in PR #36. Administrator category-list access was subsequently confirmed on the live site.
 
 | Operation | Capability |
 |---|---|
@@ -163,7 +163,7 @@ Slug شناسه عمومی و پایدار URL است؛ شناسه عددی Post
 - Context نباید به‌عنوان فیلد قابل مشاهده/ویرایش کاربر یا مقدار عادی `data_json` تلقی شود.
 - نام دسته، مبلغ یا درگاه از مرورگر مرجع نهایی نیست؛ Action پرداخت همه موارد را مجدداً از تنظیمات دسته و WooCommerce بررسی می‌کند.
 
-API نام‌گذاری‌شده در بالا **قرارداد هدف** است و هنوز در AFE پیاده‌سازی نشده است. جزئیات امضای token، lifecycle و متدهای PHP باید هنگام پیاده‌سازی با الگوی فعلی AFE و تست‌های آن تثبیت شود.
+این قرارداد عمومی در AFE پیاده‌سازی شده است: Provider registry/manager، توکن امضاشده محدود به فرم با انقضای ۱۲ ساعته، revalidation سمت سرور و انتقال Context تغییرناپذیر و جدا از داده متقاضی در ActionContext. پیاده‌سازی در PR #34 ادغام شده است.
 
 ## Direct WooCommerce Payment
 
@@ -285,13 +285,7 @@ WooCommerce Order منبع قطعی مبلغ، ارز، Gateway، وضعیت پ�
 
 ### Capabilities
 
-گزارش، مشاهده اطلاعات شخصی و خروجی باید با Capabilityهای اختصاصی و مجوزهای نقش کنترل شوند. پیشنهاد نام capabilityها:
-
-- `manage_ba_quick_support_categories`
-- `view_ba_quick_support_reports`
-- `export_ba_quick_support_reports`
-
-دسترسی به نقش پیش‌فرض `administrator` و نقش‌های مدیریتی سفارشی که از قبل `manage_options` دارند داده شود؛ نقش‌های عادی مانند Editor نباید این دسترسی را دریافت کنند. پیاده‌سازی اصلاح‌شده این رفتار در PR #35 ثبت شده است.
+گزارش و مشاهده اطلاعات شخصی با `view_ba_quick_support_reports` و خروجی با `export_ba_quick_support_reports` کنترل می‌شوند. هر دو مجوز به‌صورت پیش‌فرض فقط به نقش `administrator` داده می‌شوند. سایر نقش‌ها هیچ دسترسی خودکاری ندارند و مدیر سایت در صورت نیاز می‌تواند هر مجوز را مستقلاً در PublishPress Capabilities اختصاص دهد. مجوزهای دسته‌بندی نیز پنج capability مستقل view/create/edit/publish/delete دارند؛ جزئیات در بخش Category Administration Capabilities ثبت شده است.
 
 ## Security and Reliability
 
@@ -320,13 +314,14 @@ WooCommerce Order منبع قطعی مبلغ، ارز، Gateway، وضعیت پ�
 
 ### Phase 2 — Dashboard and Reports
 
-- داشبورد اختصاصی
-- گزارش دسته/Gateway/بازه زمانی
-- فیلتر و جستجو
-- خروجی Excel/CSV
-- مجوزها و لینک Order ↔ Submission
+- [x] داشبورد اختصاصی و کارت‌های شاخص مالی
+- [x] گزارش دسته/Gateway/بازه زمانی روزانه و ماهانه
+- [x] فیلتر و جستجو با ارسال POST تا اطلاعات شخصی وارد URL نشوند
+- [x] خروجی Excel/CSV با مجوز مستقل Export
+- [x] لینک Order ↔ Submission و صفحه‌بندی سفارش‌ها
+- [x] محاسبه خالص پس از Refund جزئی/کامل با WooCommerce CRUD و سازگار با HPOS
 
-تغییرات در PRهای مستقل و قابل بازبینی انجام شوند: فاز اول برای Context/فرم/پرداخت و فاز دوم برای گزارش‌گیری.
+پیاده‌سازی در [PR #37](https://github.com/mohsenfarhangi/bonyad-alavi-wp/pull/37) است؛ تا زمان Merge و پذیرش زنده، آن را روی سایت فعال فرض نکن.
 
 ## Acceptance Tests
 
