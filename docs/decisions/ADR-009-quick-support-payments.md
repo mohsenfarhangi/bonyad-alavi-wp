@@ -66,6 +66,7 @@
 - AFE exposes the generic `afe_form_render_override` filter. The theme integration checks the Quick Support order marker and uses constant-time comparison for the stored return token before replacing the form output at its original location.
 - The result template is chosen from the actual WooCommerce order state: paid, failed, cancelled, pending or unknown. The query string alone is never interpreted as payment success.
 - The AFE «قالب‌ها» tab exposes five separate HTML templates and optional CSS for this form only. Supported tokens include order number, amount, category, transaction ID, status, date, message and retry URL.
+- Quick Support focused CI [run 43406730380](https://github.com/mohsenfarhangi/bonyad-alavi-wp/actions/runs/43406730380) passed, including PHP lint and the dedicated payment-return regression test. The separate AFE frontend CSS workflow [run 43406730348](https://github.com/mohsenfarhangi/bonyad-alavi-wp/actions/runs/43406730348) is not green due to missing export-profile test fixtures and Playwright's lack of Ubuntu 26.04 support; browser checks did not execute.
 
 ### Gateway Selection
 
