@@ -1000,3 +1000,7 @@ Modules: [MODULE-AFE](../modules/alavi-form-engine.md), [MODULE-JIHADI-FORM](../
 - Local implementation distinguishes explicit authenticated SEP user-cancellation callbacks with a signed presentation notice, without changing order status; paid status takes precedence. Prior callback URLs cannot recover the original State. Focused local tests passed; live deployment and acceptance remain pending.
 
 - 2026-11-13: The project owner confirmed the cancellation flow works on the live site. This is limited to the reported cancellation flow; full payment and cart/session acceptance remain separate.
+
+## 2026-11-13 — Quick Support personal fields
+
+- Removed province, county, national ID and email from the shared Quick Support form definition at the owner’s request. Name, surname, mobile, amount and optional gateway selection remain. Existing submissions are not deleted. Live WordPress acceptance and saved form overrides need verification.

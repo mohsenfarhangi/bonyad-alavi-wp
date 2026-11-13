@@ -21,7 +21,7 @@ Implemented and merged in main:
 - Context is carried separately from applicant data through ActionContext and is available to context-aware validators and dynamic data sources.
 - Generic single-option dynamic Select rendering and visible downstream Action errors.
 - `ba_quick_support` CPT, four seeded categories, category meta settings, Elementor CPT support and five independent category capabilities. Only the built-in Administrator receives them automatically; other roles are configured manually in PublishPress Capabilities.
-- Shared AFE form `quick-support-payment`, required/optional field rules, province/county dependency and server-side amount-range validation.
+- Shared AFE form `quick-support-payment`, required identity fields and server-side amount-range validation.
 - Dedicated payment Action and WooCommerce order service, shared technical product, per-submission lock/idempotency, retry recovery and gateway allowlists.
 - Existing participation Gateway service extended with exact gateway resolution and optional internal isolated-cart item data.
 - Suggested amount/limit UI and customer gateway-selection setting.
@@ -132,18 +132,11 @@ Slug شناسه عمومی و پایدار URL است؛ شناسه عددی Post
 | `mobile` | شماره همراه | Tel + Iran mobile validator | بله |
 | `first_name` | نام | Text | بله |
 | `last_name` | نام خانوادگی | Text | بله |
-| `province` | استان | Geo Select، level=`province` | خیر |
-| `county` | شهر | Geo Select، level=`county`، وابسته به `province` | خیر |
-| `national_id` | کد ملی | Text + national ID validator | خیر |
-| `email` | ایمیل | Email | خیر |
 | `amount` | مبلغ | Number / amount input | بله |
 | `payment_gateway` | درگاه پرداخت | Dynamic Select | فقط در صورت فعال بودن انتخاب درگاه |
 
 قواعد تکمیلی:
 
-- اگر `county` انتخاب شود، `province` نیز باید انتخاب شده باشد.
-- شهرستان باید متعلق به استان انتخاب‌شده باشد.
-- کد ملی و ایمیل در صورت ورود باید معتبر باشند؛ خالی بودن آن‌ها مجاز است.
 - حداقل/حداکثر مبلغ و مبالغ پیشنهادی از دسته فعال خوانده شوند.
 - مبلغ در سمت سرور دوباره نرمال‌سازی و اعتبارسنجی شود.
 - مبلغ و نماد/تعداد اعشار از تنظیمات WooCommerce گرفته شود؛ واحد پول hard-code نشود.
@@ -251,7 +244,7 @@ Action پس از ثبت موفق Submission اجرا می‌شود و با Conte
 | `_ba_quick_support_amount` | مبلغ مشارکت |
 | `_ba_quick_support_gateway_id` | شناسه دقیق درگاه |
 
-نام، نام خانوادگی، موبایل و ایمیل در Billing استاندارد سفارش قرار می‌گیرند. استان، شهرستان و کد ملی در Submission AFE باقی می‌مانند و بی‌دلیل در چند محل تکثیر نمی‌شوند.
+نام، نام خانوادگی و موبایل در Billing سفارش قرار می‌گیرند. ثبت‌های پیشین و داده‌های موجود بدون تغییر باقی می‌مانند.
 
 ## Gateway Selection
 
@@ -351,8 +344,6 @@ WooCommerce Order منبع قطعی مبلغ، ارز، Gateway، وضعیت پ�
 - نمایش خودکار دسته‌های فعال در Loop Grid و حذف دسته غیرفعال
 - رندر فرم مشترک در چهار صفحه
 - required/optional fields مطابق این سند
-- وابستگی county به province و اعتبارسنجی سمت سرور
-- اعتبارسنجی کد ملی و ایمیل فقط در صورت ورود
 - دریافت صحیح currency/symbol/decimals از WooCommerce
 - اعتبارسنجی min/max و suggested amounts دسته
 - انتخاب درگاه خاموش/روشن، allowlist عمومی و override دسته

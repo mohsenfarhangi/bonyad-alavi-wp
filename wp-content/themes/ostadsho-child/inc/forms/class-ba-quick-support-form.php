@@ -7,7 +7,6 @@ use BonyadAlavi\FormEngine\DataSource\DataSourceManager;
 use BonyadAlavi\FormEngine\Form\Form;
 use BonyadAlavi\FormEngine\Form\FormRegistry;
 use BonyadAlavi\FormEngine\Form\Step;
-use BonyadAlavi\FormEngine\Form\Fields\EmailField;
 use BonyadAlavi\FormEngine\Form\Fields\SelectField;
 use BonyadAlavi\FormEngine\Form\Fields\TelField;
 use BonyadAlavi\FormEngine\Form\Fields\TextField;
@@ -138,43 +137,6 @@ final class BA_Quick_Support_Form
                 ->label('نام خانوادگی')
                 ->attributes(['autocomplete'=>'family-name'])
                 ->required()
-                ->width(6),
-
-            SelectField::make('province')
-                ->label('استان')
-                ->source(['type'=>'geo','level'=>'province'])
-                ->native()
-                ->width(6),
-
-            SelectField::make('county')
-                ->label('شهرستان')
-                ->source(['type'=>'geo','level'=>'county','parent'=>'province'])
-                ->dependsOn('province')
-                ->native()
-                ->meta('validators', [[
-                    'key'=>'ba_qs_county_in_province',
-                    'message'=>'ابتدا استان را انتخاب کنید و سپس شهرستان همان استان را انتخاب کنید.',
-                ]])
-                ->width(6),
-
-            TextField::make('national_id')
-                ->label('کد ملی')
-                ->rule('national_id')
-                ->attributes([
-                    'maxlength'=>10,
-                    'minlength'=>10,
-                    'pattern'=>'[0-9]{10}',
-                    'inputmode'=>'numeric',
-                    'autocomplete'=>'off',
-                    'data-afe-digits-only'=>'1',
-                    'data-afe-invalid-message'=>'کد ملی واردشده معتبر نیست.',
-                ])
-                ->width(6),
-
-            EmailField::make('email')
-                ->label('ایمیل')
-                ->rule('email')
-                ->attributes(['autocomplete'=>'email'])
                 ->width(6),
 
             TextField::make('amount')

@@ -121,17 +121,8 @@ $checks = [
         && !empty($fields['first_name']['required'])
         && !empty($fields['last_name']['required'])
         && !empty($fields['amount']['required']),
-    'optional-province-county-national-id-email' => empty($fields['province']['required'])
-        && empty($fields['county']['required'])
-        && empty($fields['national_id']['required'])
-        && empty($fields['email']['required']),
+    'only-requested-personal-fields' => !isset($fields['province']) && !isset($fields['county']) && !isset($fields['national_id']) && !isset($fields['email']),
     'iran-mobile-09-rule' => !empty($fields['mobile']['rules']['mobile_09']),
-    'national-id-rule' => !empty($fields['national_id']['rules']['national_id']),
-    'email-rule' => !empty($fields['email']['rules']['email']),
-    'county-geo-dependency' => ($fields['county']['source']['type'] ?? '') === 'geo'
-        && ($fields['county']['source']['level'] ?? '') === 'county'
-        && ($fields['county']['depends_on'] ?? '') === 'province'
-        && ($fields['county']['validators'][0]['key'] ?? '') === 'ba_qs_county_in_province',
     'amount-context-validator' => ($fields['amount']['validators'][0]['key'] ?? '') === 'ba_qs_amount_limits',
     'amount-label-includes-currency' => ($fields['amount']['label'] ?? '') === 'مبلغ حمایت (تومان)',
     'amount-description-removed' => empty($fields['amount']['description']),
