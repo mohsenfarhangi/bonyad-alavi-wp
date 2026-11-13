@@ -54,7 +54,7 @@ BA_Quick_Support_Form::register($registry);
 $form = $registry->get(BA_Quick_Support_Form::SLUG)->toArray();
 $fields = quick_support_fields($form);
 
-$rendererReflection = new ReflectionClass(\\BonyadAlavi\\FormEngine\\Form\\Renderer::class);
+$rendererReflection = new ReflectionClass(\BonyadAlavi\FormEngine\Form\Renderer::class);
 $renderer = $rendererReflection->newInstanceWithoutConstructor();
 $headingRenderer = $rendererReflection->getMethod('renderStepHeading');
 $headingRenderer->setAccessible(true);
