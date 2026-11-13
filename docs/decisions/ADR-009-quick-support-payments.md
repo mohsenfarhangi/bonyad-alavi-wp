@@ -2,7 +2,7 @@
 
 **Status:** Accepted  
 **Date recorded:** 2026-11-12  
-**Implementation status:** Phase 1 and category capability model merged in [PR #34](https://github.com/mohsenfarhangi/bonyad-alavi-wp/pull/34), [PR #35](https://github.com/mohsenfarhangi/bonyad-alavi-wp/pull/35) and [PR #36](https://github.com/mohsenfarhangi/bonyad-alavi-wp/pull/36). Phase 2 dashboard/reporting implementation is in [PR #37](https://github.com/mohsenfarhangi/bonyad-alavi-wp/pull/37); review/merge and live acceptance pending.
+**Implementation status:** Phase 1, category capability model and Phase 2 dashboard/reporting merged in [PR #34](https://github.com/mohsenfarhangi/bonyad-alavi-wp/pull/34), [PR #35](https://github.com/mohsenfarhangi/bonyad-alavi-wp/pull/35), [PR #36](https://github.com/mohsenfarhangi/bonyad-alavi-wp/pull/36) and [PR #37](https://github.com/mohsenfarhangi/bonyad-alavi-wp/pull/37). Main merge commit: `09cf9f1765d2b8f3fc73545426b5c07016a32340`. Live acceptance remains pending.
 
 ## Context
 
