@@ -16,6 +16,8 @@ function sanitize_key(string $key): string {
 function esc_html(string $value): string {
     return htmlspecialchars($value, ENT_QUOTES, 'UTF-8');
 }
+function get_woocommerce_currency_symbol(): string { return 'تومان'; }
+function wp_strip_all_tags(string $value): string { return strip_tags($value); }
 
 final class BA_Participation_Payment_Gateway_Service
 {
@@ -27,7 +29,7 @@ spl_autoload_register(static function(string $class) use ($pluginRoot): void {
     $prefix = 'BonyadAlavi\\FormEngine\\';
     if (!str_starts_with($class, $prefix)) return;
     $file = $pluginRoot . '/src/' . str_replace('\\', '/', substr($class, strlen($prefix))) . '.php';
-    if (is_readable($file)) require_once $file;
+    if (is_file($file)) require_once $file;
 });
 
 require_once dirname(__DIR__) . '/inc/quick-support/class-ba-quick-support-category.php';
@@ -131,6 +133,8 @@ $checks = [
         && ($fields['county']['depends_on'] ?? '') === 'province'
         && ($fields['county']['validators'][0]['key'] ?? '') === 'ba_qs_county_in_province',
     'amount-context-validator' => ($fields['amount']['validators'][0]['key'] ?? '') === 'ba_qs_amount_limits',
+    'amount-label-includes-currency' => ($fields['amount']['label'] ?? '') === 'مبلغ حمایت (تومان)',
+    'amount-description-removed' => empty($fields['amount']['description']),
     'payment-action-registered-in-form' => ($form['actions'][0]['type'] ?? '') === 'ba_quick_support_payment',
     'payment-action-handler-registered' => $actionRegistry->has('ba_quick_support_payment')
         && $actionRegistry->handler('ba_quick_support_payment') instanceof BA_Quick_Support_Payment_Action,

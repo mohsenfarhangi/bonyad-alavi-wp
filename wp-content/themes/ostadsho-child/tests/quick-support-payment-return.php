@@ -66,6 +66,8 @@ function wp_add_inline_style(string $handle, string $css): bool {
     return true;
 }
 function nocache_headers(): void {}
+function get_query_var(string $key): mixed { return $GLOBALS['ba_qs_query_vars'][$key] ?? ''; }
+function wc_get_checkout_url(): string { return 'https://bonyadalavi.ir/checkout/'; }
 
 final class BA_Quick_Support_Payment_Service
 {
@@ -118,6 +120,23 @@ $GLOBALS['ba_qs_order'] = new BA_QS_Test_Order([
     BA_Quick_Support_Payment_Service::ORDER_RETURN_TOKEN => 'return-secret',
     BA_Quick_Support_Payment_Service::ORDER_CATEGORY_TITLE => 'توانمندسازی اقتصادی',
 ]);
+
+$GLOBALS['ba_qs_query_vars']['order-pay'] = 321;
+$_GET = ['key'=>'order-key-secret'];
+$callbackUrl = BA_Quick_Support_Payment_Return::filterSepCallbackUrl('https://bonyadalavi.ir/?wc-api=WC_Sep_Payment_Gateway', 'WC_Sep_Payment_Gateway');
+parse_str((string)parse_url($callbackUrl, PHP_URL_QUERY), $callbackQuery);
+$_GET = ['wc-api'=>'WC_Sep_Payment_Gateway', 'wc_order'=>'321', 'ba_qs_callback_token'=>'return-secret'];
+$sepRedirect = BA_Quick_Support_Payment_Return::filterSepFailureRedirect(wc_get_checkout_url(), 302);
+unset($_GET['wc-api']);
+$GLOBALS['wp'] = (object)['query_vars'=>['wc-api'=>'wc_sep_payment_gateway']];
+$prettySepRedirect = BA_Quick_Support_Payment_Return::filterSepFailureRedirect(wc_get_checkout_url(), 302);
+unset($GLOBALS['wp']);
+$_GET['wc-api'] = 'WC_Sep_Payment_Gateway';
+$_GET['ba_qs_callback_token'] = 'wrong';
+$badSepRedirect = BA_Quick_Support_Payment_Return::filterSepFailureRedirect(wc_get_checkout_url(), 302);
+$_GET['ba_qs_callback_token'] = 'return-secret';
+$_GET['wc-api'] = 'other-gateway';
+$otherSepRedirect = BA_Quick_Support_Payment_Return::filterSepFailureRedirect(wc_get_checkout_url(), 302);
 
 $definitions = BA_Quick_Support_Payment_Return::templateDefinitions([], 'quick-support-payment');
 $returnUrl = BA_Quick_Support_Payment_Return::filterReturnUrl('https://example.com/order-received/', $GLOBALS['ba_qs_order']);
@@ -199,6 +218,11 @@ $legacyHtml = BA_Quick_Support_Payment_Return::renderResult(
 );
 
 $checks = [
+    'sep-callback-carries-token' => ($callbackQuery['ba_qs_callback_token'] ?? '') === 'return-secret',
+    'sep-failure-returns-to-form' => str_starts_with($sepRedirect, $baseUrl),
+    'sep-pretty-permalink-returns-to-form' => str_starts_with($prettySepRedirect, $baseUrl),
+    'sep-invalid-token-keeps-checkout' => $badSepRedirect === wc_get_checkout_url(),
+    'other-gateway-keeps-checkout' => $otherSepRedirect === wc_get_checkout_url(),
     'five-editable-status-templates' => count($definitions) === 5
         && isset($definitions['success'], $definitions['failed'], $definitions['cancelled'], $definitions['pending'], $definitions['unknown']),
     'success-return-uses-original-page-and-signed-token' => str_starts_with($returnUrl, $baseUrl)
@@ -216,8 +240,9 @@ $checks = [
     'cancelled-order-uses-cancelled-template' => is_string($cancelledHtml) && str_contains($cancelledHtml, 'پرداخت لغوشده'),
     'unknown-order-uses-unknown-template' => is_string($unknownHtml) && str_contains($unknownHtml, 'وضعیت نامشخص'),
     'invalid-return-token-does-not-replace-form' => $invalidToken === 'normal-form',
-    'unsafe-css-import-is-not-emitted' => !str_contains($GLOBALS['ba_qs_inline_css'], '@import')
-        && !str_contains($GLOBALS['ba_qs_inline_css'], 'url('),
+    'result-styles-are-rendered-after-head' => is_string($successHtml) && str_contains($successHtml, '<style>') && str_contains($successHtml, '.custom-result{color:#176b4c}'),
+    'unsafe-css-import-is-not-emitted' => !str_contains($successHtml, '@import')
+        && !str_contains($successHtml, 'url('),
     'unsafe-external-return-url-is-rejected' => $externalReturnUrl === 'https://bonyadalavi.ir/thank-you/',
     'unrelated-order-return-url-is-unchanged' => $unrelatedReturnUrl === 'https://bonyadalavi.ir/thank-you/',
     'order-received-url-filter-is-registered' => !empty($GLOBALS['ba_qs_filters']['woocommerce_get_checkout_order_received_url']),

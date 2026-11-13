@@ -27,6 +27,31 @@
         var input = field ? field.querySelector('input[name="afe_data[amount]"]') : null;
         if (!field || !input) return;
 
+        function groupInput() {
+            var start = input.selectionStart;
+            var raw = input.value.replace(/[۰-۹٠-٩]/g, function (digit) {
+                var code = digit.charCodeAt(0);
+                return String(code >= 1776 ? code - 1776 : code - 1632);
+            }).replace(/٬/g, ',').replace(/٫/g, '.');
+            var before = raw.slice(0, start == null ? raw.length : start).replace(/,/g, '').length;
+            var parts = raw.replace(/,/g, '').split('.');
+            var integer = parts.shift().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+            var formatted = integer + (parts.length ? '.' + parts.join('.') : '');
+            // Never let the form engine's maxlength enforcement truncate digits on blur.
+            if (input.maxLength > 0 && formatted.length > input.maxLength) return;
+            input.value = formatted;
+            if (start != null) {
+                var pos = 0, seen = 0;
+                while (pos < formatted.length && seen < before) {
+                    if (formatted.charAt(pos) !== ',') seen++;
+                    pos++;
+                }
+                input.setSelectionRange(pos, pos);
+            }
+        }
+        input.addEventListener('input', groupInput);
+        groupInput();
+
         if (Array.isArray(context.suggested_amounts) && context.suggested_amounts.length) {
             var group = document.createElement('div');
             group.className = 'ba-qs-amount-suggestions';

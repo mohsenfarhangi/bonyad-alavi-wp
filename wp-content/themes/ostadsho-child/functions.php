@@ -168,10 +168,6 @@ require_once get_stylesheet_directory() . '/inc/woocommerce/class-ba-woocommerce
 // پرداخت سریع دسته‌ای و Context Provider عمومی AFE.
 
 add_action( 'wp_enqueue_scripts', function () {
-	if ( ! is_singular( 'ba_quick_support' ) ) {
-		return;
-	}
-
 	$theme_dir = get_stylesheet_directory();
 	$theme_uri = get_stylesheet_directory_uri();
 	$style_path = '/assets/css/ba-quick-support-form.css';

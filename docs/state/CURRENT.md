@@ -18,6 +18,13 @@
 
 AFE release goal همچنان live acceptance نسخه 1.0.28 و رفع blocker واقعی پیش از production promotion است.
 
+## Quick Support — payment return follow-up (2026-11-13)
+
+- سفارش 30254 پرداخت موفق و بازگشت به فرم را در سایت نشان داد؛ سفارش 30253 پس از لغو سامان به تسویه‌حساب رفت و pending ماند (گزارش مدیر و خواندن وضعیت سفارش‌ها).
+- اصلاح محلی: CSS نتیجه همراه خروجی، برچسب مبلغ با واحد پول، حذف توضیح مبلغ و جداسازی سه‌رقمی ورودی؛ callback سامان برای سفارش Quick Support با توکن بازگشت تأییدشده، مسیر خطای checkout را به نتیجه فرم می‌برد. وضعیت نتیجه همچنان از سفارش است، نه پارامتر برگشتی بانک.
+- مدیر بخشی از تغییرات اولیه را پیش از تکمیل روی سایت بارگذاری کرده است؛ اصلاح callback و نسخه نهایی به‌صورت زنده تأیید نشده‌اند. آزمون واقعی موفق/لغو، نمایش نتیجه، مبلغ و حفظ سبد ضروری است؛ callbackهای قبلی فاقد توکن جدید همچنان رفتار درگاه را حفظ می‌کنند.
+- آزمون‌های محلی quick-support-form-definition، quick-support-payment-rules، quick-support-payment-return و quick-support-amount-format و syntax PHP/JS موفق شدند؛ این‌ها پذیرش درگاه واقعی نیستند.
+
 ## Quick Support — Phase 1 access accepted; Phase 2 reports merged (2026-11-13)
 
 - PRs #34 (Context/category/form/payment), #35 (role capability correction), #36 (granular category permissions), #37 (reports/dashboard), #38 (report-source isolation) and #39 (dedicated form + same-page payment return) are merged into `main`. PR #39 squash merge commit / current `main` HEAD at this snapshot: `27ae5780fe245a6d71cd5af279284f328bcf5992` (2026-11-13 11:02:55 UTC).

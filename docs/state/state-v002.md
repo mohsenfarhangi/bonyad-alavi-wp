@@ -987,3 +987,9 @@ Modules: [MODULE-AFE](../modules/alavi-form-engine.md), [MODULE-JIHADI-FORM](../
 - Latest AFE frontend CSS/browser workflow [run 43413527323](https://github.com/mohsenfarhangi/bonyad-alavi-wp/actions/runs/43413527323) completed successfully at workflow level. CSS/version checks passed; Playwright passed at 360, 780, 782 and 1024px, including RTL select behavior and mocked form submission.
 - Important QA caveat: the workflow's `tools/qa.sh` sub-step reported three baseline Export/Jihadi fixture failures (`jihadi-output-profile`, `export-package-integration.php`, and `export-profile.php`). The step is explicitly `continue-on-error`, so the workflow and browser job completed successfully; the full AFE regression suite must not be described as fully passing until those fixtures are repaired.
 - Still pending: deploy the AFE plugin and child theme to staging/production as appropriate; verify real Hosted/Redirect gateway callbacks for success/failure/cancel/retry, same-page return and editable templates; test Cart/Session/Persistent Cart, HPOS, and Elementor Popup/Loop Grid/Single; complete the live form acceptance. AFE remains `1.0.28-dev.11`, DB remains `1.0.5-dev.2`; no release/version bump was made.
+
+## 2026-11-13 — Quick Support payment return follow-up
+
+- Live order 30254 completed and returned to the form; order 30253 remained pending after cancellation and the SEP gateway redirected to checkout.
+- Local changes add authenticated SEP callback return handling, result CSS emitted with the result, currency in the amount label and grouped amount input. The order status remains the source of truth. Earlier partial edits were uploaded by the owner; final deployment and live acceptance have not been verified.
+- Local quick-support form, payment rules, payment return, amount formatting and PHP/JS syntax checks passed. Actual gateway cancellation, success and customer cart/session preservation remain pending.

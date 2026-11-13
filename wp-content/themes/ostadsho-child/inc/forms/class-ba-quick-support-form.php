@@ -178,17 +178,16 @@ final class BA_Quick_Support_Form
                 ->width(6),
 
             TextField::make('amount')
-                ->label('مبلغ حمایت')
+                ->label('مبلغ حمایت' . (function_exists('get_woocommerce_currency_symbol') ? ' (' . html_entity_decode(wp_strip_all_tags((string)get_woocommerce_currency_symbol()), ENT_QUOTES | ENT_HTML5, 'UTF-8') . ')' : ''))
                 ->placeholder('مبلغ را وارد کنید')
                 ->attributes([
-                    'maxlength'=>20,
+                    'maxlength'=>26,
                     'inputmode'=>'decimal',
                     'autocomplete'=>'off',
                     'data-afe-character-mode'=>'digits',
                     'data-afe-allowed-extra'=>'.٬٫,',
                     'data-afe-ltr'=>'1',
                 ])
-                ->description('مبلغ را به واحد پول فعال در فروشگاه وارد کنید.')
                 ->meta('validators', [[
                     'key'=>'ba_qs_amount_limits',
                     'message'=>'مبلغ واردشده خارج از محدوده مجاز این دسته است.',
