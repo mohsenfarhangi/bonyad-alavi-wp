@@ -123,7 +123,7 @@ Slug شناسه عمومی و پایدار URL است؛ شناسه عددی Post
 - The result state is selected from the current WooCommerce order status: paid, failed, cancelled, pending or unknown. The query string is only a locator and never proof of successful payment.
 - The AFE «قالب‌ها» tab provides five independent HTML editors and one optional CSS editor for the Quick Support form. Available tokens: `{{order_number}}`, `{{amount}}`, `{{category}}`, `{{transaction_id}}`, `{{status}}`, `{{date}}`, `{{message}}` and `{{retry_url}}`.
 - Failed/cancelled templates can link to the clean original page to retry. Pending/unknown templates avoid duplicate payment attempts while the gateway result is unresolved.
-- Implementation is being added to [PR #39](https://github.com/mohsenfarhangi/bonyad-alavi-wp/pull/39). Focused CI for the return flow must pass before merge; no live gateway acceptance is claimed.
+- Implementation is in [PR #39](https://github.com/mohsenfarhangi/bonyad-alavi-wp/pull/39). Quick Support focused CI [run 43406730380](https://github.com/mohsenfarhangi/bonyad-alavi-wp/actions/runs/43406730380) passed PHP syntax and all same-page return/template security tests. The separate AFE frontend CSS workflow [run 43406730348](https://github.com/mohsenfarhangi/bonyad-alavi-wp/actions/runs/43406730348) remains red: its regression script reports missing Jihadi export-profile fixtures and Playwright 1.58.2 cannot install Chromium on the Ubuntu 26.04 runner; browser checks were skipped. No live gateway acceptance is claimed.
 
 ### Form Fields
 
