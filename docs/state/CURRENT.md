@@ -6,7 +6,7 @@
 
 پروژه در توسعه فعال است.
 
-- **Alavi Form Engine:** `1.0.28-dev.9`، DB `1.0.5-dev.2`، stable baseline/tag `1.0.27`; production bump هنوز به live acceptance وابسته است.
+- **Alavi Form Engine:** `1.0.28-dev.10`، DB `1.0.5-dev.2`، stable baseline/tag `1.0.27`; production bump هنوز به live acceptance وابسته است.
 - **Ostadsho child theme:** custom integration layer روی Theme header `2.8`; version docs legacy v0.x به state history مهاجرت کرده‌اند.
 
 ## Current Goal
@@ -25,11 +25,20 @@ AFE release goal همچنان live acceptance نسخه 1.0.28 و رفع blocker 
 - Category capabilities: `view_ba_quick_support_categories`, `create_ba_quick_support_categories`, `edit_ba_quick_support_category`, `publish_ba_quick_support_categories`, `delete_ba_quick_support_category`.
 - فرم مشترک `quick-support-payment` با فیلدهای اجباری موبایل/نام/نام خانوادگی/مبلغ و فیلدهای اختیاری استان/شهرستان/کد ملی/ایمیل؛ Action پرداخت مستقیم، سفارش مستقل WooCommerce، محصول فنی مخفی، allowlist درگاه، idempotency و retry recovery در Phase 1 پیاده‌سازی شده‌اند.
 - **Phase 2 reports در PR #37 ادغام شد:** داشبورد شاخص‌های مالی، گزارش دسته/درگاه/روز/ماه، فیلترهای POST، جدول صفحه‌بندی‌شده سفارش‌ها، لینک AFE Submission، خروجی CSV/XLSX و capabilityهای مستقل مشاهده/خروجی. تست‌های PR شامل Quick Support، Studies Center، Facilitator و Camp Admission موفق شدند.
-- **تفکیک گزارش Quick Support از پرداخت محصول‌محور مشارکت:** اصلاح در [PR #38](https://github.com/mohsenfarhangi/bonyad-alavi-wp/pull/38) آماده بررسی است. تمام گزارش‌ها، جدول سفارش‌ها و خروجی‌ها هم‌زمان `created_via = ba_quick_support` و marker `_ba_quick_support = 1` را الزامی می‌کنند؛ سفارش‌های `bap_quick_checkout` حذف می‌شوند. CI [run 43398110222](https://github.com/mohsenfarhangi/bonyad-alavi-wp/actions/runs/43398110222) موفق است؛ Merge و Deploy باقی است.
+- **تفکیک گزارش Quick Support از پرداخت محصول‌محور مشارکت:** PR #38 ادغام و روی سایت مستقر شده است. تمام گزارش‌ها، جدول سفارش‌ها و خروجی‌ها هم‌زمان `created_via = ba_quick_support` و marker `_ba_quick_support = 1` را الزامی می‌کنند؛ سفارش‌های `bap_quick_checkout` حذف می‌شوند. مدیر پروژه تست زنده را انجام داده و عملکرد بدون مشکل را تأیید کرده است.
 - مجوز گزارش: `view_ba_quick_support_reports` و `export_ba_quick_support_reports`; فقط Administrator به‌صورت پیش‌فرض آن‌ها را می‌گیرد.
-- **گام بعدی: Deploy و پذیرش زنده گزارش‌ها** — فایل‌های جدید قالب روی staging/سایت بارگذاری شوند؛ صحت آمار با سفارش واقعی و Refund جزئی/کامل بررسی شود؛ CSV/XLSX با متن فارسی باز شود؛ دسترسی نقش‌های غیر Administrator و لینک سفارش/فرم بررسی شود.
+- گزارش تفکیک سفارش‌ها در محیط زنده تست و تأیید شده است. پذیرش کامل سایر جزئیات گزارش (Refundها، CSV/XLSX و سطح دسترسی نقش‌ها) در صورت نیاز می‌تواند جداگانه تکمیل شود.
 - **پذیرش پرداخت زنده هنوز باز است:** Hosted/Redirect واقعی، callback/return، حفظ Cart/Session/Persistent Cart، HPOS و تأیید قالب‌های Elementor برای Popup/Loop Grid/Single باید در staging آزمایش شوند.
 - مرجع ادامه: [MODULE-QUICK-SUPPORT](../modules/quick-support-payments.md)، [ADR-009](../decisions/ADR-009-quick-support-payments.md).
+
+### Quick Support form layout — in progress (2026-11-13)
+
+- فرم `quick-support-payment` یک قالب اختصاصی code-defined دارد که فقط `{{steps}}` را رندر می‌کند؛ هدر AFE، نشان و progress bar حذف شده‌اند.
+- `show_step_heading=false` برای همین فرم کلاس `.afe-step-heading` را از خروجی حذف می‌کند؛ پیش‌فرض عمومی AFE برای سایر فرم‌ها `true` باقی می‌ماند.
+- `captcha_before_submit=true` کپچا را بعد از فیلدهای فرم و قبل از دکمه ارسال قرار می‌دهد.
+- تغییر generic در AFE فقط یک opt-in جدید برای نمایش عنوان Step اضافه می‌کند؛ هیچ فرم دیگری به‌صورت پیش‌فرض تغییر نمی‌کند.
+- شاخه جاری: `feat/quick-support-dedicated-form-template-20261113`. PR و CI در انتظار هستند.
+- AFE development version: `1.0.28-dev.10`; DB version بدون تغییر است.
 
 ## Contact form — admin-managed message category (2026-11-04)
 
@@ -419,7 +428,7 @@ Historical PASSهای AFE/Theme به HEAD جدید تعمیم داده نمی‌
 
 **آخرین کار تکمیل‌شده:** PR #28 مربوط به فیلدهای اختصاصی مدیریت بررسی و در 2026-11-12 به‌عنوان پیاده‌سازی superseded بسته شد؛ قابلیت از طریق PR #29 و #30 در `main` وجود دارد و پذیرش زنده آن طبق تأیید مدیر پروژه انجام شده است. برای این قابلیت کار باز دیگری باقی نمانده است. جزئیات در [MODULE-AFE](../modules/alavi-form-engine.md)، [MODULE-JIHADI-FORM](../modules/jihadi-group-registration-form.md) و انتهای [state-v002.md](state-v002.md) ثبت شده‌اند.
 
-**Quick Support handoff (2026-11-13):** PRs #34/#35/#36 merged. مدیر پروژه رفع دسترسی Administrator را روی سایت تأیید کرده و REST API برای CPT context=edit موفق است. فقط Administrator به‌صورت پیش‌فرض پنج capability دسته‌بندی و دو capability گزارش را می‌گیرد؛ نقش‌های دیگر فقط با تنظیم دستی PublishPress مجاز می‌شوند. Phase 2 dashboard/reporting در [PR #37](https://github.com/mohsenfarhangi/bonyad-alavi-wp/pull/37) و branch `feat/quick-support-reports-phase2-20261113` پیاده‌سازی شده؛ CI [run 43395846166](https://github.com/mohsenfarhangi/bonyad-alavi-wp/actions/runs/43395846166) PASS است و merge/deploy pending است. پس از merge، گزارش و خروجی CSV/XLSX را روی سایت آزمایش کن. پذیرش درگاه زنده، callback/return، Cart/Session/Persistent Cart، HPOS و Elementor Popup/Loop Grid/Single نیز هنوز باز است. برای ادامه [MODULE-QUICK-SUPPORT](../modules/quick-support-payments.md) و [ADR-009](../decisions/ADR-009-quick-support-payments.md) را بخوان.
+**Quick Support handoff (2026-11-13):** PRs #34–#38 merged. مدیر پروژه دسترسی Administrator، جداسازی گزارش محصول‌محور از Quick Support و تست زنده اصلاح گزارش را تأیید کرده است. گزارش سریع فقط سفارش‌های دارای `created_via = ba_quick_support` و marker `_ba_quick_support = 1` را می‌خواند. شاخه جاری برای قالب اختصاصی فرم `feat/quick-support-dedicated-form-template-20261113` است: `quick-support-payment` بدون هدر AFE و progress، بدون `.afe-step-heading` و با CAPTCHA قبل از submit. PR/CI این task در انتظار است. پذیرش درگاه زنده، callback/return، Cart/Session/Persistent Cart، HPOS و Elementor Popup/Loop Grid/Single همچنان یک checklist جداست. برای ادامه [MODULE-QUICK-SUPPORT](../modules/quick-support-payments.md)، [MODULE-AFE](../modules/alavi-form-engine.md) و [ADR-009](../decisions/ADR-009-quick-support-payments.md) را بخوان.
 
 **شروع task بعدی:** از بخش `Current Goal` در ابتدای همین فایل، task موردنظر را انتخاب کن. پذیرش زنده فرم جذب تسهیلگر و پذیرش بصری ویجت‌های Elementor هنوز در آن بخش باز هستند.
 
