@@ -83,9 +83,22 @@ final class BA_Quick_Support_Category
 
     public static function ensure_admin_capability(): void
     {
-        $administrator = get_role('administrator');
-        if ($administrator && !$administrator->has_cap('manage_ba_quick_support_categories')) {
-            $administrator->add_cap('manage_ba_quick_support_categories');
+        if (!function_exists('wp_roles') || !function_exists('get_role')) return;
+
+        $registeredRoles = wp_roles();
+        if (!$registeredRoles || !isset($registeredRoles->roles) || !is_array($registeredRoles->roles)) return;
+
+        foreach (array_keys($registeredRoles->roles) as $roleSlug) {
+            $role = get_role((string)$roleSlug);
+            if (!$role) continue;
+
+            // Support custom "site manager" roles while keeping access limited
+            // to the built-in Administrator and roles already trusted to manage options.
+            if ($roleSlug !== 'administrator' && !$role->has_cap('manage_options')) continue;
+
+            if (!$role->has_cap('manage_ba_quick_support_categories')) {
+                $role->add_cap('manage_ba_quick_support_categories');
+            }
         }
     }
 

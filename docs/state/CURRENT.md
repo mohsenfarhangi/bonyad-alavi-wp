@@ -18,11 +18,11 @@
 
 AFE release goal همچنان live acceptance نسخه 1.0.28 و رفع blocker واقعی پیش از production promotion است.
 
-## Quick Support — Phase 1 implementation in PR #34 (2026-11-13)
+## Quick Support — Phase 1 merged; admin role correction in PR #35 (2026-11-13)
 
-- فاز اول در [PR #34](https://github.com/mohsenfarhangi/bonyad-alavi-wp/pull/34) پیاده‌سازی شده است؛ وضعیت **implemented in branch / review and staging acceptance pending** است. هنوز merge یا production deployment انجام نشده است.
+- فاز اول در [PR #34](https://github.com/mohsenfarhangi/bonyad-alavi-wp/pull/34) به `main` ادغام شده است. کاربر اعلام کرده فایل‌ها روی سایت آپلود شده‌اند، اما نقش «مدیر کل» هنوز به منوی پرداخت سریع دسترسی ندارد؛ بررسی کد نشان داد capability فقط به role با slug برابر `administrator` داده می‌شد. اصلاح برای اعطای دسترسی به roleهای `administrator` و roleهای دارای `manage_options` در [PR #35](https://github.com/mohsenfarhangi/bonyad-alavi-wp/pull/35) در حال بررسی است. این گزارش به‌تنهایی اجرای موفق اصلاح روی سایت را تأیید نمی‌کند.
 - AFE Generic Form Context، کنترل‌های Elementor، توکن امضاشده و verify سمت سرور، انتقال Context جدا از applicant data، و context-aware validators پیاده‌سازی شده‌اند.
-- CPT `ba_quick_support`، چهار دسته اولیه، فیلدهای تنظیمات دسته، Elementor support و دسترسی مدیریت Administrator-only اضافه شده‌اند.
+- CPT `ba_quick_support`، چهار دسته اولیه، فیلدهای تنظیمات دسته و Elementor support اضافه شده‌اند؛ اصلاح دسترسی نقش‌های مدیریتی سفارشی در PR #35 است.
 - فرم مشترک `quick-support-payment` با فیلدهای اجباری موبایل/نام/نام خانوادگی/مبلغ و فیلدهای اختیاری استان/شهرستان/کد ملی/ایمیل ثبت شده است.
 - Action پرداخت سریع و سفارش مستقل WooCommerce، محصول فنی مخفی، Gateway allowlist/selection، idempotency و retry recovery اضافه شده‌اند.
 - Focused CI در [run 43309991432](https://github.com/mohsenfarhangi/bonyad-alavi-wp/actions/runs/43311051009) پاس شده است.
@@ -418,7 +418,7 @@ Historical PASSهای AFE/Theme به HEAD جدید تعمیم داده نمی‌
 
 **آخرین کار تکمیل‌شده:** PR #28 مربوط به فیلدهای اختصاصی مدیریت بررسی و در 2026-11-12 به‌عنوان پیاده‌سازی superseded بسته شد؛ قابلیت از طریق PR #29 و #30 در `main` وجود دارد و پذیرش زنده آن طبق تأیید مدیر پروژه انجام شده است. برای این قابلیت کار باز دیگری باقی نمانده است. جزئیات در [MODULE-AFE](../modules/alavi-form-engine.md)، [MODULE-JIHADI-FORM](../modules/jihadi-group-registration-form.md) و انتهای [state-v002.md](state-v002.md) ثبت شده‌اند.
 
-**Quick Support handoff (2026-11-13):** فاز اول در [PR #34](https://github.com/mohsenfarhangi/bonyad-alavi-wp/pull/34) پیاده‌سازی شده اما هنوز merge/deploy و live-tested نشده است. ابتدا [MODULE-QUICK-SUPPORT](../modules/quick-support-payments.md) و [ADR-009](../decisions/ADR-009-quick-support-payments.md) را بخوان؛ سپس [MODULE-AFE](../modules/alavi-form-engine.md)، [MODULE-AFE-EXTENSION](../modules/alavi-form-engine-extension-api.md) و [MODULE-PARTICIPATION](../modules/participation-payments.md) را برای مرزهای API بررسی کن. ادامه کار ابتدا review/merge و staging acceptance فاز اول است؛ Phase 2 داشبورد و گزارش‌ها هنوز پیاده‌سازی نشده است.
+**Quick Support handoff (2026-11-13):** Phase 1 در [PR #34](https://github.com/mohsenfarhangi/bonyad-alavi-wp/pull/34) به main merge شده است. کاربر گزارش کرده فایل‌ها روی سایت آپلود شده‌اند، اما نقش «مدیر کل» هنوز دسترسی ندارد؛ علت محتمل در کد این بود که capability فقط به role `administrator` اعطا می‌شد. اصلاح برای roleهای دارای `manage_options` در [PR #35](https://github.com/mohsenfarhangi/bonyad-alavi-wp/pull/35) است. پس از merge آن، نقش کاربر و وجود `manage_options` روی سایت بررسی و سپس دسترسی زنده تأیید شود. برای ادامه ابتدا [MODULE-QUICK-SUPPORT](../modules/quick-support-payments.md) و [ADR-009](../decisions/ADR-009-quick-support-payments.md) را بخوان. Phase 2 داشبورد و گزارش‌ها هنوز پیاده‌سازی نشده است.
 
 **شروع task بعدی:** از بخش `Current Goal` در ابتدای همین فایل، task موردنظر را انتخاب کن. پذیرش زنده فرم جذب تسهیلگر و پذیرش بصری ویجت‌های Elementor هنوز در آن بخش باز هستند.
 
@@ -430,6 +430,6 @@ Historical PASSهای AFE/Theme به HEAD جدید تعمیم داده نمی‌
 
 **Do not reconsider without new evidence:** AFE source-definition override model، ownership فرم پروژه‌ای در theme، participation cart isolation، theme shared settings persistence، Jihadi source precedence، shared admin Repeater، export autoload isolation.
 
-**Do not assume:** current HEAD QA PASS، پذیرش کلی همه مسیرهای Export در سطح release، vendor availability یا production readiness؛ همچنین Quick Support Phase 1 هنوز merge/deploy یا live acceptance نشده و Phase 2 reporting موجود نیست. پذیرش زنده فیلدهای مدیریتی فقط برای همان قابلیت و طبق گزارش مدیر پروژه تأیید شده است.
+**Do not assume:** current HEAD QA PASS، پذیرش کلی همه مسیرهای Export در سطح release، vendor availability یا production readiness؛ همچنین Quick Support Phase 1 در main merge شده، اما live acceptance کامل نشده؛ اصلاح نقش‌های مدیریتی در PR #35 است و Phase 2 reporting موجود نیست. پذیرش زنده فیلدهای مدیریتی فقط برای همان قابلیت و طبق گزارش مدیر پروژه تأیید شده است.
 
 **History lookup:** [INDEX.md](INDEX.md) → `state-v002.md` برای legacy milestones.

@@ -885,3 +885,11 @@ Modules: [MODULE-AFE](../modules/alavi-form-engine.md), [MODULE-JIHADI-FORM](../
 - WooCommerce: Action پرداخت، محصول فنی مخفی/مجازی، سفارش مستقل per Submission، Gateway selection/allowlist، استفاده از Gateway isolation موجود، جلوگیری از خرید مستقیم محصول فنی و idempotent retry recovery.
 - CI متمرکز در [run 43309991432](https://github.com/mohsenfarhangi/bonyad-alavi-wp/actions/runs/43311051009) پاس شد. Live gateway/callback، cart/session persistence، HPOS و Elementor site configuration هنوز نیازمند staging acceptance هستند.
 - Phase 2 (dashboard/reporting/exports) هنوز شروع نشده است.
+
+
+## 2026-11-13 — Quick Support administrator role capability correction
+
+- پس از گزارش مدیر پروژه مبنی بر نبود دسترسی نقش «مدیر کل» به منوی «پرداخت سریع» با وجود آپلود فایل‌ها، کد بررسی شد.
+- علت در implementation قبلی: capability اختصاصی `manage_ba_quick_support_categories` فقط به role با slug دقیق `administrator` اعطا می‌شد؛ نقش‌های مدیریتی سفارشی با `manage_options` پوشش داده نشده بودند.
+- PR #35 اعطای capability را به role پیش‌فرض `administrator` و roleهای دارای `manage_options` گسترش می‌دهد؛ roleهای عادی مانند Editor همچنان دسترسی نمی‌گیرند.
+- regression checks برای administrator، custom site-manager و editor اضافه شد. پس از merge باید دسترسی روی سایت و role واقعی کاربر زنده تأیید شود.
