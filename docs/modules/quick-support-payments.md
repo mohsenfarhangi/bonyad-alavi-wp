@@ -118,7 +118,7 @@ Slug شناسه عمومی و پایدار URL است؛ شناسه عددی Post
 ### Same-page payment return and editable result templates
 
 - The payment service stores the validated same-site URL of the page hosting the form on the WooCommerce order, along with a random return token. The AJAX Referer is preferred; the Quick Support category permalink is the fallback.
-- WooCommerce return/received URL filters and cancellation URL filters are applied only to orders carrying the Quick Support order marker. Cancellation still passes through WooCommerce's handler so the order status is changed before the browser is returned to the source page.
+- WooCommerce return, received, retry-payment and cancellation URL filters are applied only to orders carrying the Quick Support order marker. Cancellation still passes through WooCommerce's handler so the order status is changed before the browser is returned to the source page.
 - On return, AFE's generic `afe_form_render_override` hook lets the theme replace the form at the exact widget/shortcode location. The handler requires a matching order marker and constant-time token comparison; an invalid token leaves the normal form visible.
 - The result state is selected from the current WooCommerce order status: paid, failed, cancelled, pending or unknown. The query string is only a locator and never proof of successful payment.
 - The AFE «قالب‌ها» tab provides five independent HTML editors and one optional CSS editor for the Quick Support form. Available tokens: `{{order_number}}`, `{{amount}}`, `{{category}}`, `{{transaction_id}}`, `{{status}}`, `{{date}}`, `{{message}}` and `{{retry_url}}`.
