@@ -18,16 +18,17 @@
 
 AFE release goal همچنان live acceptance نسخه 1.0.28 و رفع blocker واقعی پیش از production promotion است.
 
-## Quick Support — Phase 1 accepted for admin access; Phase 2 reports in PR #37 (2026-11-13)
+## Quick Support — Phase 1 access accepted; Phase 2 reports merged (2026-11-13)
 
-- PR #34 (Context, category CPT, shared form and direct WooCommerce payment), PR #35 (role capability correction) and PR #36 (granular category permissions) are merged. Current `main` is at merge commit `9bc9ed6427d845af3595f79499d18197ed756eda` for PR #36.
+- PRs #34 (Context/category/form/payment), #35 (role capability correction), #36 (granular category permissions) and #37 (reports/dashboard) are merged into `main`. Current main merge commit for PR #37: `09cf9f1765d2b8f3fc73545426b5c07016a32340`.
 - مدیر پروژه اعلام کرده فایل‌های قالب روی سایت بارگذاری شده‌اند و دسترسی مدیر کل به منوی پرداخت سریع برطرف شده است. بررسی REST API نیز `/wp/v2/types/ba_quick_support?context=edit` را موفق برگرداند. فقط Administrator به‌صورت پیش‌فرض پنج مجوز دسته‌بندی را می‌گیرد؛ سایر نقش‌ها به‌صورت دستی در PublishPress تنظیم می‌شوند.
 - Category capabilities: `view_ba_quick_support_categories`, `create_ba_quick_support_categories`, `edit_ba_quick_support_category`, `publish_ba_quick_support_categories`, `delete_ba_quick_support_category`.
 - فرم مشترک `quick-support-payment` با فیلدهای اجباری موبایل/نام/نام خانوادگی/مبلغ و فیلدهای اختیاری استان/شهرستان/کد ملی/ایمیل؛ Action پرداخت مستقیم، سفارش مستقل WooCommerce، محصول فنی مخفی، allowlist درگاه، idempotency و retry recovery در Phase 1 پیاده‌سازی شده‌اند.
-- **پذیرش پرداخت زنده هنوز باز است:** Hosted/Redirect واقعی، callback/return، حفظ Cart/Session/Persistent Cart، HPOS و تأیید قالب‌های Elementor برای Popup/Loop Grid/Single باید در staging آزمایش شوند. آپلود فایل‌ها و حل دسترسی مدیر، تأیید پرداخت واقعی محسوب نمی‌شود.
-- **Phase 2 reports** در برنچ `feat/quick-support-reports-phase2-20261113` و [PR #37](https://github.com/mohsenfarhangi/bonyad-alavi-wp/pull/37) پیاده‌سازی شده: داشبورد شاخص‌ها، breakdown دسته/درگاه/روز/ماه، فیلترهای POST، جدول سفارش‌ها، لینک AFE Submission، خروجی CSV/XLSX و capabilityهای مستقل مشاهده/خروجی. CI نهایی [run 43395846166](https://github.com/mohsenfarhangi/bonyad-alavi-wp/actions/runs/43395846166) PASS است؛ PR منتظر review/merge است.
+- **Phase 2 reports در PR #37 ادغام شد:** داشبورد شاخص‌های مالی، گزارش دسته/درگاه/روز/ماه، فیلترهای POST، جدول صفحه‌بندی‌شده سفارش‌ها، لینک AFE Submission، خروجی CSV/XLSX و capabilityهای مستقل مشاهده/خروجی. تست‌های PR شامل Quick Support، Studies Center، Facilitator و Camp Admission موفق شدند.
 - مجوز گزارش: `view_ba_quick_support_reports` و `export_ba_quick_support_reports`; فقط Administrator به‌صورت پیش‌فرض آن‌ها را می‌گیرد.
-- مرجع ادامه: [MODULE-QUICK-SUPPORT](../modules/quick-support-payments.md)، [ADR-009](../decisions/ADR-009-quick-support-payments.md). Phase 2 پس از Merge/Deploy نیازمند تست گزارش واقعی و خروجی CSV/XLSX است.
+- **گام بعدی: Deploy و پذیرش زنده گزارش‌ها** — فایل‌های جدید قالب روی staging/سایت بارگذاری شوند؛ صحت آمار با سفارش واقعی و Refund جزئی/کامل بررسی شود؛ CSV/XLSX با متن فارسی باز شود؛ دسترسی نقش‌های غیر Administrator و لینک سفارش/فرم بررسی شود.
+- **پذیرش پرداخت زنده هنوز باز است:** Hosted/Redirect واقعی، callback/return، حفظ Cart/Session/Persistent Cart، HPOS و تأیید قالب‌های Elementor برای Popup/Loop Grid/Single باید در staging آزمایش شوند.
+- مرجع ادامه: [MODULE-QUICK-SUPPORT](../modules/quick-support-payments.md)، [ADR-009](../decisions/ADR-009-quick-support-payments.md).
 
 ## Contact form — admin-managed message category (2026-11-04)
 
