@@ -1,6 +1,6 @@
 # MODULE-QUICK-SUPPORT — Quick Support Payments
 
-**Status:** Phase 1, granular category permissions and Phase 2 reports are merged in [PR #34](https://github.com/mohsenfarhangi/bonyad-alavi-wp/pull/34), [PR #35](https://github.com/mohsenfarhangi/bonyad-alavi-wp/pull/35), [PR #36](https://github.com/mohsenfarhangi/bonyad-alavi-wp/pull/36) and [PR #37](https://github.com/mohsenfarhangi/bonyad-alavi-wp/pull/37). Main merge commit: `09cf9f1765d2b8f3fc73545426b5c07016a32340`.  
+**Status:** Phase 1, granular category permissions, Phase 2 reports and report-source isolation are merged in [PR #34](https://github.com/mohsenfarhangi/bonyad-alavi-wp/pull/34), [PR #35](https://github.com/mohsenfarhangi/bonyad-alavi-wp/pull/35), [PR #36](https://github.com/mohsenfarhangi/bonyad-alavi-wp/pull/36), [PR #37](https://github.com/mohsenfarhangi/bonyad-alavi-wp/pull/37) and [PR #38](https://github.com/mohsenfarhangi/bonyad-alavi-wp/pull/38). Report-source isolation is deployed and confirmed working on the live site.  
 **Decision:** [ADR-009](../decisions/ADR-009-quick-support-payments.md)  
 **Parent modules:** [MODULE-PARTICIPATION](participation-payments.md), [MODULE-AFE](alavi-form-engine.md), [MODULE-AFE-EXTENSION](alavi-form-engine-extension-api.md)
 
@@ -12,7 +12,7 @@
 
 ## Phase 1 Implementation Record — PR #34
 
-**Implementation status:** PRs #34, #35, #36 and #37 are merged. Generic Context, category CPT, shared form, direct WooCommerce payment and financial reporting dashboard are in main. Report-source isolation hardening is in [PR #38](https://github.com/mohsenfarhangi/bonyad-alavi-wp/pull/38) with CI passing; merge/deploy and live report/payment-flow acceptance remain pending.
+**Implementation status:** PRs #34–#38 are merged. Generic Context, category CPT, shared form, direct WooCommerce payment, financial reporting dashboard and strict report-source isolation are in main. The project owner deployed the report isolation change and confirmed on-site testing works without issue; live gateway/payment-flow acceptance remains a separate pending item.
 
 Implemented in the current feature branch:
 
@@ -30,7 +30,7 @@ Implemented in the current feature branch:
 
 **Live acceptance still pending:** Hosted/Redirect gateway initiation and callback/return, preservation of the real Cart/Session/Persistent Cart, HPOS order creation, and confirmation of the Elementor Single/Popup/Loop Grid layouts on the target site. The project owner reported that the updated theme files were uploaded and confirmed Administrator access; this does not count as payment-flow acceptance.
 
-**Phase 2 implementation — PR #37 (merged):** adds the dedicated report submenu, financial aggregation, filters, paginated order list and CSV/XLSX exports. Report queries are restricted by both `created_via = ba_quick_support` and `_ba_quick_support = 1`, excluding product-based participation orders (`bap_quick_checkout`) from the dashboard, list and exports. Final focused CI [run 43395846166](https://github.com/mohsenfarhangi/bonyad-alavi-wp/actions/runs/43395846166) passed. Strict product-participation exclusion is additionally covered by [PR #38](https://github.com/mohsenfarhangi/bonyad-alavi-wp/pull/38), CI [run 43398110222](https://github.com/mohsenfarhangi/bonyad-alavi-wp/actions/runs/43398110222) passed. Deploy and live acceptance are pending.
+**Phase 2 implementation — PR #37 (merged):** adds the dedicated report submenu, financial aggregation, filters, paginated order list and CSV/XLSX exports. Report queries are restricted by both `created_via = ba_quick_support` and `_ba_quick_support = 1`, excluding product-based participation orders (`bap_quick_checkout`) from the dashboard, list and exports. Final focused CI [run 43395846166](https://github.com/mohsenfarhangi/bonyad-alavi-wp/actions/runs/43395846166) passed. Strict product-participation exclusion is additionally covered by [PR #38](https://github.com/mohsenfarhangi/bonyad-alavi-wp/pull/38), CI [run 43398110222](https://github.com/mohsenfarhangi/bonyad-alavi-wp/actions/runs/43398110222) passed; it has since been deployed and verified by the project owner.
 
 ## Category Administration Capabilities
 
@@ -106,6 +106,13 @@ Slug شناسه عمومی و پایدار URL است؛ شناسه عددی Post
 `quick-support-payment`
 
 فرم برای همه دسته‌ها مشترک است و در صفحه هر دسته فقط یک ویجت «فرم علوی» قرار می‌گیرد.
+
+### Dedicated form layout
+
+- Source Definition uses `Form::template('{{steps}}')`; therefore the Quick Support form has no AFE form header, brand mark or progress bar.
+- `show_step_heading=false` removes the `.afe-step-heading` block from this form only. AFE defaults this setting to `true` for all other forms.
+- `captcha_before_submit=true` renders the CAPTCHA after the final Step fields and immediately before the submit-action area/button. The existing CAPTCHA validation and payment Action remain unchanged.
+- These settings are part of the `quick-support-payment` code definition; no global AFE template or other form definition is changed.
 
 ### Form Fields
 
