@@ -179,11 +179,17 @@ HTML,
 
     public static function renderResult($original, string $slug, array $form, array $formContext = [])
     {
-        if ($slug !== self::FORM_SLUG || empty($_GET[self::QUERY_FLAG])) return $original;
-        if ((string)wp_unslash($_GET[self::QUERY_FLAG]) !== '1') return $original;
+        if ($slug !== self::FORM_SLUG) return $original;
 
-        $orderId = absint($_GET[self::QUERY_ORDER] ?? 0);
-        $token = sanitize_text_field((string)wp_unslash($_GET[self::QUERY_TOKEN] ?? ''));
+        $flagValue = $_GET[self::QUERY_FLAG] ?? '';
+        if (!is_scalar($flagValue) || (string)wp_unslash((string)$flagValue) !== '1') return $original;
+
+        $orderValue = $_GET[self::QUERY_ORDER] ?? 0;
+        $tokenValue = $_GET[self::QUERY_TOKEN] ?? '';
+        if (!is_scalar($orderValue) || !is_scalar($tokenValue)) return $original;
+
+        $orderId = absint(wp_unslash((string)$orderValue));
+        $token = sanitize_text_field(wp_unslash((string)$tokenValue));
         if ($orderId <= 0 || $token === '' || !function_exists('wc_get_order')) return $original;
 
         $order = wc_get_order($orderId);
@@ -288,6 +294,9 @@ HTML,
         $host = strtolower((string)wp_parse_url($url, PHP_URL_HOST));
         $siteHost = strtolower((string)wp_parse_url(home_url('/'), PHP_URL_HOST));
         if ($host === '' || $siteHost === '' || $host !== $siteHost) return '';
+
+        $path = (string)wp_parse_url($url, PHP_URL_PATH);
+        if (str_contains($path, '/wp-admin/') || str_contains($path, '/wp-login.php')) return '';
 
         return remove_query_arg([self::QUERY_FLAG, self::QUERY_ORDER, self::QUERY_TOKEN], $url);
     }
