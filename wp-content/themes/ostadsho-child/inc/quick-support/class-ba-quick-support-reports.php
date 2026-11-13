@@ -104,10 +104,14 @@ final class BA_Quick_Support_Reports
             'order' => 'ASC',
         ]);
         $gateways = [];
-        if (function_exists('WC') && WC() && isset(WC()->payment_gateways())) {
-            foreach ((array)WC()->payment_gateways()->payment_gateways() as $gateway) {
-                if (is_object($gateway) && isset($gateway->id)) {
-                    $gateways[(string)$gateway->id] = (string)($gateway->title ?? $gateway->id);
+        $woocommerce = function_exists('WC') ? WC() : null;
+        if (is_object($woocommerce) && method_exists($woocommerce, 'payment_gateways')) {
+            $gatewayManager = $woocommerce->payment_gateways();
+            if (is_object($gatewayManager) && method_exists($gatewayManager, 'payment_gateways')) {
+                foreach ((array)$gatewayManager->payment_gateways() as $gateway) {
+                    if (is_object($gateway) && isset($gateway->id)) {
+                        $gateways[(string)$gateway->id] = (string)($gateway->title ?? $gateway->id);
+                    }
                 }
             }
         }
@@ -334,7 +338,7 @@ final class BA_Quick_Support_Reports
 
         fputcsv($output, self::export_headers());
         self::service()->iterate($filters, static function ($order) use ($output): void {
-            fputcsv($output, self::export_row($order));
+            fputcsv($output, array_map([self::class, 'csv_safe'], self::export_row($order)));
         });
         fclose($output);
         exit;
@@ -402,6 +406,11 @@ final class BA_Quick_Support_Reports
             }
         });
         throw new RuntimeException('خروجی Excel بدون ارسال فایل پایان یافت.');
+    }
+
+    private static function csv_safe(string $value): string
+    {
+        return preg_match('/^[\\s]*[=+@-]/u', $value) ? "'" . $value : $value;
     }
 
     private static function export_headers(): array
