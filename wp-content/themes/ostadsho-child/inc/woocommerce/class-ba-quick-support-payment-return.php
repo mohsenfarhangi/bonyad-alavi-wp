@@ -21,6 +21,7 @@ final class BA_Quick_Support_Payment_Return
 
         add_filter('woocommerce_get_return_url', [self::class, 'filterReturnUrl'], 20, 2);
         add_filter('woocommerce_get_checkout_order_received_url', [self::class, 'filterReturnUrl'], 20, 2);
+        add_filter('woocommerce_get_checkout_payment_url', [self::class, 'filterReturnUrl'], 20, 2);
         add_filter('woocommerce_get_cancel_order_url', [self::class, 'filterCancelUrl'], 20, 3);
         add_filter('woocommerce_get_cancel_order_url_raw', [self::class, 'filterCancelUrl'], 20, 3);
     }
