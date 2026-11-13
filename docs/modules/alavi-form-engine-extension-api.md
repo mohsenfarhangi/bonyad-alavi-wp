@@ -87,6 +87,20 @@ Core tokens:
 
 Token field فقط برای field واقعی همان form resolve شود.
 
+## Form Render Override
+
+Hook:
+`afe_form_render_override`
+
+Signature:
+`apply_filters('afe_form_render_override', null, $slug, $form, $contextToken, $formContext)`
+
+- Runs in `Renderer::render()` after the resolved form is loaded and before normal form markup is produced.
+- `$slug` is the registered form slug, `$form` is the resolved configuration (including Admin settings), `$contextToken` is the submitted/rendered context token (or an empty string), and `$formContext` is the server-resolved immutable context array.
+- Return a non-empty HTML string to replace the normal form output at the widget/shortcode's exact location. Return `null`, an empty string or a non-string value to preserve normal rendering.
+- The integration that returns markup owns its validation, escaping and sanitization. Validate signed return tokens and associated resource ownership before replacing a public form.
+- Keep domain-specific payment/order logic in the owning theme or extension; AFE only exposes the generic render seam.
+
 ## Validators
 
 Hook:
@@ -115,7 +129,7 @@ Custom Regex admin path:
 
 ## Generic Form Context Providers
 
-Implemented in [PR #34](https://github.com/mohsenfarhangi/bonyad-alavi-wp/pull/34); merge/deployment and live acceptance are pending.
+Implemented and merged in [PR #34](https://github.com/mohsenfarhangi/bonyad-alavi-wp/pull/34); deployment and live acceptance of the full Quick Support payment flow remain separate staging checks.
 
 Registration hook:
 `afe_register_form_context_providers`

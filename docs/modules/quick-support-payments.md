@@ -1,6 +1,6 @@
 # MODULE-QUICK-SUPPORT — Quick Support Payments
 
-**Status:** Phase 1, granular category permissions and Phase 2 reports are merged in [PR #34](https://github.com/mohsenfarhangi/bonyad-alavi-wp/pull/34), [PR #35](https://github.com/mohsenfarhangi/bonyad-alavi-wp/pull/35), [PR #36](https://github.com/mohsenfarhangi/bonyad-alavi-wp/pull/36) and [PR #37](https://github.com/mohsenfarhangi/bonyad-alavi-wp/pull/37). Main merge commit: `09cf9f1765d2b8f3fc73545426b5c07016a32340`.  
+**Status:** Phase 1, granular category permissions, Phase 2 reports, report-source isolation, dedicated form layout and same-page payment return/result templates are merged in [PRs #34–#39](https://github.com/mohsenfarhangi/bonyad-alavi-wp/pulls?q=is%3Apr+is%3Amerged+quick+support). Report-source isolation is deployed and confirmed working on the live site. PR #39 focused CI passed; deployment and live gateway acceptance remain pending.  
 **Decision:** [ADR-009](../decisions/ADR-009-quick-support-payments.md)  
 **Parent modules:** [MODULE-PARTICIPATION](participation-payments.md), [MODULE-AFE](alavi-form-engine.md), [MODULE-AFE-EXTENSION](alavi-form-engine-extension-api.md)
 
@@ -12,9 +12,9 @@
 
 ## Phase 1 Implementation Record — PR #34
 
-**Implementation status:** PRs #34, #35, #36 and #37 are merged. Generic Context, category CPT, shared form, direct WooCommerce payment and financial reporting dashboard are in main. Report-source isolation hardening is in [PR #38](https://github.com/mohsenfarhangi/bonyad-alavi-wp/pull/38) with CI passing; merge/deploy and live report/payment-flow acceptance remain pending.
+**Implementation status:** PRs #34–#39 are merged. Generic Context, category CPT, shared form, direct WooCommerce payment, financial reporting dashboard, strict report-source isolation, dedicated form layout and status-based same-page return are in main. The project owner deployed report isolation and confirmed it works; live gateway/payment-flow acceptance remains a separate pending item.
 
-Implemented in the current feature branch:
+Implemented and merged in main:
 
 - AFE generic Context Provider interface, registry and manager; signed form-bound token with 12-hour expiry and server-side provider revalidation.
 - Elementor Form Widget controls for Current Page, Fixed Category and Query Parameter (Slug/ID).
@@ -30,16 +30,7 @@ Implemented in the current feature branch:
 
 **Live acceptance still pending:** Hosted/Redirect gateway initiation and callback/return, preservation of the real Cart/Session/Persistent Cart, HPOS order creation, and confirmation of the Elementor Single/Popup/Loop Grid layouts on the target site. The project owner reported that the updated theme files were uploaded and confirmed Administrator access; this does not count as payment-flow acceptance.
 
-**Phase 2 implementation — PR #37 (merged):** adds the dedicated report submenu, financial aggregation, filters, paginated order list and CSV/XLSX exports. Report queries are restricted by both `created_via = ba_quick_support` and `_ba_quick_support = 1`, excluding product-based participation orders (`bap_quick_checkout`) from the dashboard, list and exports. Final focused CI [run 43395846166](https://github.com/mohsenfarhangi/bonyad-alavi-wp/actions/runs/43395846166) passed. Strict product-participation exclusion is additionally covered by [PR #38](https://github.com/mohsenfarhangi/bonyad-alavi-wp/pull/38), CI [run 43398110222](https://github.com/mohsenfarhangi/bonyad-alavi-wp/actions/runs/43398110222) passed. Deploy and live acceptance are pending.
-
-## Dedicated payment form presentation and return (feature branch)
-
-- The `quick-support-payment` source definition uses a minimal form template (no internal AFE header), hides the built-in `afe-step-heading` for this form only, and enables `captcha_before_submit` so CAPTCHA is rendered immediately before the submit action.
-- The payment order stores the same-site page URL from the AFE AJAX request Referer in `_ba_qs_return_url`. WooCommerce's `woocommerce_get_return_url` filter sends Quick Support orders back to that page with an order ID/key; the AFE render override replaces the form with the matching result message in the same location.
-- Result state is derived only from the WooCommerce order after the gateway callback (`success`, `failed`, `cancelled`, or `pending`); query parameters never establish payment success. Order ID, order key, `created_via`, and the Quick Support marker are checked before rendering.
-- AFE's template tab gains four per-status HTML editors and a dedicated result CSS editor for this form only. Tokens: `{{order_number}}`, `{{amount}}`, `{{category_title}}`, `{{customer_name}}`, `{{gateway_title}}`.
-- The return renderer uses a generic `afe_form_render_override` extension filter; other AFE forms are unchanged.
-- This feature is under review in a PR; CI and live gateway acceptance are pending.
+**Phase 2 implementation — PR #37 (merged):** adds the dedicated report submenu, financial aggregation, filters, paginated order list and CSV/XLSX exports. Report queries are restricted by both `created_via = ba_quick_support` and `_ba_quick_support = 1`, excluding product-based participation orders (`bap_quick_checkout`) from the dashboard, list and exports. Final focused CI [run 43395846166](https://github.com/mohsenfarhangi/bonyad-alavi-wp/actions/runs/43395846166) passed. Strict product-participation exclusion is additionally covered by [PR #38](https://github.com/mohsenfarhangi/bonyad-alavi-wp/pull/38), CI [run 43398110222](https://github.com/mohsenfarhangi/bonyad-alavi-wp/actions/runs/43398110222) passed; it has since been deployed and verified by the project owner.
 
 ## Category Administration Capabilities
 
@@ -115,6 +106,24 @@ Slug شناسه عمومی و پایدار URL است؛ شناسه عددی Post
 `quick-support-payment`
 
 فرم برای همه دسته‌ها مشترک است و در صفحه هر دسته فقط یک ویجت «فرم علوی» قرار می‌گیرد.
+
+### Dedicated form layout
+
+- Source Definition uses `Form::template('{{steps}}')`; therefore the Quick Support form has no AFE form header, brand mark or progress bar.
+- `show_step_heading=false` removes the `.afe-step-heading` block from this form only. AFE defaults this setting to `true` for all other forms.
+- `captcha_before_submit=true` renders the CAPTCHA after the final Step fields and immediately before the submit-action area/button. The existing CAPTCHA validation and payment Action remain unchanged.
+- These settings are part of the `quick-support-payment` code definition; no global AFE template or other form definition is changed.
+- Merged in [PR #39](https://github.com/mohsenfarhangi/bonyad-alavi-wp/pull/39); Quick Support CI [run 43403744041](https://github.com/mohsenfarhangi/bonyad-alavi-wp/actions/runs/43403744041) and AFE regression CI [run 43403744021](https://github.com/mohsenfarhangi/bonyad-alavi-wp/actions/runs/43403744021) passed. Live form acceptance in Elementor remains pending.
+
+### Same-page payment return and editable result templates
+
+- The payment service stores the validated same-site URL of the page hosting the form on the WooCommerce order, along with a random return token. The AJAX Referer is preferred; the Quick Support category permalink is the fallback.
+- WooCommerce return, order-received and cancellation URL filters are applied only to orders whose `created_via` and Quick Support marker both match. The WooCommerce order-payment URL is not overridden, preserving its normal payment/retry behavior. Cancellation still passes through WooCommerce's handler so the order status is changed before the browser is returned to the source page.
+- On return, AFE's generic `afe_form_render_override` hook lets the theme replace the form at the exact widget/shortcode location. The handler requires matching `created_via`, the Quick Support order marker and a constant-time comparison of the random return token; invalid credentials leave the normal form visible. Legacy orders from the first main-branch draft retain their order-key return path.
+- The result state is selected from the current WooCommerce order status: paid, failed, cancelled, pending or unknown. The query string is only a locator and never proof of successful payment.
+- The AFE «قالب‌ها» tab provides five independent HTML editors and one optional CSS editor for the Quick Support form. Available tokens: `{{order_number}}`, `{{amount}}`, `{{category}}`, `{{transaction_id}}`, `{{status}}`, `{{date}}`, `{{message}}` and `{{retry_url}}`.
+- Failed/cancelled templates can link to the clean original page to retry. Pending/unknown templates avoid duplicate payment attempts while the gateway result is unresolved.
+- Merged in [PR #39](https://github.com/mohsenfarhangi/bonyad-alavi-wp/pull/39). Quick Support focused CI [run 43407814224](https://github.com/mohsenfarhangi/bonyad-alavi-wp/actions/runs/43407814224) passed PHP syntax and all same-page return/template security tests, including all five status templates. AFE frontend CSS/browser workflow [run 43407334326](https://github.com/mohsenfarhangi/bonyad-alavi-wp/actions/runs/43407334326) passed after pinning the runner to Ubuntu 24.04; Playwright checks passed at 360, 780, 782 and 1024px. Its non-blocking AFE regression-suite step still prints three export-profile/Jihadi fixture failures (configured continue-on-error). No live gateway acceptance is claimed.
 
 ### Form Fields
 

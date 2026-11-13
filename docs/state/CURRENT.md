@@ -6,7 +6,7 @@
 
 پروژه در توسعه فعال است.
 
-- **Alavi Form Engine:** `1.0.28-dev.9`، DB `1.0.5-dev.2`، stable baseline/tag `1.0.27`; production bump هنوز به live acceptance وابسته است.
+- **Alavi Form Engine:** `1.0.28-dev.11`، DB `1.0.5-dev.2`، stable baseline/tag `1.0.27`; production bump هنوز به live acceptance وابسته است.
 - **Ostadsho child theme:** custom integration layer روی Theme header `2.8`; version docs legacy v0.x به state history مهاجرت کرده‌اند.
 
 ## Current Goal
@@ -18,11 +18,6 @@
 
 AFE release goal همچنان live acceptance نسخه 1.0.28 و رفع blocker واقعی پیش از production promotion است.
 
-## Quick Support — payment form return templates in progress (2026-11-13)
-
-- Feature branch `feat/quick-support-payment-return-template`: dedicated minimal form shell, CAPTCHA immediately before submit, hidden `afe-step-heading`, secure same-page WooCommerce return, and AFE per-status HTML/CSS editors. Four return states are based on persisted order status and verified order key; success is never inferred from the URL.
-- AFE adds the generic `afe_form_render_override` filter and a dedicated template-tab editor limited to `quick-support-payment`. PR/CI and live gateway acceptance pending.
-
 ## Quick Support — Phase 1 access accepted; Phase 2 reports merged (2026-11-13)
 
 - PRs #34 (Context/category/form/payment), #35 (role capability correction), #36 (granular category permissions) and #37 (reports/dashboard) are merged into `main`. Current main merge commit for PR #37: `09cf9f1765d2b8f3fc73545426b5c07016a32340`.
@@ -30,11 +25,27 @@ AFE release goal همچنان live acceptance نسخه 1.0.28 و رفع blocker 
 - Category capabilities: `view_ba_quick_support_categories`, `create_ba_quick_support_categories`, `edit_ba_quick_support_category`, `publish_ba_quick_support_categories`, `delete_ba_quick_support_category`.
 - فرم مشترک `quick-support-payment` با فیلدهای اجباری موبایل/نام/نام خانوادگی/مبلغ و فیلدهای اختیاری استان/شهرستان/کد ملی/ایمیل؛ Action پرداخت مستقیم، سفارش مستقل WooCommerce، محصول فنی مخفی، allowlist درگاه، idempotency و retry recovery در Phase 1 پیاده‌سازی شده‌اند.
 - **Phase 2 reports در PR #37 ادغام شد:** داشبورد شاخص‌های مالی، گزارش دسته/درگاه/روز/ماه، فیلترهای POST، جدول صفحه‌بندی‌شده سفارش‌ها، لینک AFE Submission، خروجی CSV/XLSX و capabilityهای مستقل مشاهده/خروجی. تست‌های PR شامل Quick Support، Studies Center، Facilitator و Camp Admission موفق شدند.
-- **تفکیک گزارش Quick Support از پرداخت محصول‌محور مشارکت:** اصلاح در [PR #38](https://github.com/mohsenfarhangi/bonyad-alavi-wp/pull/38) آماده بررسی است. تمام گزارش‌ها، جدول سفارش‌ها و خروجی‌ها هم‌زمان `created_via = ba_quick_support` و marker `_ba_quick_support = 1` را الزامی می‌کنند؛ سفارش‌های `bap_quick_checkout` حذف می‌شوند. CI [run 43398110222](https://github.com/mohsenfarhangi/bonyad-alavi-wp/actions/runs/43398110222) موفق است؛ Merge و Deploy باقی است.
+- **تفکیک گزارش Quick Support از پرداخت محصول‌محور مشارکت:** PR #38 ادغام و روی سایت مستقر شده است. تمام گزارش‌ها، جدول سفارش‌ها و خروجی‌ها هم‌زمان `created_via = ba_quick_support` و marker `_ba_quick_support = 1` را الزامی می‌کنند؛ سفارش‌های `bap_quick_checkout` حذف می‌شوند. مدیر پروژه تست زنده را انجام داده و عملکرد بدون مشکل را تأیید کرده است.
 - مجوز گزارش: `view_ba_quick_support_reports` و `export_ba_quick_support_reports`; فقط Administrator به‌صورت پیش‌فرض آن‌ها را می‌گیرد.
-- **گام بعدی: Deploy و پذیرش زنده گزارش‌ها** — فایل‌های جدید قالب روی staging/سایت بارگذاری شوند؛ صحت آمار با سفارش واقعی و Refund جزئی/کامل بررسی شود؛ CSV/XLSX با متن فارسی باز شود؛ دسترسی نقش‌های غیر Administrator و لینک سفارش/فرم بررسی شود.
+- گزارش تفکیک سفارش‌ها در محیط زنده تست و تأیید شده است. پذیرش کامل سایر جزئیات گزارش (Refundها، CSV/XLSX و سطح دسترسی نقش‌ها) در صورت نیاز می‌تواند جداگانه تکمیل شود.
 - **پذیرش پرداخت زنده هنوز باز است:** Hosted/Redirect واقعی، callback/return، حفظ Cart/Session/Persistent Cart، HPOS و تأیید قالب‌های Elementor برای Popup/Loop Grid/Single باید در staging آزمایش شوند.
 - مرجع ادامه: [MODULE-QUICK-SUPPORT](../modules/quick-support-payments.md)، [ADR-009](../decisions/ADR-009-quick-support-payments.md).
+
+### Quick Support form layout — merged in PR #39 (2026-11-13)
+
+- فرم `quick-support-payment` یک قالب اختصاصی code-defined دارد که فقط `{{steps}}` را رندر می‌کند؛ هدر AFE، نشان و progress bar حذف شده‌اند.
+- `show_step_heading=false` برای همین فرم کلاس `.afe-step-heading` را از خروجی حذف می‌کند؛ پیش‌فرض عمومی AFE برای سایر فرم‌ها `true` باقی می‌ماند.
+- `captcha_before_submit=true` کپچا را بعد از فیلدهای فرم و قبل از دکمه ارسال قرار می‌دهد.
+- تغییر generic در AFE فقط یک opt-in جدید برای نمایش عنوان Step اضافه می‌کند؛ هیچ فرم دیگری به‌صورت پیش‌فرض تغییر نمی‌کند.
+- این تغییرات در [PR #39](https://github.com/mohsenfarhangi/bonyad-alavi-wp/pull/39) به `main` ادغام شدند. Quick Support CI [run 43403744041](https://github.com/mohsenfarhangi/bonyad-alavi-wp/actions/runs/43403744041) و AFE regression CI [run 43403744021](https://github.com/mohsenfarhangi/bonyad-alavi-wp/actions/runs/43403744021) PASS شدند؛ پذیرش فرم در Elementor واقعی باقی است.
+- AFE development version: `1.0.28-dev.11`; DB version بدون تغییر است.
+
+### Quick Support payment return — merged in PR #39 (2026-11-13)
+
+- در همان PR #39، آدرس صفحه مبدأ و یک توکن تصادفی روی Order ذخیره می‌شود؛ callback موفق و مسیر لغو WooCommerce باید مرورگر را به همان صفحه فرم برگردانند.
+- AFE hook عمومی `afe_form_render_override` با قرارداد پنج‌آرگومانی حفظ شده است. جایگزینی فرم فقط پس از اعتبارسنجی `created_via`، marker سفارش و مقایسه constant-time توکن انجام می‌شود؛ سازگاری مسیر order-key نسخه اولیه نیز حفظ شده است.
+- پنج قالب HTML مجزا برای success/failed/cancelled/pending/unknown و CSS تکمیلی از تب «قالب‌ها» قابل ویرایش‌اند. وضعیت از WooCommerce Order خوانده می‌شود؛ پارامتر URL به‌تنهایی موفقیت پرداخت را اثبات نمی‌کند.
+- این تغییرات در [PR #39](https://github.com/mohsenfarhangi/bonyad-alavi-wp/pull/39) ادغام شده‌اند. Quick Support focused CI [run 43407814224](https://github.com/mohsenfarhangi/bonyad-alavi-wp/actions/runs/43407814224) شامل PHP lint و تست‌های بازگشت/قالب برای هر پنج وضعیت موفق شد. تست زنده درگاه و callback همچنان باز است.
 
 ## Contact form — admin-managed message category (2026-11-04)
 
@@ -424,7 +435,7 @@ Historical PASSهای AFE/Theme به HEAD جدید تعمیم داده نمی‌
 
 **آخرین کار تکمیل‌شده:** PR #28 مربوط به فیلدهای اختصاصی مدیریت بررسی و در 2026-11-12 به‌عنوان پیاده‌سازی superseded بسته شد؛ قابلیت از طریق PR #29 و #30 در `main` وجود دارد و پذیرش زنده آن طبق تأیید مدیر پروژه انجام شده است. برای این قابلیت کار باز دیگری باقی نمانده است. جزئیات در [MODULE-AFE](../modules/alavi-form-engine.md)، [MODULE-JIHADI-FORM](../modules/jihadi-group-registration-form.md) و انتهای [state-v002.md](state-v002.md) ثبت شده‌اند.
 
-**Quick Support handoff (2026-11-13):** PRs #34/#35/#36 merged. مدیر پروژه رفع دسترسی Administrator را روی سایت تأیید کرده و REST API برای CPT context=edit موفق است. فقط Administrator به‌صورت پیش‌فرض پنج capability دسته‌بندی و دو capability گزارش را می‌گیرد؛ نقش‌های دیگر فقط با تنظیم دستی PublishPress مجاز می‌شوند. Phase 2 dashboard/reporting در [PR #37](https://github.com/mohsenfarhangi/bonyad-alavi-wp/pull/37) و branch `feat/quick-support-reports-phase2-20261113` پیاده‌سازی شده؛ CI [run 43395846166](https://github.com/mohsenfarhangi/bonyad-alavi-wp/actions/runs/43395846166) PASS است و merge/deploy pending است. پس از merge، گزارش و خروجی CSV/XLSX را روی سایت آزمایش کن. پذیرش درگاه زنده، callback/return، Cart/Session/Persistent Cart، HPOS و Elementor Popup/Loop Grid/Single نیز هنوز باز است. برای ادامه [MODULE-QUICK-SUPPORT](../modules/quick-support-payments.md) و [ADR-009](../decisions/ADR-009-quick-support-payments.md) را بخوان.
+**Quick Support handoff (2026-11-13):** PRs #34–#39 are merged. PR #38 report-source isolation is deployed and the project owner confirmed it works. PR #39 adds the dedicated headerless form, CAPTCHA placement, same-page return URL/token, status-based result rendering and five editable result templates. The AFE render override keeps its five-argument context contract; Quick Support orders require both `created_via = ba_quick_support` and marker `_ba_quick_support = 1`, plus a constant-time return-token check. Legacy order-key returns remain supported for orders created by the first main-branch draft. Quick Support focused CI [run 43407814224](https://github.com/mohsenfarhangi/bonyad-alavi-wp/actions/runs/43407814224) passed regression coverage for success, failed, cancelled, pending and unknown. AFE frontend CSS/browser workflow [run 43407334326](https://github.com/mohsenfarhangi/bonyad-alavi-wp/actions/runs/43407334326) passed after pinning Ubuntu 24.04; Playwright checks passed at 360, 780, 782 and 1024px. Its non-blocking AFE regression-suite step still prints three export-profile/Jihadi fixture failures (configured continue-on-error). Deployment and live gateway tests (success/failure/cancel, retry, Cart/Session/Persistent Cart, HPOS, Elementor Popup/Loop Grid/Single) remain pending. For continuation read [MODULE-QUICK-SUPPORT](../modules/quick-support-payments.md), [MODULE-AFE-EXTENSION](../modules/alavi-form-engine-extension-api.md) and [ADR-009](../decisions/ADR-009-quick-support-payments.md).
 
 **شروع task بعدی:** از بخش `Current Goal` در ابتدای همین فایل، task موردنظر را انتخاب کن. پذیرش زنده فرم جذب تسهیلگر و پذیرش بصری ویجت‌های Elementor هنوز در آن بخش باز هستند.
 
@@ -436,6 +447,6 @@ Historical PASSهای AFE/Theme به HEAD جدید تعمیم داده نمی‌
 
 **Do not reconsider without new evidence:** AFE source-definition override model، ownership فرم پروژه‌ای در theme، participation cart isolation، theme shared settings persistence، Jihadi source precedence، shared admin Repeater، export autoload isolation.
 
-**Do not assume:** current HEAD QA PASS، پذیرش کلی همه مسیرهای Export در سطح release، vendor availability یا production readiness؛ همچنین Quick Support Phase 1 و اصلاح capability در main merge شده‌اند؛ دسترسی Administrator روی سایت تأیید شده است. پذیرش زنده پرداخت هنوز باز است و Phase 2 reporting در PR #37 منتظر Merge/Deploy است. پذیرش زنده فیلدهای مدیریتی فقط برای همان قابلیت و طبق گزارش مدیر پروژه تأیید شده است.
+**Do not assume:** current HEAD QA PASS، پذیرش کلی همه مسیرهای Export در سطح release، vendor availability یا production readiness. Quick Support PRs #34–#39 merged هستند؛ deployment و live gateway acceptance هنوز انجام نشده‌اند. The AFE frontend CSS/browser workflow passed on Ubuntu 24.04 at four viewport widths; its non-blocking regression-suite step still reports three export-profile/Jihadi fixture failures.
 
 **History lookup:** [INDEX.md](INDEX.md) → `state-v002.md` برای legacy milestones.

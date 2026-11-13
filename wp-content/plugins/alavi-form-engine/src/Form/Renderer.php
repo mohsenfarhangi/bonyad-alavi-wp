@@ -44,9 +44,13 @@ final class Renderer
         }
 
         $form = $this->service->resolvedForm($slug);
-        $renderOverride = apply_filters('afe_form_render_override', null, $slug, $form, $contextToken, $formContext);
-        if (is_string($renderOverride) && $renderOverride !== '') return $renderOverride;
         $row = $this->forms->row($slug);
+
+        // Allow a form-specific integration to replace the normal form output,
+        // for example with a trusted payment result on the gateway return visit.
+        $renderOverride = apply_filters('afe_form_render_override', null, $slug, $form, $contextToken, $formContext);
+        if (is_string($renderOverride) && trim($renderOverride) !== '') return $renderOverride;
+
         $editing = $this->resolveEditing($form);
         $values = $editing['row']['data'] ?? [];
         $renderValues = $values;
@@ -92,11 +96,15 @@ final class Renderer
             }
             $body = implode('', $items);
             $body = $this->applyTokens($this->templates->resolveStep($step), $byName, $body);
+            $heading = $this->renderStepHeading(
+                (string)($step['title'] ?? ''),
+                (string)($step['description'] ?? ''),
+                $index,
+                $total,
+                $form
+            );
             $stepHtml[] = '<section class="afe-step'.($index===0?' is-active':'').'" data-step="'.esc_attr((string)$index).'">'
-                . '<div class="afe-step-heading"><span class="afe-step-kicker">مرحله '.esc_html((string)($index+1)).' از '.esc_html((string)$total).'</span>'
-                . '<h2>'.esc_html($step['title']).'</h2>'
-                . (!empty($step['description'])?'<p>'.esc_html((string)$step['description']).'</p>':'')
-                . '</div><div class="afe-grid">'.$body.'</div>'
+                . $heading . '<div class="afe-grid">'.$body.'</div>'
                 . ($inlineCaptcha && $index===$dataSteps-1
                     ? '<div class="afe-captcha-wrap">'.$this->security->captchaMarkup((string)($form['settings']['captcha']??'custom')).'</div>'
                     : '')
@@ -110,7 +118,14 @@ final class Renderer
             if (!empty($form['settings']['lock_after_submit'])) {
                 $warning='<div class="afe-lock-warning"><strong>توجه قبل از ثبت نهایی</strong><p>'.esc_html((string)($form['settings']['lock_warning']??'')).'</p><label><input type="checkbox" data-afe-lock-confirm> متن بالا را مطالعه کردم و ثبت نهایی را تأیید می‌کنم.</label></div>';
             }
-            $stepHtml[]='<section class="afe-step afe-preview-step" data-afe-preview-step="1" data-step="'.esc_attr((string)$previewIndex).'"><div class="afe-step-heading"><span class="afe-step-kicker">مرحله '.esc_html((string)($previewIndex+1)).' از '.esc_html((string)$total).'</span><h2>'.esc_html((string)($form['settings']['preview_title']??'پیش‌نمایش اطلاعات ارسالی')).'</h2><p>'.esc_html((string)($form['settings']['preview_description']??'')).'</p></div>'.$previewBody.$warning.$this->previewActions().'</section>';
+            $previewHeading = $this->renderStepHeading(
+                (string)($form['settings']['preview_title'] ?? 'پیش‌نمایش اطلاعات ارسالی'),
+                (string)($form['settings']['preview_description'] ?? ''),
+                $previewIndex,
+                $total,
+                $form
+            );
+            $stepHtml[]='<section class="afe-step afe-preview-step" data-afe-preview-step="1" data-step="'.esc_attr((string)$previewIndex).'">'.$previewHeading.$previewBody.$warning.$this->previewActions().'</section>';
         }
 
         $steps = implode('', $stepHtml);
@@ -198,6 +213,25 @@ final class Renderer
         return '<div class="afe-progress"><div class="afe-progress-meta"><span class="afe-progress-text">مرحله ۱ از '.esc_html((string)$total).'</span><strong class="afe-progress-percent">'.esc_html((string)round(100/max(1,$total))).'٪</strong></div>'
             . '<div class="afe-progress-track"><span style="width:'.esc_attr((string)(100/max(1,$total))).'%"></span></div>'
             . '<div class="afe-progress-dots">'.$labels.'</div></div>';
+    }
+
+    /**
+     * Render a step heading unless the source form explicitly disables it.
+     *
+     * @param array<string,mixed> $form
+     */
+    private function renderStepHeading(string $title, string $description, int $index, int $total, array $form): string
+    {
+        $settings = (array)($form['settings'] ?? []);
+        if (array_key_exists('show_step_heading', $settings) && empty($settings['show_step_heading'])) {
+            return '';
+        }
+
+        return '<div class="afe-step-heading"><span class="afe-step-kicker">مرحله '
+            . esc_html((string)($index + 1)) . ' از ' . esc_html((string)$total) . '</span>'
+            . '<h2>' . esc_html($title) . '</h2>'
+            . ($description !== '' ? '<p>' . esc_html($description) . '</p>' : '')
+            . '</div>';
     }
 
     private function stepActions(int $index, int $dataSteps, array $form, bool $previewEnabled, bool $readOnly): string
