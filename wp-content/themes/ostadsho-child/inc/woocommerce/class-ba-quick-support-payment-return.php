@@ -23,6 +23,35 @@ final class BA_Quick_Support_Payment_Return
         add_filter('woocommerce_get_checkout_order_received_url', [self::class, 'filterReturnUrl'], 20, 2);
         add_filter('woocommerce_get_cancel_order_url', [self::class, 'filterCancelUrl'], 20, 3);
         add_filter('woocommerce_get_cancel_order_url_raw', [self::class, 'filterCancelUrl'], 20, 3);
+        add_filter('woocommerce_api_request_url', [self::class, 'filterSepCallbackUrl'], 20, 2);
+        add_filter('wp_redirect', [self::class, 'filterSepFailureRedirect'], 20, 2);
+    }
+
+    public static function filterSepCallbackUrl($url, $request)
+    {
+        if (strcasecmp((string)$request, 'WC_Sep_Payment_Gateway') !== 0 || !function_exists('get_query_var')) return $url;
+        $id = absint(get_query_var('order-pay'));
+        $key = $_GET['key'] ?? '';
+        if (!$id || !is_string($key) || !function_exists('wc_get_order')) return $url;
+        $order = wc_get_order($id);
+        if (!self::isQuickSupportOrder($order) || !method_exists($order, 'get_order_key') || !hash_equals((string)$order->get_order_key(), wp_unslash($key))) return $url;
+        $token = (string)$order->get_meta(BA_Quick_Support_Payment_Service::ORDER_RETURN_TOKEN, true);
+        return $token !== '' ? add_query_arg('ba_qs_callback_token', $token, $url) : $url;
+    }
+
+    public static function filterSepFailureRedirect($location, $status)
+    {
+        if (!is_string($location) || !function_exists('wc_get_checkout_url') || $location !== wc_get_checkout_url()) return $location;
+        $api = $_GET['wc-api'] ?? (function_exists('get_query_var') ? get_query_var('wc-api') : '');
+        $id = $_GET['wc_order'] ?? '';
+        $token = $_GET['ba_qs_callback_token'] ?? '';
+        if (!is_string($api) || strcasecmp($api, 'WC_Sep_Payment_Gateway') !== 0 || !is_scalar($id) || !is_string($token) || $token === '' || !function_exists('wc_get_order')) return $location;
+        $order = wc_get_order(absint($id));
+        if (!self::isQuickSupportOrder($order)) return $location;
+        $stored = (string)$order->get_meta(BA_Quick_Support_Payment_Service::ORDER_RETURN_TOKEN, true);
+        if ($stored === '' || !hash_equals($stored, wp_unslash($token))) return $location;
+        $resultUrl = self::resultUrl($order);
+        return $resultUrl !== '' ? $resultUrl : $location;
     }
 
     /**
@@ -220,7 +249,8 @@ HTML,
         $customCss = self::sanitizeCss((string)($form['settings']['payment_result_css'] ?? $form['settings']['quick_support_result_css'] ?? ''));
         $css = self::defaultCss();
         if ($customCss !== '') $css .= "\n" . $customCss;
-        wp_add_inline_style('afe-frontend', $css);
+        // The form may render after wp_head; emit result-specific styles with the result.
+        $resultStyle = '<style>' . $css . '</style>';
 
         $statusKey = self::statusKey($order);
         $definitions = self::templateDefinitions([], self::FORM_SLUG, $form, (array)($form['settings'] ?? []));
@@ -270,7 +300,7 @@ HTML,
         $html = strtr(wp_kses_post($template), $tokens);
         $html = wp_kses_post($html);
 
-        return '<div class="afe-shell afe-isolation-strong ba-quick-support-payment-return" dir="rtl">' . $html . '</div>';
+        return $resultStyle . '<div class="afe-shell afe-isolation-strong ba-quick-support-payment-return" dir="rtl">' . $html . '</div>';
     }
 
     private static function isQuickSupportOrder($order): bool
