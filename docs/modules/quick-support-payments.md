@@ -1,6 +1,6 @@
 # MODULE-QUICK-SUPPORT — Quick Support Payments
 
-**Status:** Phase 1 merged in [PR #34](https://github.com/mohsenfarhangi/bonyad-alavi-wp/pull/34); admin-role capability correction is in [PR #35](https://github.com/mohsenfarhangi/bonyad-alavi-wp/pull/35); staging acceptance pending  
+**Status:** Phase 1 merged in [PR #34](https://github.com/mohsenfarhangi/bonyad-alavi-wp/pull/34); granular category capabilities are implemented in [PR #36](https://github.com/mohsenfarhangi/bonyad-alavi-wp/pull/36); staging acceptance pending  
 **Decision:** [ADR-009](../decisions/ADR-009-quick-support-payments.md)  
 **Parent modules:** [MODULE-PARTICIPATION](participation-payments.md), [MODULE-AFE](alavi-form-engine.md), [MODULE-AFE-EXTENSION](alavi-form-engine-extension-api.md)
 
@@ -31,6 +31,20 @@ Implemented in the current feature branch:
 **Not yet accepted:** live hosted/redirect gateway initiation and callback, real Cart/Session/Persistent Cart preservation on staging, HPOS order creation, and Elementor Single/Popup/Loop Grid configuration on the target site. No production deployment has occurred.
 
 **Phase 2 remains out of scope:** Quick Support dashboard, financial aggregation, filters and Excel/CSV exports.
+
+## Category Administration Capabilities
+
+Implemented in PR #36; merge and live acceptance pending.
+
+| Operation | Capability |
+|---|---|
+| View category list | `view_ba_quick_support_categories` |
+| Create category | `create_ba_quick_support_categories` |
+| Edit category | `edit_ba_quick_support_category` |
+| Publish category | `publish_ba_quick_support_categories` |
+| Delete category | `delete_ba_quick_support_category` |
+
+WordPress's CPT list-screen primitive `edit_posts` maps to the independent view permission. Object-level edit/read/delete meta capabilities and create/publish primitives are mapped independently. Administrator receives all five permissions once through a versioned migration. No other role receives them automatically; assign each permission per role in PublishPress Capabilities. A view-only role can open the list, but editing an individual category requires the edit permission.
 
 ## Architecture and Ownership
 
