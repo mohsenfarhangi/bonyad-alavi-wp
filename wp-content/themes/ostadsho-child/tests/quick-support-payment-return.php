@@ -153,6 +153,10 @@ $GLOBALS['ba_qs_order']->setStatus('failed', false);
 $failedHtml = BA_Quick_Support_Payment_Return::renderResult(null, 'quick-support-payment', ['settings'=>[]]);
 $GLOBALS['ba_qs_order']->setStatus('pending', false);
 $pendingHtml = BA_Quick_Support_Payment_Return::renderResult(null, 'quick-support-payment', ['settings'=>[]]);
+$GLOBALS['ba_qs_order']->setStatus('cancelled', false);
+$cancelledHtml = BA_Quick_Support_Payment_Return::renderResult(null, 'quick-support-payment', ['settings'=>[]]);
+$GLOBALS['ba_qs_order']->setStatus('refunded', false);
+$unknownHtml = BA_Quick_Support_Payment_Return::renderResult(null, 'quick-support-payment', ['settings'=>[]]);
 
 $_GET['ba_qs_token'] = 'invalid-token';
 $invalidToken = BA_Quick_Support_Payment_Return::renderResult('normal-form', 'quick-support-payment', ['settings'=>[]]);
@@ -175,6 +179,8 @@ $checks = [
         && str_contains($successHtml, '50,000'),
     'failed-order-uses-failed-template' => is_string($failedHtml) && str_contains($failedHtml, 'پرداخت ناموفق'),
     'pending-order-uses-pending-template' => is_string($pendingHtml) && str_contains($pendingHtml, 'در انتظار تأیید'),
+    'cancelled-order-uses-cancelled-template' => is_string($cancelledHtml) && str_contains($cancelledHtml, 'پرداخت لغوشده'),
+    'unknown-order-uses-unknown-template' => is_string($unknownHtml) && str_contains($unknownHtml, 'وضعیت نامشخص'),
     'invalid-return-token-does-not-replace-form' => $invalidToken === 'normal-form',
     'unsafe-css-import-is-not-emitted' => !str_contains($GLOBALS['ba_qs_inline_css'], '@import')
         && !str_contains($GLOBALS['ba_qs_inline_css'], 'url('),
