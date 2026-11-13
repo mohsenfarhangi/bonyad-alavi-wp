@@ -33,6 +33,10 @@ on:
       - 'wp-content/themes/ostadsho-child/assets/css/ba-quick-support-form.css'
       - 'wp-content/themes/ostadsho-child/assets/css/ba-quick-support-reports.css'
       - 'wp-content/themes/ostadsho-child/functions.php'
+      - 'docs/modules/alavi-form-engine.md'
+      - 'docs/modules/quick-support-payments.md'
+      - 'docs/state/CURRENT.md'
+      - 'docs/state/state-v002.md'
       - '.github/workflows/quick-support-phase1-checks.yml'
   workflow_dispatch:
 
