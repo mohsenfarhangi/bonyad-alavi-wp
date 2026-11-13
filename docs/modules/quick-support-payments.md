@@ -30,7 +30,7 @@ Implemented in the current feature branch:
 
 **Live acceptance still pending:** Hosted/Redirect gateway initiation and callback/return, preservation of the real Cart/Session/Persistent Cart, HPOS order creation, and confirmation of the Elementor Single/Popup/Loop Grid layouts on the target site. The project owner reported that the updated theme files were uploaded and confirmed Administrator access; this does not count as payment-flow acceptance.
 
-**Phase 2 implementation — PR #37:** adds the dedicated report submenu, financial aggregation, filters, paginated order list and CSV/XLSX exports. CI is passing on the branch; merge and live acceptance are pending.
+**Phase 2 implementation — PR #37:** adds the dedicated report submenu, financial aggregation, filters, paginated order list and CSV/XLSX exports. Final focused CI [run 43395846166](https://github.com/mohsenfarhangi/bonyad-alavi-wp/actions/runs/43395846166) passed; merge and live acceptance are pending.
 
 ## Category Administration Capabilities
 
