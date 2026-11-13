@@ -929,4 +929,13 @@ Modules: [MODULE-AFE](../modules/alavi-form-engine.md), [MODULE-JIHADI-FORM](../
 - The legacy Participation checkout creates orders with `created_via = bap_quick_checkout`; Quick Support creates orders with `created_via = ba_quick_support` and marker `_ba_quick_support = 1`.
 - The report service now requires both the dedicated WooCommerce `created_via` value and the Quick Support order marker. This shared query is used by the dashboard summary, paginated order list, CSV and XLSX iteration.
 - Regression fixtures include product-based participation orders, including a defensive case with a copied Quick Support marker, to prove the creation-source filter excludes them.
-- Implementation and focused regression test are in [PR #38](https://github.com/mohsenfarhangi/bonyad-alavi-wp/pull/38); focused CI [run 43398110222](https://github.com/mohsenfarhangi/bonyad-alavi-wp/actions/runs/43398110222) passed. Merge and deployment are pending.
+- Implementation and focused regression test were merged in [PR #38](https://github.com/mohsenfarhangi/bonyad-alavi-wp/pull/38); focused CI [run 43398110222](https://github.com/mohsenfarhangi/bonyad-alavi-wp/actions/runs/43398110222) passed. The project owner deployed the change and confirmed live testing works without issue.
+
+
+## 2026-11-13 — Quick Support dedicated AFE form layout
+
+- The shared `quick-support-payment` Source Definition now supplies a dedicated form template through `Form::template('{{steps}}')`, omitting the default AFE form header, brand mark and progress markup.
+- Added generic `show_step_heading` setting to AFE form defaults (`true`); Renderer now conditionally emits `.afe-step-heading` for data and preview steps. Quick Support opts out, so no step heading is rendered on that form; all other forms preserve existing behavior by default.
+- Enabled the existing per-form `captcha_before_submit` option for Quick Support. With preview disabled and the form unlocked, the renderer places CAPTCHA after the last Step's fields and before the submit action/button.
+- Added regression coverage for the custom headerless template, Quick Support heading suppression, unchanged generic default heading and CAPTCHA placement configuration.
+- AFE dev version bumped to `1.0.28-dev.10`; DB version unchanged. Branch: `feat/quick-support-dedicated-form-template-20261113`. PR/CI/live form acceptance pending.
