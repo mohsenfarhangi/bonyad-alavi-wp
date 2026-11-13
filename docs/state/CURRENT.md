@@ -40,6 +40,13 @@ AFE release goal همچنان live acceptance نسخه 1.0.28 و رفع blocker 
 - پیاده‌سازی در [PR #39](https://github.com/mohsenfarhangi/bonyad-alavi-wp/pull/39) قرار دارد. Quick Support CI [run 43403744041](https://github.com/mohsenfarhangi/bonyad-alavi-wp/actions/runs/43403744041) و AFE regression CI [run 43403744021](https://github.com/mohsenfarhangi/bonyad-alavi-wp/actions/runs/43403744021) هر دو PASS شدند؛ Merge و پذیرش زنده فرم باقی است.
 - AFE development version: `1.0.28-dev.10`; DB version بدون تغییر است.
 
+### Quick Support payment return — in progress (2026-11-13)
+
+- در همان PR #39، آدرس صفحه مبدأ و یک توکن تصادفی روی Order ذخیره می‌شود؛ callback موفق و مسیر لغو WooCommerce باید مرورگر را به همان صفحه فرم برگردانند.
+- AFE hook عمومی `afe_form_render_override` به theme اجازه می‌دهد فقط در صورت اعتبارسنجی marker سفارش و توکن، خروجی فرم را در همان محل با پیام نتیجه جایگزین کند.
+- پنج قالب HTML مجزا برای success/failed/cancelled/pending/unknown و CSS تکمیلی از تب «قالب‌ها» قابل ویرایش‌اند. وضعیت از WooCommerce Order خوانده می‌شود؛ پارامتر URL به‌تنهایی موفقیت پرداخت را اثبات نمی‌کند.
+- PR #39 branch `feat/quick-support-dedicated-form-template-20261113` با این تغییرات گسترش یافته است. CI برای کد جدید هنوز باید اجرا و PASS شود؛ تست زنده درگاه و callback همچنان باز است.
+
 ## Contact form — admin-managed message category (2026-11-04)
 
 - فیلد اجباری Select با شناسه `message_category` و عرض ۱۲، بدون گزینه اولیه، پیش از موضوع در فرم `contact-us` اضافه شد. مدیریت گزینه‌ها فقط از Field Override استاندارد AFE است.
@@ -428,7 +435,7 @@ Historical PASSهای AFE/Theme به HEAD جدید تعمیم داده نمی‌
 
 **آخرین کار تکمیل‌شده:** PR #28 مربوط به فیلدهای اختصاصی مدیریت بررسی و در 2026-11-12 به‌عنوان پیاده‌سازی superseded بسته شد؛ قابلیت از طریق PR #29 و #30 در `main` وجود دارد و پذیرش زنده آن طبق تأیید مدیر پروژه انجام شده است. برای این قابلیت کار باز دیگری باقی نمانده است. جزئیات در [MODULE-AFE](../modules/alavi-form-engine.md)، [MODULE-JIHADI-FORM](../modules/jihadi-group-registration-form.md) و انتهای [state-v002.md](state-v002.md) ثبت شده‌اند.
 
-**Quick Support handoff (2026-11-13):** PRs #34–#38 merged. مدیر پروژه دسترسی Administrator، جداسازی گزارش محصول‌محور از Quick Support و تست زنده اصلاح گزارش را تأیید کرده است. گزارش سریع فقط سفارش‌های دارای `created_via = ba_quick_support` و marker `_ba_quick_support = 1` را می‌خواند. قالب اختصاصی فرم در [PR #39](https://github.com/mohsenfarhangi/bonyad-alavi-wp/pull/39) آماده است: `quick-support-payment` بدون هدر AFE و progress، بدون `.afe-step-heading` و با CAPTCHA قبل از submit. هر دو CI [run 43403744041](https://github.com/mohsenfarhangi/bonyad-alavi-wp/actions/runs/43403744041) و [run 43403744021](https://github.com/mohsenfarhangi/bonyad-alavi-wp/actions/runs/43403744021) PASS شدند؛ Merge و پذیرش زنده فرم باقی است. پذیرش درگاه زنده، callback/return، Cart/Session/Persistent Cart، HPOS و Elementor Popup/Loop Grid/Single همچنان یک checklist جداست. برای ادامه [MODULE-QUICK-SUPPORT](../modules/quick-support-payments.md)، [MODULE-AFE](../modules/alavi-form-engine.md) و [ADR-009](../decisions/ADR-009-quick-support-payments.md) را بخوان.
+**Quick Support handoff (2026-11-13):** PRs #34–#38 merged; PR #38 report-source isolation is deployed and the project owner confirmed it works. PR #39 branch `feat/quick-support-dedicated-form-template-20261113` contains the dedicated headerless form, CAPTCHA placement, same-page return URL/token, status-based result rendering and five editable result templates. The earlier headerless-form CI runs [43403744041](https://github.com/mohsenfarhangi/bonyad-alavi-wp/actions/runs/43403744041) and [43403744021](https://github.com/mohsenfarhangi/bonyad-alavi-wp/actions/runs/43403744021) passed before the return-flow extension; new CI must be checked for the latest head. Merge/deploy and live gateway tests (success/failure/cancel, retry, Cart/Session/Persistent Cart, HPOS, Elementor Popup/Loop Grid/Single) remain pending. For continuation read [MODULE-QUICK-SUPPORT](../modules/quick-support-payments.md), [MODULE-AFE-EXTENSION](../modules/alavi-form-engine-extension-api.md) and [ADR-009](../decisions/ADR-009-quick-support-payments.md).
 
 **شروع task بعدی:** از بخش `Current Goal` در ابتدای همین فایل، task موردنظر را انتخاب کن. پذیرش زنده فرم جذب تسهیلگر و پذیرش بصری ویجت‌های Elementor هنوز در آن بخش باز هستند.
 
@@ -440,6 +447,6 @@ Historical PASSهای AFE/Theme به HEAD جدید تعمیم داده نمی‌
 
 **Do not reconsider without new evidence:** AFE source-definition override model، ownership فرم پروژه‌ای در theme، participation cart isolation، theme shared settings persistence، Jihadi source precedence، shared admin Repeater، export autoload isolation.
 
-**Do not assume:** current HEAD QA PASS، پذیرش کلی همه مسیرهای Export در سطح release، vendor availability یا production readiness؛ همچنین Quick Support Phase 1 و اصلاح capability در main merge شده‌اند؛ دسترسی Administrator روی سایت تأیید شده است. پذیرش زنده پرداخت هنوز باز است و Phase 2 reporting در PR #37 منتظر Merge/Deploy است. پذیرش زنده فیلدهای مدیریتی فقط برای همان قابلیت و طبق گزارش مدیر پروژه تأیید شده است.
+**Do not assume:** current HEAD QA PASS، پذیرش کلی همه مسیرهای Export در سطح release، vendor availability یا production readiness. Quick Support PRs #34–#38 merged هستند؛ PR #39 headerless form CI passed previously, but the latest same-page payment-return extension still requires its own CI/review and live gateway acceptance.
 
 **History lookup:** [INDEX.md](INDEX.md) → `state-v002.md` برای legacy milestones.
