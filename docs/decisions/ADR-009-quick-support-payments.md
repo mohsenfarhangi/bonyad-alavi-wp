@@ -74,7 +74,7 @@
 - مبلغ خالص پس از کسر refund محاسبه می‌شود؛ partial refund نیز لحاظ می‌شود.
 - از WooCommerce CRUD و HPOS استفاده می‌شود؛ در نسخه اول جدول تراکنش موازی ساخته نمی‌شود.
 - دسترسی گزارش و داده شخصی با `view_ba_quick_support_reports` و خروجی با `export_ba_quick_support_reports` کنترل می‌شود. هر دو capability و پنج capability دسته‌بندی به‌صورت پیش‌فرض فقط به نقش `administrator` داده می‌شوند؛ نقش‌های دیگر صرفاً با تنظیم دستی مدیر در PublishPress Capabilities دسترسی می‌گیرند.
-- گزارش‌ها از `wc_get_orders()` با دو شرط مستقل `created_via` و marker/meta_query خوانده می‌شوند تا HPOS پشتیبانی شود و سفارش‌های محصول‌محور مشارکت وارد آمار، جدول یا خروجی نشوند. فیلتر نام/موبایل و export از POST استفاده می‌کنند تا اطلاعات شخصی در URL قرار نگیرد.
+- گزارش‌ها از `wc_get_orders()` با دو شرط مستقل `created_via` و marker/meta_query خوانده می‌شوند تا HPOS پشتیبانی شود و سفارش‌های محصول‌محور مشارکت وارد آمار، جدول یا خروجی نشوند. Regression hardening این جداسازی در [PR #38](https://github.com/mohsenfarhangi/bonyad-alavi-wp/pull/38) با CI موفق [run 43398110222](https://github.com/mohsenfarhangi/bonyad-alavi-wp/actions/runs/43398110222) آماده Merge است. فیلتر نام/موبایل و export از POST استفاده می‌کنند تا اطلاعات شخصی در URL قرار نگیرد.
 
 ## Consequences
 
