@@ -113,6 +113,7 @@ Slug شناسه عمومی و پایدار URL است؛ شناسه عددی Post
 - `show_step_heading=false` removes the `.afe-step-heading` block from this form only. AFE defaults this setting to `true` for all other forms.
 - `captcha_before_submit=true` renders the CAPTCHA after the final Step fields and immediately before the submit-action area/button. The existing CAPTCHA validation and payment Action remain unchanged.
 - These settings are part of the `quick-support-payment` code definition; no global AFE template or other form definition is changed.
+- Implementation is in [PR #39](https://github.com/mohsenfarhangi/bonyad-alavi-wp/pull/39); Quick Support CI [run 43403744041](https://github.com/mohsenfarhangi/bonyad-alavi-wp/actions/runs/43403744041) and AFE regression CI [run 43403744021](https://github.com/mohsenfarhangi/bonyad-alavi-wp/actions/runs/43403744021) passed. Merge and live form acceptance remain pending.
 
 ### Form Fields
 
