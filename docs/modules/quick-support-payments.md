@@ -1,6 +1,6 @@
 # MODULE-QUICK-SUPPORT — Quick Support Payments
 
-**Status:** Phase 1, granular category permissions, Phase 2 reports and report-source isolation are merged in [PR #34](https://github.com/mohsenfarhangi/bonyad-alavi-wp/pull/34), [PR #35](https://github.com/mohsenfarhangi/bonyad-alavi-wp/pull/35), [PR #36](https://github.com/mohsenfarhangi/bonyad-alavi-wp/pull/36), [PR #37](https://github.com/mohsenfarhangi/bonyad-alavi-wp/pull/37) and [PR #38](https://github.com/mohsenfarhangi/bonyad-alavi-wp/pull/38). Report-source isolation is deployed and confirmed working on the live site.  
+**Status:** Phase 1, granular category permissions, Phase 2 reports and report-source isolation are merged in [PRs #34–#38](https://github.com/mohsenfarhangi/bonyad-alavi-wp/pulls?q=is%3Apr+is%3Amerged+quick+support). Report-source isolation is deployed and confirmed working on the live site. Dedicated form layout, same-page payment return and editable result templates are being developed in [PR #39](https://github.com/mohsenfarhangi/bonyad-alavi-wp/pull/39); updated CI/review and live gateway acceptance remain pending.  
 **Decision:** [ADR-009](../decisions/ADR-009-quick-support-payments.md)  
 **Parent modules:** [MODULE-PARTICIPATION](participation-payments.md), [MODULE-AFE](alavi-form-engine.md), [MODULE-AFE-EXTENSION](alavi-form-engine-extension-api.md)
 
@@ -114,6 +114,16 @@ Slug شناسه عمومی و پایدار URL است؛ شناسه عددی Post
 - `captcha_before_submit=true` renders the CAPTCHA after the final Step fields and immediately before the submit-action area/button. The existing CAPTCHA validation and payment Action remain unchanged.
 - These settings are part of the `quick-support-payment` code definition; no global AFE template or other form definition is changed.
 - Implementation is in [PR #39](https://github.com/mohsenfarhangi/bonyad-alavi-wp/pull/39); Quick Support CI [run 43403744041](https://github.com/mohsenfarhangi/bonyad-alavi-wp/actions/runs/43403744041) and AFE regression CI [run 43403744021](https://github.com/mohsenfarhangi/bonyad-alavi-wp/actions/runs/43403744021) passed. Merge and live form acceptance remain pending.
+
+### Same-page payment return and editable result templates
+
+- The payment service stores the validated same-site URL of the page hosting the form on the WooCommerce order, along with a random return token. The AJAX Referer is preferred; the Quick Support category permalink is the fallback.
+- WooCommerce return/received URL filters and cancellation URL filters are applied only to orders carrying the Quick Support order marker. Cancellation still passes through WooCommerce's handler so the order status is changed before the browser is returned to the source page.
+- On return, AFE's generic `afe_form_render_override` hook lets the theme replace the form at the exact widget/shortcode location. The handler requires a matching order marker and constant-time token comparison; an invalid token leaves the normal form visible.
+- The result state is selected from the current WooCommerce order status: paid, failed, cancelled, pending or unknown. The query string is only a locator and never proof of successful payment.
+- The AFE «قالب‌ها» tab provides five independent HTML editors and one optional CSS editor for the Quick Support form. Available tokens: `{{order_number}}`, `{{amount}}`, `{{category}}`, `{{transaction_id}}`, `{{status}}`, `{{date}}`, `{{message}}` and `{{retry_url}}`.
+- Failed/cancelled templates can link to the clean original page to retry. Pending/unknown templates avoid duplicate payment attempts while the gateway result is unresolved.
+- Implementation is being added to [PR #39](https://github.com/mohsenfarhangi/bonyad-alavi-wp/pull/39). Focused CI for the return flow must pass before merge; no live gateway acceptance is claimed.
 
 ### Form Fields
 
