@@ -54,6 +54,8 @@ function wc_get_orders(array $query): object {
     ];
 }
 
+final class BA_Quick_Support_Category { public const POST_TYPE = 'ba_quick_support'; }
+
 final class WP_Post
 {
     public function __construct(public int $ID, public string $post_title) {}
