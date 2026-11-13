@@ -929,4 +929,14 @@ Modules: [MODULE-AFE](../modules/alavi-form-engine.md), [MODULE-JIHADI-FORM](../
 - The legacy Participation checkout creates orders with `created_via = bap_quick_checkout`; Quick Support creates orders with `created_via = ba_quick_support` and marker `_ba_quick_support = 1`.
 - The report service now requires both the dedicated WooCommerce `created_via` value and the Quick Support order marker. This shared query is used by the dashboard summary, paginated order list, CSV and XLSX iteration.
 - Regression fixtures include product-based participation orders, including a defensive case with a copied Quick Support marker, to prove the creation-source filter excludes them.
-- Implementation and focused regression test are in [PR #38](https://github.com/mohsenfarhangi/bonyad-alavi-wp/pull/38); focused CI [run 43398110222](https://github.com/mohsenfarhangi/bonyad-alavi-wp/actions/runs/43398110222) passed. Merge and deployment are pending.
+- Implementation and focused regression test are in [PR #38](https://github.com/mohsenfarhangi/bonyad-alavi-wp/pull/38); focused CI [run 43398110222](https://github.com/mohsenfarhangi/bonyad-alavi-wp/actions/runs/43398110222) passed. PR #38 merged into `main` at `12145e323ba75aa45299e3d547e9803edfb36a04`.
+
+
+## 2026-11-13 — Quick Support form presentation and same-page payment return
+
+- Requirement: the shared Quick Support payment form must not render an internal AFE header or \`.afe-step-heading\`; CAPTCHA must appear immediately before submit.
+- The code-defined form template is \`{{steps}}\`; the form opts into \`hide_step_heading\` and \`captcha_before_submit\`. These settings are limited to \`quick-support-payment\`.
+- AFE adds the generic \`afe_form_render_override\` integration hook. The theme's Quick Support return handler validates the order marker and a random order-stored return token before replacing the normal form output.
+- The payment service stores the same-site source page URL and a new random return token on the WooCommerce order. Success/received and cancellation URLs are filtered for Quick Support orders only; cancellation continues through WooCommerce so the order status is updated before returning to the page.
+- Result selection is based on the current WooCommerce order status (paid, failed, cancelled, pending or unknown), not on the browser query parameter. The AFE Templates tab provides five independent HTML result templates and optional CSS.
+- Implementation, docs and regression tests are in [PR #39](https://github.com/mohsenfarhangi/bonyad-alavi-wp/pull/39), branch \`feat/quick-support-payment-return-templates\`. CI/review and merge are pending at this state snapshot; no live payment acceptance is claimed.
