@@ -993,3 +993,8 @@ Modules: [MODULE-AFE](../modules/alavi-form-engine.md), [MODULE-JIHADI-FORM](../
 - Live order 30254 completed and returned to the form; order 30253 remained pending after cancellation and the SEP gateway redirected to checkout.
 - Local changes add authenticated SEP callback return handling, result CSS emitted with the result, currency in the amount label and grouped amount input. The order status remains the source of truth. Earlier partial edits were uploaded by the owner; final deployment and live acceptance have not been verified.
 - Local quick-support form, payment rules, payment return, amount formatting and PHP/JS syntax checks passed. Actual gateway cancellation, success and customer cart/session preservation remain pending.
+
+## 2026-11-13 — SEP cancellation display follow-up
+
+- Owner reported order 30264 returned to the form after cancellation but displayed pending; live readback confirmed WooCommerce pending and a gateway missing-parameter order note.
+- Local implementation distinguishes explicit authenticated SEP user-cancellation callbacks with a signed presentation notice, without changing order status; paid status takes precedence. Prior callback URLs cannot recover the original State. Focused local tests passed; live deployment and acceptance remain pending.

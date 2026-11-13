@@ -390,7 +390,7 @@ final class BA_Quick_Support_Payment_Service
         if ($url === '') $url = home_url('/');
 
         return remove_query_arg(
-            ['ba_qs_payment_result', 'ba_qs_order_id', 'ba_qs_token', 'ba_qs_order', 'ba_qs_key'],
+            ['ba_qs_payment_result', 'ba_qs_order_id', 'ba_qs_token', 'ba_qs_order', 'ba_qs_key', 'ba_qs_cancel_notice'],
             $url
         );
     }

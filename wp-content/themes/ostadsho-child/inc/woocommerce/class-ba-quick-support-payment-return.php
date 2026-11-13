@@ -52,7 +52,19 @@ final class BA_Quick_Support_Payment_Return
         $stored = (string)$order->get_meta(BA_Quick_Support_Payment_Service::ORDER_RETURN_TOKEN, true);
         if ($stored === '' || !hash_equals($stored, wp_unslash($token))) return $location;
         $resultUrl = self::resultUrl($order);
+        $state = $_POST['State'] ?? '';
+        $resNum = $_POST['ResNum'] ?? '';
+        if ($resultUrl !== '' && is_string($state) && is_scalar($resNum)
+            && absint(wp_unslash((string)$resNum)) === (int)$order->get_id()
+            && in_array(strtolower(str_replace(' ', '', wp_unslash($state))), ['canceledbyuser', 'cancelledbyuser'], true)) {
+            $resultUrl = add_query_arg('ba_qs_cancel_notice', self::cancelNoticeSignature($order), $resultUrl);
+        }
         return $resultUrl !== '' ? $resultUrl : $location;
+    }
+
+    private static function cancelNoticeSignature($order): string
+    {
+        return hash_hmac('sha256', 'sep-cancel|' . $order->get_id(), wp_salt('auth'));
     }
 
     /**
@@ -254,12 +266,19 @@ HTML,
         $resultStyle = '<style>' . $css . '</style>';
 
         $statusKey = self::statusKey($order);
+        $cancelNotice = $_GET['ba_qs_cancel_notice'] ?? '';
+        $showCancelNotice = $statusKey === 'pending' && is_string($cancelNotice) && $cancelNotice !== ''
+            && hash_equals(self::cancelNoticeSignature($order), wp_unslash($cancelNotice));
+        if ($showCancelNotice) $statusKey = 'cancelled';
         $definitions = self::templateDefinitions([], self::FORM_SLUG, $form, (array)($form['settings'] ?? []));
         $defaultTemplate = (string)($definitions[$statusKey]['default'] ?? $definitions['unknown']['default']);
         $customTemplates = (array)($form['settings']['payment_result_templates'] ?? []);
         $legacyTemplates = (array)($form['settings']['quick_support_result_templates'] ?? []);
         $template = trim((string)($customTemplates[$statusKey] ?? $legacyTemplates[$statusKey] ?? ''));
+        // An admin's cancelled-order template may incorrectly claim the pending order was cancelled.
+        if ($showCancelNotice) $template = '';
         if ($template === '') $template = $defaultTemplate;
+        if ($showCancelNotice) $template = str_replace('فرآیند پرداخت لغو شد', 'انصراف در بازگشت از درگاه گزارش شد', $template);
 
         $statusName = function_exists('wc_get_order_status_name')
             ? (string)wc_get_order_status_name((string)$order->get_status())
@@ -277,6 +296,9 @@ HTML,
             'pending' => 'هنوز پاسخ نهایی از بانک دریافت نشده است. وضعیت سفارش پس از دریافت پاسخ به‌روزرسانی می‌شود.',
             'unknown' => 'وضعیت سفارش در حال حاضر «' . $statusName . '» است و نتیجه قطعی پرداخت مشخص نیست.',
         ];
+        if ($showCancelNotice) {
+            $messages['cancelled'] = 'در یک بازگشت از درگاه، انصراف از پرداخت گزارش شده است؛ پرداخت هنوز به‌صورت نهایی تأیید نشده است. در صورت کسر وجه، پیش از تلاش مجدد وضعیت را بررسی کنید.';
+        }
 
         $amount = function_exists('wc_price')
             ? wp_kses_post(wc_price((float)$order->get_total(), ['currency' => $order->get_currency()]))
@@ -361,7 +383,7 @@ HTML,
         $path = (string)wp_parse_url($url, PHP_URL_PATH);
         if (str_contains($path, '/wp-admin/') || str_contains($path, '/wp-login.php')) return '';
 
-        return remove_query_arg([self::QUERY_FLAG, self::QUERY_ORDER, self::QUERY_TOKEN, 'ba_qs_order', 'ba_qs_key'], $url);
+        return remove_query_arg([self::QUERY_FLAG, self::QUERY_ORDER, self::QUERY_TOKEN, 'ba_qs_order', 'ba_qs_key', 'ba_qs_cancel_notice'], $url);
     }
 
     private static function sanitizeCss(string $css): string

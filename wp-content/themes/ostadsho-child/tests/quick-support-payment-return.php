@@ -66,6 +66,7 @@ function wp_add_inline_style(string $handle, string $css): bool {
     return true;
 }
 function nocache_headers(): void {}
+function wp_salt(string $scheme = 'auth'): string { return 'test-site-secret'; }
 function get_query_var(string $key): mixed { return $GLOBALS['ba_qs_query_vars'][$key] ?? ''; }
 function wc_get_checkout_url(): string { return 'https://bonyadalavi.ir/checkout/'; }
 
@@ -127,6 +128,12 @@ $callbackUrl = BA_Quick_Support_Payment_Return::filterSepCallbackUrl('https://bo
 parse_str((string)parse_url($callbackUrl, PHP_URL_QUERY), $callbackQuery);
 $_GET = ['wc-api'=>'WC_Sep_Payment_Gateway', 'wc_order'=>'321', 'ba_qs_callback_token'=>'return-secret'];
 $sepRedirect = BA_Quick_Support_Payment_Return::filterSepFailureRedirect(wc_get_checkout_url(), 302);
+$_POST = ['State'=>'Canceled By User', 'ResNum'=>'321'];
+$cancelledSepRedirect = BA_Quick_Support_Payment_Return::filterSepFailureRedirect(wc_get_checkout_url(), 302);
+parse_str((string)parse_url($cancelledSepRedirect, PHP_URL_QUERY), $cancelledSepQuery);
+$_POST = ['State'=>'Canceled By User', 'ResNum'=>'322'];
+$wrongResRedirect = BA_Quick_Support_Payment_Return::filterSepFailureRedirect(wc_get_checkout_url(), 302);
+$_POST = [];
 unset($_GET['wc-api']);
 $GLOBALS['wp'] = (object)['query_vars'=>['wc-api'=>'wc_sep_payment_gateway']];
 $prettySepRedirect = BA_Quick_Support_Payment_Return::filterSepFailureRedirect(wc_get_checkout_url(), 302);
@@ -185,6 +192,16 @@ $GLOBALS['ba_qs_order']->setStatus('failed', false);
 $failedHtml = BA_Quick_Support_Payment_Return::renderResult(null, 'quick-support-payment', ['settings'=>[]]);
 $GLOBALS['ba_qs_order']->setStatus('pending', false);
 $pendingHtml = BA_Quick_Support_Payment_Return::renderResult(null, 'quick-support-payment', ['settings'=>[]]);
+$_GET['ba_qs_cancel_notice'] = $cancelledSepQuery['ba_qs_cancel_notice'] ?? '';
+$cancelNoticeHtml = BA_Quick_Support_Payment_Return::renderResult(null, 'quick-support-payment', ['settings'=>['payment_result_templates'=>['cancelled'=>'<h2>سفارش لغو شده است</h2>']]]);
+$GLOBALS['ba_qs_order']->setStatus('on-hold', false);
+$onHoldCancelHtml = BA_Quick_Support_Payment_Return::renderResult(null, 'quick-support-payment', ['settings'=>[]]);
+$GLOBALS['ba_qs_order']->setStatus('processing', true);
+$paidWithCancelNoticeHtml = BA_Quick_Support_Payment_Return::renderResult(null, 'quick-support-payment', ['settings'=>[]]);
+$GLOBALS['ba_qs_order']->setStatus('pending', false);
+$_GET['ba_qs_cancel_notice'] = 'forged';
+$forgedCancelNoticeHtml = BA_Quick_Support_Payment_Return::renderResult(null, 'quick-support-payment', ['settings'=>[]]);
+unset($_GET['ba_qs_cancel_notice']);
 $GLOBALS['ba_qs_order']->setStatus('cancelled', false);
 $cancelledHtml = BA_Quick_Support_Payment_Return::renderResult(null, 'quick-support-payment', ['settings'=>[]]);
 $GLOBALS['ba_qs_order']->setStatus('refunded', false);
@@ -220,6 +237,12 @@ $legacyHtml = BA_Quick_Support_Payment_Return::renderResult(
 $checks = [
     'sep-callback-carries-token' => ($callbackQuery['ba_qs_callback_token'] ?? '') === 'return-secret',
     'sep-failure-returns-to-form' => str_starts_with($sepRedirect, $baseUrl),
+    'explicit-cancel-gets-signed-notice' => !empty($cancelledSepQuery['ba_qs_cancel_notice']),
+    'wrong-resnum-does-not-get-cancel-notice' => !str_contains($wrongResRedirect, 'ba_qs_cancel_notice'),
+    'signed-cancel-displays-payment-cancelled-while-order-pending' => str_contains($cancelNoticeHtml, 'انصراف در بازگشت از درگاه گزارش شد') && str_contains($cancelNoticeHtml, 'پرداخت هنوز به‌صورت نهایی تأیید نشده است') && !str_contains($cancelNoticeHtml, 'سفارش لغو شده است'),
+    'on-hold-cancel-notice-does-not-claim-pending-order' => str_contains($onHoldCancelHtml, 'پرداخت هنوز به‌صورت نهایی تأیید نشده است') && !str_contains($onHoldCancelHtml, 'وضعیت سفارش هنوز در انتظار پرداخت است'),
+    'paid-status-overrides-cancel-notice' => str_contains($paidWithCancelNoticeHtml, 'حمایت شما با موفقیت ثبت شد'),
+    'forged-cancel-notice-is-ignored' => str_contains($forgedCancelNoticeHtml, 'وضعیت پرداخت هنوز نهایی نشده است'),
     'sep-pretty-permalink-returns-to-form' => str_starts_with($prettySepRedirect, $baseUrl),
     'sep-invalid-token-keeps-checkout' => $badSepRedirect === wc_get_checkout_url(),
     'other-gateway-keeps-checkout' => $otherSepRedirect === wc_get_checkout_url(),
