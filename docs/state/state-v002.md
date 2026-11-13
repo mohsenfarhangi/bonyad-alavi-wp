@@ -929,4 +929,4 @@ Modules: [MODULE-AFE](../modules/alavi-form-engine.md), [MODULE-JIHADI-FORM](../
 - The legacy Participation checkout creates orders with `created_via = bap_quick_checkout`; Quick Support creates orders with `created_via = ba_quick_support` and marker `_ba_quick_support = 1`.
 - The report service now requires both the dedicated WooCommerce `created_via` value and the Quick Support order marker. This shared query is used by the dashboard summary, paginated order list, CSV and XLSX iteration.
 - Regression fixtures include product-based participation orders, including a defensive case with a copied Quick Support marker, to prove the creation-source filter excludes them.
-- Implementation and focused regression test are in branch `fix/quick-support-report-isolation-20261113`; PR/CI and merge are pending.
+- Implementation and focused regression test are in [PR #38](https://github.com/mohsenfarhangi/bonyad-alavi-wp/pull/38); focused CI [run 43398110222](https://github.com/mohsenfarhangi/bonyad-alavi-wp/actions/runs/43398110222) passed. Merge and deployment are pending.
