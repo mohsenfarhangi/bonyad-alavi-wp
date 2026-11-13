@@ -2,7 +2,7 @@
 
 **Status:** Accepted  
 **Date recorded:** 2026-11-12  
-**Implementation status:** Phase 1 implementation is under review in [PR #34](https://github.com/mohsenfarhangi/bonyad-alavi-wp/pull/34); not merged or deployed. Phase 2 reporting remains pending.
+**Implementation status:** Phase 1 and category capability model merged in [PR #34](https://github.com/mohsenfarhangi/bonyad-alavi-wp/pull/34), [PR #35](https://github.com/mohsenfarhangi/bonyad-alavi-wp/pull/35) and [PR #36](https://github.com/mohsenfarhangi/bonyad-alavi-wp/pull/36). Phase 2 dashboard/reporting implementation is in [PR #37](https://github.com/mohsenfarhangi/bonyad-alavi-wp/pull/37); review/merge and live acceptance pending.
 
 ## Context
 
@@ -73,7 +73,8 @@
 - Dashboard مستقل، فیلتر و Excel/CSV export دارد.
 - مبلغ خالص پس از کسر refund محاسبه می‌شود؛ partial refund نیز لحاظ می‌شود.
 - از WooCommerce CRUD و HPOS استفاده می‌شود؛ در نسخه اول جدول تراکنش موازی ساخته نمی‌شود.
-- دسترسی گزارش و داده شخصی با capabilityهای اختصاصی کنترل می‌شود.
+- دسترسی گزارش و داده شخصی با `view_ba_quick_support_reports` و خروجی با `export_ba_quick_support_reports` کنترل می‌شود. هر دو capability و پنج capability دسته‌بندی به‌صورت پیش‌فرض فقط به نقش `administrator` داده می‌شوند؛ نقش‌های دیگر صرفاً با تنظیم دستی مدیر در PublishPress Capabilities دسترسی می‌گیرند.
+- گزارش‌ها از `wc_get_orders()` و WooCommerce CRUD با marker/meta_query خوانده می‌شوند تا HPOS پشتیبانی شود. فیلتر نام/موبایل و export از POST استفاده می‌کنند تا اطلاعات شخصی در URL قرار نگیرد.
 
 ## Consequences
 
