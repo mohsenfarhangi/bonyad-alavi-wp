@@ -18,11 +18,11 @@
 
 AFE release goal همچنان live acceptance نسخه 1.0.28 و رفع blocker واقعی پیش از production promotion است.
 
-## Quick Support — Phase 1 merged; admin role correction in PR #35 (2026-11-13)
+## Quick Support — Phase 1 merged; granular category permissions in PR #36 (2026-11-13)
 
-- فاز اول در [PR #34](https://github.com/mohsenfarhangi/bonyad-alavi-wp/pull/34) به `main` ادغام شده است. کاربر اعلام کرده فایل‌ها روی سایت آپلود شده‌اند، اما نقش «مدیر کل» هنوز به منوی پرداخت سریع دسترسی ندارد؛ بررسی کد نشان داد capability فقط به role با slug برابر `administrator` داده می‌شد. اصلاح برای اعطای دسترسی به roleهای `administrator` و roleهای دارای `manage_options` در [PR #35](https://github.com/mohsenfarhangi/bonyad-alavi-wp/pull/35) در حال بررسی است. این گزارش به‌تنهایی اجرای موفق اصلاح روی سایت را تأیید نمی‌کند.
+فاز اول در PR #34 و اصلاح نقش در PR #35 به main ادغام شده‌اند. بررسی زنده REST API نشان داد Administrator مجوز قدیمی را دارد، اما endpoint ویرایش CPT همچنان 403 می‌دهد. نگاشت قبلی CPT همه عملیات را به یک capability متصل کرده بود. مدل مجوزهای مستقل مشاهده، ایجاد، ویرایش، انتشار و حذف در PR #36 پیاده‌سازی شده و منتظر review/merge است.
 - AFE Generic Form Context، کنترل‌های Elementor، توکن امضاشده و verify سمت سرور، انتقال Context جدا از applicant data، و context-aware validators پیاده‌سازی شده‌اند.
-- CPT `ba_quick_support`، چهار دسته اولیه، فیلدهای تنظیمات دسته و Elementor support اضافه شده‌اند؛ اصلاح دسترسی نقش‌های مدیریتی سفارشی در PR #35 است.
+CPT `ba_quick_support` با پنج capability مستقل در PR #36 اصلاح شده است؛ فقط Administrator همه آن‌ها را از طریق migration یک‌باره می‌گیرد و سایر نقش‌ها باید در PublishPress جداگانه تنظیم شوند.
 - فرم مشترک `quick-support-payment` با فیلدهای اجباری موبایل/نام/نام خانوادگی/مبلغ و فیلدهای اختیاری استان/شهرستان/کد ملی/ایمیل ثبت شده است.
 - Action پرداخت سریع و سفارش مستقل WooCommerce، محصول فنی مخفی، Gateway allowlist/selection، idempotency و retry recovery اضافه شده‌اند.
 - Focused CI در [run 43309991432](https://github.com/mohsenfarhangi/bonyad-alavi-wp/actions/runs/43311051009) پاس شده است.
