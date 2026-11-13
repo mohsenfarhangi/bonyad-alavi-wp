@@ -21,6 +21,28 @@ final class WP_Post
         public string $post_excerpt = ''
     ) {}
 }
+final class BA_QS_Test_Role
+{
+    public function __construct(private array $caps = []) {}
+    public function has_cap(string $cap): bool { return !empty($this->caps[$cap]); }
+    public function add_cap(string $cap, bool $grant = true): void { $this->caps[$cap] = $grant; }
+}
+final class BA_QS_Test_Roles
+{
+    public function __construct(public array $roles = []) {}
+}
+$GLOBALS['ba_qs_roles'] = [
+    'administrator' => new BA_QS_Test_Role(['manage_options'=>true]),
+    'custom_site_manager' => new BA_QS_Test_Role(['manage_options'=>true]),
+    'editor' => new BA_QS_Test_Role(['edit_posts'=>true]),
+];
+$GLOBALS['ba_qs_role_registry'] = new BA_QS_Test_Roles([
+    'administrator'=>[],
+    'custom_site_manager'=>[],
+    'editor'=>[],
+]);
+function wp_roles(): BA_QS_Test_Roles { return $GLOBALS['ba_qs_role_registry']; }
+function get_role(string $slug): ?BA_QS_Test_Role { return $GLOBALS['ba_qs_roles'][$slug] ?? null; }
 
 $GLOBALS['ba_qs_posts'] = [
     41 => new WP_Post(41, 'ba_quick_support', 'publish', 'education-skills', 'آموزش، مهارت و پرورش', 'توسعه آموزش و مهارت'),
@@ -97,7 +119,12 @@ $queryId = $provider->resolve([
     'identifier_type'=>'id',
 ], 'quick-support-payment');
 
+BA_Quick_Support_Category::ensure_admin_capability();
+
 $checks = [
+    'administrator-role-receives-category-capability' => get_role('administrator')?->has_cap('manage_ba_quick_support_categories') === true,
+    'custom-manage-options-role-receives-category-capability' => get_role('custom_site_manager')?->has_cap('manage_ba_quick_support_categories') === true,
+    'non-admin-role-does-not-receive-category-capability' => get_role('editor')?->has_cap('manage_ba_quick_support_categories') === false,
     'current-page-source-resolves-category' => is_array($current) && ($current['category_id'] ?? 0) === 41,
     'fixed-source-resolves-category' => is_array($fixed) && ($fixed['category_slug'] ?? '') === 'education-skills',
     'query-slug-source-resolves-category' => is_array($querySlug) && ($querySlug['category_id'] ?? 0) === 41,
