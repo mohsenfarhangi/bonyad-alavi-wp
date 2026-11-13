@@ -9,7 +9,6 @@ function sanitize_text_field(string $value): string { return trim(strip_tags($va
 function sanitize_key(string $value): string { return strtolower((string)preg_replace('/[^a-z0-9_\-]/i', '', $value)); }
 function current_time(string $format): string { return '2026-11-13'; }
 function wp_date(string $format, ?int $timestamp = null): string { return date($format, $timestamp ?? time()); }
-function checkdate(int $month, int $day, int $year): bool { return (bool)\checkdate($month, $day, $year); }
 function get_post(int $id): ?WP_Post { return $GLOBALS['ba_qs_report_categories'][$id] ?? null; }
 function wc_get_order_statuses(): array {
     return [
