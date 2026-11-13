@@ -911,3 +911,13 @@ Modules: [MODULE-AFE](../modules/alavi-form-engine.md), [MODULE-JIHADI-FORM](../
 - پذیرش زنده پرداخت هنوز باز است: Hosted/Redirect، callback/return، حفظ Cart/Session/Persistent Cart، HPOS و Elementor templates.
 - Phase 2 dashboard/reporting در branch `feat/quick-support-reports-phase2-20261113` و PR #37 توسعه یافته است: KPIها، breakdown دسته/درگاه/روز/ماه، فیلترهای POST، سفارش‌های صفحه‌بندی‌شده، لینک Order و AFE Submission، CSV/XLSX export و capabilityهای جداگانه view/export. فقط Administrator به‌صورت پیش‌فرض مجوزهای گزارش را می‌گیرد.
 - CI نهایی branch در [run 43395846166](https://github.com/mohsenfarhangi/bonyad-alavi-wp/actions/runs/43395846166) PASS شد. PR #37 منتظر review/merge و سپس staging/live report acceptance است.
+
+
+## 2026-11-13 — Quick Support Phase 2 merged
+
+- PR #37 merged into `main` at `09cf9f1765d2b8f3fc73545426b5c07016a32340`.
+- Adds Quick Support report dashboard, KPI cards, category/gateway/day/month breakdowns, POST filters, paginated WooCommerce order list, order-to-AFE-submission links and CSV/XLSX exports.
+- Adds independent `view_ba_quick_support_reports` and `export_ba_quick_support_reports`; Administrator receives them by default, other roles require explicit assignment.
+- Focused CI passed [run 43395846166](https://github.com/mohsenfarhangi/bonyad-alavi-wp/actions/runs/43395846166); PR checks also passed for Quick Support, Studies Center, Facilitator and Camp Admission.
+- Next: deploy child theme to staging/site and verify financial totals against real Quick Support orders (including partial/full refunds), Persian CSV/XLSX output, capability boundaries and order/submission links.
+- Phase 1 live gateway acceptance (Hosted/Redirect, callback/return, Cart/Session/Persistent Cart, HPOS and Elementor templates) remains a separate pending checklist.
