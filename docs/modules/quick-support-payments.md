@@ -12,7 +12,7 @@
 
 ## Phase 1 Implementation Record — PR #34
 
-**Implementation status:** PRs #34, #35, #36 and #37 are merged. Generic Context, category CPT, shared form, direct WooCommerce payment and financial reporting dashboard are in main. Administrator access was confirmed on the live WordPress site; live report and payment-flow acceptance remain pending.
+**Implementation status:** PRs #34, #35, #36 and #37 are merged. Generic Context, category CPT, shared form, direct WooCommerce payment and financial reporting dashboard are in main. Report-source isolation hardening is in [PR #38](https://github.com/mohsenfarhangi/bonyad-alavi-wp/pull/38) with CI passing; merge/deploy and live report/payment-flow acceptance remain pending.
 
 Implemented in the current feature branch:
 
@@ -30,7 +30,7 @@ Implemented in the current feature branch:
 
 **Live acceptance still pending:** Hosted/Redirect gateway initiation and callback/return, preservation of the real Cart/Session/Persistent Cart, HPOS order creation, and confirmation of the Elementor Single/Popup/Loop Grid layouts on the target site. The project owner reported that the updated theme files were uploaded and confirmed Administrator access; this does not count as payment-flow acceptance.
 
-**Phase 2 implementation — PR #37 (merged):** adds the dedicated report submenu, financial aggregation, filters, paginated order list and CSV/XLSX exports. Report queries are restricted by both `created_via = ba_quick_support` and `_ba_quick_support = 1`, excluding product-based participation orders (`bap_quick_checkout`) from the dashboard, list and exports. Final focused CI [run 43395846166](https://github.com/mohsenfarhangi/bonyad-alavi-wp/actions/runs/43395846166) passed. Deploy and live acceptance are pending.
+**Phase 2 implementation — PR #37 (merged):** adds the dedicated report submenu, financial aggregation, filters, paginated order list and CSV/XLSX exports. Report queries are restricted by both `created_via = ba_quick_support` and `_ba_quick_support = 1`, excluding product-based participation orders (`bap_quick_checkout`) from the dashboard, list and exports. Final focused CI [run 43395846166](https://github.com/mohsenfarhangi/bonyad-alavi-wp/actions/runs/43395846166) passed. Strict product-participation exclusion is additionally covered by [PR #38](https://github.com/mohsenfarhangi/bonyad-alavi-wp/pull/38), CI [run 43398110222](https://github.com/mohsenfarhangi/bonyad-alavi-wp/actions/runs/43398110222) passed. Deploy and live acceptance are pending.
 
 ## Category Administration Capabilities
 
