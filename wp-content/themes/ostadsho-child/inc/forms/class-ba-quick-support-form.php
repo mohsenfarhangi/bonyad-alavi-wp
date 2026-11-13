@@ -211,10 +211,14 @@ final class BA_Quick_Support_Form
         return Form::make(self::SLUG)
             ->title('پرداخت سریع مشارکت')
             ->description('اطلاعات خود را وارد کنید تا به درگاه پرداخت منتقل شوید.')
+            // A compact, form-specific layout: no AFE form header or progress bar.
+            ->template('{{steps}}')
             ->settings([
                 'wizard'=>false,
                 'save_draft'=>false,
                 'show_progress'=>false,
+                'show_step_heading'=>false,
+                'captcha_before_submit'=>true,
                 'show_tracking_code'=>false,
                 'editing_enabled'=>false,
                 'editing_modes'=>[],
