@@ -26,6 +26,11 @@ Plugin:
 Source domains:
 `Actions, Admin, Core, DataSource, Database, Duplicate, Elementor, Events, Export, Form, InputMask, Localization, Repository, Rest, Security, Style, Submission, Template, Validation`.
 
+## Frontend Render Extension
+
+- `Renderer::render()` exposes `afe_form_render_override` after resolving the form and before rendering the default markup. Integrations may return a complete HTML string for a specific form; returning `null`/non-string/empty preserves the normal renderer.
+- This extension is used by Quick Support payment return to replace only the `quick-support-payment` form with an order-verified result message. The filter must validate its own context and must not trust query parameters for financial status.
+
 ## Form Definition and Overrides
 
 Contract: [ADR-001](../decisions/ADR-001-code-defined-forms.md).
