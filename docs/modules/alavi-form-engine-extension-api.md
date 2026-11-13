@@ -87,6 +87,20 @@ Core tokens:
 
 Token field فقط برای field واقعی همان form resolve شود.
 
+## Form Render Override
+
+Hook:
+`afe_form_render_override`
+
+Signature:
+`apply_filters('afe_form_render_override', null, $slug, $form, $formContext)`
+
+- The filter runs in `Renderer::render()` after the resolved form is loaded and before normal form markup/assets are rendered.
+- `$slug` is the registered form slug, `$form` is the resolved form configuration (including Admin settings), and `$formContext` is the server-resolved immutable context array.
+- Return a non-empty HTML string to replace the normal form output at the widget/shortcode's exact location. Return `null` or an empty/non-string value to keep normal rendering.
+- The integration that returns markup owns its validation, escaping and sanitization. Validate signed return tokens and associated resource ownership before replacing a public form.
+- Keep domain-specific payment/order logic in the owning theme or extension; AFE only exposes the generic render seam.
+
 ## Validators
 
 Hook:
