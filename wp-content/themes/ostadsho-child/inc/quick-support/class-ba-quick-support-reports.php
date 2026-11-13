@@ -22,6 +22,7 @@ final class BA_Quick_Support_Reports
     {
         add_action('init', [self::class, 'sync_admin_capabilities'], 2);
         add_action('admin_menu', [self::class, 'register_menu'], 99);
+        add_action('admin_enqueue_scripts', [self::class, 'enqueue_assets']);
         add_action('admin_post_ba_quick_support_export', [self::class, 'handle_export']);
     }
 
@@ -49,6 +50,22 @@ final class BA_Quick_Support_Reports
             self::VIEW_CAPABILITY,
             self::PAGE_SLUG,
             [self::class, 'render_page']
+        );
+    }
+
+    public static function enqueue_assets(string $hook): void
+    {
+        if (($_GET['page'] ?? '') !== self::PAGE_SLUG) return;
+
+        $relative = '/assets/css/ba-quick-support-reports.css';
+        $file = get_stylesheet_directory() . $relative;
+        if (!is_readable($file)) return;
+
+        wp_enqueue_style(
+            'ba-quick-support-reports',
+            get_stylesheet_directory_uri() . $relative,
+            [],
+            (string)filemtime($file)
         );
     }
 
