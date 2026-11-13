@@ -98,6 +98,9 @@ $checks = [
     'stable-form-slug' => $form['slug'] === 'quick-support-payment',
     'shared-storage' => $form['storage'] === 'shared',
     'one-step-shared-form' => count($form['steps']) === 1,
+    'dedicated-form-template-hides-header' => ($form['template'] ?? '') === '{{steps}}',
+    'captcha-is-configured-before-submit' => !empty($form['settings']['captcha_before_submit']),
+    'step-heading-is-hidden' => !empty($form['settings']['hide_step_heading']),
     'required-mobile-name-lastname-amount' => !empty($fields['mobile']['required'])
         && !empty($fields['first_name']['required'])
         && !empty($fields['last_name']['required'])
