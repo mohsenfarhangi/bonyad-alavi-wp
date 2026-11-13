@@ -165,6 +165,46 @@ require_once get_stylesheet_directory() . '/inc/woocommerce/class-ba-participati
 require_once get_stylesheet_directory() . '/inc/woocommerce/class-ba-participation-quick-checkout-service.php';
 require_once get_stylesheet_directory() . '/inc/woocommerce/class-ba-woocommerce-participation.php';
 
+// پرداخت سریع دسته‌ای و Context Provider عمومی AFE.
+
+add_action( 'wp_enqueue_scripts', function () {
+	if ( ! is_singular( 'ba_quick_support' ) ) {
+		return;
+	}
+
+	$theme_dir = get_stylesheet_directory();
+	$theme_uri = get_stylesheet_directory_uri();
+	$style_path = '/assets/css/ba-quick-support-form.css';
+	$script_path = '/assets/js/ba-quick-support-form.js';
+	$style_file = $theme_dir . $style_path;
+	$script_file = $theme_dir . $script_path;
+
+	if ( is_readable( $style_file ) ) {
+		wp_enqueue_style(
+			'ba-quick-support-form',
+			$theme_uri . $style_path,
+			array(),
+			(string) filemtime( $style_file )
+		);
+	}
+
+	if ( is_readable( $script_file ) ) {
+		wp_enqueue_script(
+			'ba-quick-support-form',
+			$theme_uri . $script_path,
+			array(),
+			(string) filemtime( $script_file ),
+			true
+		);
+	}
+}, 20 );
+require_once get_stylesheet_directory() . '/inc/quick-support/class-ba-quick-support-category.php';
+require_once get_stylesheet_directory() . '/inc/quick-support/class-ba-quick-support-category-context-provider.php';
+require_once get_stylesheet_directory() . '/inc/woocommerce/class-ba-quick-support-payment-service.php';
+require_once get_stylesheet_directory() . '/inc/woocommerce/class-ba-quick-support-payment-action.php';
+BA_Quick_Support_Category::boot();
+BA_Quick_Support_Payment_Service::boot();
+
 // سرویس و تب تنظیمات مرکز حرکت‌های مردمی و جهادی.
 require_once get_stylesheet_directory() . '/inc/services/class-ba-center-settings-service.php';
 require_once get_stylesheet_directory() . '/inc/admin/settings/class-ba-center-settings-tab.php';
@@ -195,3 +235,11 @@ add_action( 'afe_register_forms', array( BA_Facilitator_Recruitment_Form::class,
 require_once get_stylesheet_directory() . '/inc/forms/class-ba-camp-admission-form.php';
 add_action( 'afe_register_validator_definitions', array( BA_Camp_Admission_Form::class, 'registerValidators' ) );
 add_action( 'afe_register_forms', array( BA_Camp_Admission_Form::class, 'register' ) );
+
+ // فرم مشترک پرداخت سریع مشارکت و قرارداد عمومی Context در AFE.
+require_once get_stylesheet_directory() . '/inc/forms/class-ba-quick-support-form.php';
+add_action( 'afe_register_form_context_providers', array( BA_Quick_Support_Form::class, 'registerContextProvider' ) );
+add_action( 'afe_register_data_sources', array( BA_Quick_Support_Form::class, 'registerDataSources' ) );
+add_action( 'afe_register_validator_definitions', array( BA_Quick_Support_Form::class, 'registerValidators' ) );
+add_action( 'afe_register_action_definitions', array( BA_Quick_Support_Form::class, 'registerActionDefinition' ) );
+add_action( 'afe_register_forms', array( BA_Quick_Support_Form::class, 'register' ) );

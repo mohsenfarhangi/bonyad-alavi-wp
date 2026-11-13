@@ -37,7 +37,7 @@ final class Renderer
         return $this->render((string)$atts['id']);
     }
 
-    public function render(string $slug): string
+    public function render(string $slug, string $contextToken = '', array $formContext = []): string
     {
         if (!$this->registry->has($slug)) {
             return '<div class="afe-notice afe-notice-error">فرم موردنظر پیدا نشد.</div>';
@@ -47,6 +47,8 @@ final class Renderer
         $row = $this->forms->row($slug);
         $editing = $this->resolveEditing($form);
         $values = $editing['row']['data'] ?? [];
+        $renderValues = $values;
+        if ($formContext !== []) $renderValues['__afe_context'] = $formContext;
         $credentials = $editing['credentials'] ?? [];
         $this->currentSubmissionId = !empty($editing['row']['id']) ? (int)$editing['row']['id'] : 0;
         // A public/front-end form must always respect the persisted submission lock.
@@ -82,7 +84,7 @@ final class Renderer
         foreach ($form['steps'] as $index=>$step) {
             $items=[]; $byName=[];
             foreach ($step['items'] as $item) {
-                $html = $this->renderItem($item, $values, $form, null);
+                $html = $this->renderItem($item, $renderValues, $form, null);
                 $items[] = $html;
                 if (!empty($item['name'])) $byName[$item['name']] = $html;
             }
@@ -128,6 +130,7 @@ final class Renderer
             . '<input type="hidden" name="afe_form_slug" value="'.esc_attr($slug).'">'
             . '<input type="hidden" name="_afe_nonce" value="'.esc_attr(wp_create_nonce('afe_submit_'.$slug)).'">'
             . '<div class="afe-hp" aria-hidden="true"><label>Website<input type="text" name="_afe_website" tabindex="-1" autocomplete="off"></label></div>';
+        if ($contextToken !== '') $hidden .= '<input type="hidden" name="_afe_context_token" value="'.esc_attr($contextToken).'">';
 
         if (!empty($editing['row'])) {
             $hidden .= '<input type="hidden" name="_afe_submission_id" value="'.esc_attr((string)$editing['row']['id']).'">';
@@ -168,8 +171,11 @@ final class Renderer
         $duplicateTracking = !empty($form['settings']['editing_enabled'])
             && in_array('tracking', (array)($form['settings']['editing_modes'] ?? []), true);
 
+        $contextJson = $formContext !== [] ? wp_json_encode($formContext, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) : '';
+        $contextAttribute = is_string($contextJson) && $contextJson !== '' ? ' data-afe-context="'.esc_attr($contextJson).'"' : '';
+
         return $customCssHtml . '<div class="'.esc_attr($shellClass).'" data-afe-isolation="'.esc_attr($this->styleIsolation->modeForForm($form)).'" dir="rtl">'.$editingNotice.$lockPanel.$resumeBox
-            . '<form class="afe-form" method="post" enctype="multipart/form-data" novalidate data-form="'.esc_attr($slug).'"'.($locked?' data-afe-readonly="1"':'').' data-afe-lock-after-submit="'.(!empty($form['settings']['lock_after_submit'])?'1':'0').'" data-afe-preview-enabled="'.($previewEnabled?'1':'0').'" data-afe-show-tracking-code="'.(($form['settings']['show_tracking_code']??true)?'1':'0').'" data-afe-lock-warning="'.esc_attr((string)($form['settings']['lock_warning']??'')).'" data-afe-duplicate-tracking="'.($duplicateTracking?'1':'0').'" data-afe-duplicate-otp="'.($duplicateOtp?'1':'0').'" data-afe-duplicate-otp="'.($duplicateOtp?'1':'0').'"'.$duplicateAttrs.'>'
+            . '<form class="afe-form" method="post" enctype="multipart/form-data" novalidate data-form="'.esc_attr($slug).'"'.$contextAttribute.($locked?' data-afe-readonly="1"':'').' data-afe-lock-after-submit="'.(!empty($form['settings']['lock_after_submit'])?'1':'0').'" data-afe-preview-enabled="'.($previewEnabled?'1':'0').'" data-afe-show-tracking-code="'.(($form['settings']['show_tracking_code']??true)?'1':'0').'" data-afe-lock-warning="'.esc_attr((string)($form['settings']['lock_warning']??'')).'" data-afe-duplicate-tracking="'.($duplicateTracking?'1':'0').'" data-afe-duplicate-otp="'.($duplicateOtp?'1':'0').'" data-afe-duplicate-otp="'.($duplicateOtp?'1':'0').'"'.$duplicateAttrs.'>'
             . $hidden . $duplicateLive . $content
             . ($locked || $inlineCaptcha ? '' : '<div class="afe-captcha-wrap">'.$this->security->captchaMarkup((string)($form['settings']['captcha']??'custom')).'</div>')
             . '<div class="afe-form-result" aria-live="polite"></div>'
@@ -263,6 +269,11 @@ final class Renderer
         if (($field['type']??'')==='html') return '<div class="afe-html-block afe-col-12">'.wp_kses_post((string)($field['html']??'')).'</div>';
 
         $name=$field['name'];
+        $formContext = is_array($values['__afe_context'] ?? null) ? $values['__afe_context'] : [];
+        $contextAttributes = (array)($formContext['field_attributes'][$name] ?? []);
+        if ($contextAttributes !== []) {
+            $field['attributes'] = array_replace((array)($field['attributes'] ?? []), $contextAttributes);
+        }
         $value = $repeaterContext !== null ? ($repeaterContext[$name]??($field['default']??'')) : ($values[$name]??($field['default']??''));
         if (($field['type']??'')==='repeater') {
             $rows=(array)$value;
@@ -461,6 +472,13 @@ final class Renderer
         }
 
         $multiple=!empty($field['multiple']);
+        if (!empty($field['hide_when_single_option']) && !$multiple && count($options) === 1) {
+            $optionValue = (string)array_key_first($options);
+            $optionLabel = (string)reset($options);
+            return '<input type="hidden" name="'.esc_attr($name).'" value="'.esc_attr($optionValue).'">'
+                . '<div class="afe-select-single-option" aria-live="polite">'.esc_html($optionLabel).'</div>';
+        }
+
         $mode=in_array(($field['select_mode']??'custom'),['custom','native'],true)
             ? (string)($field['select_mode']??'custom')
             : 'custom';

@@ -1,6 +1,6 @@
 # MODULE-QUICK-SUPPORT — Quick Support Payments
 
-**Status:** design accepted / implementation pending  
+**Status:** Phase 1 implemented in [PR #34](https://github.com/mohsenfarhangi/bonyad-alavi-wp/pull/34); review and staging acceptance pending  
 **Decision:** [ADR-009](../decisions/ADR-009-quick-support-payments.md)  
 **Parent modules:** [MODULE-PARTICIPATION](participation-payments.md), [MODULE-AFE](alavi-form-engine.md), [MODULE-AFE-EXTENSION](alavi-form-engine-extension-api.md)
 
@@ -8,7 +8,29 @@
 
 پرداخت سریع مشارکت مردمی برای حمایت از یکی از دسته‌بندی‌های موضوعی بنیاد علوی، بدون انتخاب پروژه یا محصول توسط پرداخت‌کننده. یک فرم مشترک اطلاعات پرداخت‌کننده را می‌گیرد و پرداخت را مستقیماً از طریق درگاه WooCommerce انجام می‌دهد.
 
-این سند **طرح فنی پذیرفته‌شده** را ثبت می‌کند؛ تا تاریخ 2026-11-12 پیاده‌سازی این قابلیت شروع نشده و هیچ‌یک از اجزای زیر نباید به‌عنوان قابلیت موجود فرض شود.
+این سند مرجع طراحی و پیاده‌سازی است. اجزای فاز اول در PR #34 نوشته شده‌اند، اما تا زمان Merge و پذیرش staging نباید قابلیت را روی سایت عملیاتی‌شده فرض کرد.
+
+## Phase 1 Implementation Record — PR #34
+
+**Implementation status:** code review / staging acceptance pending.
+
+Implemented in the current feature branch:
+
+- AFE generic Context Provider interface, registry and manager; signed form-bound token with 12-hour expiry and server-side provider revalidation.
+- Elementor Form Widget controls for Current Page, Fixed Category and Query Parameter (Slug/ID).
+- Context is carried separately from applicant data through ActionContext and is available to context-aware validators and dynamic data sources.
+- Generic single-option dynamic Select rendering and visible downstream Action errors.
+- `ba_quick_support` CPT, four seeded categories, category meta settings, administrator-only category management and Elementor CPT support.
+- Shared AFE form `quick-support-payment`, required/optional field rules, province/county dependency and server-side amount-range validation.
+- Dedicated payment Action and WooCommerce order service, shared technical product, per-submission lock/idempotency, retry recovery and gateway allowlists.
+- Existing participation Gateway service extended with exact gateway resolution and optional internal isolated-cart item data.
+- Suggested amount/limit UI and customer gateway-selection setting.
+
+**Focused CI:** [run 43309991432](https://github.com/mohsenfarhangi/bonyad-alavi-wp/actions/runs/43311051009) passed PHP syntax, AFE Context/validator tests, Quick Support category/form/payment-rule tests, existing theme form regressions and JavaScript syntax on the PR branch.
+
+**Not yet accepted:** live hosted/redirect gateway initiation and callback, real Cart/Session/Persistent Cart preservation on staging, HPOS order creation, and Elementor Single/Popup/Loop Grid configuration on the target site. No production deployment has occurred.
+
+**Phase 2 remains out of scope:** Quick Support dashboard, financial aggregation, filters and Excel/CSV exports.
 
 ## Architecture and Ownership
 

@@ -100,7 +100,7 @@ Reusable validator جدید به registry اضافه شود؛ branch hard-coded 
 - `$config`: this field's validator configuration
 - `$data`: complete sanitized submission data, for cross-field rules
 
-The fourth `$data` argument is now passed by `Validator::validateRegistered()`. Existing callbacks that declare only the original three arguments remain compatible. Use this context for server-authoritative date ranges, matching fields and calculated values; never trust a frontend-only calculation.
+The fourth `$data` argument is passed by `Validator::validateRegistered()`; the fifth optional `$context` argument carries verified Form Context. Existing callbacks that declare only three or four arguments remain compatible. Use `$data` for cross-field rules and `$context` for server-authoritative page/category context; never trust a frontend-only calculation.
 
 Legacy `->rule(...)` برای backward compatibility باقی است.
 
@@ -112,6 +112,35 @@ Custom Regex admin path:
 - compile test
 - error message mandatory
 - runtime PCRE limits
+
+## Generic Form Context Providers
+
+Implemented in [PR #34](https://github.com/mohsenfarhangi/bonyad-alavi-wp/pull/34); merge/deployment and live acceptance are pending.
+
+Registration hook:
+`afe_register_form_context_providers`
+
+Core API:
+- `FormContextProviderInterface`: `getKey()`, `getLabel()`, `supportedSources()`, `resolve()`, `validate()`, `fixedOptions()`.
+- `FormContextRegistry::register()` stores providers by stable key and exposes provider/fixed-value options to Elementor.
+- `FormContextManager::issue($formSlug, $providerKey, $settings)` resolves canonical Context and issues a signed token.
+- `FormContextManager::verify($formSlug, $token)` verifies signature, form binding, expiry and provider-specific validity on Submit.
+
+Elementor «فرم علوی» controls:
+- Context Provider
+- Current Page
+- Fixed Value
+- Query Parameter with provider-selected ID/Slug interpretation
+
+Security and lifecycle:
+- Token HMAC is derived from WordPress auth salt, bound to form slug and expires after 12 hours; token size is bounded.
+- Provider is re-run during Submit; inactive/unknown/mismatched contexts fail closed.
+- Context stays separate from applicant fields and `data_json`; verified data is carried by immutable `ActionContext::$context`.
+- Only public, render-safe context values may be returned by a provider because render context is exposed in `data-afe-context`.
+- Context is available to dynamic data-source callbacks as `__afe_context`, to render-time field attributes, and to custom Validator callbacks as the fifth `$context` argument.
+- Do not place PII, secrets or authorization decisions solely in client-visible context. Revalidate all business rules in the server-side action.
+
+Quick Support is one provider implementation, not an AFE core dependency. See [MODULE-QUICK-SUPPORT](quick-support-payments.md) and [ADR-009](../decisions/ADR-009-quick-support-payments.md).
 
 ## Input Masks
 

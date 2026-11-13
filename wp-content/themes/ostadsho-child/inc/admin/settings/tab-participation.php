@@ -52,6 +52,8 @@ function ba_register_participation_settings_fields( $tab ) {
 				'executed_projects_value' => 0,
 				'slider_images'                   => array(),
 				'payment_gateway'                 => '',
+				'allow_customer_gateway_selection' => false,
+				'quick_support_gateway_allowlist'  => array(),
 			),
 		)
 	);
@@ -165,15 +167,33 @@ function ba_register_participation_settings_fields( $tab ) {
 
 	add_settings_field(
 		'payment_gateway',
-		'درگاه پرداخت مشارکت',
+		'درگاه پیش‌فرض پرداخت مشارکت',
 		'ba_render_participation_gateway_field',
 		$tab['page_slug'],
 		'ba_participation_payment_section',
 		array(
 			'option_name' => $tab['option_name'],
 			'key'         => 'payment_gateway',
-			'description' => 'فقط درگاه‌های فعال ووکامرس نمایش داده می‌شوند. اطلاعات اتصال درگاه همچنان از تنظیمات پرداخت ووکامرس مدیریت می‌شود.',
+			'description' => 'درگاه پیش‌فرض برای پرداخت سریع پروژه‌ها و دسته‌های پرداخت سریع؛ اطلاعات اتصال درگاه از تنظیمات پرداخت ووکامرس مدیریت می‌شود.',
 		)
+	);
+
+	add_settings_field(
+		'allow_customer_gateway_selection',
+		'امکان انتخاب درگاه توسط پرداخت‌کننده',
+		'ba_render_quick_support_gateway_selection_field',
+		$tab['page_slug'],
+		'ba_participation_payment_section',
+		array('option_name'=>$tab['option_name'],'key'=>'allow_customer_gateway_selection')
+	);
+
+	add_settings_field(
+		'quick_support_gateway_allowlist',
+		'درگاه‌های مجاز پرداخت سریع',
+		'ba_render_quick_support_gateway_allowlist_field',
+		$tab['page_slug'],
+		'ba_participation_payment_section',
+		array('option_name'=>$tab['option_name'],'key'=>'quick_support_gateway_allowlist')
 	);
 }
 
@@ -213,7 +233,9 @@ function ba_get_participation_settings() {
 		'executed_projects_value_title' => 'ارزش پروژه‌های اجرا شده با همکاری خیرین',
 		'executed_projects_value' => 0,
 		'slider_images'           => array(),
-		'payment_gateway'         => '',
+		'payment_gateway'                 => '',
+		'allow_customer_gateway_selection' => false,
+		'quick_support_gateway_allowlist'  => array(),
 	);
 
 	$options = get_option( 'ba_participation_settings', array() );
@@ -293,6 +315,10 @@ function ba_sanitize_participation_settings( $input ) {
 	$slider_images = array_values( array_unique( array_filter( array_map( 'absint', $slider_images ) ) ) );
 
 	$gateway_id = isset( $input['payment_gateway'] ) ? ba_sanitize_participation_gateway_id( $input['payment_gateway'] ) : '';
+	$quick_support_gateways = isset( $input['quick_support_gateway_allowlist'] ) && is_array( $input['quick_support_gateway_allowlist'] )
+		? array_map( 'ba_sanitize_participation_gateway_id', $input['quick_support_gateway_allowlist'] )
+		: array();
+	$quick_support_gateways = array_values( array_unique( array_filter( $quick_support_gateways ) ) );
 
 	return array(
 		'donated_amount_title'          => sanitize_text_field( isset( $input['donated_amount_title'] ) ? $input['donated_amount_title'] : '' ),
@@ -302,7 +328,9 @@ function ba_sanitize_participation_settings( $input ) {
 		'executed_projects_value_title' => sanitize_text_field( isset( $input['executed_projects_value_title'] ) ? $input['executed_projects_value_title'] : '' ),
 		'executed_projects_value'       => ba_sanitize_integer_value( isset( $input['executed_projects_value'] ) ? $input['executed_projects_value'] : 0 ),
 		'slider_images'                 => $slider_images,
-		'payment_gateway'               => $gateway_id,
+		'payment_gateway'                 => $gateway_id,
+		'allow_customer_gateway_selection' => ! empty( $input['allow_customer_gateway_selection'] ),
+		'quick_support_gateway_allowlist'  => $quick_support_gateways,
 	);
 }
 
@@ -482,4 +510,58 @@ function ba_render_participation_gateway_field( $args ) {
 		<p class="description"><?php echo esc_html( $args['description'] ); ?></p>
 	<?php endif; ?>
 	<?php
+}
+
+
+/**
+ * Allow the donor to choose a gateway on the Quick Support form.
+ *
+ * @param array $args Field args.
+ * @return void
+ */
+function ba_render_quick_support_gateway_selection_field( $args ) {
+	$options = ba_get_participation_settings();
+	$enabled = ! empty( $options['allow_customer_gateway_selection'] );
+	?>
+	<label>
+		<input
+			type="checkbox"
+			name="<?php echo esc_attr( $args['option_name'] . '[' . $args['key'] . ']' ); ?>"
+			value="1"
+			<?php checked( $enabled ); ?>
+		/>
+		پرداخت‌کننده بتواند از میان درگاه‌های مجاز همین دسته انتخاب کند.
+	</label>
+	<p class="description">در حالت غیرفعال، درگاه پیش‌فرض بالا استفاده می‌شود. این گزینه به‌صورت پیش‌فرض خاموش است.</p>
+	<?php
+}
+
+/**
+ * Render the global allowlist inherited by Quick Support categories.
+ *
+ * @param array $args Field args.
+ * @return void
+ */
+function ba_render_quick_support_gateway_allowlist_field( $args ) {
+	$options = ba_get_participation_settings();
+	$selected = array_map( 'strval', (array) ( $options['quick_support_gateway_allowlist'] ?? array() ) );
+	$service = class_exists( 'BA_Participation_Payment_Gateway_Service' ) ? new BA_Participation_Payment_Gateway_Service() : null;
+	$choices = $service ? $service->get_active_gateway_choices() : array();
+
+	if ( empty( $choices ) ) {
+		echo '<p class="description">در حال حاضر درگاه فعال WooCommerce پیدا نشد.</p>';
+		return;
+	}
+
+	foreach ( $choices as $gateway_id => $gateway_title ) {
+		printf(
+			'<label style="display:block;margin:5px 0"><input type="checkbox" name="%1$s[]" value="%2$s" %3$s> %4$s</label>',
+			esc_attr( $args['option_name'] . '[' . $args['key'] . ']' ),
+			esc_attr( $gateway_id ),
+			checked( in_array( (string) $gateway_id, $selected, true ), true, false ),
+			esc_html( $gateway_title )
+		);
+	}
+
+	echo '<p class="description">اگر هیچ درگاهی انتخاب نشود، همه درگاه‌های فعال مجاز هستند. فهرست اختصاصی هر دسته در صفحه همان دسته می‌تواند این فهرست را جایگزین کند.</p>';
 }

@@ -4,6 +4,8 @@ declare(strict_types=1);
 namespace BonyadAlavi\FormEngine\Core;
 
 use BonyadAlavi\FormEngine\Actions\ActionManager;
+use BonyadAlavi\FormEngine\Context\FormContextRegistry;
+use BonyadAlavi\FormEngine\Context\FormContextManager;
 use BonyadAlavi\FormEngine\Actions\ActionRegistry;
 use BonyadAlavi\FormEngine\Actions\ActionExecutionRepository;
 use BonyadAlavi\FormEngine\Actions\Tokens\TokenRegistry;
@@ -86,6 +88,10 @@ final class Plugin
         }
 
         $this->container = new Container();
+
+        $contextRegistry = new FormContextRegistry();
+        do_action('afe_register_form_context_providers', $contextRegistry);
+        $formContexts = new FormContextManager($contextRegistry);
 
         $registry = new FormRegistry();
         do_action('afe_register_forms', $registry);
@@ -187,7 +193,7 @@ final class Plugin
         $service = new SubmissionService(
             $registry, $formRepo, $submissionRepo, $security, $validator,
             $fileUploader, $actions, $events, $dedicated, $formAccess,
-            $duplicatePolicy, $duplicateRepo, $actionExecutions, $inputMaskRegistry, $smsRecovery
+            $duplicatePolicy, $duplicateRepo, $actionExecutions, $inputMaskRegistry, $smsRecovery, $formContexts
         );
         $previewPresenter = new FormDataPresenter($sources, $dates);
         $previewRenderer = new PreviewRenderer($previewPresenter, $submissionRepo, $templates);
@@ -212,6 +218,8 @@ final class Plugin
         }
 
         $this->container->set(FormRegistry::class,$registry);
+        $this->container->set(FormContextRegistry::class,$contextRegistry);
+        $this->container->set(FormContextManager::class,$formContexts);
         $this->container->set(FormRepository::class,$formRepo);
         $this->container->set(SubmissionRepository::class,$submissionRepo);
         $this->container->set(DuplicateRepository::class,$duplicateRepo);

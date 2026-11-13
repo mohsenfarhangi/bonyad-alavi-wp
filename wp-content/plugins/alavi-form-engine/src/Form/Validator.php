@@ -10,14 +10,14 @@ final class Validator
 {
     public function __construct(private readonly ?ValidatorRegistry $registry = null) {}
 
-    public function validate(array $form, array $data, bool $draft = false): array
+    public function validate(array $form, array $data, bool $draft = false, array $context = []): array
     {
         $errors = [];
         $uniqueGroups = [];
 
         foreach ($form['steps'] as $step) {
             foreach ($step['items'] as $field) {
-                $this->validateField($field, $data[$field['name']] ?? null, $data, $errors, $uniqueGroups, $draft);
+                $this->validateField($field, $data[$field['name']] ?? null, $data, $errors, $uniqueGroups, $draft, $context);
             }
         }
 
@@ -31,7 +31,7 @@ final class Validator
         return $errors;
     }
 
-    private function validateField(array $field, mixed $value, array $data, array &$errors, array &$uniqueGroups, bool $draft): void
+    private function validateField(array $field, mixed $value, array $data, array &$errors, array &$uniqueGroups, bool $draft, array $context = []): void
     {
         // HTML has no value to validate. File fields are intentionally excluded
         // from the generic data validator as uploaded files live in $_FILES, not
@@ -54,7 +54,7 @@ final class Validator
                     $childValue = $row[$child['name']] ?? null;
                     $childErrors = [];
                     $dummyGroups = [];
-                    $this->validateField($child, $childValue, $row, $childErrors, $dummyGroups, $draft);
+                    $this->validateField($child, $childValue, $row, $childErrors, $dummyGroups, $draft, $context);
                     foreach ($childErrors as $key=>$message) {
                         $errors[$field['name'].'.'.$i.'.'.$key] = $message;
                     }
@@ -121,7 +121,7 @@ final class Validator
         }
 
         if (!isset($errors[$field['name']])) $this->validateCharacterMode($field,$string,$errors);
-        if (!isset($errors[$field['name']])) $this->validateRegistered($field,$string,$data,$errors);
+        if (!isset($errors[$field['name']])) $this->validateRegistered($field,$string,$data,$errors,$context);
 
         if (!empty($field['unique_group'])) {
             $uniqueGroups[$field['unique_group']][] = $value;
@@ -129,7 +129,7 @@ final class Validator
     }
 
 
-    private function validateRegistered(array $field,string $value,array $data,array &$errors): void
+    private function validateRegistered(array $field,string $value,array $data,array &$errors,array $context = []): void
     {
         $registry=$this->registry;
         if (!$registry) return;
@@ -139,7 +139,7 @@ final class Validator
             $key=(string)($config['key']??'');
             $definition=$registry->get($key);
             if (!$definition || !$definition->supports((string)($field['type']??''))) continue;
-            if (!$definition->validate($value,$field,$config,$data)) {
+            if (!$definition->validate($value,$field,$config,$data,$context)) {
                 $errors[$field['name']]=(string)($config['message']??$definition->defaultMessage);
                 return;
             }

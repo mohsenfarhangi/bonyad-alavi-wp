@@ -94,6 +94,29 @@ final class BA_Participation_Payment_Gateway_Service {
 	 * @param mixed $gateway_id شناسه خام درگاه.
 	 * @return string
 	 */
+	/**
+	 * نمونه درگاه فعال را با شناسه دقیق یا شناسه legacy resolve می‌کند.
+	 *
+	 * @param string $gateway_id شناسه درگاه.
+	 * @return WC_Payment_Gateway|WP_Error
+	 */
+	public function get_gateway_by_id( $gateway_id ) {
+		$gateway_id = $this->resolve_registered_gateway_id( $gateway_id );
+		if ( '' === $gateway_id ) {
+			return new WP_Error( 'bap_gateway_not_configured', 'شناسه درگاه پرداخت معتبر نیست.' );
+		}
+
+		$gateway = $this->find_gateway_by_id( $gateway_id );
+		if ( ! $gateway instanceof WC_Payment_Gateway ) {
+			return new WP_Error( 'bap_gateway_missing', 'درگاه پرداخت انتخاب‌شده در ووکامرس در دسترس نیست.' );
+		}
+		if ( 'yes' !== $gateway->enabled ) {
+			return new WP_Error( 'bap_gateway_disabled', 'درگاه پرداخت انتخاب‌شده غیرفعال است.' );
+		}
+
+		return $gateway;
+	}
+
 	public function sanitize_gateway_id( $gateway_id ) {
 		$gateway_id = sanitize_text_field( (string) $gateway_id );
 
@@ -143,7 +166,7 @@ final class BA_Participation_Payment_Gateway_Service {
 	 * @param callable   $callback Callback مورد نظر.
 	 * @return mixed|WP_Error
 	 */
-	public function with_isolated_cart( WC_Product $product, $amount, callable $callback ) {
+	public function with_isolated_cart( WC_Product $product, $amount, callable $callback, array $additional_cart_item_data = array() ) {
 		if ( ! function_exists( 'WC' ) || ! class_exists( 'WC_Cart' ) ) {
 			return new WP_Error( 'bap_cart_unavailable', 'زیرساخت سبد ووکامرس در دسترس نیست.' );
 		}
@@ -159,16 +182,35 @@ final class BA_Participation_Payment_Gateway_Service {
 		WC()->cart = $isolated_cart;
 
 		try {
-			$cart_item_key = $isolated_cart->add_to_cart(
-				$product->get_id(),
-				1,
-				0,
-				array(),
+			$cart_item_data = array_merge(
+				$additional_cart_item_data,
 				array(
 					Bonyad_Alavi_WooCommerce_Participation::CART_AMOUNT_KEY => $amount,
 					Bonyad_Alavi_WooCommerce_Participation::CART_MARKER_KEY => 1,
 				)
 			);
+
+			$had_internal_flag = array_key_exists( 'ba_qs_internal_isolated_cart', $GLOBALS );
+			$previous_internal_flag = $GLOBALS['ba_qs_internal_isolated_cart'] ?? null;
+			if ( ! empty( $additional_cart_item_data['_ba_qs_internal'] ) ) {
+				$GLOBALS['ba_qs_internal_isolated_cart'] = true;
+			}
+
+			try {
+				$cart_item_key = $isolated_cart->add_to_cart(
+					$product->get_id(),
+					1,
+					0,
+					array(),
+					$cart_item_data
+				);
+			} finally {
+				if ( $had_internal_flag ) {
+					$GLOBALS['ba_qs_internal_isolated_cart'] = $previous_internal_flag;
+				} else {
+					unset( $GLOBALS['ba_qs_internal_isolated_cart'] );
+				}
+			}
 
 			if ( false === $cart_item_key ) {
 				return new WP_Error( 'bap_isolated_cart_failed', 'آماده‌سازی پرداخت سریع انجام نشد.' );

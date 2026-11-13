@@ -25,8 +25,8 @@ final class ValidatorDefinition
      * Validate one field with access to the complete sanitized submission data.
      * The fourth callback argument is optional for existing three-argument validators.
      */
-    public function validate(string $value, array $field, array $config = [], array $data = []): bool
+    public function validate(string $value, array $field, array $config = [], array $data = [], array $context = []): bool
     {
-        return (bool)($this->callback)($value, $field, $config, $data);
+        return (bool)($this->callback)($value, $field, $config, $data, $context);
     }
 }
