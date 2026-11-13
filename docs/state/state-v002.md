@@ -998,3 +998,5 @@ Modules: [MODULE-AFE](../modules/alavi-form-engine.md), [MODULE-JIHADI-FORM](../
 
 - Owner reported order 30264 returned to the form after cancellation but displayed pending; live readback confirmed WooCommerce pending and a gateway missing-parameter order note.
 - Local implementation distinguishes explicit authenticated SEP user-cancellation callbacks with a signed presentation notice, without changing order status; paid status takes precedence. Prior callback URLs cannot recover the original State. Focused local tests passed; live deployment and acceptance remain pending.
+
+- 2026-11-13: The project owner confirmed the cancellation flow works on the live site. This is limited to the reported cancellation flow; full payment and cart/session acceptance remain separate.
