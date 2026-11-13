@@ -241,6 +241,8 @@ add_action( 'afe_register_forms', array( BA_Camp_Admission_Form::class, 'registe
 
  // فرم مشترک پرداخت سریع مشارکت و قرارداد عمومی Context در AFE.
 require_once get_stylesheet_directory() . '/inc/forms/class-ba-quick-support-form.php';
+require_once get_stylesheet_directory() . '/inc/woocommerce/class-ba-quick-support-payment-return.php';
+BA_Quick_Support_Payment_Return::boot();
 add_action( 'afe_register_form_context_providers', array( BA_Quick_Support_Form::class, 'registerContextProvider' ) );
 add_action( 'afe_register_data_sources', array( BA_Quick_Support_Form::class, 'registerDataSources' ) );
 add_action( 'afe_register_validator_definitions', array( BA_Quick_Support_Form::class, 'registerValidators' ) );
