@@ -58,8 +58,8 @@ final class BA_Quick_Support_Report_Service
     }
 
     /**
-     * Build a WooCommerce CRUD query. All filtering uses order CRUD/meta_query,
-     * keeping the report compatible with both legacy storage and HPOS.
+     * Build a WooCommerce order query. Source filtering uses created_via and
+     * metadata filtering uses meta_query through wc_get_orders() for HPOS support.
      */
     public function build_query(array $filters, int $page = 1, int $limit = self::PAGE_SIZE): array
     {
