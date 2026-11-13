@@ -100,6 +100,7 @@ final class BA_Quick_Support_Reports
         self::render_filters($filters);
         self::render_summary($summary);
         self::render_breakdowns($summary);
+        echo '<p class="description">تعداد سفارش‌های مطابق فیلترها: <strong>' . esc_html(number_format_i18n((int)$result['total'])) . '</strong></p>';
         self::render_orders($result['orders']);
         self::render_pagination($filters, $page, (int)$result['pages']);
 
@@ -390,7 +391,11 @@ final class BA_Quick_Support_Reports
             self::service()->iterate($filters, static function ($order) use ($sheet, &$row): void {
                 foreach (self::export_row($order) as $index => $value) {
                     $column = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($index + 1);
-                    $sheet->setCellValueExplicit($column . $row, (string)$value, \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+                    if (in_array($index, [8, 9, 10], true)) {
+                        $sheet->setCellValue($column . $row, (float)$value);
+                    } else {
+                        $sheet->setCellValueExplicit($column . $row, (string)$value, \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING);
+                    }
                 }
                 $row++;
             });
