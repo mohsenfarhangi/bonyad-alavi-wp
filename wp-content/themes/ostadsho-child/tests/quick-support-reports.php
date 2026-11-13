@@ -28,6 +28,7 @@ function wc_get_orders(array $query): object {
     }
     $allowed = $allowed ?? [];
     $orders = array_values(array_filter($orders, static function($order) use ($query, $allowed): bool {
+        if (!empty($query['created_via']) && $order->get_created_via() !== $query['created_via']) return false;
         if ($allowed && !in_array($order->get_status(), $allowed, true)) return false;
         foreach ((array)($query['meta_query'] ?? []) as $condition) {
             if (!is_array($condition) || empty($condition['key'])) continue;
@@ -83,6 +84,7 @@ function add_submenu_page(string $parent, string $pageTitle, string $menuTitle, 
 final class BA_Quick_Support_Payment_Service
 {
     public const ORDER_MARKER = '_ba_quick_support';
+    public const ORDER_CREATED_VIA = 'ba_quick_support';
     public const ORDER_CATEGORY_ID = '_ba_quick_support_category_id';
     public const ORDER_CATEGORY_TITLE = '_ba_quick_support_category_title';
     public const ORDER_SUBMISSION_ID = '_ba_afe_submission_id';
@@ -103,7 +105,8 @@ final class WC_Order
         private float $total,
         private float $refunded,
         private array $meta,
-        private string $gatewayTitle = 'درگاه آزمایشی'
+        private string $gatewayTitle = 'درگاه آزمایشی',
+        private string $createdVia = 'ba_quick_support'
     ) {}
     public function get_id(): int { return $this->id; }
     public function get_status(): string { return $this->status; }
@@ -112,6 +115,7 @@ final class WC_Order
     public function get_total_refunded(): string { return (string)$this->refunded; }
     public function get_meta(string $key, bool $single = true): mixed { return $this->meta[$key] ?? ''; }
     public function get_payment_method_title(): string { return $this->gatewayTitle; }
+    public function get_created_via(): string { return $this->createdVia; }
 }
 $GLOBALS['ba_qs_report_categories'] = [
     41 => new WP_Post(41, 'آموزش، مهارت و پرورش'),
@@ -138,9 +142,14 @@ $GLOBALS['ba_qs_report_orders'] = [
     new WC_Order(104, 'failed', null, 250, 0, [
         $marker=>1, $categoryKey=>41, $titleKey=>'آموزش، مهارت و پرورش', $gatewayKey=>'sep',
     ]),
+    // Product/project-based participation orders use a different creation source.
     new WC_Order(105, 'completed', new DateTimeImmutable('2026-11-12 12:00:00'), 999, 0, [
-        $categoryKey=>41, $titleKey=>'سفارش عادی', $gatewayKey=>'sep',
-    ]),
+        '_bap_participation_amount'=>'999',
+    ], 'درگاه مشارکت', 'bap_quick_checkout'),
+    // Defense in depth: even a product-based order with a stale/copied marker must stay out.
+    new WC_Order(106, 'completed', new DateTimeImmutable('2026-11-12 13:00:00'), 777, 0, [
+        $marker=>1, '_bap_participation_amount'=>'777',
+    ], 'درگاه مشارکت', 'bap_quick_checkout'),
 ];
 
 $service = new BA_Quick_Support_Report_Service();
@@ -158,6 +167,9 @@ $filters = $service->normalize_filters([
 ]);
 $query = $service->build_query($filters, 2, 50);
 $summary = $service->summary(['period'=>'day']);
+$reportPage = $service->page([], 1, 50);
+$iteratedOrderIds = [];
+$service->iterate([], static function($order) use (&$iteratedOrderIds): void { $iteratedOrderIds[] = $order->get_id(); });
 
 BA_Quick_Support_Reports::sync_admin_capabilities();
 BA_Quick_Support_Reports::register_menu();
@@ -168,11 +180,14 @@ $checks = [
     'customer-search-is-trimmed' => $filters['search'] === 'نام آزمایشی',
     'period-is-whitelisted' => $filters['period'] === 'month',
     'order-query-always-requires-quick-support-marker' => isset($query['meta_query'][0]['key']) && $query['meta_query'][0]['key'] === $marker,
+    'order-query-requires-quick-support-created-via' => ($query['created_via'] ?? '') === BA_Quick_Support_Payment_Service::ORDER_CREATED_VIA,
     'order-query-filters-category-and-gateway' => count($query['meta_query']) === 6,
     'amount-filters-use-numeric-decimal-comparison' => ($query['meta_query'][3]['type'] ?? '') === 'DECIMAL' && ($query['meta_query'][4]['type'] ?? '') === 'DECIMAL',
     'order-query-supports-hpos-compatible-date-range' => $query['date_created'] === '2026-11-01...2026-11-20',
     'order-query-paginates' => $query['page'] === 2 && $query['limit'] === 50 && $query['paginate'] === true,
     'summary-gross-includes-only-confirmed-quick-support-orders' => $summary['gross'] === 1500.0,
+    'product-based-participation-orders-are-excluded-from-report-list' => $reportPage['total'] === 4 && !in_array(105, array_map(static fn($order) => $order->get_id(), $reportPage['orders']), true) && !in_array(106, array_map(static fn($order) => $order->get_id(), $reportPage['orders']), true),
+    'product-based-participation-orders-are-excluded-from-exports' => !in_array(105, $iteratedOrderIds, true) && !in_array(106, $iteratedOrderIds, true),
     'summary-net-deducts-partial-and-full-refunds' => $summary['net'] === 800.0,
     'summary-counts-paid-orders-with-valid-paid-date' => $summary['paid_count'] === 2,
     'summary-average-uses-net-paid-amount' => $summary['average_net'] === 400.0,
