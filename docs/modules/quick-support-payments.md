@@ -1,6 +1,6 @@
 # MODULE-QUICK-SUPPORT — Quick Support Payments
 
-**Status:** Phase 1 implemented in [PR #34](https://github.com/mohsenfarhangi/bonyad-alavi-wp/pull/34); review and staging acceptance pending  
+**Status:** Phase 1 merged in [PR #34](https://github.com/mohsenfarhangi/bonyad-alavi-wp/pull/34); admin-role capability correction is in [PR #35](https://github.com/mohsenfarhangi/bonyad-alavi-wp/pull/35); staging acceptance pending  
 **Decision:** [ADR-009](../decisions/ADR-009-quick-support-payments.md)  
 **Parent modules:** [MODULE-PARTICIPATION](participation-payments.md), [MODULE-AFE](alavi-form-engine.md), [MODULE-AFE-EXTENSION](alavi-form-engine-extension-api.md)
 
@@ -8,11 +8,11 @@
 
 پرداخت سریع مشارکت مردمی برای حمایت از یکی از دسته‌بندی‌های موضوعی بنیاد علوی، بدون انتخاب پروژه یا محصول توسط پرداخت‌کننده. یک فرم مشترک اطلاعات پرداخت‌کننده را می‌گیرد و پرداخت را مستقیماً از طریق درگاه WooCommerce انجام می‌دهد.
 
-این سند مرجع طراحی و پیاده‌سازی است. اجزای فاز اول در PR #34 نوشته شده‌اند، اما تا زمان Merge و پذیرش staging نباید قابلیت را روی سایت عملیاتی‌شده فرض کرد.
+این سند مرجع طراحی و پیاده‌سازی است. فاز اول در PR #34 به main ادغام شده است؛ بااین‌حال پذیرش staging و تأیید دسترسی نقش‌های مدیریتی هنوز باز است.
 
 ## Phase 1 Implementation Record — PR #34
 
-**Implementation status:** code review / staging acceptance pending.
+**Implementation status:** Phase 1 merged; role-capability correction in PR #35; staging acceptance pending.
 
 Implemented in the current feature branch:
 
@@ -20,7 +20,7 @@ Implemented in the current feature branch:
 - Elementor Form Widget controls for Current Page, Fixed Category and Query Parameter (Slug/ID).
 - Context is carried separately from applicant data through ActionContext and is available to context-aware validators and dynamic data sources.
 - Generic single-option dynamic Select rendering and visible downstream Action errors.
-- `ba_quick_support` CPT, four seeded categories, category meta settings, administrator-only category management and Elementor CPT support.
+- `ba_quick_support` CPT, four seeded categories, category meta settings, category management for Administrator and trusted roles with `manage_options`, and Elementor CPT support.
 - Shared AFE form `quick-support-payment`, required/optional field rules, province/county dependency and server-side amount-range validation.
 - Dedicated payment Action and WooCommerce order service, shared technical product, per-submission lock/idempotency, retry recovery and gateway allowlists.
 - Existing participation Gateway service extended with exact gateway resolution and optional internal isolated-cart item data.
@@ -277,7 +277,7 @@ WooCommerce Order منبع قطعی مبلغ، ارز، Gateway، وضعیت پ�
 - `view_ba_quick_support_reports`
 - `export_ba_quick_support_reports`
 
-دسترسی پیش‌فرض فقط به Administrator داده شود و اعطای دسترسی به نقش‌های دیگر صریح باشد.
+دسترسی به نقش پیش‌فرض `administrator` و نقش‌های مدیریتی سفارشی که از قبل `manage_options` دارند داده شود؛ نقش‌های عادی مانند Editor نباید این دسترسی را دریافت کنند. پیاده‌سازی اصلاح‌شده این رفتار در PR #35 ثبت شده است.
 
 ## Security and Reliability
 
