@@ -1,6 +1,6 @@
 # MODULE-QUICK-SUPPORT — Quick Support Payments
 
-**Status:** Phase 1, granular category permissions, Phase 2 reports and report-source isolation are merged in [PRs #34–#38](https://github.com/mohsenfarhangi/bonyad-alavi-wp/pulls?q=is%3Apr+is%3Amerged+quick+support). Report-source isolation is deployed and confirmed working on the live site. Dedicated form layout, same-page payment return and editable result templates are being developed in [PR #39](https://github.com/mohsenfarhangi/bonyad-alavi-wp/pull/39); updated CI/review and live gateway acceptance remain pending.  
+**Status:** Phase 1, granular category permissions, Phase 2 reports and report-source isolation are merged in [PRs #34–#38](https://github.com/mohsenfarhangi/bonyad-alavi-wp/pulls?q=is%3Apr+is%3Amerged+quick+support). Report-source isolation is deployed and confirmed working on the live site. Dedicated form layout, same-page payment return and editable result templates are in [PR #39](https://github.com/mohsenfarhangi/bonyad-alavi-wp/pull/39); focused CI passed, while PR review/merge and live gateway acceptance remain pending.  
 **Decision:** [ADR-009](../decisions/ADR-009-quick-support-payments.md)  
 **Parent modules:** [MODULE-PARTICIPATION](participation-payments.md), [MODULE-AFE](alavi-form-engine.md), [MODULE-AFE-EXTENSION](alavi-form-engine-extension-api.md)
 
