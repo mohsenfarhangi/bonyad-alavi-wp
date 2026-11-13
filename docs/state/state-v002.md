@@ -939,3 +939,13 @@ Modules: [MODULE-AFE](../modules/alavi-form-engine.md), [MODULE-JIHADI-FORM](../
 - Enabled the existing per-form `captcha_before_submit` option for Quick Support. With preview disabled and the form unlocked, the renderer places CAPTCHA after the last Step's fields and before the submit action/button.
 - Added regression coverage for the custom headerless template, Quick Support heading suppression, unchanged generic default heading and CAPTCHA placement configuration.
 - AFE dev version bumped to `1.0.28-dev.10`; DB version unchanged. Branch: `feat/quick-support-dedicated-form-template-20261113`. PR/CI/live form acceptance pending.
+
+
+## 2026-11-13 — Quick Support dedicated form template PR and CI
+
+- PR [#39](https://github.com/mohsenfarhangi/bonyad-alavi-wp/pull/39) adds the dedicated headerless template for `quick-support-payment`, disables `.afe-step-heading` only for this form and enables CAPTCHA before submit.
+- AFE `show_step_heading` defaults to `true`, preserving existing forms; Quick Support opts out. The form-level template contains only `{{steps}}`, so no AFE form header/brand/progress is rendered.
+- AFE dev version is `1.0.28-dev.10`; DB version unchanged.
+- Quick Support CI [run 43403744041](https://github.com/mohsenfarhangi/bonyad-alavi-wp/actions/runs/43403744041) passed PHP syntax, AFE Context/validator tests, all theme form regression tests and JavaScript syntax.
+- AFE duplicate-draft and Jihadi form regression CI [run 43403744021](https://github.com/mohsenfarhangi/bonyad-alavi-wp/actions/runs/43403744021) also passed.
+- PR is open and mergeable. Merge, deployment of both the AFE plugin and child theme, and live form verification remain pending.
