@@ -18,6 +18,11 @@
 
 AFE release goal همچنان live acceptance نسخه 1.0.28 و رفع blocker واقعی پیش از production promotion است.
 
+## Quick Support — payment form return templates in progress (2026-11-13)
+
+- Feature branch `feat/quick-support-payment-return-template`: dedicated minimal form shell, CAPTCHA immediately before submit, hidden `afe-step-heading`, secure same-page WooCommerce return, and AFE per-status HTML/CSS editors. Four return states are based on persisted order status and verified order key; success is never inferred from the URL.
+- AFE adds the generic `afe_form_render_override` filter and a dedicated template-tab editor limited to `quick-support-payment`. PR/CI and live gateway acceptance pending.
+
 ## Quick Support — Phase 1 access accepted; Phase 2 reports merged (2026-11-13)
 
 - PRs #34 (Context/category/form/payment), #35 (role capability correction), #36 (granular category permissions) and #37 (reports/dashboard) are merged into `main`. Current main merge commit for PR #37: `09cf9f1765d2b8f3fc73545426b5c07016a32340`.
