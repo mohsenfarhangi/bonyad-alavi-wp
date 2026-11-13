@@ -45,6 +45,12 @@ final class Renderer
 
         $form = $this->service->resolvedForm($slug);
         $row = $this->forms->row($slug);
+
+        // Allow a form-specific integration to replace the normal form output,
+        // for example with a trusted payment result on the gateway return visit.
+        $renderOverride = apply_filters('afe_form_render_override', null, $slug, $form, $formContext);
+        if (is_string($renderOverride) && trim($renderOverride) !== '') return $renderOverride;
+
         $editing = $this->resolveEditing($form);
         $values = $editing['row']['data'] ?? [];
         $renderValues = $values;
