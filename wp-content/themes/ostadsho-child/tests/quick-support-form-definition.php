@@ -13,6 +13,10 @@ function sanitize_key(string $key): string {
     return strtolower((string)preg_replace('/[^a-z0-9_\\-]/i', '', $key));
 }
 
+function esc_html(string $value): string {
+    return htmlspecialchars($value, ENT_QUOTES, 'UTF-8');
+}
+
 final class BA_Participation_Payment_Gateway_Service
 {
     public function __construct() {}
@@ -32,6 +36,7 @@ require_once dirname(__DIR__) . '/inc/woocommerce/class-ba-quick-support-payment
 require_once dirname(__DIR__) . '/inc/woocommerce/class-ba-quick-support-payment-action.php';
 require_once dirname(__DIR__) . '/inc/forms/class-ba-quick-support-form.php';
 
+use BonyadAlavi\FormEngine\Form\Form;
 use BonyadAlavi\FormEngine\Form\FormRegistry;
 use BonyadAlavi\FormEngine\Form\Validator;
 use BonyadAlavi\FormEngine\Validation\ValidatorRegistry;
@@ -52,6 +57,14 @@ $registry = new FormRegistry();
 BA_Quick_Support_Form::register($registry);
 $form = $registry->get(BA_Quick_Support_Form::SLUG)->toArray();
 $fields = quick_support_fields($form);
+
+$rendererReflection = new ReflectionClass(\BonyadAlavi\FormEngine\Form\Renderer::class);
+$renderer = $rendererReflection->newInstanceWithoutConstructor();
+$headingRenderer = $rendererReflection->getMethod('renderStepHeading');
+$headingRenderer->setAccessible(true);
+$quickSupportHeading = $headingRenderer->invoke($renderer, 'اطلاعات پرداخت', '', 0, 1, $form);
+$genericForm = Form::make('generic-heading-default')->toArray();
+$genericHeading = $headingRenderer->invoke($renderer, 'اطلاعات عمومی', 'توضیح مرحله', 0, 1, $genericForm);
 
 $validatorRegistry = new ValidatorRegistry();
 BA_Quick_Support_Form::registerValidators($validatorRegistry);
@@ -98,6 +111,10 @@ $checks = [
     'stable-form-slug' => $form['slug'] === 'quick-support-payment',
     'shared-storage' => $form['storage'] === 'shared',
     'one-step-shared-form' => count($form['steps']) === 1,
+    'quick-support-uses-dedicated-headerless-template' => ($form['template'] ?? '') === '{{steps}}',
+    'quick-support-hides-step-heading' => ($form['settings']['show_step_heading'] ?? null) === false && $quickSupportHeading === '',
+    'generic-forms-keep-step-heading-by-default' => ($genericForm['settings']['show_step_heading'] ?? null) === true && str_contains($genericHeading, 'afe-step-heading') && str_contains($genericHeading, 'اطلاعات عمومی'),
+    'quick-support-captcha-is-before-submit' => ($form['settings']['captcha_before_submit'] ?? null) === true,
     'required-mobile-name-lastname-amount' => !empty($fields['mobile']['required'])
         && !empty($fields['first_name']['required'])
         && !empty($fields['last_name']['required'])

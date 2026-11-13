@@ -48,7 +48,7 @@
 }
 
 /* Dedicated minimal shell for the Quick Support payment form. */
-.ba-quick-support-payment .afe-step-heading{display:none!important}
-.ba-quick-support-payment .afe-step{padding-top:0!important}
-.ba-quick-support-payment .afe-form-result:empty{display:none}
-.ba-quick-support-payment .afe-captcha-wrap{margin-top:18px}
+.afe-shell form.afe-form[data-form="quick-support-payment"] .afe-step-heading{display:none!important}
+.afe-shell form.afe-form[data-form="quick-support-payment"] .afe-step{padding-top:0!important}
+.afe-shell form.afe-form[data-form="quick-support-payment"] .afe-form-result:empty{display:none}
+.afe-shell form.afe-form[data-form="quick-support-payment"] .afe-captcha-wrap{margin-top:18px}

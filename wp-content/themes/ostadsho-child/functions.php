@@ -201,8 +201,6 @@ add_action( 'wp_enqueue_scripts', function () {
 require_once get_stylesheet_directory() . '/inc/quick-support/class-ba-quick-support-category.php';
 require_once get_stylesheet_directory() . '/inc/quick-support/class-ba-quick-support-category-context-provider.php';
 require_once get_stylesheet_directory() . '/inc/woocommerce/class-ba-quick-support-payment-service.php';
-require_once get_stylesheet_directory() . '/inc/woocommerce/class-ba-quick-support-payment-return.php';
-BA_Quick_Support_Payment_Return::boot();
 require_once get_stylesheet_directory() . '/inc/woocommerce/class-ba-quick-support-payment-action.php';
 require_once get_stylesheet_directory() . '/inc/quick-support/class-ba-quick-support-report-service.php';
 require_once get_stylesheet_directory() . '/inc/quick-support/class-ba-quick-support-reports.php';
@@ -243,6 +241,8 @@ add_action( 'afe_register_forms', array( BA_Camp_Admission_Form::class, 'registe
 
  // فرم مشترک پرداخت سریع مشارکت و قرارداد عمومی Context در AFE.
 require_once get_stylesheet_directory() . '/inc/forms/class-ba-quick-support-form.php';
+require_once get_stylesheet_directory() . '/inc/woocommerce/class-ba-quick-support-payment-return.php';
+BA_Quick_Support_Payment_Return::boot();
 add_action( 'afe_register_form_context_providers', array( BA_Quick_Support_Form::class, 'registerContextProvider' ) );
 add_action( 'afe_register_data_sources', array( BA_Quick_Support_Form::class, 'registerDataSources' ) );
 add_action( 'afe_register_validator_definitions', array( BA_Quick_Support_Form::class, 'registerValidators' ) );

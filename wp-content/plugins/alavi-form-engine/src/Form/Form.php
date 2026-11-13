@@ -48,6 +48,7 @@ final class Form
                 'wizard' => true,
                 'save_draft' => true,
                 'show_progress' => true,
+                'show_step_heading' => true,
                 'captcha_before_submit' => false,
                 'show_tracking_code' => true,
                 'success_message' => '',

@@ -3,7 +3,7 @@
 **Status:** active development / pre-acceptance  
 **Path:** `wp-content/plugins/alavi-form-engine/`  
 **Namespace:** `BonyadAlavi\FormEngine`  
-**Development version:** `1.0.28-dev.9`  
+**Development version:** `1.0.28-dev.11`  
 **DB checkpoint:** `1.0.5-dev.2`  
 **Stable baseline/tag documented:** `1.0.27`  
 **PHP:** `>=8.3`
@@ -28,8 +28,12 @@ Source domains:
 
 ## Frontend Render Extension
 
-- `Renderer::render()` exposes `afe_form_render_override` after resolving the form and before rendering the default markup. Integrations may return a complete HTML string for a specific form; returning `null`/non-string/empty preserves the normal renderer.
-- This extension is used by Quick Support payment return to replace only the `quick-support-payment` form with an order-verified result message. The filter must validate its own context and must not trust query parameters for financial status.
+- `Renderer::render()` exposes `afe_form_render_override` after resolving the form and before normal form markup. The filter receives the slug, resolved form, context token and server-resolved immutable form context.
+- Signature: `apply_filters('afe_form_render_override', null, $slug, $form, $contextToken, $formContext)`.
+- An integration may return a complete HTML string for the same widget/shortcode location; returning `null`, an empty string or a non-string preserves normal rendering.
+- The hook is used by Quick Support payment return. The integration must validate order ownership, `created_via`, the Quick Support marker and its signed return credential; URL parameters alone must never establish payment success.
+- Domain-specific payment/order logic remains in the owning theme or extension; AFE only exposes the generic render seam.
+
 
 ## Form Definition and Overrides
 
@@ -323,7 +327,10 @@ Per-form brand mark:
 - token `{{brand_mark}}`
 
 Template Registry:
-- form/preview/step default templates از code
+- form/preview/step default templates از code؛ هر Source Definition می‌تواند با `Form::template()` قالب کل فرم را جداگانه تعیین کند.
+- قالب فرم می‌تواند فقط `{{steps}}` را رندر کند تا هدر/نشان/نوار پیشرفت در همان فرم نمایش داده نشوند.
+- setting عمومی `show_step_heading` با پیش‌فرض `true` نمایش عنوان هر Step را کنترل می‌کند؛ غیرفعال‌سازی آن فقط روی همان فرم اثر دارد.
+- setting موجود `captcha_before_submit` به‌صورت opt-in کپچا را بعد از فیلدهای آخرین Step و پیش از دکمه ارسال قرار می‌دهد.
 - Admin فقط override متفاوت را persist می‌کند
 - reset override باعث برگشت به future code default می‌شود
 - whitelisted tokens؛ remote CSS/resources/raw PHP ممنوع.

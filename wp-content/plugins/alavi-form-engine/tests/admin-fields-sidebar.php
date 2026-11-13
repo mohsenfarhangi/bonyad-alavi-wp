@@ -52,8 +52,8 @@ $checks=[
     'exports-still-use-admin-section'=>str_contains($pdf,'$this->presenter->sections($form)')
         && str_contains($excel,'$this->presenter->sections($form)'),
     'sidebar-css-scoped'=>str_contains($css,'.afe-submission-admin-fields .afe-sidebar-admin-field'),
-    'bumped-assets-version'=>str_contains($entry,'Version: 1.0.28-dev.9')
-        && str_contains($entry,"define('AFE_VERSION', '1.0.28-dev.9')"),
+    'bumped-assets-version'=>str_contains($entry,'Version: 1.0.28-dev.11')
+        && str_contains($entry,"define('AFE_VERSION', '1.0.28-dev.11')"),
 ];
 foreach($checks as $name=>$ok) {
     echo ($ok?'PASS ':'FAIL ').$name.PHP_EOL;

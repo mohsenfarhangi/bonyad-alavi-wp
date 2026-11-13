@@ -36,8 +36,8 @@ $checks=[
         && str_contains($theme,"'active' => 'فعال'")
         && str_contains($theme,"'leading' => 'پیشرو'")
         && str_contains($theme,"'model' => 'الگو'"),
-    'development-asset-version'=>str_contains($entry,'Version: 1.0.28-dev.9')
-        && str_contains($entry,"define('AFE_VERSION', '1.0.28-dev.9')"),
+    'development-asset-version'=>str_contains($entry,'Version: 1.0.28-dev.11')
+        && str_contains($entry,"define('AFE_VERSION', '1.0.28-dev.11')"),
 ];
 foreach($checks as $name=>$ok) {
     echo ($ok?'PASS ':'FAIL ').$name.PHP_EOL;

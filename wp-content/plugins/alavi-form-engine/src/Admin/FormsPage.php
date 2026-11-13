@@ -199,30 +199,39 @@ final class FormsPage
             14
         );
         echo '</div>';
-        if ($slug === 'quick-support-payment') {
-            $resultDefaults = [
-                'success' => '<section class="ba-qs-payment-result is-success"><h2>پرداخت شما با موفقیت انجام شد</h2><p>از همراهی و حمایت ارزشمند شما سپاسگزاریم. مشارکت شما به دستاوردهای ماندگار تبدیل خواهد شد.</p><dl><div><dt>شماره سفارش</dt><dd>{{order_number}}</dd></div><div><dt>مبلغ پرداخت</dt><dd>{{amount}}</dd></div><div><dt>موضوع حمایت</dt><dd>{{category_title}}</dd></div></dl></section>',
-                'failed' => '<section class="ba-qs-payment-result is-failed"><h2>پرداخت انجام نشد</h2><p>متأسفانه پرداخت شما تأیید نشد. در صورت کسر وجه، مبلغ طبق ضوابط بانکی به حساب شما بازخواهد گشت.</p><dl><div><dt>شماره سفارش</dt><dd>{{order_number}}</dd></div><div><dt>مبلغ</dt><dd>{{amount}}</dd></div></dl></section>',
-                'cancelled' => '<section class="ba-qs-payment-result is-cancelled"><h2>پرداخت لغو شد</h2><p>فرآیند پرداخت را لغو کرده‌اید. در صورت تمایل می‌توانید دوباره برای حمایت اقدام کنید.</p><dl><div><dt>شماره سفارش</dt><dd>{{order_number}}</dd></div><div><dt>مبلغ</dt><dd>{{amount}}</dd></div></dl></section>',
-                'pending' => '<section class="ba-qs-payment-result is-pending"><h2>وضعیت پرداخت در حال بررسی است</h2><p>هنوز تأیید نهایی پرداخت از بانک دریافت نشده است. لطفاً کمی بعد وضعیت سفارش را بررسی کنید.</p><dl><div><dt>شماره سفارش</dt><dd>{{order_number}}</dd></div><div><dt>مبلغ</dt><dd>{{amount}}</dd></div></dl></section>',
-            ];
-            $storedResults = (array)($storedSettings['quick_support_result_templates'] ?? []);
-            echo '<div class="afe-admin-card"><h2>قالب نتیجه پرداخت سریع</h2><p class="description">این قالب‌ها فقط برای فرم پرداخت سریع استفاده می‌شوند و پس از بازگشت از درگاه، در محل همین فرم نمایش داده می‌شوند. Tokenها: {{order_number}}، {{amount}}، {{category_title}}، {{customer_name}}، {{gateway_title}}.</p>';
-            foreach ($resultDefaults as $resultStatus => $defaultHtml) {
+
+        // Optional form-specific result templates are supplied by integrations.
+        $paymentResultDefinitions=apply_filters('afe_form_payment_result_template_definitions',[],$slug,$form,$storedSettings);
+        if(is_array($paymentResultDefinitions) && $paymentResultDefinitions!==[]){
+            $storedPaymentTemplates=(array)($storedSettings['payment_result_templates']??[]);
+            $legacyPaymentTemplates=(array)($storedSettings['quick_support_result_templates']??[]);
+            echo '<div class="afe-admin-card afe-payment-result-templates"><div class="afe-admin-card-title"><div><h2>قالب نتیجه پرداخت</h2><p>این قالب‌ها پس از بازگشت از درگاه، به‌جای فرم و دقیقاً در محل نمایش همان فرم قرار می‌گیرند. هر وضعیت قالب مستقل دارد.</p></div></div>';
+            foreach($paymentResultDefinitions as $templateKey=>$definition){
+                if(!is_array($definition) || !array_key_exists('default',$definition)) continue;
+                $templateKey=sanitize_key((string)$templateKey);
+                if($templateKey==='') continue;
+                $label=sanitize_text_field((string)($definition['label']??$templateKey));
+                $description=sanitize_text_field((string)($definition['description']??''));
+                $default=wp_kses_post((string)$definition['default']);
+                $stored=(string)($storedPaymentTemplates[$templateKey]??$legacyPaymentTemplates[$templateKey]??'');
+                $tokens=array_values(array_filter(array_map('sanitize_text_field',(array)($definition['tokens']??[]))));
+                $rows=max(5,min(16,(int)($definition['rows']??9)));
+                echo '<details class="afe-step-template"><summary>'.esc_html($label).' <code>'.esc_html($templateKey).'</code></summary>';
                 $this->renderTemplateEditor(
-                    'quick_support_result_templates['.$resultStatus.']',
-                    'وضعیت '. $resultStatus,
-                    'قالب HTML برای این وضعیت پرداخت.',
-                    $defaultHtml,
-                    (string)($storedResults[$resultStatus] ?? ''),
-                    ['{{order_number}}','{{amount}}','{{category_title}}','{{customer_name}}','{{gateway_title}}'],
-                    7,
+                    'payment_result_templates['.$templateKey.']',
+                    $label,
+                    $description,
+                    $default,
+                    $stored,
+                    $tokens,
+                    $rows,
                     true
                 );
+                echo '</details>';
             }
+            echo '<div class="afe-template-editor"><div class="afe-template-editor__head"><div><h3>CSS تکمیلی نتیجه پرداخت</h3><p>استایل پایه به‌صورت خودکار اعمال می‌شود. این بخش فقط برای سفارشی‌سازی بیشتر است؛ @import و url() هنگام ذخیره حذف می‌شوند.</p></div></div>';
+            echo '<textarea class="afe-code" name="payment_result_css" rows="10" spellcheck="false">'.esc_textarea((string)($storedSettings['payment_result_css']??$storedSettings['quick_support_result_css']??'')).'</textarea></div>';
             echo '</div>';
-            $defaultResultCss = '.ba-qs-payment-result{max-width:680px;margin:0 auto;padding:32px;border:1px solid #e5e7eb;border-radius:16px;text-align:center;background:#fff;color:#344054}.ba-qs-payment-result h2{margin:0 0 12px;font-size:22px}.ba-qs-payment-result p{line-height:2;color:#667085}.ba-qs-payment-result dl{margin:24px 0 0;text-align:right}.ba-qs-payment-result dl div{display:flex;justify-content:space-between;gap:16px;padding:10px 0;border-top:1px solid #eaecf0}.ba-qs-payment-result dt{color:#667085}.ba-qs-payment-result dd{margin:0;font-weight:700}.ba-qs-payment-result.is-success{border-color:#a6f4c5}.ba-qs-payment-result.is-failed,.ba-qs-payment-result.is-cancelled{border-color:#fecdca}.ba-qs-payment-result.is-pending{border-color:#fedf89}';
-            echo '<div class="afe-admin-card"><h2>CSS قالب نتیجه پرداخت</h2><p class="description">استایل فقط روی پیام نتیجه پرداخت اعمال می‌شود.</p><textarea class="afe-code" name="quick_support_result_css" rows="10" spellcheck="false">'.esc_textarea((string)($storedSettings['quick_support_result_css'] ?? $defaultResultCss)).'</textarea></div>';
         }
 
         // Output templates: PDF is HTML/CSS + tokens; Excel stays structural.
@@ -956,6 +965,7 @@ final class FormsPage
     {
         check_admin_referer('afe_save_form_'.$slug,'afe_form_nonce');
         $existing=$this->forms->overrides($slug);
+        $storedSettings=$this->forms->adminSettings($slug);
         $codeForm=$this->registry->get($slug)->toArray();
         $codeFlat=$this->flatten((array)($codeForm['steps']??[]));
         $overrides=[
@@ -1108,15 +1118,6 @@ final class FormsPage
         $submittedValid=array_filter($adminFieldsSubmitted,static fn($one)=>is_array($one)&&trim((string)($one['name']??''))!==''&&trim((string)($one['label']??''))!=='');
         if(count($adminFields)!==count($submittedValid)) wp_die('تعریف فیلدهای اختصاصی مدیریت نامعتبر یا تکراری است.','خطای تنظیمات',['response'=>400,'back_link'=>true]);
         $settings['admin_fields']=$adminFields;
-        if ($slug === 'quick-support-payment') {
-            $resultTemplates = [];
-            foreach (['success','failed','cancelled','pending'] as $resultStatus) {
-                $raw = wp_kses_post(wp_unslash((string)($_POST['quick_support_result_templates'][$resultStatus] ?? '')));
-                if ($raw !== '') $resultTemplates[$resultStatus] = $raw;
-            }
-            $settings['quick_support_result_templates'] = $resultTemplates;
-            $settings['quick_support_result_css'] = wp_strip_all_tags(wp_unslash((string)($_POST['quick_support_result_css'] ?? '')));
-        }
         $settings['duplicate']=[
             'enabled'=>!empty($_POST['duplicate_enabled']) && $duplicateFields!==[],
             'fields'=>$duplicateFields,
@@ -1140,6 +1141,30 @@ final class FormsPage
         $previewDefault=wp_kses_post($this->templates->defaultPreview($codeForm));
         $previewOverride=$this->templates->normalizeOverride($previewSubmitted,$previewDefault);
         if ($previewOverride!=='') $settings['preview_template']=$previewOverride;
+
+        $paymentResultDefinitions=apply_filters('afe_form_payment_result_template_definitions',[],$slug,$codeForm,$storedSettings);
+        if(is_array($paymentResultDefinitions) && $paymentResultDefinitions!==[]){
+            $submittedPaymentTemplates=(array)wp_unslash($_POST['payment_result_templates']??[]);
+            $paymentTemplates=[];
+            foreach($paymentResultDefinitions as $templateKey=>$definition){
+                if(!is_array($definition) || !array_key_exists('default',$definition)) continue;
+                $templateKey=sanitize_key((string)$templateKey);
+                if($templateKey==='') continue;
+                $submitted=wp_kses_post((string)($submittedPaymentTemplates[$templateKey]??''));
+                $default=wp_kses_post((string)$definition['default']);
+                $normalized=$this->templates->normalizeOverride($submitted,$default);
+                if(trim($normalized)!=='') $paymentTemplates[$templateKey]=$normalized;
+            }
+            // Persist an empty set too, so resetting every editor restores the
+            // code defaults instead of leaving an older override in the database.
+            $settings['payment_result_templates']=$paymentTemplates;
+
+            $paymentCss=wp_strip_all_tags(wp_unslash((string)($_POST['payment_result_css']??'')));
+            $paymentCss=preg_replace('/@import\b|url\s*\([^)]*\)|expression\s*\([^)]*\)|javascript\s*:/i','',$paymentCss)??$paymentCss;
+            $settings['payment_result_css']=trim($paymentCss);
+            $settings['quick_support_result_templates']=[];
+            $settings['quick_support_result_css']='';
+        }
 
         $resetExportProfile=!empty($_POST['reset_export_profile']);
         $exportForm=$codeForm;

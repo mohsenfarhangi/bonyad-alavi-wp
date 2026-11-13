@@ -929,4 +929,52 @@ Modules: [MODULE-AFE](../modules/alavi-form-engine.md), [MODULE-JIHADI-FORM](../
 - The legacy Participation checkout creates orders with `created_via = bap_quick_checkout`; Quick Support creates orders with `created_via = ba_quick_support` and marker `_ba_quick_support = 1`.
 - The report service now requires both the dedicated WooCommerce `created_via` value and the Quick Support order marker. This shared query is used by the dashboard summary, paginated order list, CSV and XLSX iteration.
 - Regression fixtures include product-based participation orders, including a defensive case with a copied Quick Support marker, to prove the creation-source filter excludes them.
-- Implementation and focused regression test are in [PR #38](https://github.com/mohsenfarhangi/bonyad-alavi-wp/pull/38); focused CI [run 43398110222](https://github.com/mohsenfarhangi/bonyad-alavi-wp/actions/runs/43398110222) passed. Merge and deployment are pending.
+- Implementation and focused regression test were merged in [PR #38](https://github.com/mohsenfarhangi/bonyad-alavi-wp/pull/38); focused CI [run 43398110222](https://github.com/mohsenfarhangi/bonyad-alavi-wp/actions/runs/43398110222) passed. The project owner deployed the change and confirmed live testing works without issue.
+
+
+## 2026-11-13 — Quick Support dedicated AFE form layout
+
+- The shared `quick-support-payment` Source Definition now supplies a dedicated form template through `Form::template('{{steps}}')`, omitting the default AFE form header, brand mark and progress markup.
+- Added generic `show_step_heading` setting to AFE form defaults (`true`); Renderer now conditionally emits `.afe-step-heading` for data and preview steps. Quick Support opts out, so no step heading is rendered on that form; all other forms preserve existing behavior by default.
+- Enabled the existing per-form `captcha_before_submit` option for Quick Support. With preview disabled and the form unlocked, the renderer places CAPTCHA after the last Step's fields and before the submit action/button.
+- Added regression coverage for the custom headerless template, Quick Support heading suppression, unchanged generic default heading and CAPTCHA placement configuration.
+- AFE dev version bumped to `1.0.28-dev.10`; DB version unchanged. Branch: `feat/quick-support-dedicated-form-template-20261113`. PR/CI/live form acceptance pending.
+
+
+## 2026-11-13 — Quick Support dedicated form template PR and CI
+
+- PR [#39](https://github.com/mohsenfarhangi/bonyad-alavi-wp/pull/39) adds the dedicated headerless template for `quick-support-payment`, disables `.afe-step-heading` only for this form and enables CAPTCHA before submit.
+- AFE `show_step_heading` defaults to `true`, preserving existing forms; Quick Support opts out. The form-level template contains only `{{steps}}`, so no AFE form header/brand/progress is rendered.
+- AFE dev version is `1.0.28-dev.10`; DB version unchanged.
+- Quick Support CI [run 43403744041](https://github.com/mohsenfarhangi/bonyad-alavi-wp/actions/runs/43403744041) passed PHP syntax, AFE Context/validator tests, all theme form regression tests and JavaScript syntax.
+- AFE duplicate-draft and Jihadi form regression CI [run 43403744021](https://github.com/mohsenfarhangi/bonyad-alavi-wp/actions/runs/43403744021) also passed.
+- PR is open and mergeable. Merge, deployment of both the AFE plugin and child theme, and live form verification remain pending.
+
+
+## 2026-11-13 — Quick Support same-page payment return and editable result templates
+
+- Extended the existing [PR #39](https://github.com/mohsenfarhangi/bonyad-alavi-wp/pull/39) branch `feat/quick-support-dedicated-form-template-20261113`; no duplicate PR is created.
+- The WooCommerce Quick Support order stores the validated same-site source page URL and a random return token. The gateway return/received and cancellation URL filters apply only to Quick Support orders.
+- Added the generic AFE `afe_form_render_override` hook. The theme handler verifies the order marker and compares the return token with `hash_equals()` before replacing the form at its original render location.
+- Result state comes from the WooCommerce order (paid, failed, cancelled, pending or unknown), not from the return query flag. Invalid tokens and non-Quick-Support orders keep the normal form output.
+- The AFE Templates tab has five editable status-specific HTML templates and optional CSS, with order/amount/category/transaction/status/date/message/retry tokens.
+- Regression test `tests/quick-support-payment-return.php` covers same-page success/cancel URLs, template rendering, status mapping, invalid/external tokens/URLs, array query inputs and CSS sanitization.
+- Quick Support focused CI [run 43407814224](https://github.com/mohsenfarhangi/bonyad-alavi-wp/actions/runs/43407814224) passed PHP syntax and all dedicated return tests, including success, failed, cancelled, pending and unknown.
+- AFE frontend CSS/browser workflow [run 43407334326](https://github.com/mohsenfarhangi/bonyad-alavi-wp/actions/runs/43407334326) passed after pinning Ubuntu 24.04; Playwright checks passed at 360, 780, 782 and 1024px. Its non-blocking AFE regression-suite step still prints three export-profile/Jihadi fixture failures and is configured continue-on-error.
+- PR #39 remains open; merge/deploy and live Hosted/Redirect success/failure/cancel callback acceptance remain required.
+
+
+## 2026-11-13 — AFE dev version 1.0.28-dev.11
+
+- The AFE Renderer now exposes the generic `afe_form_render_override` hook, and the Admin Templates tab supports integration-provided status-specific HTML templates and CSS settings.
+- Quick Support's same-page payment return consumes this extension point; the DB schema version remains `1.0.5-dev.2`.
+
+## STATE-002-052 — Quick Support dedicated form and same-page payment return merged (2026-11-13)
+
+- PR #39 merges the dedicated headerless `quick-support-payment` form, CAPTCHA-before-submit placement, per-form hidden Step heading and same-page gateway return/result rendering.
+- AFE provides the generic `afe_form_render_override` seam with its existing five-argument context contract; the Admin Templates tab stores five status-specific HTML templates and optional scoped CSS for Quick Support only.
+- Return URLs are same-site and carry a random per-order token. Rendering requires matching `created_via`, the Quick Support order marker and constant-time token comparison. Legacy order-key returns from the first main-branch draft remain supported.
+- AFE remains `1.0.28-dev.11`; DB schema remains `1.0.5-dev.2`. No production version bump is implied.
+- Focused Quick Support CI [run 43407814224](https://github.com/mohsenfarhangi/bonyad-alavi-wp/actions/runs/43407814224) passed. AFE frontend CSS/browser CI [run 43407334326](https://github.com/mohsenfarhangi/bonyad-alavi-wp/actions/runs/43407334326) passed Playwright at 360/780/782/1024px; its non-blocking AFE regression-suite step still reports three export-profile/Jihadi fixture failures.
+- Deployment, real Hosted/Redirect gateway callbacks, success/failure/cancel/retry, Cart/Session/Persistent Cart, HPOS and Elementor Popup/Loop Grid/Single acceptance remain open.
+
