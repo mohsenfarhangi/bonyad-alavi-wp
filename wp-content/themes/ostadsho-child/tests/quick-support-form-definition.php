@@ -13,6 +13,10 @@ function sanitize_key(string $key): string {
     return strtolower((string)preg_replace('/[^a-z0-9_\\-]/i', '', $key));
 }
 
+function esc_html(string $value): string {
+    return htmlspecialchars($value, ENT_QUOTES, 'UTF-8');
+}
+
 final class BA_Participation_Payment_Gateway_Service
 {
     public function __construct() {}
