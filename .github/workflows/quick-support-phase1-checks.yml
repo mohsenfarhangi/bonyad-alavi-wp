@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - 'feat/quick-support-phase1-*'
+      - 'feat/quick-support-reports-*'
   pull_request:
     branches: [main]
     paths:
@@ -19,6 +20,7 @@ on:
       - 'wp-content/plugins/alavi-form-engine/tests/form-context-*.php'
       - 'wp-content/plugins/alavi-form-engine/tests/action-context-form-context.php'
       - 'wp-content/themes/ostadsho-child/inc/quick-support/**'
+      - 'wp-content/themes/ostadsho-child/tests/quick-support-reports.php'
       - 'wp-content/themes/ostadsho-child/inc/forms/class-ba-quick-support-form.php'
       - 'wp-content/themes/ostadsho-child/inc/woocommerce/class-ba-quick-support-*.php'
       - 'wp-content/themes/ostadsho-child/inc/woocommerce/class-ba-participation-payment-gateway-service.php'
@@ -57,6 +59,8 @@ jobs:
           php -l wp-content/themes/ostadsho-child/functions.php
           php -l wp-content/themes/ostadsho-child/inc/quick-support/class-ba-quick-support-category.php
           php -l wp-content/themes/ostadsho-child/inc/quick-support/class-ba-quick-support-category-context-provider.php
+          php -l wp-content/themes/ostadsho-child/inc/quick-support/class-ba-quick-support-report-service.php
+          php -l wp-content/themes/ostadsho-child/inc/quick-support/class-ba-quick-support-reports.php
           php -l wp-content/themes/ostadsho-child/inc/forms/class-ba-quick-support-form.php
           php -l wp-content/themes/ostadsho-child/inc/woocommerce/class-ba-quick-support-payment-service.php
           php -l wp-content/themes/ostadsho-child/inc/woocommerce/class-ba-quick-support-payment-action.php
@@ -80,6 +84,7 @@ jobs:
         run: |
           php wp-content/themes/ostadsho-child/tests/quick-support-form-definition.php
           php wp-content/themes/ostadsho-child/tests/quick-support-category-context.php
+          php wp-content/themes/ostadsho-child/tests/quick-support-reports.php
           php wp-content/themes/ostadsho-child/tests/quick-support-payment-rules.php
           php wp-content/themes/ostadsho-child/tests/facilitator-form-definition.php
           php wp-content/themes/ostadsho-child/tests/jihadi-form-definition.php
