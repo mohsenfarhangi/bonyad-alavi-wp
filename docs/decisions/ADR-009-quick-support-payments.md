@@ -69,12 +69,12 @@
 ### Reporting
 
 - WooCommerce Orders مرجع مبلغ، currency، Gateway، payment state و refunds است؛ AFE Submission مرجع داده کامل فرم.
-- سفارش با marker `_ba_quick_support` و metadata دسته، Submission و Gateway قابل شناسایی است.
+- سفارش با `created_via = ba_quick_support` و marker `_ba_quick_support` به‌صورت هم‌زمان به‌عنوان Quick Support شناسایی می‌شود. پرداخت محصول‌محور مشارکت از `created_via = bap_quick_checkout` استفاده می‌کند و باید از گزارش سریع خارج بماند.
 - Dashboard مستقل، فیلتر و Excel/CSV export دارد.
 - مبلغ خالص پس از کسر refund محاسبه می‌شود؛ partial refund نیز لحاظ می‌شود.
 - از WooCommerce CRUD و HPOS استفاده می‌شود؛ در نسخه اول جدول تراکنش موازی ساخته نمی‌شود.
 - دسترسی گزارش و داده شخصی با `view_ba_quick_support_reports` و خروجی با `export_ba_quick_support_reports` کنترل می‌شود. هر دو capability و پنج capability دسته‌بندی به‌صورت پیش‌فرض فقط به نقش `administrator` داده می‌شوند؛ نقش‌های دیگر صرفاً با تنظیم دستی مدیر در PublishPress Capabilities دسترسی می‌گیرند.
-- گزارش‌ها از `wc_get_orders()` و WooCommerce CRUD با marker/meta_query خوانده می‌شوند تا HPOS پشتیبانی شود. فیلتر نام/موبایل و export از POST استفاده می‌کنند تا اطلاعات شخصی در URL قرار نگیرد.
+- گزارش‌ها از `wc_get_orders()` با دو شرط مستقل `created_via` و marker/meta_query خوانده می‌شوند تا HPOS پشتیبانی شود و سفارش‌های محصول‌محور مشارکت وارد آمار، جدول یا خروجی نشوند. فیلتر نام/موبایل و export از POST استفاده می‌کنند تا اطلاعات شخصی در URL قرار نگیرد.
 
 ## Consequences
 
