@@ -108,6 +108,9 @@ final class BA_Quick_Support_Report_Service
 
         $allStatuses = function_exists('wc_get_order_statuses') ? array_keys(wc_get_order_statuses()) : [];
         $query = [
+            // Keep this dashboard strictly scoped to category-based Quick Support orders.
+            // Product/project participation uses the separate 'bap_quick_checkout' flow.
+            'created_via' => BA_Quick_Support_Payment_Service::ORDER_CREATED_VIA,
             'status' => !empty($filters['status']) ? [$filters['status']] : $allStatuses,
             'limit' => max(1, min(500, $limit)),
             'page' => max(1, $page),
