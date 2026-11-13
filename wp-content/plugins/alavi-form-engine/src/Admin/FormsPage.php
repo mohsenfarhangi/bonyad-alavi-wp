@@ -199,6 +199,31 @@ final class FormsPage
             14
         );
         echo '</div>';
+        if ($slug === 'quick-support-payment') {
+            $resultDefaults = [
+                'success' => '<section class="ba-qs-payment-result is-success"><h2>پرداخت شما با موفقیت انجام شد</h2><p>از همراهی و حمایت ارزشمند شما سپاسگزاریم. مشارکت شما به دستاوردهای ماندگار تبدیل خواهد شد.</p><dl><div><dt>شماره سفارش</dt><dd>{{order_number}}</dd></div><div><dt>مبلغ پرداخت</dt><dd>{{amount}}</dd></div><div><dt>موضوع حمایت</dt><dd>{{category_title}}</dd></div></dl></section>',
+                'failed' => '<section class="ba-qs-payment-result is-failed"><h2>پرداخت انجام نشد</h2><p>متأسفانه پرداخت شما تأیید نشد. در صورت کسر وجه، مبلغ طبق ضوابط بانکی به حساب شما بازخواهد گشت.</p><dl><div><dt>شماره سفارش</dt><dd>{{order_number}}</dd></div><div><dt>مبلغ</dt><dd>{{amount}}</dd></div></dl></section>',
+                'cancelled' => '<section class="ba-qs-payment-result is-cancelled"><h2>پرداخت لغو شد</h2><p>فرآیند پرداخت را لغو کرده‌اید. در صورت تمایل می‌توانید دوباره برای حمایت اقدام کنید.</p><dl><div><dt>شماره سفارش</dt><dd>{{order_number}}</dd></div><div><dt>مبلغ</dt><dd>{{amount}}</dd></div></dl></section>',
+                'pending' => '<section class="ba-qs-payment-result is-pending"><h2>وضعیت پرداخت در حال بررسی است</h2><p>هنوز تأیید نهایی پرداخت از بانک دریافت نشده است. لطفاً کمی بعد وضعیت سفارش را بررسی کنید.</p><dl><div><dt>شماره سفارش</dt><dd>{{order_number}}</dd></div><div><dt>مبلغ</dt><dd>{{amount}}</dd></div></dl></section>',
+            ];
+            $storedResults = (array)($storedSettings['quick_support_result_templates'] ?? []);
+            echo '<div class="afe-admin-card"><h2>قالب نتیجه پرداخت سریع</h2><p class="description">این قالب‌ها فقط برای فرم پرداخت سریع استفاده می‌شوند و پس از بازگشت از درگاه، در محل همین فرم نمایش داده می‌شوند. Tokenها: {{order_number}}، {{amount}}، {{category_title}}، {{customer_name}}، {{gateway_title}}.</p>';
+            foreach ($resultDefaults as $resultStatus => $defaultHtml) {
+                $this->renderTemplateEditor(
+                    'quick_support_result_templates['.$resultStatus.']',
+                    'وضعیت '. $resultStatus,
+                    'قالب HTML برای این وضعیت پرداخت.',
+                    $defaultHtml,
+                    (string)($storedResults[$resultStatus] ?? ''),
+                    ['{{order_number}}','{{amount}}','{{category_title}}','{{customer_name}}','{{gateway_title}}'],
+                    7,
+                    true
+                );
+            }
+            echo '</div>';
+            $defaultResultCss = '.ba-qs-payment-result{max-width:680px;margin:0 auto;padding:32px;border:1px solid #e5e7eb;border-radius:16px;text-align:center;background:#fff;color:#344054}.ba-qs-payment-result h2{margin:0 0 12px;font-size:22px}.ba-qs-payment-result p{line-height:2;color:#667085}.ba-qs-payment-result dl{margin:24px 0 0;text-align:right}.ba-qs-payment-result dl div{display:flex;justify-content:space-between;gap:16px;padding:10px 0;border-top:1px solid #eaecf0}.ba-qs-payment-result dt{color:#667085}.ba-qs-payment-result dd{margin:0;font-weight:700}.ba-qs-payment-result.is-success{border-color:#a6f4c5}.ba-qs-payment-result.is-failed,.ba-qs-payment-result.is-cancelled{border-color:#fecdca}.ba-qs-payment-result.is-pending{border-color:#fedf89}';
+            echo '<div class="afe-admin-card"><h2>CSS قالب نتیجه پرداخت</h2><p class="description">استایل فقط روی پیام نتیجه پرداخت اعمال می‌شود.</p><textarea class="afe-code" name="quick_support_result_css" rows="10" spellcheck="false">'.esc_textarea((string)($storedSettings['quick_support_result_css'] ?? $defaultResultCss)).'</textarea></div>';
+        }
 
         // Output templates: PDF is HTML/CSS + tokens; Excel stays structural.
         $codeExport=ExportProfile::resolve($form);
@@ -1083,6 +1108,15 @@ final class FormsPage
         $submittedValid=array_filter($adminFieldsSubmitted,static fn($one)=>is_array($one)&&trim((string)($one['name']??''))!==''&&trim((string)($one['label']??''))!=='');
         if(count($adminFields)!==count($submittedValid)) wp_die('تعریف فیلدهای اختصاصی مدیریت نامعتبر یا تکراری است.','خطای تنظیمات',['response'=>400,'back_link'=>true]);
         $settings['admin_fields']=$adminFields;
+        if ($slug === 'quick-support-payment') {
+            $resultTemplates = [];
+            foreach (['success','failed','cancelled','pending'] as $resultStatus) {
+                $raw = wp_kses_post(wp_unslash((string)($_POST['quick_support_result_templates'][$resultStatus] ?? '')));
+                if ($raw !== '') $resultTemplates[$resultStatus] = $raw;
+            }
+            $settings['quick_support_result_templates'] = $resultTemplates;
+            $settings['quick_support_result_css'] = wp_strip_all_tags(wp_unslash((string)($_POST['quick_support_result_css'] ?? '')));
+        }
         $settings['duplicate']=[
             'enabled'=>!empty($_POST['duplicate_enabled']) && $duplicateFields!==[],
             'fields'=>$duplicateFields,
