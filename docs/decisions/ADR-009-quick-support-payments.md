@@ -2,7 +2,7 @@
 
 **Status:** Accepted  
 **Date recorded:** 2026-11-12  
-**Implementation status:** Phase 1, category capability model and Phase 2 dashboard/reporting merged in [PR #34](https://github.com/mohsenfarhangi/bonyad-alavi-wp/pull/34), [PR #35](https://github.com/mohsenfarhangi/bonyad-alavi-wp/pull/35), [PR #36](https://github.com/mohsenfarhangi/bonyad-alavi-wp/pull/36) and [PR #37](https://github.com/mohsenfarhangi/bonyad-alavi-wp/pull/37). Main merge commit: `09cf9f1765d2b8f3fc73545426b5c07016a32340`. Live acceptance remains pending.
+**Implementation status:** Phase 1, category capability model, Phase 2 reporting and strict report-source isolation are merged in PRs #34–#38. Main merge commit after PR #38: `12145e323ba75aa45299e3d547e9803edfb36a04`. Dedicated payment form presentation and same-page return are implemented in [PR #39](https://github.com/mohsenfarhangi/bonyad-alavi-wp/pull/39); CI/review and live gateway acceptance remain pending.
 
 ## Context
 
@@ -57,6 +57,15 @@
 - یک Order به هر AFE Submission متصل است؛ retry همان Order را بازیابی می‌کند و سفارش تکراری نمی‌سازد.
 - نتیجه پرداخت فقط با callback/verification معتبر Gateway قطعی می‌شود.
 - نسخه اول Hosted/Redirect Gatewayها را هدف می‌گیرد؛ Gateway دارای payment fields داخلی خارج از scope است.
+
+### Payment Form Presentation and Gateway Return
+
+- The Quick Support AFE form has its own code-defined form template with only `{{steps}}`; it does not render the AFE form header. The per-form `hide_step_heading` setting removes `.afe-step-heading`, and `captcha_before_submit` places CAPTCHA immediately before the submit action.
+- The page hosting the form is captured from the same-site AJAX Referer; the category permalink is the fallback. The URL and a random return token are stored on the WooCommerce order using private order metadata.
+- Quick Support orders alone receive custom WooCommerce return/received and cancellation URLs. A cancelled order is changed by WooCommerce before the browser is redirected to the stored source page.
+- AFE exposes the generic `afe_form_render_override` filter. The theme integration validates the return token and order marker before replacing the form at the same render location.
+- The displayed result is derived from the WooCommerce order state (paid, failed, cancelled, pending or unknown). A query parameter or browser redirect by itself is never treated as proof of payment.
+- The AFE form «قالب‌ها» tab stores five separate HTML result templates and optional CSS. Supported template tokens include order number, amount, category, transaction ID, status, date, message and retry URL. Only the Quick Support form receives these editors and filters.
 
 ### Gateway Selection
 
