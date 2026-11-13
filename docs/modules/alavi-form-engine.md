@@ -3,7 +3,7 @@
 **Status:** active development / pre-acceptance  
 **Path:** `wp-content/plugins/alavi-form-engine/`  
 **Namespace:** `BonyadAlavi\FormEngine`  
-**Development version:** `1.0.28-dev.9`  
+**Development version:** `1.0.28-dev.10`  
 **DB checkpoint:** `1.0.5-dev.2`  
 **Stable baseline/tag documented:** `1.0.27`  
 **PHP:** `>=8.3`
@@ -318,7 +318,10 @@ Per-form brand mark:
 - token `{{brand_mark}}`
 
 Template Registry:
-- form/preview/step default templates از code
+- form/preview/step default templates از code؛ هر Source Definition می‌تواند با `Form::template()` قالب کل فرم را جداگانه تعیین کند.
+- قالب فرم می‌تواند فقط `{{steps}}` را رندر کند تا هدر/نشان/نوار پیشرفت در همان فرم نمایش داده نشوند.
+- setting عمومی `show_step_heading` با پیش‌فرض `true` نمایش عنوان هر Step را کنترل می‌کند؛ غیرفعال‌سازی آن فقط روی همان فرم اثر دارد.
+- setting موجود `captcha_before_submit` به‌صورت opt-in کپچا را بعد از فیلدهای آخرین Step و پیش از دکمه ارسال قرار می‌دهد.
 - Admin فقط override متفاوت را persist می‌کند
 - reset override باعث برگشت به future code default می‌شود
 - whitelisted tokens؛ remote CSS/resources/raw PHP ممنوع.
