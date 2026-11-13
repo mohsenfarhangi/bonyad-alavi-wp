@@ -351,6 +351,15 @@ final class BA_Quick_Support_Payment_Service
             $order->update_meta_data(self::ORDER_SUBMISSION_ID, $submissionId);
             $order->update_meta_data(self::ORDER_AMOUNT, $amount);
             $order->update_meta_data(self::ORDER_GATEWAY_ID, $gatewayId);
+            $referer = wp_get_referer();
+            if (is_string($referer) && $referer !== '') {
+                $referer = wp_validate_redirect($referer, '');
+                $homeHost = (string)wp_parse_url(home_url('/'), PHP_URL_HOST);
+                $refererHost = (string)wp_parse_url($referer, PHP_URL_HOST);
+                if ($referer !== '' && $homeHost !== '' && strcasecmp($homeHost, $refererHost) === 0) {
+                    $order->update_meta_data('_ba_qs_return_url', remove_query_arg(['ba_qs_payment_result','ba_qs_order','ba_qs_key'], $referer));
+                }
+            }
             $order->calculate_totals(false);
             $order->save();
 
