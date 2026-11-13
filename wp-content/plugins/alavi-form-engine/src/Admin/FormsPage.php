@@ -200,6 +200,38 @@ final class FormsPage
         );
         echo '</div>';
 
+        // Optional form-specific result templates are supplied by integrations.
+        $paymentResultDefinitions=apply_filters('afe_form_payment_result_template_definitions',[],$slug,$form,$storedSettings);
+        if(is_array($paymentResultDefinitions) && $paymentResultDefinitions!==[]){
+            echo '<div class="afe-admin-card afe-payment-result-templates"><div class="afe-admin-card-title"><div><h2>قالب نتیجه پرداخت</h2><p>این قالب‌ها پس از بازگشت از درگاه، به‌جای فرم و دقیقاً در محل نمایش همان فرم قرار می‌گیرند. هر وضعیت قالب مستقل دارد.</p></div></div>';
+            foreach($paymentResultDefinitions as $templateKey=>$definition){
+                if(!is_array($definition) || !array_key_exists('default',$definition)) continue;
+                $templateKey=sanitize_key((string)$templateKey);
+                if($templateKey==='') continue;
+                $label=sanitize_text_field((string)($definition['label']??$templateKey));
+                $description=sanitize_text_field((string)($definition['description']??''));
+                $default=wp_kses_post((string)$definition['default']);
+                $stored=(string)($storedSettings['payment_result_templates'][$templateKey]??'');
+                $tokens=array_values(array_filter(array_map('sanitize_text_field',(array)($definition['tokens']??[]))));
+                $rows=max(5,min(16,(int)($definition['rows']??9)));
+                echo '<details class="afe-step-template"><summary>'.esc_html($label).' <code>'.esc_html($templateKey).'</code></summary>';
+                $this->renderTemplateEditor(
+                    'payment_result_templates['.$templateKey.']',
+                    $label,
+                    $description,
+                    $default,
+                    $stored,
+                    $tokens,
+                    $rows,
+                    true
+                );
+                echo '</details>';
+            }
+            echo '<div class="afe-template-editor"><div class="afe-template-editor__head"><div><h3>CSS تکمیلی نتیجه پرداخت</h3><p>استایل پایه به‌صورت خودکار اعمال می‌شود. این بخش فقط برای سفارشی‌سازی بیشتر است؛ @import و url() هنگام ذخیره حذف می‌شوند.</p></div></div>';
+            echo '<textarea class="afe-code" name="payment_result_css" rows="10" spellcheck="false">'.esc_textarea((string)($storedSettings['payment_result_css']??'')).'</textarea></div>';
+            echo '</div>';
+        }
+
         // Output templates: PDF is HTML/CSS + tokens; Excel stays structural.
         $codeExport=ExportProfile::resolve($form);
         $storedExport=(array)($storedSettings['exports']??[]);
@@ -931,6 +963,7 @@ final class FormsPage
     {
         check_admin_referer('afe_save_form_'.$slug,'afe_form_nonce');
         $existing=$this->forms->overrides($slug);
+        $storedSettings=$this->forms->adminSettings($slug);
         $codeForm=$this->registry->get($slug)->toArray();
         $codeFlat=$this->flatten((array)($codeForm['steps']??[]));
         $overrides=[
@@ -1106,6 +1139,26 @@ final class FormsPage
         $previewDefault=wp_kses_post($this->templates->defaultPreview($codeForm));
         $previewOverride=$this->templates->normalizeOverride($previewSubmitted,$previewDefault);
         if ($previewOverride!=='') $settings['preview_template']=$previewOverride;
+
+        $paymentResultDefinitions=apply_filters('afe_form_payment_result_template_definitions',[],$slug,$codeForm,$storedSettings);
+        if(is_array($paymentResultDefinitions) && $paymentResultDefinitions!==[]){
+            $submittedPaymentTemplates=(array)wp_unslash($_POST['payment_result_templates']??[]);
+            $paymentTemplates=[];
+            foreach($paymentResultDefinitions as $templateKey=>$definition){
+                if(!is_array($definition) || !array_key_exists('default',$definition)) continue;
+                $templateKey=sanitize_key((string)$templateKey);
+                if($templateKey==='') continue;
+                $submitted=wp_kses_post((string)($submittedPaymentTemplates[$templateKey]??''));
+                $default=wp_kses_post((string)$definition['default']);
+                $normalized=$this->templates->normalizeOverride($submitted,$default);
+                if(trim($normalized)!=='') $paymentTemplates[$templateKey]=$normalized;
+            }
+            if($paymentTemplates!==[]) $settings['payment_result_templates']=$paymentTemplates;
+
+            $paymentCss=wp_strip_all_tags(wp_unslash((string)($_POST['payment_result_css']??'')));
+            $paymentCss=preg_replace('/@import\b|url\s*\([^)]*\)|expression\s*\([^)]*\)|javascript\s*:/i','',$paymentCss)??$paymentCss;
+            if(trim($paymentCss)!=='') $settings['payment_result_css']=trim($paymentCss);
+        }
 
         $resetExportProfile=!empty($_POST['reset_export_profile']);
         $exportForm=$codeForm;
