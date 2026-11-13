@@ -959,7 +959,8 @@ Modules: [MODULE-AFE](../modules/alavi-form-engine.md), [MODULE-JIHADI-FORM](../
 - Result state comes from the WooCommerce order (paid, failed, cancelled, pending or unknown), not from the return query flag. Invalid tokens and non-Quick-Support orders keep the normal form output.
 - The AFE Templates tab has five editable status-specific HTML templates and optional CSS, with order/amount/category/transaction/status/date/message/retry tokens.
 - Regression test `tests/quick-support-payment-return.php` covers same-page success/cancel URLs, template rendering, status mapping, invalid/external tokens/URLs, array query inputs and CSS sanitization.
-- Quick Support focused CI [run 43406730380](https://github.com/mohsenfarhangi/bonyad-alavi-wp/actions/runs/43406730380) passed PHP syntax and all dedicated return tests. The separate AFE frontend CSS workflow [run 43406730348](https://github.com/mohsenfarhangi/bonyad-alavi-wp/actions/runs/43406730348) remains red because its export-profile regression fixtures fail and Playwright 1.58.2 does not support Chromium installation on the Ubuntu 26.04 runner; browser tests were skipped.
+- Quick Support focused CI [run 43407334731](https://github.com/mohsenfarhangi/bonyad-alavi-wp/actions/runs/43407334731) passed PHP syntax and all dedicated return tests.
+- AFE frontend CSS/browser workflow [run 43407334326](https://github.com/mohsenfarhangi/bonyad-alavi-wp/actions/runs/43407334326) passed after pinning Ubuntu 24.04; Playwright checks passed at 360, 780, 782 and 1024px. Its non-blocking AFE regression-suite step still prints three export-profile/Jihadi fixture failures and is configured continue-on-error.
 - PR #39 remains open; merge/deploy and live Hosted/Redirect success/failure/cancel callback acceptance remain required.
 
 
